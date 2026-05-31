@@ -4,7 +4,8 @@ import { ArrowRight, Search as SearchIcon } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ListingCard } from "@/components/ListingCard";
-import { listings, type Listing } from "@/data/marketplace";
+import { type Listing } from "@/data/marketplace";
+import { useListings } from "@/hooks/useListings";
 import { useLanguage } from "@/hooks/useLanguage";
 
 interface SearchParams {
