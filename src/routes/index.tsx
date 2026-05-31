@@ -5,6 +5,7 @@ import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { Hero } from "@/components/Hero";
 import { CategoryGrid } from "@/components/CategoryGrid";
 import { PromoCarousel } from "@/components/PromoCarousel";
+import { HomeBanners } from "@/components/HomeBanners";
 // FeatureStrip removed per request — no marketing feature text on home page
 import { ListingsSection } from "@/components/ListingsSection";
 import { AuctionsSection } from "@/components/AuctionsSection";
@@ -47,17 +48,23 @@ function Index() {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <main>
-        <Hero />
-        <PromoCarousel />
-        <CategoryGrid />
-        <WeBuyBanner />
-        <ListingsSection title={t("sec.featured")} subtitle={t("sec.featuredSub")} items={featured} />
-        <AuctionsSection />
-        <ListingsSection title={t("sec.latest")} subtitle={t("sec.latestSub")} items={latest} />
-        <Testimonials />
-        <BusinessSection />
-      </main>
+      <div className="mx-auto flex max-w-[110rem] gap-6 px-0 xl:px-6">
+        <HomeBanners position="left" />
+        <main className="min-w-0 flex-1">
+          <HomeBanners position="top" />
+          <Hero />
+          <PromoCarousel />
+          <CategoryGrid />
+          <WeBuyBanner />
+          <ListingsSection title={t("sec.featured")} subtitle={t("sec.featuredSub")} items={featured} />
+          <AuctionsSection />
+          <ListingsSection title={t("sec.latest")} subtitle={t("sec.latestSub")} items={latest} />
+          <Testimonials />
+          <BusinessSection />
+          <HomeBanners position="bottom" />
+        </main>
+        <HomeBanners position="right" />
+      </div>
       <Footer />
       <WhatsAppButton />
     </div>
