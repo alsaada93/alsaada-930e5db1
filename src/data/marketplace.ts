@@ -6,9 +6,11 @@ export interface SubCategory {
 export interface Category {
   id: string;
   name: string;
+  nameEn: string;
   icon: string;
   count: number;
   description: string;
+  descriptionEn: string;
   sub: string[];
   groups: SubCategory[];
 }
