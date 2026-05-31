@@ -954,6 +954,20 @@ function AddListingPage() {
         </form>
       </main>
       <Footer />
+      <ImageEditor
+        open={editingIndex !== null}
+        file={editingIndex !== null ? images[editingIndex]?.file ?? null : null}
+        onClose={() => setEditingIndex(null)}
+        onApply={(edited) => {
+          setImages((prev) =>
+            prev.map((img, idx) => {
+              if (idx !== editingIndex) return img;
+              URL.revokeObjectURL(img.url);
+              return { url: URL.createObjectURL(edited), file: edited };
+            }),
+          );
+        }}
+      />
     </div>
   );
 }
