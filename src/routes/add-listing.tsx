@@ -127,6 +127,22 @@ function AddListingPage() {
     return [...merged, "أخرى"];
   }, [categoryId, itemName, dbBrands]);
 
+  const filteredBrands = useMemo(() => {
+    const q = brandQuery.trim().toLowerCase();
+    if (!q) return brandOptions;
+    return brandOptions.filter(
+      (b) => b.toLowerCase().includes(q) || brandLabel(b, "ar").includes(brandQuery.trim()),
+    );
+  }, [brandOptions, brandQuery]);
+
+  const filteredCountries = useMemo(() => {
+    const q = countryQuery.trim().toLowerCase();
+    if (!q) return countries;
+    return countries.filter(
+      (c) => c.en.toLowerCase().includes(q) || c.ar.includes(countryQuery.trim()),
+    );
+  }, [countryQuery]);
+
   // Price + AI
   const [price, setPrice] = useState("");
   const [condition, setCondition] = useState("مستعمل");
