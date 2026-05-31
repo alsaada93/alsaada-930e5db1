@@ -117,7 +117,7 @@ const dict: Dict = {
   "add.avgPrice": { ar: "متوسط السعر", en: "Average price" },
   "add.suggestedPrice": { ar: "السعر المقترح", en: "Suggested price" },
   "add.sellSpeed": { ar: "سرعة البيع", en: "Sell speed" },
-  "add.marketCompare": { ar: "مقارنة السوق", en: "Market comparison" },
+  "add.marketCompare": { ar: "مقارنة بأولكس والسوق المفتوح", en: "vs OLX & Open Souq" },
   "add.description": { ar: "الوصف", en: "Description" },
   "add.descPh": { ar: "اكتب وصفاً تفصيلياً للمنتج...", en: "Write a detailed description..." },
   "add.publish": { ar: "نشر الإعلان", en: "Publish listing" },
