@@ -18,12 +18,25 @@ export interface Listing {
   image: string;
   featured?: boolean;
   views: number;
+  sellerId?: string; // FK to sellers table in Supabase
   seller?: string;
   sellerRating?: number;
   sellerReviews?: number;
   sellerVerified?: boolean;
   sellerDeals?: number;
   phone?: string; // E.164 without + for wa.me / tel
+}
+
+export interface Seller {
+  id: string;
+  name: string;
+  phone: string | null;
+  verified: boolean;
+  rating: number;
+  reviews_count: number;
+  deals_count: number;
+  city: string | null;
+  member_since: string;
 }
 
 export interface Auction {
