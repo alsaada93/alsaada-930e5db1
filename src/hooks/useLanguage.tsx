@@ -58,10 +58,10 @@ const dict: Dict = {
   "sec.featured": { ar: "الإعلانات المميزة", en: "Featured listings" },
   "sec.featuredSub": { ar: "إعلانات مختارة من تجار موثوقين", en: "Selected ads from trusted sellers" },
   "sec.latest": { ar: "أحدث الإعلانات", en: "Latest listings" },
-  "sec.latestSub": { ar: "آخر ما تم إضافته على سوقو", en: "Newest additions on SOOGO" },
+  "sec.latestSub": { ar: "آخر ما تم إضافته على السعادة ماركت", en: "Newest additions on Al Saada Market" },
 
   // Footer
-  "footer.tagline": { ar: "سوقو — منصة بيع وشراء ومزاد معدات المطاعم والأثاث والإلكترونيات في مملكة البحرين.", en: "SOOGO — buy, sell and bid on restaurant equipment, furniture and electronics in the Kingdom of Bahrain." },
+  "footer.tagline": { ar: "السعادة ماركت — منصة بيع وشراء ومزاد معدات المطاعم والأثاث والإلكترونيات في مملكة البحرين.", en: "Al Saada Market — buy, sell and bid on restaurant equipment, furniture and electronics in the Kingdom of Bahrain." },
   "footer.rights": { ar: "جميع الحقوق محفوظة", en: "All rights reserved" },
   "footer.admin": { ar: "لوحة الإدارة", en: "Admin panel" },
 
@@ -117,14 +117,14 @@ const dict: Dict = {
   "add.avgPrice": { ar: "متوسط السعر", en: "Average price" },
   "add.suggestedPrice": { ar: "السعر المقترح", en: "Suggested price" },
   "add.sellSpeed": { ar: "سرعة البيع", en: "Sell speed" },
-  "add.marketCompare": { ar: "مقارنة السوق", en: "Market comparison" },
+  "add.marketCompare": { ar: "مقارنة بأولكس والسوق المفتوح", en: "vs OLX & Open Souq" },
   "add.description": { ar: "الوصف", en: "Description" },
   "add.descPh": { ar: "اكتب وصفاً تفصيلياً للمنتج...", en: "Write a detailed description..." },
   "add.publish": { ar: "نشر الإعلان", en: "Publish listing" },
   "add.publishAuction": { ar: "نشر المزاد", en: "Publish auction" },
   "add.publishBusiness": { ar: "نشر النشاط للبيع", en: "Publish business for sale" },
   "add.received": { ar: "تم استلام إعلانك", en: "Your listing was received" },
-  "add.receivedDesc": { ar: "سيتم مراجعة الإعلان من قبل الإدارة قبل نشره. شكراً لاستخدامك سوقو.", en: "Your listing will be reviewed by the team before publishing. Thanks for using SOOGO." },
+  "add.receivedDesc": { ar: "سيتم مراجعة الإعلان من قبل الإدارة قبل نشره. شكراً لاستخدامك السعادة ماركت.", en: "Your listing will be reviewed by the team before publishing. Thanks for using Al Saada Market." },
 
   // Business sale fields
   "biz.heading": { ar: "تفاصيل النشاط التجاري", en: "Business details" },
@@ -152,8 +152,8 @@ const dict: Dict = {
   "toast.needImage": { ar: "أضف صورة واحدة على الأقل", en: "Add at least one image" },
   "speed.fast": { ar: "سريع (3-7 أيام)", en: "Fast (3-7 days)" },
   "speed.medium": { ar: "متوسط (1-3 أسابيع)", en: "Medium (1-3 weeks)" },
-  "market.above": { ar: "أعلى قليلاً من متوسط السوق", en: "Slightly above market average" },
-  "market.within": { ar: "ضمن متوسط السوق ومنافس", en: "Within market average and competitive" },
+  "market.above": { ar: "أعلى قليلاً من أسعار أولكس والسوق المفتوح", en: "Slightly above OLX & Open Souq prices" },
+  "market.within": { ar: "منافس ضمن أسعار أولكس والسوق المفتوح", en: "Competitive with OLX & Open Souq prices" },
 };
 
 interface LanguageContextValue {

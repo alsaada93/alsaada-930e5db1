@@ -13,10 +13,10 @@ import { ShieldCheck } from "lucide-react";
 export const Route = createFileRoute("/login")({
   head: () => ({
     meta: [
-      { title: "تسجيل الدخول | سوقو SOOGO" },
-      { name: "description", content: "سجّل الدخول أو أنشئ حسابًا لإدارة إعلاناتك على سوقو." },
-      { property: "og:title", content: "تسجيل الدخول | سوقو SOOGO" },
-      { property: "og:description", content: "سجّل الدخول أو أنشئ حسابًا على سوقو." },
+      { title: "تسجيل الدخول | السعادة ماركت Al Saada Market" },
+      { name: "description", content: "سجّل الدخول أو أنشئ حسابًا لإدارة إعلاناتك على السعادة ماركت." },
+      { property: "og:title", content: "تسجيل الدخول | السعادة ماركت Al Saada Market" },
+      { property: "og:description", content: "سجّل الدخول أو أنشئ حسابًا على السعادة ماركت." },
       { property: "og:url", content: "https://soogo-hub.lovable.app/login" },
       { name: "robots", content: "noindex" },
     ],
@@ -88,7 +88,7 @@ function LoginPage() {
             S
           </span>
           <h1 className="text-2xl font-extrabold text-foreground">
-            سوقو <span className="text-primary">SOOGO</span>
+            السعادة ماركت <span className="text-primary">Al Saada Market</span>
           </h1>
           <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
             <ShieldCheck className="h-4 w-4" />

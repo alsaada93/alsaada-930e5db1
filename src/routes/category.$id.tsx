@@ -37,9 +37,9 @@ export const Route = createFileRoute("/category/$id")({
     const url = `https://soogo-hub.lovable.app/category/${params.id}`;
     return {
       meta: [
-        { title: `${name} | سوقو SOOGO` },
-        { name: "description", content: loaderData?.category.description ?? "تصفّح التصنيفات في سوقو" },
-        { property: "og:title", content: `${name} | سوقو SOOGO` },
+        { title: `${name} | السعادة ماركت Al Saada Market` },
+        { name: "description", content: loaderData?.category.description ?? "تصفّح التصنيفات في السعادة ماركت" },
+        { property: "og:title", content: `${name} | السعادة ماركت Al Saada Market` },
         { property: "og:description", content: loaderData?.category.description ?? "" },
         { property: "og:url", content: url },
       ],
@@ -50,7 +50,7 @@ export const Route = createFileRoute("/category/$id")({
           children: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "CollectionPage",
-            name: `${name} | سوقو SOOGO`,
+            name: `${name} | السعادة ماركت Al Saada Market`,
             description: loaderData?.category.description ?? "",
             url,
           }),

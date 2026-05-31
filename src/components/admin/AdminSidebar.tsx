@@ -21,7 +21,7 @@ export function AdminSidebar() {
           S
         </span>
         <span className="hidden font-extrabold md:block">
-          سوقو <span className="text-primary">الإدارة</span>
+          السعادة ماركت <span className="text-primary">الإدارة</span>
         </span>
       </div>
 

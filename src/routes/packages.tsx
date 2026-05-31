@@ -7,12 +7,12 @@ import { useLanguage } from "@/hooks/useLanguage";
 export const Route = createFileRoute("/packages")({
   head: () => ({
     meta: [
-      { title: "الباقات والأسعار | سوقو SOOGO" },
+      { title: "الباقات والأسعار | السعادة ماركت Al Saada Market" },
       {
         name: "description",
-        content: "اختر باقة الاشتراك المناسبة لعرض إعلاناتك على سوقو — مجاني، احترافي وتاجر.",
+        content: "اختر باقة الاشتراك المناسبة لعرض إعلاناتك على السعادة ماركت — مجاني، احترافي وتاجر.",
       },
-      { property: "og:title", content: "الباقات والأسعار | سوقو SOOGO" },
+      { property: "og:title", content: "الباقات والأسعار | السعادة ماركت Al Saada Market" },
       { property: "og:description", content: "باقات اشتراك مرنة لبيع معدات المطاعم والأثاث والإلكترونيات." },
       { property: "og:url", content: "https://soogo-hub.lovable.app/packages" },
     ],

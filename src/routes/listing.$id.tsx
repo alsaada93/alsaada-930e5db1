@@ -65,9 +65,9 @@ export const Route = createFileRoute("/listing/$id")({
     const image = loaderData?.item.image ?? "";
     return {
       meta: [
-        { title: `${t} | سوقو SOOGO` },
-        { name: "description", content: `${t} — ${loaderData?.item.city ?? ""} على سوقو` },
-        { property: "og:title", content: `${t} | سوقو SOOGO` },
+        { title: `${t} | السعادة ماركت Al Saada Market` },
+        { name: "description", content: `${t} — ${loaderData?.item.city ?? ""} على السعادة ماركت` },
+        { property: "og:title", content: `${t} | السعادة ماركت Al Saada Market` },
         { property: "og:description", content: `${t} للبيع في ${loaderData?.item.city ?? "البحرين"}` },
         { property: "og:type", content: "product" },
         { property: "og:url", content: url },
@@ -134,7 +134,7 @@ function ListingPage() {
   const verified = seller?.verified ?? false;
 
   const waLink = `https://wa.me/${phone}?text=${encodeURIComponent(
-    `مرحباً، أنا مهتم بإعلان "${item.title}" المعروض على سوقو.`,
+    `مرحباً، أنا مهتم بإعلان "${item.title}" المعروض على السعادة ماركت.`,
   )}`;
 
   return (

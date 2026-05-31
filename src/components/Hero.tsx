@@ -1,5 +1,6 @@
 import { Search, Camera, Sparkles } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import heroImg from "@/assets/hero.jpg";
 import { useLanguage } from "@/hooks/useLanguage";
@@ -7,8 +8,12 @@ import { useHeroSlides } from "@/hooks/useHeroSlides";
 
 export function Hero() {
   const { t } = useLanguage();
+  const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [imageName, setImageName] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
+
+  const goSearch = () => navigate({ to: "/search", search: { q: query.trim() || undefined } });
 
   const { slides, intervalMs } = useHeroSlides();
   const [current, setCurrent] = useState(0);
@@ -41,7 +46,7 @@ export function Hero() {
         <img
           key={src + i}
           src={src}
-          alt="SOOGO marketplace"
+          alt="Al Saada Market marketplace"
           width={1536}
           height={1024}
           loading={i === 0 ? "eager" : "lazy"}
@@ -67,6 +72,9 @@ export function Hero() {
               <Search className="ms-2 h-5 w-5 shrink-0 text-muted-foreground" />
               <input
                 type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && goSearch()}
                 placeholder={t("hero.searchPlaceholder")}
                 className="h-11 w-full border-0 bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
               />
@@ -85,7 +93,11 @@ export function Hero() {
               >
                 <Camera className="h-5 w-5" />
               </button>
-              <button className="rounded-xl bg-gradient-primary px-5 py-2.5 text-sm font-bold text-primary-foreground">
+              <button
+                type="button"
+                onClick={goSearch}
+                className="rounded-xl bg-gradient-primary px-5 py-2.5 text-sm font-bold text-primary-foreground"
+              >
                 {t("hero.search")}
               </button>
             </div>

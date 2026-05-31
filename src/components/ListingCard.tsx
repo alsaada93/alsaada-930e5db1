@@ -18,7 +18,7 @@ export function ListingCard({ item }: { item: Listing }) {
   const verified = seller?.verified ?? item.sellerVerified ?? false;
 
   const waLink = `https://wa.me/${phone}?text=${encodeURIComponent(
-    `مرحباً، أنا مهتم بإعلان "${item.title}" المعروض على سوقو.`,
+    `مرحباً، أنا مهتم بإعلان "${item.title}" المعروض على السعادة ماركت.`,
   )}`;
 
   return (
