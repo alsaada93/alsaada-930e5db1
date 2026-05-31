@@ -42,11 +42,22 @@ export function Footer() {
           <div key={c.title}>
             <h4 className="mb-3 font-bold">{c.title}</h4>
             <ul className="space-y-2 text-sm text-navy-foreground/60">
-              {c.links.map((l) => (
-                <li key={l}>
-                  <a href="#" className="transition-colors hover:text-navy-foreground">{l}</a>
-                </li>
-              ))}
+              {c.links.map((l) => {
+                const isPackages = l === "الباقات والأسعار" || l === "Plans & pricing";
+                return (
+                  <li key={l}>
+                    {isPackages ? (
+                      <Link to="/packages" className="transition-colors hover:text-navy-foreground">
+                        {l}
+                      </Link>
+                    ) : (
+                      <a href="#" className="transition-colors hover:text-navy-foreground">
+                        {l}
+                      </a>
+                    )}
+                  </li>
+                );
+              })}
             </ul>
           </div>
         ))}
