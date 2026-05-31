@@ -32,6 +32,7 @@ function SearchPage() {
   const { q } = Route.useSearch();
   const navigate = useNavigate();
   const { lang } = useLanguage();
+  const { listings } = useListings();
   const [query, setQuery] = useState(q ?? "");
 
   const results = useMemo(() => {
