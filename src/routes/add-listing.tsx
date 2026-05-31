@@ -17,10 +17,11 @@ import {
 import { toast } from "sonner";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import { categories, bahrainRegions, listings } from "@/data/marketplace";
+import { categories, bahrainRegions, listings, brandsFor } from "@/data/marketplace";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/hooks/useLanguage";
 import { supabase } from "@/integrations/supabase/client";
+import { useEffect } from "react";
 
 export const Route = createFileRoute("/add-listing")({
   head: () => ({
