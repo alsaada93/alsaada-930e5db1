@@ -1,5 +1,6 @@
 import { Search, Camera, Sparkles } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import heroImg from "@/assets/hero.jpg";
 import { useLanguage } from "@/hooks/useLanguage";
@@ -7,8 +8,12 @@ import { useHeroSlides } from "@/hooks/useHeroSlides";
 
 export function Hero() {
   const { t } = useLanguage();
+  const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [imageName, setImageName] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
+
+  const goSearch = () => navigate({ to: "/search", search: { q: query.trim() || undefined } });
 
   const { slides, intervalMs } = useHeroSlides();
   const [current, setCurrent] = useState(0);
