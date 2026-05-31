@@ -87,6 +87,7 @@ export type Database = {
           condition: string
           contact_name: string | null
           contact_phone: string | null
+          country_of_origin: string | null
           created_at: string
           delivery_available: boolean | null
           description: string | null
@@ -126,6 +127,7 @@ export type Database = {
           condition?: string
           contact_name?: string | null
           contact_phone?: string | null
+          country_of_origin?: string | null
           created_at?: string
           delivery_available?: boolean | null
           description?: string | null
@@ -165,6 +167,7 @@ export type Database = {
           condition?: string
           contact_name?: string | null
           contact_phone?: string | null
+          country_of_origin?: string | null
           created_at?: string
           delivery_available?: boolean | null
           description?: string | null
