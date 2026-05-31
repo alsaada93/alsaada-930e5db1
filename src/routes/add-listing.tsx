@@ -643,42 +643,42 @@ function BusinessFields({ t }: { t: (k: string) => string }) {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
           <label className="mb-1 block text-sm font-semibold">{t("biz.rent")}</label>
-          <input type="number" min={0} placeholder="0" className={input} />
+          <input type="number" name="rent" min={0} placeholder="0" className={input} />
         </div>
         <div>
           <label className="mb-1 block text-sm font-semibold">{t("biz.area")}</label>
-          <input type="number" min={0} placeholder="0" className={input} />
+          <input type="number" name="area" min={0} placeholder="0" className={input} />
         </div>
         <div>
           <label className="mb-1 block text-sm font-semibold">{t("biz.outlets")}</label>
-          <input type="number" min={0} placeholder="0" className={input} />
+          <input type="number" name="outlets" min={0} placeholder="0" className={input} />
         </div>
         <div>
           <label className="mb-1 block text-sm font-semibold">{t("biz.staff")}</label>
-          <input type="number" min={0} placeholder="0" className={input} />
+          <input type="number" name="staff" min={0} placeholder="0" className={input} />
         </div>
         <div>
           <label className="mb-1 block text-sm font-semibold">{t("biz.monthlyRevenue")}</label>
-          <input type="number" min={0} placeholder="0" className={input} />
+          <input type="number" name="monthlyRevenue" min={0} placeholder="0" className={input} />
         </div>
         <div>
           <label className="mb-1 block text-sm font-semibold">{t("biz.opCost")}</label>
-          <input type="number" min={0} placeholder="0" className={input} />
+          <input type="number" name="opCost" min={0} placeholder="0" className={input} />
         </div>
         <div>
           <label className="mb-1 block text-sm font-semibold">{t("biz.license")}</label>
-          <select value={license} onChange={(e) => setLicense(e.target.value)} className={input}>
+          <select name="license" value={license} onChange={(e) => setLicense(e.target.value)} className={input}>
             <option value="with">{t("biz.withLicense")}</option>
             <option value="without">{t("biz.withoutLicense")}</option>
           </select>
         </div>
         <div>
           <label className="mb-1 block text-sm font-semibold">{t("biz.reason")}</label>
-          <input type="text" placeholder={t("biz.reasonPh")} className={input} />
+          <input type="text" name="reason" placeholder={t("biz.reasonPh")} className={input} />
         </div>
       </div>
       <label className="mt-3 flex items-center gap-2 text-sm font-semibold">
-        <input type="checkbox" defaultChecked className="h-4 w-4 rounded border-border accent-primary" />
+        <input type="checkbox" name="includesEquip" defaultChecked className="h-4 w-4 rounded border-border accent-primary" />
         {t("biz.includesEquip")}
       </label>
     </div>
