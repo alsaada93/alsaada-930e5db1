@@ -35,14 +35,14 @@ export function Header() {
           <button className="hidden rounded-lg p-2 hover:bg-white/10 sm:block" aria-label="الإشعارات">
             <Bell className="h-5 w-5" />
           </button>
-          <button className="flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-medium hover:bg-white/10">
+          <Link to="/login" className="flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-medium hover:bg-white/10">
             <User className="h-4 w-4" />
             <span className="hidden sm:inline">دخول</span>
-          </button>
-          <button className="flex items-center gap-1.5 rounded-lg bg-gradient-primary px-3 py-2 text-sm font-bold text-primary-foreground shadow-glow transition-transform hover:scale-[1.03]">
+          </Link>
+          <Link to="/add-listing" className="flex items-center gap-1.5 rounded-lg bg-gradient-primary px-3 py-2 text-sm font-bold text-primary-foreground shadow-glow transition-transform hover:scale-[1.03]">
             <Plus className="h-4 w-4" />
             <span className="hidden sm:inline">أضف إعلان</span>
-          </button>
+          </Link>
           <button className="rounded-lg p-2 hover:bg-white/10 md:hidden" aria-label="القائمة">
             <Menu className="h-5 w-5" />
           </button>
