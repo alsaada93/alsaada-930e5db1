@@ -18,12 +18,25 @@ export interface Listing {
   image: string;
   featured?: boolean;
   views: number;
+  sellerId?: string; // FK to sellers table in Supabase
   seller?: string;
   sellerRating?: number;
   sellerReviews?: number;
   sellerVerified?: boolean;
   sellerDeals?: number;
   phone?: string; // E.164 without + for wa.me / tel
+}
+
+export interface Seller {
+  id: string;
+  name: string;
+  phone: string | null;
+  verified: boolean;
+  rating: number;
+  reviews_count: number;
+  deals_count: number;
+  city: string | null;
+  member_since: string;
 }
 
 export interface Auction {
@@ -118,14 +131,15 @@ const img = (q: string) =>
   `https://images.unsplash.com/${q}?auto=format&fit=crop&w=600&q=70`;
 
 export const listings: Listing[] = [
-  { id: "l1", title: "فرن بيتزا احترافي ستانلس ستيل", price: 850, negotiable: true, condition: "مستعمل", city: "المنامة", category: "معدات المطاعم", image: img("photo-1556910103-1c02745aae4d"), featured: true, views: 1240 },
-  { id: "l2", title: "مكينة إسبرسو La Marzocco", price: 2300, condition: "مستعمل", city: "المحرق", category: "الكوفي شوب", image: img("photo-1510972527921-ce03766a1cf1"), featured: true, views: 980 },
-  { id: "l3", title: "ثلاجة عرض زجاجية كبيرة", price: 620, negotiable: true, condition: "مستعمل", city: "الرفاع", category: "معدات المطاعم", image: img("photo-1571175443880-49e1d25b2bc5"), views: 540 },
-  { id: "l4", title: "لابتوب MacBook Pro M2", price: 480, condition: "مستعمل", city: "المنامة", category: "الإلكترونيات", image: img("photo-1517336714731-489689fd1ca8"), featured: true, views: 2100 },
-  { id: "l5", title: "طاولات وكراسي مطعم خشب فاخر", price: 350, negotiable: true, condition: "مستعمل", city: "عيسى", category: "الأثاث", image: img("photo-1517248135467-4c7edcad34c4"), views: 730 },
-  { id: "l6", title: "ماكينة آيس كريم سوفت 3 نكهات", price: 1100, condition: "جديد", city: "سترة", category: "الآيس كريم", image: img("photo-1497034825429-c343d7c6a68f"), views: 410 },
-  { id: "l7", title: "جهاز نقاط بيع POS كامل", price: 290, condition: "جديد", city: "المنامة", category: "الإلكترونيات", image: img("photo-1556742044-3c52d6e88c62"), views: 860 },
-  { id: "l8", title: "عجانة مخبز صناعية 20 كجم", price: 740, negotiable: true, condition: "مستعمل", city: "المحرق", category: "المخابز", image: img("photo-1509440159596-0249088772ff"), views: 320 },
+  { id: "l1", sellerId: "s1", title: "فرن بيتزا احترافي ستانلس ستيل", price: 850, negotiable: true, condition: "مستعمل", city: "المنامة", category: "معدات المطاعم", image: img("photo-1556910103-1c02745aae4d"), featured: true, views: 1240 },
+  { id: "l2", sellerId: "s2", title: "مكينة إسبرسو La Marzocco", price: 2300, condition: "مستعمل", city: "المحرق", category: "الكوفي شوب", image: img("photo-1510972527921-ce03766a1cf1"), featured: true, views: 980 },
+  { id: "l3", sellerId: "s3", title: "ثلاجة عرض زجاجية كبيرة", price: 620, negotiable: true, condition: "مستعمل", city: "الرفاع", category: "معدات المطاعم", image: img("photo-1571175443880-49e1d25b2bc5"), views: 540 },
+  { id: "l4", sellerId: "s4", title: "لابتوب MacBook Pro M2", price: 480, condition: "مستعمل", city: "المنامة", category: "الإلكترونيات", image: img("photo-1517336714731-489689fd1ca8"), featured: true, views: 2100 },
+  { id: "l5", sellerId: "s5", title: "طاولات وكراسي مطعم خشب فاخر", price: 350, negotiable: true, condition: "مستعمل", city: "عيسى", category: "الأثاث", image: img("photo-1517248135467-4c7edcad34c4"), views: 730 },
+  { id: "l6", sellerId: "s6", title: "ماكينة آيس كريم سوفت 3 نكهات", price: 1100, condition: "جديد", city: "سترة", category: "الآيس كريم", image: img("photo-1497034825429-c343d7c6a68f"), views: 410 },
+  { id: "l7", sellerId: "s4", title: "جهاز نقاط بيع POS كامل", price: 290, condition: "جديد", city: "المنامة", category: "الإلكترونيات", image: img("photo-1556742044-3c52d6e88c62"), views: 860 },
+  { id: "l8", sellerId: "s2", title: "عجانة مخبز صناعية 20 كجم", price: 740, negotiable: true, condition: "مستعمل", city: "المحرق", category: "المخابز", image: img("photo-1509440159596-0249088772ff"), views: 320 },
+
 ];
 
 export const auctions: Auction[] = [
