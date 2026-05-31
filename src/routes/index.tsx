@@ -46,11 +46,11 @@ function Index() {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <WeBuyBanner />
       <main>
         <Hero />
         <PromoCarousel />
         <CategoryGrid />
+        <WeBuyBanner />
         <ListingsSection title={t("sec.featured")} subtitle={t("sec.featuredSub")} items={featured} />
         <AuctionsSection />
         <ListingsSection title={t("sec.latest")} subtitle={t("sec.latestSub")} items={latest} />

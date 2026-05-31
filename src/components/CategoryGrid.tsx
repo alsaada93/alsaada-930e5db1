@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { UtensilsCrossed, Hotel, Smartphone, Sofa, Store, Gavel, type LucideIcon } from "lucide-react";
-import { categories } from "@/data/marketplace";
+import { useCategories } from "@/hooks/useCategories";
 import { useLanguage } from "@/hooks/useLanguage";
 
 const icons: Record<string, LucideIcon> = {
@@ -19,6 +19,7 @@ const gradients: Record<string, string> = {
 
 export function CategoryGrid() {
   const { t, lang } = useLanguage();
+  const { categories } = useCategories();
 
   return (
     <section className="mx-auto max-w-7xl px-4 py-12">

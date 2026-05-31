@@ -52,6 +52,8 @@ export const Route = createFileRoute("/listing/$id")({
         views: data.views,
         userId: (data.user_id as string | null) ?? null,
         createdAt: (data.created_at as string | null) ?? null,
+        publishedAt: (data.published_at as string | null) ?? null,
+        expiresAt: (data.expires_at as string | null) ?? null,
         sellerId: undefined as string | undefined,
         phone: data.contact_phone ?? undefined,
         description: data.description as string | null,
@@ -249,7 +251,12 @@ function ListingPage() {
   const verified = seller?.verified ?? false;
 
   const isOwner = !!user && !!item.userId && user.id === item.userId;
-  const expiresAt = item.createdAt ? new Date(item.createdAt).getTime() + EXPIRY_DAYS * 86400_000 : null;
+  const expiresAt = item.expiresAt
+    ? new Date(item.expiresAt).getTime()
+    : item.createdAt
+      ? new Date(item.createdAt).getTime() + EXPIRY_DAYS * 86400_000
+      : null;
+  const publishedAt = item.publishedAt ?? item.createdAt;
   const expired = expiresAt != null && expiresAt < Date.now();
   const daysLeft = expiresAt != null ? Math.ceil((expiresAt - Date.now()) / 86400_000) : null;
 
@@ -259,7 +266,7 @@ function ListingPage() {
     setReposting(true);
     const { error } = await supabase
       .from("listings")
-      .update({ created_at: new Date().toISOString(), status: "approved" })
+      .update({ published_at: new Date().toISOString(), status: "approved" })
       .eq("id", item.id);
     setReposting(false);
     if (error) {
@@ -379,12 +386,12 @@ function ListingPage() {
               </span>
             </div>
 
-            {/* تاريخ ووقت النشر + مدة الصلاحية */}
-            {item.createdAt && (
+            {/* سجل تاريخ ووقت النشر والانتهاء */}
+            {publishedAt && (
               <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
                 <span className="flex items-center gap-1">
-                  <Clock className="h-3.5 w-3.5" /> نُشر {timeAgo(item.createdAt)} —{" "}
-                  {new Date(item.createdAt).toLocaleString("ar", {
+                  <Clock className="h-3.5 w-3.5" /> نُشر {timeAgo(publishedAt)} —{" "}
+                  {new Date(publishedAt).toLocaleString("ar", {
                     year: "numeric",
                     month: "long",
                     day: "numeric",
@@ -392,13 +399,21 @@ function ListingPage() {
                     minute: "2-digit",
                   })}
                 </span>
-                {!expired && daysLeft != null && (
+                {expiresAt != null && (
                   <span className="flex items-center gap-1">
-                    <CalendarDays className="h-3.5 w-3.5" /> يُحذف خلال {daysLeft} يوم
+                    <CalendarDays className="h-3.5 w-3.5" />
+                    {expired ? "انتهى في" : "ينتهي في"}{" "}
+                    {new Date(expiresAt).toLocaleString("ar", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
+                    {!expired && daysLeft != null ? ` (خلال ${daysLeft} يوم)` : ""}
                   </span>
                 )}
               </div>
             )}
+
 
             {/* بطاقة البائع */}
             <div className="mt-5 rounded-2xl border border-border bg-card p-4">
