@@ -134,7 +134,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     preview(next);
     const { error } = await supabase
       .from("site_settings")
-      .upsert({ key: "theme", value: next as unknown as Record<string, unknown> }, { onConflict: "key" });
+      .upsert({ key: "theme", value: JSON.parse(JSON.stringify(next)) }, { onConflict: "key" });
     if (error) throw error;
   };
 
