@@ -100,9 +100,11 @@ export const categories: Category[] = [
   {
     id: "restaurant",
     name: "مطاعم",
+    nameEn: "Restaurants",
     icon: "🍽️",
     count: 1284,
     description: "مخابز، كوفي شوب ومعدات المطاعم الكاملة",
+    descriptionEn: "Bakeries, coffee shops and full restaurant equipment",
     sub: ["مخابز", "كوفي شوب", "معدات كهربائية", "معدات غاز", "معدات تحضير", "طاولات ومغاسل"],
     groups: [
       {
@@ -118,9 +120,11 @@ export const categories: Category[] = [
   {
     id: "hotels",
     name: "فنادق",
+    nameEn: "Hotels",
     icon: "🏨",
     count: 312,
     description: "أثاث ومعدات الفنادق والشقق المفروشة",
+    descriptionEn: "Furniture and equipment for hotels and serviced apartments",
     sub: ["أثاث فنادق", "معدات كهربائية", "معدات تحضير", "غسيل وتنظيف"],
     groups: [
       {
@@ -138,9 +142,11 @@ export const categories: Category[] = [
   {
     id: "other",
     name: "غير ذلك",
+    nameEn: "Other",
     icon: "📦",
     count: 1976,
     description: "إلكترونيات وأثاث وكل ما لا يندرج تحت التصنيفات الأخرى",
+    descriptionEn: "Electronics, furniture and everything else",
     sub: ["إلكترونيات", "أثاث منزلي", "أثاث مكتبي", "أخرى"],
     groups: [
       {
