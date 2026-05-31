@@ -333,7 +333,7 @@ function AddListingPage() {
     if (s === 1) {
       if (!titleText.trim()) return fail(ar ? "اكتب عنوان الإعلان" : "Enter a title");
       if (!descText.trim()) return fail(ar ? "اكتب وصف الإعلان" : "Enter a description");
-      if (images.length === 0 && existingImages.length === 0) return fail(t("toast.needImage"));
+      if (media.length === 0) return fail(t("toast.needImage"));
       return true;
     }
     if (s === 2) {
