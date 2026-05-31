@@ -282,6 +282,8 @@ function AddListingPage() {
         has_license: isBusiness ? fd.get("license") === "with" : null,
         includes_equipment: isBusiness ? fd.get("includesEquip") === "on" : null,
         sale_reason: isBusiness ? String(fd.get("reason") || "").trim() || null : null,
+        negotiable_flag: listingType === "auction" ? false : negotiable,
+        delivery_available: listingType === "auction" ? false : delivery,
       };
 
       const { error } = await supabase.from("listings").insert(payload);
