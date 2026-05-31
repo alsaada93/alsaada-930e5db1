@@ -62,9 +62,11 @@ export function Hero() {
             <Sparkles className="h-3.5 w-3.5" /> {t("hero.badge")}
           </span>
           <h1 className="mt-4 text-3xl font-extrabold leading-tight md:text-5xl">
+            <span className="sr-only">السعادة ماركت — سوق بيع وشراء معدات المطاعم والأثاث في البحرين. </span>
             {activeSlide?.title || t("hero.title1")}
             <span className="block text-navy-foreground/90">{activeSlide?.subtitle || t("hero.title2")}</span>
           </h1>
+
           <p className="mt-4 text-base text-navy-foreground/75 md:text-lg">{t("hero.subtitle")}</p>
 
           <div className="mt-7 rounded-2xl bg-white p-2 shadow-card">
