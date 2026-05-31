@@ -201,7 +201,7 @@ function AddListingPage() {
 
       const payload = {
         user_id: user?.id ?? null,
-        listing_type: listingType,
+        listing_type: listingType ?? "normal",
         title: String(fd.get("title") || "").trim(),
         description: String(fd.get("description") || "").trim(),
         price: Number(price) || 0,
