@@ -92,7 +92,7 @@ function CategoryPage() {
     navigate({
       to: "/category/$id",
       params: { id: category.id },
-      search: (prev) => ({ ...prev, ...patch }),
+      search: (prev: CategorySearch) => ({ ...prev, ...patch }),
     });
   };
 
