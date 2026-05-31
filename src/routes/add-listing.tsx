@@ -288,6 +288,7 @@ function AddListingPage() {
         condition,
         category_id: categoryId || null,
         brand: brand || null,
+        country_of_origin: country ? country.ar : null,
         group_name: groupName || null,
         item_name: itemName || null,
         city: region,
