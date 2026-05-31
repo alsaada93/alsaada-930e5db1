@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState, useEffect } from "react";
 import {
   ArrowRight,
   CheckCircle2,
@@ -13,6 +13,7 @@ import {
   Tag,
   Gavel,
   Store,
+  Check,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Header } from "@/components/Header";
@@ -23,7 +24,6 @@ import { countries, type Country } from "@/data/countries";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/hooks/useLanguage";
 import { supabase } from "@/integrations/supabase/client";
-import { useEffect } from "react";
 
 export const Route = createFileRoute("/add-listing")({
   head: () => ({
@@ -54,12 +54,18 @@ function AddListingPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { t, lang } = useLanguage();
+  const ar = lang === "ar";
   const [listingType, setListingType] = useState<ListingType | null>(null);
   const [submitted, setSubmitted] = useState(false);
+  const [step, setStep] = useState(1);
 
   // Guest contact (required if not logged in)
   const [guestName, setGuestName] = useState("");
   const [guestPhone, setGuestPhone] = useState("");
+
+  // Title + description (controlled so they persist across steps)
+  const [titleText, setTitleText] = useState("");
+  const [descText, setDescText] = useState("");
 
   // Category cascade
   const [categoryId, setCategoryId] = useState("");
@@ -99,14 +105,31 @@ function AddListingPage() {
 
   // Media (keep File objects so we can upload them to storage)
   const [images, setImages] = useState<{ url: string; file: File }[]>([]);
-  const [video, setVideo] = useState<{ url: string; file: File } | null>(null);
   const imgInput = useRef<HTMLInputElement>(null);
-  const vidInput = useRef<HTMLInputElement>(null);
+
+  // Post-publish video
+  const [newId, setNewId] = useState<string | null>(null);
+  const [videoSaving, setVideoSaving] = useState(false);
+  const [videoDone, setVideoDone] = useState(false);
+  const postVidInput = useRef<HTMLInputElement>(null);
 
   // Extra options
   const [negotiable, setNegotiable] = useState(true);
   const [delivery, setDelivery] = useState(false);
-  const [descText, setDescText] = useState("");
+
+  // Business fields (controlled to survive step navigation)
+  const [biz, setBiz] = useState({
+    rent: "",
+    area: "",
+    outlets: "",
+    staff: "",
+    monthlyRevenue: "",
+    opCost: "",
+    license: "with",
+    reason: "",
+    includesEquip: true,
+  });
+  const [auctionDuration, setAuctionDuration] = useState("24");
 
   // Brands from the database (managed in admin), merged with built-in lists
   const [dbBrands, setDbBrands] = useState<{ name: string; category_id: string; item_name: string | null }[]>([]);
@@ -163,11 +186,6 @@ function AddListingPage() {
     setImages((p) => [...p, ...next]);
   };
 
-  const handleVideo = (files: FileList | null) => {
-    if (!files || !files[0]) return;
-    setVideo({ url: URL.createObjectURL(files[0]), file: files[0] });
-  };
-
   const useMyLocation = () => {
     if (!navigator.geolocation) {
       toast.error(t("toast.noGeo"));
@@ -194,7 +212,6 @@ function AddListingPage() {
     }
     setEstimating(true);
     setTimeout(() => {
-      // Real market average from comparable listings (category + subcategory).
       let peers = listings.filter((l) => l.category === activeCategory.name);
       if (groupName) {
         const bySub = peers.filter((l) => l.sub === groupName);
@@ -202,25 +219,16 @@ function AddListingPage() {
       }
       const sameCond = peers.filter((l) => l.condition === condition);
       const sample = sameCond.length >= 3 ? sameCond : peers;
-      const base = sample.length
-        ? sample.reduce((s, l) => s + l.price, 0) / sample.length
-        : 600;
+      const base = sample.length ? sample.reduce((s, l) => s + l.price, 0) / sample.length : 600;
 
-      // حالة المنتج
       let factor = condition === "جديد" ? 1.12 : 0.92;
-
-      // الماركة: ماركات راقية ترفع السعر، الماركات الاقتصادية تخفّضه قليلاً
       const premium = ["Apple", "Sony", "Bose", "Daikin", "Miele", "Rational", "La Marzocco", "Herman Miller", "Bosch", "Samsung", "LG"];
       const budget = ["Nikai", "Geepas", "TCL", "Hisense", "Realme", "Oppo", "Home Box"];
       if (brand && premium.includes(brand)) factor *= 1.15;
       else if (brand && budget.includes(brand)) factor *= 0.9;
-
-      // الوصف: وصف غني (أكثر تفصيلاً) يدل على منتج أفضل عرضاً
       const len = descText.trim().length;
       if (len > 220) factor *= 1.05;
       else if (len > 0 && len < 40) factor *= 0.97;
-
-      // قابلية التفاوض تخفّض السعر المعروض قليلاً
       if (negotiable) factor *= 0.98;
 
       const average = Math.round(base);
@@ -236,7 +244,6 @@ function AddListingPage() {
     }, 700);
   };
 
-
   const uploadFile = async (file: File, kind: string) => {
     const ext = file.name.split(".").pop() || "bin";
     const path = `${kind}/${crypto.randomUUID()}.${ext}`;
@@ -248,42 +255,62 @@ function AddListingPage() {
     return supabase.storage.from("listings").getPublicUrl(path).data.publicUrl;
   };
 
-  const numOrNull = (v: FormDataEntryValue | null) => {
+  const num = (v: string) => {
     const n = Number(v);
-    return v != null && v !== "" && !Number.isNaN(n) ? n : null;
+    return v !== "" && !Number.isNaN(n) ? n : null;
   };
+
+  // ---- Step validation ----
+  const validateStep = (s: number): boolean => {
+    if (s === 1) {
+      if (!titleText.trim()) return fail(ar ? "اكتب عنوان الإعلان" : "Enter a title");
+      if (!descText.trim()) return fail(ar ? "اكتب وصف الإعلان" : "Enter a description");
+      if (images.length === 0) return fail(t("toast.needImage"));
+      return true;
+    }
+    if (s === 2) {
+      if (!categoryId) return fail(t("toast.pickCat"));
+      if (!region) return fail(t("toast.pickRegion"));
+      return true;
+    }
+    if (s === 3) {
+      if (!price) return fail(ar ? "أدخل السعر" : "Enter a price");
+      return true;
+    }
+    return true;
+  };
+
+  const fail = (msg: string) => {
+    toast.error(msg);
+    return false;
+  };
+
+  const next = () => {
+    if (validateStep(step)) setStep((s) => Math.min(4, s + 1));
+  };
+  const back = () => setStep((s) => Math.max(1, s - 1));
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!validateStep(1) || !validateStep(2) || !validateStep(3)) return;
     if (!user && (!guestName.trim() || !guestPhone.trim())) {
       toast.error(t("toast.guestNeeded"));
       return;
     }
-    if (!region) {
-      toast.error(t("toast.pickRegion"));
-      return;
-    }
-    if (images.length === 0) {
-      toast.error(t("toast.needImage"));
-      return;
-    }
 
-    const fd = new FormData(e.currentTarget);
     setSaving(true);
     try {
-      // Upload media
       const imageUrls = await Promise.all(images.map((img) => uploadFile(img.file, "images")));
-      const videoUrl = video ? await uploadFile(video.file, "videos") : null;
 
       const isBusiness = listingType === "business";
       const isAuction = listingType === "auction";
-      const auctionHours = numOrNull(fd.get("auctionDuration")) ?? 24;
+      const auctionHours = num(auctionDuration) ?? 24;
 
       const payload = {
         user_id: user?.id ?? null,
         listing_type: listingType ?? "normal",
-        title: String(fd.get("title") || "").trim(),
-        description: String(fd.get("description") || "").trim(),
+        title: titleText.trim(),
+        description: descText.trim(),
         price: Number(price) || 0,
         condition,
         category_id: categoryId || null,
@@ -295,48 +322,96 @@ function AddListingPage() {
         lat: coords?.lat ?? null,
         lng: coords?.lng ?? null,
         images: imageUrls,
-        video: videoUrl,
+        video: null,
         contact_name: user ? (user.email ?? null) : guestName.trim(),
         contact_phone: user ? null : guestPhone.trim(),
         status: "approved",
         start_price: isAuction ? Number(price) || 0 : null,
-        auction_ends_at: isAuction
-          ? new Date(Date.now() + auctionHours * 3600_000).toISOString()
-          : null,
-        rent: isBusiness ? numOrNull(fd.get("rent")) : null,
-        area_sqm: isBusiness ? numOrNull(fd.get("area")) : null,
-        outlets: isBusiness ? numOrNull(fd.get("outlets")) : null,
-        staff_count: isBusiness ? numOrNull(fd.get("staff")) : null,
-        monthly_revenue: isBusiness ? numOrNull(fd.get("monthlyRevenue")) : null,
-        operating_cost: isBusiness ? numOrNull(fd.get("opCost")) : null,
-        has_license: isBusiness ? fd.get("license") === "with" : null,
-        includes_equipment: isBusiness ? fd.get("includesEquip") === "on" : null,
-        sale_reason: isBusiness ? String(fd.get("reason") || "").trim() || null : null,
-        negotiable_flag: listingType === "auction" ? false : negotiable,
-        delivery_available: listingType === "auction" ? false : delivery,
+        auction_ends_at: isAuction ? new Date(Date.now() + auctionHours * 3600_000).toISOString() : null,
+        rent: isBusiness ? num(biz.rent) : null,
+        area_sqm: isBusiness ? num(biz.area) : null,
+        outlets: isBusiness ? num(biz.outlets) : null,
+        staff_count: isBusiness ? num(biz.staff) : null,
+        monthly_revenue: isBusiness ? num(biz.monthlyRevenue) : null,
+        operating_cost: isBusiness ? num(biz.opCost) : null,
+        has_license: isBusiness ? biz.license === "with" : null,
+        includes_equipment: isBusiness ? biz.includesEquip : null,
+        sale_reason: isBusiness ? biz.reason.trim() || null : null,
+        negotiable_flag: isAuction ? false : negotiable,
+        delivery_available: isAuction ? false : delivery,
       };
 
-      const { error } = await supabase.from("listings").insert(payload);
+      const { data, error } = await supabase.from("listings").insert(payload).select("id").single();
       if (error) throw error;
+      setNewId(data?.id ?? null);
       setSubmitted(true);
     } catch (err) {
       console.error(err);
-      toast.error(lang === "ar" ? "تعذّر نشر الإعلان، حاول مرة أخرى" : "Could not publish, try again");
+      toast.error(ar ? "تعذّر نشر الإعلان، حاول مرة أخرى" : "Could not publish, try again");
     } finally {
       setSaving(false);
     }
   };
 
-  // ---- Success screen ----
+  const handlePostVideo = async (files: FileList | null) => {
+    if (!files || !files[0] || !newId) return;
+    setVideoSaving(true);
+    try {
+      const url = await uploadFile(files[0], "videos");
+      const { error } = await supabase.from("listings").update({ video: url }).eq("id", newId);
+      if (error) throw error;
+      setVideoDone(true);
+      toast.success(ar ? "تمت إضافة الفيديو" : "Video added");
+    } catch (err) {
+      console.error(err);
+      toast.error(
+        ar ? "تعذّر إضافة الفيديو. سجّل الدخول لإدارة إعلانك." : "Could not add video. Log in to manage your listing.",
+      );
+    } finally {
+      setVideoSaving(false);
+    }
+  };
+
+  // ---- Success screen (with post-publish video option) ----
   if (submitted) {
     return (
       <div className="flex min-h-screen flex-col">
         <Header />
         <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-12">
-          <div className="rounded-2xl border border-border bg-card p-10 text-center shadow-card">
+          <div className="rounded-2xl border border-border bg-card p-8 text-center shadow-card">
             <CheckCircle2 className="mx-auto h-14 w-14 text-primary" />
             <h1 className="mt-4 text-2xl font-extrabold">{t("add.received")}</h1>
             <p className="mt-2 text-muted-foreground">{t("add.receivedDesc")}</p>
+
+            {/* Add video after publishing */}
+            <div className="mt-6 rounded-2xl border border-dashed border-primary/40 bg-accent/30 p-5 text-start">
+              <h2 className="flex items-center gap-1.5 text-sm font-extrabold">
+                <Video className="h-4 w-4 text-primary" />
+                {ar ? "أضف فيديو لإعلانك (اختياري)" : "Add a video to your listing (optional)"}
+              </h2>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {ar
+                  ? "الفيديو يزيد ثقة المشترين ويسرّع البيع."
+                  : "A video builds buyer trust and speeds up the sale."}
+              </p>
+              <input ref={postVidInput} type="file" accept="video/*" hidden onChange={(e) => handlePostVideo(e.target.files)} />
+              {videoDone ? (
+                <div className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-primary/10 px-3 py-2 text-sm font-bold text-primary">
+                  <Check className="h-4 w-4" /> {ar ? "تم رفع الفيديو" : "Video uploaded"}
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  disabled={videoSaving}
+                  onClick={() => postVidInput.current?.click()}
+                  className="mt-3 inline-flex items-center gap-2 rounded-lg border border-primary/40 bg-background px-4 py-2 text-sm font-bold hover:bg-accent disabled:opacity-60"
+                >
+                  <Video className="h-4 w-4 text-primary" />
+                  {videoSaving ? (ar ? "جارٍ الرفع..." : "Uploading...") : ar ? "اختر فيديو" : "Choose video"}
+                </button>
+              )}
+            </div>
+
             <button
               onClick={() => navigate({ to: "/" })}
               className="mt-6 rounded-full bg-primary px-6 py-2 font-bold text-primary-foreground"
@@ -372,7 +447,10 @@ function AddListingPage() {
               <button
                 key={o.type}
                 type="button"
-                onClick={() => setListingType(o.type)}
+                onClick={() => {
+                  setListingType(o.type);
+                  setStep(1);
+                }}
                 className="group flex flex-col items-start gap-3 rounded-2xl border border-border bg-card p-5 text-start shadow-card transition-all hover:-translate-y-1 hover:border-primary/50"
               >
                 <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-primary text-primary-foreground">
@@ -395,6 +473,13 @@ function AddListingPage() {
   const submitLabel =
     listingType === "auction" ? t("add.publishAuction") : listingType === "business" ? t("add.publishBusiness") : t("add.publish");
 
+  const stepNames = ar
+    ? ["التفاصيل والصور", "التصنيف والموقع", "السعر", "النشر"]
+    : ["Details & photos", "Category & location", "Price", "Publish"];
+
+  const fieldCls =
+    "h-11 w-full rounded-lg border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary";
+
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
@@ -409,427 +494,451 @@ function AddListingPage() {
         <h1 className="text-2xl font-extrabold">{heading}</h1>
         <p className="text-sm text-muted-foreground">{t("add.formSub")}</p>
 
+        {/* Stepper */}
+        <div className="mt-5 flex items-center gap-2">
+          {stepNames.map((name, i) => {
+            const n = i + 1;
+            const active = step === n;
+            const done = step > n;
+            return (
+              <div key={name} className="flex flex-1 flex-col items-center gap-1">
+                <div className="flex w-full items-center">
+                  <span
+                    className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-extrabold ${
+                      active
+                        ? "bg-primary text-primary-foreground"
+                        : done
+                          ? "bg-primary/20 text-primary"
+                          : "bg-muted text-muted-foreground"
+                    }`}
+                  >
+                    {done ? <Check className="h-4 w-4" /> : n}
+                  </span>
+                  {n < stepNames.length && (
+                    <span className={`mx-1 h-0.5 flex-1 rounded ${done ? "bg-primary" : "bg-muted"}`} />
+                  )}
+                </div>
+                <span className={`text-center text-[10px] font-semibold ${active ? "text-primary" : "text-muted-foreground"}`}>
+                  {name}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+
         <form onSubmit={handleSubmit} className="mt-6 space-y-5">
-          {/* Contact / login */}
-          {!user ? (
-            <div className="rounded-2xl border border-border bg-muted/40 p-4">
-              <div className="mb-3 flex items-center justify-between">
-                <span className="text-sm font-bold">{t("add.contactGuest")}</span>
-                <Link to="/login" className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline">
-                  <LogIn className="h-3.5 w-3.5" /> {t("add.loginShort")}
-                </Link>
-              </div>
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <input
-                  required
-                  value={guestName}
-                  onChange={(e) => setGuestName(e.target.value)}
-                  placeholder={t("add.name")}
-                  className="h-11 w-full rounded-lg border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                />
-                <input
-                  required
-                  type="tel"
-                  value={guestPhone}
-                  onChange={(e) => setGuestPhone(e.target.value)}
-                  placeholder={t("add.phone")}
-                  className="h-11 w-full rounded-lg border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                />
-              </div>
-            </div>
-          ) : (
-            <div className="rounded-lg border border-border bg-muted/40 px-4 py-3 text-sm">
-              {t("add.postingAs")} <span className="font-bold">{user.email}</span>
-            </div>
-          )}
-
-          {/* Title */}
-          <div>
-            <label className="mb-1 block text-sm font-semibold">{t("add.adTitle")}</label>
-            <input
-              required
-              type="text"
-              name="title"
-              placeholder={t("add.adTitlePh")}
-              className="h-11 w-full rounded-lg border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-            />
-          </div>
-
-          {/* Category cascade */}
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          {/* ===== Step 1: Title, Description, Images ===== */}
+          <div className={step === 1 ? "space-y-5" : "hidden"}>
             <div>
-              <label className="mb-1 block text-sm font-semibold">{t("add.mainCat")}</label>
-              <select
-                required
-                value={categoryId}
-                onChange={(e) => {
-                  setCategoryId(e.target.value);
-                  setGroupName("");
-                  setItemName("");
-                  setBrand("");
-                }}
-                className="h-11 w-full rounded-lg border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-              >
-                <option value="" disabled>{t("add.chooseCat")}</option>
-                {categories.map((c) => (
-                  <option key={c.id} value={c.id}>{c.icon} {lang === "ar" ? c.name : c.nameEn}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-semibold">{t("add.subCat")}</label>
-              <select
-                value={groupName}
-                disabled={!activeCategory}
-                onChange={(e) => {
-                  setGroupName(e.target.value);
-                  setItemName("");
-                }}
-                className="h-11 w-full rounded-lg border border-border bg-background px-3 text-sm disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-primary"
-              >
-                <option value="">{t("add.chooseSection")}</option>
-                {activeCategory?.groups.map((g) => (
-                  <option key={g.name} value={g.name}>{g.name}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-semibold">{t("add.type")}</label>
-              <select
-                value={itemName}
-                disabled={!activeGroup}
-                onChange={(e) => {
-                  setItemName(e.target.value);
-                  setBrand("");
-                }}
-                className="h-11 w-full rounded-lg border border-border bg-background px-3 text-sm disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-primary"
-              >
-                <option value="">{t("add.chooseTypeOpt")}</option>
-                {activeGroup?.items.map((it) => (
-                  <option key={it} value={it}>{it}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-
-          {/* Brand (searchable) */}
-          <div className="relative">
-            <label className="mb-1 block text-sm font-semibold">{lang === "ar" ? "الماركة" : "Brand"}</label>
-            <div className="relative">
-              <Search className="absolute end-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <label className="mb-1 block text-sm font-semibold">{t("add.adTitle")}</label>
               <input
-                value={brand ? brandLabel(brand, lang) : brandQuery}
-                disabled={!activeCategory}
-                onChange={(e) => {
-                  setBrand("");
-                  setBrandQuery(e.target.value);
-                  setBrandOpen(true);
-                }}
-                onFocus={() => setBrandOpen(true)}
-                onBlur={() => setTimeout(() => setBrandOpen(false), 150)}
-                placeholder={lang === "ar" ? "ابحث واختر الماركة" : "Search and choose brand"}
-                className="h-11 w-full rounded-lg border border-border bg-background pe-10 ps-3 text-sm disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-primary"
+                type="text"
+                value={titleText}
+                onChange={(e) => setTitleText(e.target.value)}
+                placeholder={t("add.adTitlePh")}
+                className={fieldCls}
               />
             </div>
-            {brandOpen && activeCategory && filteredBrands.length > 0 && (
-              <ul className="absolute z-20 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-border bg-popover p-1 shadow-card">
-                {filteredBrands.map((b) => (
-                  <li key={b}>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setBrand(b);
-                        setBrandQuery("");
-                        setBrandOpen(false);
-                      }}
-                      className="w-full rounded-md px-3 py-2 text-start text-sm hover:bg-accent"
-                    >
-                      {brandLabel(b, lang)}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
 
-          {/* Country of manufacture (searchable, with flags) */}
-          <div className="relative">
-            <label className="mb-1 block text-sm font-semibold">
-              {lang === "ar" ? "بلد الصنع" : "Country of manufacture"}
-            </label>
-            <div className="relative">
-              <Search className="absolute end-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <input
-                value={country ? `${country.flag} ${lang === "ar" ? country.ar : country.en}` : countryQuery}
-                onChange={(e) => {
-                  setCountry(null);
-                  setCountryQuery(e.target.value);
-                  setCountryOpen(true);
-                }}
-                onFocus={() => setCountryOpen(true)}
-                onBlur={() => setTimeout(() => setCountryOpen(false), 150)}
-                placeholder={lang === "ar" ? "ابحث عن الدولة" : "Search for a country"}
-                className="h-11 w-full rounded-lg border border-border bg-background pe-10 ps-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+            <div>
+              <label className="mb-1 block text-sm font-semibold">{t("add.description")}</label>
+              <textarea
+                rows={5}
+                value={descText}
+                onChange={(e) => setDescText(e.target.value)}
+                placeholder={t("add.descPh")}
+                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
-            {countryOpen && filteredCountries.length > 0 && (
-              <ul className="absolute z-20 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-border bg-popover p-1 shadow-card">
-                {filteredCountries.map((c, i) => (
-                  <li key={c.code}>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setCountry(c);
-                        setCountryQuery("");
-                        setCountryOpen(false);
-                      }}
-                      className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-start text-sm hover:bg-accent"
-                    >
-                      <span className="text-base">{c.flag}</span>
-                      <span>{lang === "ar" ? c.ar : c.en}</span>
-                      {c.popular && i < filteredCountries.length && (
-                        <span className="ms-auto rounded-full bg-secondary px-2 py-0.5 text-[10px] font-bold text-secondary-foreground">
-                          {lang === "ar" ? "مشهورة" : "Popular"}
-                        </span>
-                      )}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
 
-
-          {/* Negotiable + delivery */}
-          {listingType !== "auction" && (
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <label className="flex cursor-pointer items-center justify-between rounded-xl border border-border bg-card px-4 py-3 text-sm font-semibold shadow-card">
-                {lang === "ar" ? "السعر قابل للتفاوض" : "Negotiable price"}
-                <input
-                  type="checkbox"
-                  checked={negotiable}
-                  onChange={(e) => setNegotiable(e.target.checked)}
-                  className="h-5 w-5 rounded border-border accent-primary"
-                />
+            <div>
+              <label className="mb-1 block text-sm font-semibold">
+                {t("add.images")} ({images.length}/{MAX_IMAGES})
               </label>
-              <label className="flex cursor-pointer items-center justify-between rounded-xl border border-border bg-card px-4 py-3 text-sm font-semibold shadow-card">
-                {lang === "ar" ? "خدمة التوصيل متاحة" : "Delivery available"}
-                <input
-                  type="checkbox"
-                  checked={delivery}
-                  onChange={(e) => setDelivery(e.target.checked)}
-                  className="h-5 w-5 rounded border-border accent-primary"
-                />
-              </label>
-            </div>
-          )}
-
-
-
-          {/* Business details */}
-          {listingType === "business" && <BusinessFields t={t} />}
-
-          {/* Region search */}
-          <div className="relative">
-            <label className="mb-1 block text-sm font-semibold">{t("add.region")}</label>
-            <div className="relative">
-              <Search className="absolute end-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <input
-                value={region || regionQuery}
-                onChange={(e) => {
-                  setRegion("");
-                  setRegionQuery(e.target.value);
-                  setRegionOpen(true);
-                }}
-                onFocus={() => setRegionOpen(true)}
-                placeholder={t("add.regionPh")}
-                className="h-11 w-full rounded-lg border border-border bg-background pe-10 ps-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-              />
-            </div>
-            {regionOpen && filteredRegions.length > 0 && (
-              <ul className="absolute z-20 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-border bg-popover p-1 shadow-card">
-                {filteredRegions.map((r) => (
-                  <li key={r}>
+              <input ref={imgInput} type="file" accept="image/*" multiple hidden onChange={(e) => handleImages(e.target.files)} />
+              <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
+                {images.map((img, i) => (
+                  <div key={img.url} className="group relative aspect-square overflow-hidden rounded-lg border border-border">
+                    <img src={img.url} alt={`${i + 1}`} className="h-full w-full object-cover" />
                     <button
                       type="button"
-                      onClick={() => {
-                        setRegion(r);
-                        setRegionQuery("");
-                        setRegionOpen(false);
-                      }}
-                      className="w-full rounded-md px-3 py-2 text-start text-sm hover:bg-accent"
+                      onClick={() => setImages((p) => p.filter((_, idx) => idx !== i))}
+                      className="absolute start-1 top-1 rounded-full bg-destructive p-1 text-destructive-foreground opacity-0 transition group-hover:opacity-100"
                     >
-                      {r}
+                      <X className="h-3.5 w-3.5" />
                     </button>
-                  </li>
+                  </div>
                 ))}
-              </ul>
-            )}
-          </div>
-
-          {/* Map location */}
-          <div>
-            <label className="mb-1 block text-sm font-semibold">{t("add.mapLocation")}</label>
-            <button
-              type="button"
-              onClick={useMyLocation}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-background px-4 py-2 text-sm font-semibold hover:bg-accent"
-            >
-              <MapPin className="h-4 w-4 text-primary" />
-              {locating ? t("add.locating") : coords ? t("add.updateLocation") : t("add.useMyLocation")}
-            </button>
-            {coords && (
-              <div className="mt-3 overflow-hidden rounded-xl border border-border">
-                <iframe
-                  title="map"
-                  className="h-56 w-full"
-                  loading="lazy"
-                  src={`https://www.openstreetmap.org/export/embed.html?bbox=${coords.lng - 0.01}%2C${coords.lat - 0.01}%2C${coords.lng + 0.01}%2C${coords.lat + 0.01}&layer=mapnik&marker=${coords.lat}%2C${coords.lng}`}
-                />
-              </div>
-            )}
-          </div>
-
-          {/* Images */}
-          <div>
-            <label className="mb-1 block text-sm font-semibold">
-              {t("add.images")} ({images.length}/{MAX_IMAGES})
-            </label>
-            <input ref={imgInput} type="file" accept="image/*" multiple hidden onChange={(e) => handleImages(e.target.files)} />
-            <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
-              {images.map((img, i) => (
-                <div key={img.url} className="group relative aspect-square overflow-hidden rounded-lg border border-border">
-                  <img src={img.url} alt={`${i + 1}`} className="h-full w-full object-cover" />
+                {images.length < MAX_IMAGES && (
                   <button
                     type="button"
-                    onClick={() => setImages((p) => p.filter((_, idx) => idx !== i))}
-                    className="absolute start-1 top-1 rounded-full bg-destructive p-1 text-destructive-foreground opacity-0 transition group-hover:opacity-100"
+                    onClick={() => imgInput.current?.click()}
+                    className="flex aspect-square flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed border-border text-muted-foreground hover:border-primary hover:text-primary"
                   >
-                    <X className="h-3.5 w-3.5" />
+                    <ImagePlus className="h-6 w-6" />
+                    <span className="text-[10px] font-semibold">{t("add.addImg")}</span>
                   </button>
-                </div>
-              ))}
-              {images.length < MAX_IMAGES && (
-                <button
-                  type="button"
-                  onClick={() => imgInput.current?.click()}
-                  className="flex aspect-square flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed border-border text-muted-foreground hover:border-primary hover:text-primary"
+                )}
+              </div>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {ar ? "يمكنك إضافة الفيديو بعد نشر الإعلان." : "You can add a video after publishing."}
+              </p>
+            </div>
+          </div>
+
+          {/* ===== Step 2: Category, brand, country, region, map ===== */}
+          <div className={step === 2 ? "space-y-5" : "hidden"}>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <div>
+                <label className="mb-1 block text-sm font-semibold">{t("add.mainCat")}</label>
+                <select
+                  value={categoryId}
+                  onChange={(e) => {
+                    setCategoryId(e.target.value);
+                    setGroupName("");
+                    setItemName("");
+                    setBrand("");
+                  }}
+                  className={fieldCls}
                 >
-                  <ImagePlus className="h-6 w-6" />
-                  <span className="text-[10px] font-semibold">{t("add.addImg")}</span>
-                </button>
+                  <option value="" disabled>{t("add.chooseCat")}</option>
+                  {categories.map((c) => (
+                    <option key={c.id} value={c.id}>{c.icon} {ar ? c.name : c.nameEn}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-semibold">{t("add.subCat")}</label>
+                <select
+                  value={groupName}
+                  disabled={!activeCategory}
+                  onChange={(e) => {
+                    setGroupName(e.target.value);
+                    setItemName("");
+                  }}
+                  className={`${fieldCls} disabled:opacity-50`}
+                >
+                  <option value="">{t("add.chooseSection")}</option>
+                  {activeCategory?.groups.map((g) => (
+                    <option key={g.name} value={g.name}>{g.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-semibold">{t("add.type")}</label>
+                <select
+                  value={itemName}
+                  disabled={!activeGroup}
+                  onChange={(e) => {
+                    setItemName(e.target.value);
+                    setBrand("");
+                  }}
+                  className={`${fieldCls} disabled:opacity-50`}
+                >
+                  <option value="">{t("add.chooseTypeOpt")}</option>
+                  {activeGroup?.items.map((it) => (
+                    <option key={it} value={it}>{it}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Brand */}
+            <div className="relative">
+              <label className="mb-1 block text-sm font-semibold">{ar ? "الماركة" : "Brand"}</label>
+              <div className="relative">
+                <Search className="absolute end-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  value={brand ? brandLabel(brand, lang) : brandQuery}
+                  disabled={!activeCategory}
+                  onChange={(e) => {
+                    setBrand("");
+                    setBrandQuery(e.target.value);
+                    setBrandOpen(true);
+                  }}
+                  onFocus={() => setBrandOpen(true)}
+                  onBlur={() => setTimeout(() => setBrandOpen(false), 150)}
+                  placeholder={ar ? "ابحث واختر الماركة" : "Search and choose brand"}
+                  className={`${fieldCls} pe-10 disabled:opacity-50`}
+                />
+              </div>
+              {brandOpen && activeCategory && filteredBrands.length > 0 && (
+                <ul className="absolute z-20 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-border bg-popover p-1 shadow-card">
+                  {filteredBrands.map((b) => (
+                    <li key={b}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setBrand(b);
+                          setBrandQuery("");
+                          setBrandOpen(false);
+                        }}
+                        className="w-full rounded-md px-3 py-2 text-start text-sm hover:bg-accent"
+                      >
+                        {brandLabel(b, lang)}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+
+            {/* Country */}
+            <div className="relative">
+              <label className="mb-1 block text-sm font-semibold">{ar ? "بلد الصنع" : "Country of manufacture"}</label>
+              <div className="relative">
+                <Search className="absolute end-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  value={country ? `${country.flag} ${ar ? country.ar : country.en}` : countryQuery}
+                  onChange={(e) => {
+                    setCountry(null);
+                    setCountryQuery(e.target.value);
+                    setCountryOpen(true);
+                  }}
+                  onFocus={() => setCountryOpen(true)}
+                  onBlur={() => setTimeout(() => setCountryOpen(false), 150)}
+                  placeholder={ar ? "ابحث عن الدولة" : "Search for a country"}
+                  className={`${fieldCls} pe-10`}
+                />
+              </div>
+              {countryOpen && filteredCountries.length > 0 && (
+                <ul className="absolute z-20 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-border bg-popover p-1 shadow-card">
+                  {filteredCountries.map((c) => (
+                    <li key={c.code}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setCountry(c);
+                          setCountryQuery("");
+                          setCountryOpen(false);
+                        }}
+                        className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-start text-sm hover:bg-accent"
+                      >
+                        <span className="text-base">{c.flag}</span>
+                        <span>{ar ? c.ar : c.en}</span>
+                        {c.popular && (
+                          <span className="ms-auto rounded-full bg-secondary px-2 py-0.5 text-[10px] font-bold text-secondary-foreground">
+                            {ar ? "مشهورة" : "Popular"}
+                          </span>
+                        )}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+
+            {/* Region */}
+            <div className="relative">
+              <label className="mb-1 block text-sm font-semibold">{t("add.region")}</label>
+              <div className="relative">
+                <Search className="absolute end-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  value={region || regionQuery}
+                  onChange={(e) => {
+                    setRegion("");
+                    setRegionQuery(e.target.value);
+                    setRegionOpen(true);
+                  }}
+                  onFocus={() => setRegionOpen(true)}
+                  placeholder={t("add.regionPh")}
+                  className={`${fieldCls} pe-10`}
+                />
+              </div>
+              {regionOpen && filteredRegions.length > 0 && (
+                <ul className="absolute z-20 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-border bg-popover p-1 shadow-card">
+                  {filteredRegions.map((r) => (
+                    <li key={r}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setRegion(r);
+                          setRegionQuery("");
+                          setRegionOpen(false);
+                        }}
+                        className="w-full rounded-md px-3 py-2 text-start text-sm hover:bg-accent"
+                      >
+                        {r}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+
+            {/* Map */}
+            <div>
+              <label className="mb-1 block text-sm font-semibold">{t("add.mapLocation")}</label>
+              <button
+                type="button"
+                onClick={useMyLocation}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-background px-4 py-2 text-sm font-semibold hover:bg-accent"
+              >
+                <MapPin className="h-4 w-4 text-primary" />
+                {locating ? t("add.locating") : coords ? t("add.updateLocation") : t("add.useMyLocation")}
+              </button>
+              {coords && (
+                <div className="mt-3 overflow-hidden rounded-xl border border-border">
+                  <iframe
+                    title="map"
+                    className="h-56 w-full"
+                    loading="lazy"
+                    src={`https://www.openstreetmap.org/export/embed.html?bbox=${coords.lng - 0.01}%2C${coords.lat - 0.01}%2C${coords.lng + 0.01}%2C${coords.lat + 0.01}&layer=mapnik&marker=${coords.lat}%2C${coords.lng}`}
+                  />
+                </div>
               )}
             </div>
           </div>
 
-          {/* Video */}
-          <div>
-            <label className="mb-1 block text-sm font-semibold">{t("add.video")}</label>
-            <input ref={vidInput} type="file" accept="video/*" hidden onChange={(e) => handleVideo(e.target.files)} />
-            {video ? (
-              <div className="relative overflow-hidden rounded-xl border border-border">
-                <video src={video.url} controls className="h-56 w-full bg-black object-contain" />
-                <button
-                  type="button"
-                  onClick={() => setVideo(null)}
-                  className="absolute start-2 top-2 rounded-full bg-destructive p-1.5 text-destructive-foreground"
-                >
-                  <X className="h-4 w-4" />
-                </button>
+          {/* ===== Step 3: Price, condition, AI, business ===== */}
+          <div className={step === 3 ? "space-y-5" : "hidden"}>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div>
+                <label className="mb-1 block text-sm font-semibold">
+                  {listingType === "auction" ? t("add.startPrice") : t("add.price")}
+                </label>
+                <input
+                  type="number"
+                  min={0}
+                  value={price}
+                  onChange={(e) => setPrice(e.target.value)}
+                  placeholder="0"
+                  className={fieldCls}
+                />
+              </div>
+              {listingType === "auction" ? (
+                <div>
+                  <label className="mb-1 block text-sm font-semibold">{t("add.auctionDuration")}</label>
+                  <input
+                    type="number"
+                    min={1}
+                    value={auctionDuration}
+                    onChange={(e) => setAuctionDuration(e.target.value)}
+                    className={fieldCls}
+                  />
+                </div>
+              ) : (
+                <div>
+                  <label className="mb-1 block text-sm font-semibold">{t("add.condition")}</label>
+                  <select value={condition} onChange={(e) => setCondition(e.target.value)} className={fieldCls}>
+                    <option value="جديد">{t("add.new")}</option>
+                    <option value="مستعمل">{t("add.used")}</option>
+                  </select>
+                </div>
+              )}
+            </div>
+
+            <button
+              type="button"
+              onClick={estimatePrice}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-primary/40 bg-accent px-4 py-2 text-sm font-bold text-accent-foreground hover:bg-accent/70"
+            >
+              <Sparkles className="h-4 w-4" />
+              {estimating ? t("add.analyzing") : t("add.aiSuggest")}
+            </button>
+
+            {estimate && (
+              <div className="grid grid-cols-2 gap-3 rounded-2xl border border-border bg-card p-4 shadow-card sm:grid-cols-4">
+                <Stat label={t("add.avgPrice")} value={`${estimate.average} ${ar ? "د.ب" : "BHD"}`} />
+                <Stat label={t("add.suggestedPrice")} value={`${estimate.suggested} ${ar ? "د.ب" : "BHD"}`} />
+                <Stat label={t("add.sellSpeed")} value={estimate.speed} />
+                <Stat label={t("add.marketCompare")} value={estimate.market} />
+              </div>
+            )}
+
+            {listingType !== "auction" && (
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <label className="flex cursor-pointer items-center justify-between rounded-xl border border-border bg-card px-4 py-3 text-sm font-semibold shadow-card">
+                  {ar ? "السعر قابل للتفاوض" : "Negotiable price"}
+                  <input
+                    type="checkbox"
+                    checked={negotiable}
+                    onChange={(e) => setNegotiable(e.target.checked)}
+                    className="h-5 w-5 rounded border-border accent-primary"
+                  />
+                </label>
+                <label className="flex cursor-pointer items-center justify-between rounded-xl border border-border bg-card px-4 py-3 text-sm font-semibold shadow-card">
+                  {ar ? "خدمة التوصيل متاحة" : "Delivery available"}
+                  <input
+                    type="checkbox"
+                    checked={delivery}
+                    onChange={(e) => setDelivery(e.target.checked)}
+                    className="h-5 w-5 rounded border-border accent-primary"
+                  />
+                </label>
+              </div>
+            )}
+
+            {listingType === "business" && <BusinessFields t={t} biz={biz} setBiz={setBiz} />}
+          </div>
+
+          {/* ===== Step 4: Contact / login ===== */}
+          <div className={step === 4 ? "space-y-5" : "hidden"}>
+            {!user ? (
+              <div className="rounded-2xl border border-border bg-muted/40 p-4">
+                <div className="mb-3 flex items-center justify-between">
+                  <span className="text-sm font-bold">{t("add.contactGuest")}</span>
+                  <Link to="/login" className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline">
+                    <LogIn className="h-3.5 w-3.5" /> {t("add.loginShort")}
+                  </Link>
+                </div>
+                <p className="mb-3 text-xs text-muted-foreground">
+                  {ar
+                    ? "سجّل الدخول لإدارة إعلاناتك لاحقًا وإضافة فيديو، أو أكمل كزائر بإدخال بيانات التواصل."
+                    : "Log in to manage your listings and add a video later, or continue as a guest with your contact details."}
+                </p>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <input
+                    value={guestName}
+                    onChange={(e) => setGuestName(e.target.value)}
+                    placeholder={t("add.name")}
+                    className={fieldCls}
+                  />
+                  <input
+                    type="tel"
+                    value={guestPhone}
+                    onChange={(e) => setGuestPhone(e.target.value)}
+                    placeholder={t("add.phone")}
+                    className={fieldCls}
+                  />
+                </div>
               </div>
             ) : (
+              <div className="rounded-lg border border-border bg-muted/40 px-4 py-3 text-sm">
+                {t("add.postingAs")} <span className="font-bold">{user.email}</span>
+              </div>
+            )}
+          </div>
+
+          {/* ===== Navigation buttons ===== */}
+          <div className="flex items-center gap-3">
+            {step > 1 && (
               <button
                 type="button"
-                onClick={() => vidInput.current?.click()}
-                className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border py-6 text-muted-foreground hover:border-primary hover:text-primary"
+                onClick={back}
+                className="rounded-full border border-border px-6 py-3 font-bold hover:bg-muted"
               >
-                <Video className="h-5 w-5" /> {t("add.addVideo")}
+                {ar ? "السابق" : "Back"}
+              </button>
+            )}
+            {step < 4 ? (
+              <button
+                type="button"
+                onClick={next}
+                className="flex-1 rounded-full bg-gradient-primary px-6 py-3 font-bold text-primary-foreground shadow-glow transition-transform hover:scale-[1.01]"
+              >
+                {ar ? "التالي" : "Next"}
+              </button>
+            ) : (
+              <button
+                type="submit"
+                disabled={saving}
+                className="flex-1 rounded-full bg-gradient-primary px-6 py-3 font-bold text-primary-foreground shadow-glow transition-transform hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {saving ? (ar ? "جارٍ النشر..." : "Publishing...") : submitLabel}
               </button>
             )}
           </div>
-
-          {/* Price + condition + AI */}
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
-              <label className="mb-1 block text-sm font-semibold">
-                {listingType === "auction" ? t("add.startPrice") : t("add.price")}
-              </label>
-              <input
-                required
-                type="number"
-                min={0}
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
-                placeholder="0"
-                className="h-11 w-full rounded-lg border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-              />
-            </div>
-            {listingType === "auction" ? (
-              <div>
-                <label className="mb-1 block text-sm font-semibold">{t("add.auctionDuration")}</label>
-                <input
-                  type="number"
-                  name="auctionDuration"
-                  min={1}
-                  defaultValue={24}
-                  className="h-11 w-full rounded-lg border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                />
-              </div>
-            ) : (
-              <div>
-                <label className="mb-1 block text-sm font-semibold">{t("add.condition")}</label>
-                <select
-                  value={condition}
-                  onChange={(e) => setCondition(e.target.value)}
-                  className="h-11 w-full rounded-lg border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                >
-                  <option value="جديد">{t("add.new")}</option>
-                  <option value="مستعمل">{t("add.used")}</option>
-                </select>
-              </div>
-            )}
-          </div>
-
-          <button
-            type="button"
-            onClick={estimatePrice}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-primary/40 bg-accent px-4 py-2 text-sm font-bold text-accent-foreground hover:bg-accent/70"
-          >
-            <Sparkles className="h-4 w-4" />
-            {estimating ? t("add.analyzing") : t("add.aiSuggest")}
-          </button>
-
-          {estimate && (
-            <div className="grid grid-cols-2 gap-3 rounded-2xl border border-border bg-card p-4 shadow-card sm:grid-cols-4">
-              <Stat label={t("add.avgPrice")} value={`${estimate.average} ${lang === "ar" ? "د.ب" : "BHD"}`} />
-              <Stat label={t("add.suggestedPrice")} value={`${estimate.suggested} ${lang === "ar" ? "د.ب" : "BHD"}`} />
-              <Stat label={t("add.sellSpeed")} value={estimate.speed} />
-              <Stat label={t("add.marketCompare")} value={estimate.market} />
-            </div>
-          )}
-
-          {/* Description */}
-          <div>
-            <label className="mb-1 block text-sm font-semibold">{t("add.description")}</label>
-            <textarea
-              required
-              rows={5}
-              name="description"
-              value={descText}
-              onChange={(e) => setDescText(e.target.value)}
-              placeholder={t("add.descPh")}
-              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={saving}
-            className="w-full rounded-full bg-gradient-primary px-6 py-3 font-bold text-primary-foreground shadow-glow transition-transform hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {saving ? (lang === "ar" ? "جارٍ النشر..." : "Publishing...") : submitLabel}
-          </button>
         </form>
       </main>
       <Footer />
@@ -837,10 +946,30 @@ function AddListingPage() {
   );
 }
 
-function BusinessFields({ t }: { t: (k: string) => string }) {
-  const [license, setLicense] = useState("with");
+interface BizState {
+  rent: string;
+  area: string;
+  outlets: string;
+  staff: string;
+  monthlyRevenue: string;
+  opCost: string;
+  license: string;
+  reason: string;
+  includesEquip: boolean;
+}
+
+function BusinessFields({
+  t,
+  biz,
+  setBiz,
+}: {
+  t: (k: string) => string;
+  biz: BizState;
+  setBiz: React.Dispatch<React.SetStateAction<BizState>>;
+}) {
   const input =
     "h-11 w-full rounded-lg border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary";
+  const set = (patch: Partial<BizState>) => setBiz((p) => ({ ...p, ...patch }));
   return (
     <div className="rounded-2xl border border-primary/30 bg-accent/30 p-4">
       <h3 className="mb-3 flex items-center gap-1.5 text-sm font-extrabold text-primary">
@@ -849,42 +978,47 @@ function BusinessFields({ t }: { t: (k: string) => string }) {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
           <label className="mb-1 block text-sm font-semibold">{t("biz.rent")}</label>
-          <input type="number" name="rent" min={0} placeholder="0" className={input} />
+          <input type="number" min={0} placeholder="0" value={biz.rent} onChange={(e) => set({ rent: e.target.value })} className={input} />
         </div>
         <div>
           <label className="mb-1 block text-sm font-semibold">{t("biz.area")}</label>
-          <input type="number" name="area" min={0} placeholder="0" className={input} />
+          <input type="number" min={0} placeholder="0" value={biz.area} onChange={(e) => set({ area: e.target.value })} className={input} />
         </div>
         <div>
           <label className="mb-1 block text-sm font-semibold">{t("biz.outlets")}</label>
-          <input type="number" name="outlets" min={0} placeholder="0" className={input} />
+          <input type="number" min={0} placeholder="0" value={biz.outlets} onChange={(e) => set({ outlets: e.target.value })} className={input} />
         </div>
         <div>
           <label className="mb-1 block text-sm font-semibold">{t("biz.staff")}</label>
-          <input type="number" name="staff" min={0} placeholder="0" className={input} />
+          <input type="number" min={0} placeholder="0" value={biz.staff} onChange={(e) => set({ staff: e.target.value })} className={input} />
         </div>
         <div>
           <label className="mb-1 block text-sm font-semibold">{t("biz.monthlyRevenue")}</label>
-          <input type="number" name="monthlyRevenue" min={0} placeholder="0" className={input} />
+          <input type="number" min={0} placeholder="0" value={biz.monthlyRevenue} onChange={(e) => set({ monthlyRevenue: e.target.value })} className={input} />
         </div>
         <div>
           <label className="mb-1 block text-sm font-semibold">{t("biz.opCost")}</label>
-          <input type="number" name="opCost" min={0} placeholder="0" className={input} />
+          <input type="number" min={0} placeholder="0" value={biz.opCost} onChange={(e) => set({ opCost: e.target.value })} className={input} />
         </div>
         <div>
           <label className="mb-1 block text-sm font-semibold">{t("biz.license")}</label>
-          <select name="license" value={license} onChange={(e) => setLicense(e.target.value)} className={input}>
+          <select value={biz.license} onChange={(e) => set({ license: e.target.value })} className={input}>
             <option value="with">{t("biz.withLicense")}</option>
             <option value="without">{t("biz.withoutLicense")}</option>
           </select>
         </div>
         <div>
           <label className="mb-1 block text-sm font-semibold">{t("biz.reason")}</label>
-          <input type="text" name="reason" placeholder={t("biz.reasonPh")} className={input} />
+          <input type="text" placeholder={t("biz.reasonPh")} value={biz.reason} onChange={(e) => set({ reason: e.target.value })} className={input} />
         </div>
       </div>
       <label className="mt-3 flex items-center gap-2 text-sm font-semibold">
-        <input type="checkbox" name="includesEquip" defaultChecked className="h-4 w-4 rounded border-border accent-primary" />
+        <input
+          type="checkbox"
+          checked={biz.includesEquip}
+          onChange={(e) => set({ includesEquip: e.target.checked })}
+          className="h-4 w-4 rounded border-border accent-primary"
+        />
         {t("biz.includesEquip")}
       </label>
     </div>
