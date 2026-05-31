@@ -183,6 +183,7 @@ export const categories: Category[] = [
         items: ["متفرقات"],
       },
     ],
+    brands: commonBrands.other,
   },
 ];
 
