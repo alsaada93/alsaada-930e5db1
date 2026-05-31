@@ -34,8 +34,7 @@ function AdminSlidesPage() {
     load();
   }, []);
 
-  const uploadImage = async (files: FileList | null) => {
-    const file = files?.[0];
+  const uploadImage = async (file: File) => {
     if (!file) return;
     setUploading(true);
     try {
