@@ -38,6 +38,7 @@ export function useCategories() {
 export async function saveCategories(next: Category[]) {
   const { error } = await supabase
     .from("site_settings")
-    .upsert({ key: SETTINGS_KEY, value: next as unknown as Record<string, unknown> }, { onConflict: "key" });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    .upsert({ key: SETTINGS_KEY, value: next as any }, { onConflict: "key" });
   if (error) throw error;
 }
