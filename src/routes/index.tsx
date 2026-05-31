@@ -41,6 +41,7 @@ function Index() {
   return (
     <div className="min-h-screen bg-background">
       <Header />
+      <WeBuyBanner />
       <main>
         <Hero />
         <CategoryGrid />
@@ -50,6 +51,8 @@ function Index() {
         <BusinessSection />
       </main>
       <Footer />
+      <WhatsAppButton />
     </div>
+
   );
 }
