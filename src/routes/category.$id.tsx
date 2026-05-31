@@ -77,7 +77,7 @@ function CategoryPage() {
 
           {category.sub.length > 0 && (
             <div className="mt-5 flex flex-wrap gap-2">
-              {category.sub.map((s) => (
+              {category.sub.map((s: string) => (
                 <span
                   key={s}
                   className="rounded-full border border-border bg-card px-3 py-1 text-xs font-semibold text-card-foreground"
