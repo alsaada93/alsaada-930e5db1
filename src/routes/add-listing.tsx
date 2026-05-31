@@ -513,21 +513,93 @@ function AddListingPage() {
           </div>
 
 
-          {/* Brand */}
-          <div>
+          {/* Brand (searchable) */}
+          <div className="relative">
             <label className="mb-1 block text-sm font-semibold">{lang === "ar" ? "الماركة" : "Brand"}</label>
-            <select
-              value={brand}
-              disabled={!activeCategory}
-              onChange={(e) => setBrand(e.target.value)}
-              className="h-11 w-full rounded-lg border border-border bg-background px-3 text-sm disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-primary"
-            >
-              <option value="">{lang === "ar" ? "اختر الماركة" : "Choose brand"}</option>
-              {brandOptions.map((b) => (
-                <option key={b} value={b}>{b}</option>
-              ))}
-            </select>
+            <div className="relative">
+              <Search className="absolute end-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <input
+                value={brand ? brandLabel(brand, lang) : brandQuery}
+                disabled={!activeCategory}
+                onChange={(e) => {
+                  setBrand("");
+                  setBrandQuery(e.target.value);
+                  setBrandOpen(true);
+                }}
+                onFocus={() => setBrandOpen(true)}
+                onBlur={() => setTimeout(() => setBrandOpen(false), 150)}
+                placeholder={lang === "ar" ? "ابحث واختر الماركة" : "Search and choose brand"}
+                className="h-11 w-full rounded-lg border border-border bg-background pe-10 ps-3 text-sm disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+            </div>
+            {brandOpen && activeCategory && filteredBrands.length > 0 && (
+              <ul className="absolute z-20 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-border bg-popover p-1 shadow-card">
+                {filteredBrands.map((b) => (
+                  <li key={b}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setBrand(b);
+                        setBrandQuery("");
+                        setBrandOpen(false);
+                      }}
+                      className="w-full rounded-md px-3 py-2 text-start text-sm hover:bg-accent"
+                    >
+                      {brandLabel(b, lang)}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
+
+          {/* Country of manufacture (searchable, with flags) */}
+          <div className="relative">
+            <label className="mb-1 block text-sm font-semibold">
+              {lang === "ar" ? "بلد الصنع" : "Country of manufacture"}
+            </label>
+            <div className="relative">
+              <Search className="absolute end-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <input
+                value={country ? `${country.flag} ${lang === "ar" ? country.ar : country.en}` : countryQuery}
+                onChange={(e) => {
+                  setCountry(null);
+                  setCountryQuery(e.target.value);
+                  setCountryOpen(true);
+                }}
+                onFocus={() => setCountryOpen(true)}
+                onBlur={() => setTimeout(() => setCountryOpen(false), 150)}
+                placeholder={lang === "ar" ? "ابحث عن الدولة" : "Search for a country"}
+                className="h-11 w-full rounded-lg border border-border bg-background pe-10 ps-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+            </div>
+            {countryOpen && filteredCountries.length > 0 && (
+              <ul className="absolute z-20 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-border bg-popover p-1 shadow-card">
+                {filteredCountries.map((c, i) => (
+                  <li key={c.code}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCountry(c);
+                        setCountryQuery("");
+                        setCountryOpen(false);
+                      }}
+                      className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-start text-sm hover:bg-accent"
+                    >
+                      <span className="text-base">{c.flag}</span>
+                      <span>{lang === "ar" ? c.ar : c.en}</span>
+                      {c.popular && i < filteredCountries.length && (
+                        <span className="ms-auto rounded-full bg-secondary px-2 py-0.5 text-[10px] font-bold text-secondary-foreground">
+                          {lang === "ar" ? "مشهورة" : "Popular"}
+                        </span>
+                      )}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
 
           {/* Negotiable + delivery */}
           {listingType !== "auction" && (
