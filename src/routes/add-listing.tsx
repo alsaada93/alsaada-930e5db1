@@ -355,7 +355,7 @@ function AddListingPage() {
     const options: { type: ListingType; icon: typeof Tag; title: string; desc: string }[] = [
       { type: "normal", icon: Tag, title: t("add.typeNormal"), desc: t("add.typeNormalDesc") },
       { type: "auction", icon: Gavel, title: t("add.typeAuction"), desc: t("add.typeAuctionDesc") },
-      
+      { type: "business", icon: Store, title: t("add.typeBusiness"), desc: t("add.typeBusinessDesc") },
     ];
     return (
       <div className="flex min-h-screen flex-col">

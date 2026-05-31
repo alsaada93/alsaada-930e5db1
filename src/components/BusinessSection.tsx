@@ -3,7 +3,8 @@ import { businesses } from "@/data/marketplace";
 
 export function BusinessSection() {
   return (
-    <section className="mx-auto max-w-7xl px-4 py-12">
+    <section id="businesses" className="mx-auto max-w-7xl px-4 py-12 scroll-mt-24">
+
       <div className="mb-6 flex items-center gap-2">
         <Store className="h-6 w-6 text-primary" />
         <div>
