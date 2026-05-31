@@ -102,13 +102,15 @@ function AddListingPage() {
       toast.error(t("toast.maxImages"));
       return;
     }
-    const next = Array.from(files).slice(0, remaining).map((f) => URL.createObjectURL(f));
+    const next = Array.from(files)
+      .slice(0, remaining)
+      .map((f) => ({ url: URL.createObjectURL(f), file: f }));
     setImages((p) => [...p, ...next]);
   };
 
   const handleVideo = (files: FileList | null) => {
     if (!files || !files[0]) return;
-    setVideo(URL.createObjectURL(files[0]));
+    setVideo({ url: URL.createObjectURL(files[0]), file: files[0] });
   };
 
   const useMyLocation = () => {
