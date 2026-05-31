@@ -425,9 +425,9 @@ function AddListingPage() {
             </label>
             <input ref={imgInput} type="file" accept="image/*" multiple hidden onChange={(e) => handleImages(e.target.files)} />
             <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
-              {images.map((src, i) => (
-                <div key={src} className="group relative aspect-square overflow-hidden rounded-lg border border-border">
-                  <img src={src} alt={`${i + 1}`} className="h-full w-full object-cover" />
+              {images.map((img, i) => (
+                <div key={img.url} className="group relative aspect-square overflow-hidden rounded-lg border border-border">
+                  <img src={img.url} alt={`${i + 1}`} className="h-full w-full object-cover" />
                   <button
                     type="button"
                     onClick={() => setImages((p) => p.filter((_, idx) => idx !== i))}
