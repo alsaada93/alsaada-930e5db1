@@ -1129,9 +1129,9 @@ function AddListingPage() {
                 <X className="h-5 w-5" />
               </button>
             </div>
-            {(existingImages[0] || images[0]) && (
+            {media[0] && (
               <img
-                src={existingImages[0] ?? images[0].url}
+                src={media[0].url}
                 alt={titleText}
                 className="aspect-[4/3] w-full rounded-xl object-cover"
               />
