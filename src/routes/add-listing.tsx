@@ -466,7 +466,10 @@ function AddListingPage() {
               <select
                 value={itemName}
                 disabled={!activeGroup}
-                onChange={(e) => setItemName(e.target.value)}
+                onChange={(e) => {
+                  setItemName(e.target.value);
+                  setBrand("");
+                }}
                 className="h-11 w-full rounded-lg border border-border bg-background px-3 text-sm disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-primary"
               >
                 <option value="">{t("add.chooseTypeOpt")}</option>
