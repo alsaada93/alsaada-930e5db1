@@ -15,21 +15,22 @@ import { useLanguage } from "@/hooks/useLanguage";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "سوقو SOOGO | سوق المعدات والأثاث في البحرين" },
+      { title: "السعادة ماركت | شراء وبيع معدات المطاعم والأثاث والإلكترونيات في البحرين" },
       {
         name: "description",
         content:
-          "سوقو منصة بيع وشراء ومزاد معدات المطاعم والأثاث والإلكترونيات في مملكة البحرين مع تسعير ذكي بالذكاء الاصطناعي.",
+          "السعادة ماركت — شراء وبيع معدات المطاعم والأثاث والإلكترونيات في البحرين. نشتري مباشرة مع تثمين مجاني وسعر مناسب. تواصل: 36818153.",
       },
-      { property: "og:title", content: "سوقو SOOGO | سوق المعدات والأثاث في البحرين" },
+      { property: "og:title", content: "السعادة ماركت | Al Saada Market" },
       {
         property: "og:description",
-        content: "بيع وشراء ومزاد المعدات بثقة في مملكة البحرين — تسعير ذكي وحماية من الاحتيال.",
+        content: "شراء وبيع معدات المطاعم والأثاث والإلكترونيات في البحرين — نشتري مباشرة وتثمين مجاني.",
       },
       { property: "og:url", content: "https://soogo-hub.lovable.app/" },
     ],
     links: [{ rel: "canonical", href: "https://soogo-hub.lovable.app/" }],
   }),
+
   component: Index,
 });
 
