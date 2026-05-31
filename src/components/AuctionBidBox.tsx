@@ -196,7 +196,7 @@ export function AuctionBidBox({ listingId, startPrice, auctionEndsAt }: Props) {
   );
 }
 
-function Stat({ label, value, highlight, icon }: { label: string; value: string; highlight?: boolean; icon?: React.ReactNode }) {
+function Stat({ label, value, highlight, icon }: { label: string; value: string; highlight?: boolean; icon?: ReactNode }) {
   return (
     <div className="rounded-xl bg-background p-3 text-center">
       <div className="flex items-center justify-center gap-1 text-[11px] text-muted-foreground">
