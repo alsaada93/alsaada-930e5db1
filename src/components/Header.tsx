@@ -36,11 +36,11 @@ export function Header({ hideSearch = false }: { hideSearch?: boolean }) {
           >
             <Search className="absolute end-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <input
-              type="text"
+              type="search"
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder={t("header.searchPlaceholder")}
-              className="h-10 w-full rounded-lg border-0 bg-white/95 pe-10 ps-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+              className="h-10 w-full rounded-lg bg-white/95 pe-10 ps-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary border"
             />
           </form>
         </div>
