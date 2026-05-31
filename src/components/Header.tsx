@@ -17,24 +17,24 @@ export function Header({ hideSearch = false }: { hideSearch?: boolean }) {
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-navy text-navy-foreground">
-      <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-1.5">
-        <Link to="/" className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+      <div className="mx-auto flex max-w-7xl items-center gap-2 px-4 py-0.5">
+        <Link to="/" className="flex shrink-0 items-center gap-1.5">
           {identity.showLogo && (
-            <span className="flex h-6 w-6 items-center justify-center overflow-hidden rounded-lg bg-white/95 p-1 sm:h-8 sm:w-8">
+            <span className="flex h-5 w-5 items-center justify-center overflow-hidden rounded-md bg-white/95 p-0.5 sm:h-6 sm:w-6">
               {identity.logoUrl ? (
                 <img src={identity.logoUrl} alt={siteName} className="h-full w-full object-contain" />
               ) : (
-                <BrandLogo size={18} />
+                <BrandLogo size={14} />
               )}
             </span>
           )}
           {identity.showName && (
             <span className="flex flex-col leading-none">
-              <span className="text-sm font-extrabold tracking-tight sm:text-base">
+              <span className="text-xs font-extrabold tracking-tight sm:text-sm">
                 {siteName} <span className="hidden text-navy-foreground/80 sm:inline">| {altName}</span>
               </span>
               {tagline && (
-                <span className="hidden text-[10px] text-navy-foreground/60 sm:block">{tagline}</span>
+                <span className="hidden text-[9px] text-navy-foreground/60 sm:block">{tagline}</span>
               )}
             </span>
           )}
