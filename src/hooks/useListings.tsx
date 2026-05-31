@@ -26,6 +26,8 @@ function mapRow(d: Row): Listing {
     featured: Boolean(d.featured),
     views: Number(d.views ?? 0),
     phone: (d.contact_phone as string | null) ?? undefined,
+    userId: (d.user_id as string | null) ?? undefined,
+    description: (d.description as string | null) ?? undefined,
     seller: (d.contact_name as string | null) ?? undefined,
     listingType: type,
     startPrice: d.start_price != null ? Number(d.start_price) : undefined,
