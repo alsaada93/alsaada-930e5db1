@@ -266,7 +266,7 @@ function ListingPage() {
     setReposting(true);
     const { error } = await supabase
       .from("listings")
-      .update({ created_at: new Date().toISOString(), status: "approved" })
+      .update({ published_at: new Date().toISOString(), status: "approved" })
       .eq("id", item.id);
     setReposting(false);
     if (error) {
