@@ -5,7 +5,8 @@ import { toast } from "sonner";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ListingCard } from "@/components/ListingCard";
-import { categories, listings, bahrainRegions, type Listing } from "@/data/marketplace";
+import { categories, bahrainRegions, type Listing } from "@/data/marketplace";
+import { useListings } from "@/hooks/useListings";
 import { useLanguage } from "@/hooks/useLanguage";
 
 interface CategorySearch {
