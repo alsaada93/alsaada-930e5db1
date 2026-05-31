@@ -97,11 +97,17 @@ interface SavedSearch {
 const SAVED_KEY = "soogo_saved_searches";
 
 function CategoryPage() {
-  const { category, items } = Route.useLoaderData();
+  const { category } = Route.useLoaderData();
   const search = Route.useSearch();
   const navigate = useNavigate();
   const { t, lang } = useLanguage();
+  const { listings } = useListings();
   const [regionQuery, setRegionQuery] = useState("");
+
+  const items = useMemo(
+    () => listings.filter((l) => l.category === category.name),
+    [listings, category.name],
+  );
 
   const update = (patch: Partial<CategorySearch>) => {
     navigate({
