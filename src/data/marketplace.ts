@@ -16,21 +16,30 @@ export interface Category {
   brands: string[];
 }
 
-/** ماركات شائعة لكل تصنيف */
+/** ماركات شائعة لكل تصنيف، مرتبة أبجدياً وتشمل الماركات العالمية والصينية */
+const sortBrands = (arr: string[]) =>
+  [...arr].sort((a, b) => (a === "أخرى" ? 1 : b === "أخرى" ? -1 : a.localeCompare(b)));
+
 export const commonBrands: Record<string, string[]> = {
-  restaurant: [
-    "Rational", "Hobart", "Electrolux", "Robot Coupe", "La Marzocco", "Nuova Simonelli",
-    "Sinmag", "Sanremo", "Fagor", "Convotherm", "Unox", "Berto's", "Inomak", "Brema",
-    "Hoshizaki", "Winterhalter", "Kitchenaid", "أخرى",
-  ],
-  hotels: [
-    "Samsung", "LG", "Daikin", "Carrier", "Electrolux", "Whirlpool", "Bosch", "Miele",
-    "Speed Queen", "Primus", "Ariston", "Panasonic", "أخرى",
-  ],
-  other: [
-    "Apple", "Samsung", "Dell", "HP", "Lenovo", "LG", "Sony", "Hikvision", "Dahua",
-    "Cisco", "Canon", "Epson", "IKEA", "أخرى",
-  ],
+  // معدات المطاعم والمخابز والكوفي شوب
+  restaurant: sortBrands([
+    "Berto's", "Brema", "Convotherm", "Electrolux", "Fagor", "Gelmatic", "Hobart",
+    "Hoshizaki", "Inomak", "Kitchenaid", "La Marzocco", "Midea", "Nuova Simonelli",
+    "Rational", "Robot Coupe", "Sanremo", "Sinmag", "Unox", "Welbon", "Winterhalter",
+    "أخرى",
+  ]),
+  // أثاث ومعدات الفنادق والغسيل
+  hotels: sortBrands([
+    "Ariston", "Bosch", "Carrier", "Daikin", "Electrolux", "Gree", "Haier", "Hisense",
+    "LG", "Midea", "Miele", "Panasonic", "Primus", "Samsung", "Speed Queen", "TCL",
+    "Whirlpool", "أخرى",
+  ]),
+  // إلكترونيات وأثاث ومتفرقات
+  other: sortBrands([
+    "Acer", "Apple", "Asus", "Canon", "Cisco", "Dahua", "Dell", "Epson", "Haier",
+    "Hikvision", "HP", "Huawei", "IKEA", "Lenovo", "LG", "Samsung", "Sony", "TCL",
+    "Xiaomi", "أخرى",
+  ]),
 };
 
 /** مناطق ومحافظات البحرين للبحث عند إضافة إعلان */
