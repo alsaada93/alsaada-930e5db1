@@ -46,9 +46,12 @@ export function CategoryGrid() {
               </span>
               <h3 className="font-bold text-card-foreground">{lang === "ar" ? c.name : c.nameEn}</h3>
               <p className="line-clamp-2 text-xs text-muted-foreground">{lang === "ar" ? c.description : c.descriptionEn}</p>
-              <span className="mt-auto rounded-full bg-secondary px-2 py-0.5 text-xs font-semibold text-secondary-foreground">
-                {c.count.toLocaleString(lang)} {t("cat.adsSuffix")}
-              </span>
+              {c.count > 0 && (
+                <span className="mt-auto rounded-full bg-secondary px-2 py-0.5 text-xs font-semibold text-secondary-foreground">
+                  {c.count.toLocaleString(lang)} {t("cat.adsSuffix")}
+                </span>
+              )}
+
 
               {/* لوحة الأنواع الفرعية تظهر عند التأشير بالماوس */}
               {c.sub.length > 0 && (
