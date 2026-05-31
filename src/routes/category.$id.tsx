@@ -5,7 +5,8 @@ import { toast } from "sonner";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ListingCard } from "@/components/ListingCard";
-import { categories, listings, bahrainRegions, type Listing } from "@/data/marketplace";
+import { categories, bahrainRegions, type Listing } from "@/data/marketplace";
+import { useListings } from "@/hooks/useListings";
 import { useLanguage } from "@/hooks/useLanguage";
 
 interface CategorySearch {
@@ -29,8 +30,7 @@ export const Route = createFileRoute("/category/$id")({
   loader: ({ params }) => {
     const category = categories.find((c) => c.id === params.id);
     if (!category) throw notFound();
-    const items = listings.filter((l) => l.category === category.name);
-    return { category, items };
+    return { category };
   },
   head: ({ loaderData, params }) => {
     const name = loaderData?.category.name ?? "التصنيفات";
@@ -97,11 +97,17 @@ interface SavedSearch {
 const SAVED_KEY = "soogo_saved_searches";
 
 function CategoryPage() {
-  const { category, items } = Route.useLoaderData();
+  const { category } = Route.useLoaderData();
   const search = Route.useSearch();
   const navigate = useNavigate();
   const { t, lang } = useLanguage();
+  const { listings } = useListings();
   const [regionQuery, setRegionQuery] = useState("");
+
+  const items = useMemo(
+    () => listings.filter((l) => l.category === category.name),
+    [listings, category.name],
+  );
 
   const update = (patch: Partial<CategorySearch>) => {
     navigate({

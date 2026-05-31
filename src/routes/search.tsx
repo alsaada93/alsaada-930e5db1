@@ -4,7 +4,8 @@ import { ArrowRight, Search as SearchIcon } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ListingCard } from "@/components/ListingCard";
-import { listings, type Listing } from "@/data/marketplace";
+import { type Listing } from "@/data/marketplace";
+import { useListings } from "@/hooks/useListings";
 import { useLanguage } from "@/hooks/useLanguage";
 
 interface SearchParams {
@@ -31,6 +32,7 @@ function SearchPage() {
   const { q } = Route.useSearch();
   const navigate = useNavigate();
   const { lang } = useLanguage();
+  const { listings } = useListings();
   const [query, setQuery] = useState(q ?? "");
 
   const results = useMemo(() => {
@@ -40,7 +42,7 @@ function SearchPage() {
       const haystack = `${l.title} ${l.category} ${l.sub ?? ""} ${l.city}`.toLowerCase();
       return haystack.includes(term);
     });
-  }, [q]);
+  }, [q, listings]);
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();

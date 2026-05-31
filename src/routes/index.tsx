@@ -9,7 +9,7 @@ import { ListingsSection } from "@/components/ListingsSection";
 import { AuctionsSection } from "@/components/AuctionsSection";
 import { BusinessSection } from "@/components/BusinessSection";
 import { Footer } from "@/components/Footer";
-import { listings } from "@/data/marketplace";
+import { useListings } from "@/hooks/useListings";
 import { useLanguage } from "@/hooks/useLanguage";
 
 export const Route = createFileRoute("/")({
@@ -36,6 +36,7 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   const { t } = useLanguage();
+  const { listings } = useListings();
   const featured = listings.filter((l) => l.featured);
   const latest = listings;
 

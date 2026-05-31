@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import { listings } from "@/data/marketplace";
+
 import { useSeller } from "@/hooks/useSellers";
 import { SellerReviews } from "@/components/SellerReviews";
 import { supabase } from "@/integrations/supabase/client";
@@ -20,12 +20,6 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/listing/$id")({
   loader: async ({ params }) => {
-    const seed = listings.find((l) => l.id === params.id);
-    if (seed) {
-      return {
-        item: { ...seed, description: null as string | null, business: null as Record<string, number | boolean | string | null> | null },
-      };
-    }
     const { data } = await supabase.from("listings").select("*").eq("id", params.id).maybeSingle();
     if (!data) throw notFound();
     return {
