@@ -1,21 +1,23 @@
 import { Link } from "@tanstack/react-router";
 import { Search, Heart, Bell, Menu, Plus, User } from "lucide-react";
+import logo from "@/assets/soogo-logo.png";
 
 export function Header() {
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-navy text-navy-foreground">
       <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-3">
         <Link to="/" className="flex shrink-0 items-center gap-2">
-          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-primary text-lg font-black text-primary-foreground shadow-glow">
-            S
+          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/95 p-1">
+            <img src={logo} alt="شعار سوقو SOOGO" width={36} height={36} className="h-full w-full object-contain" />
           </span>
           <span className="flex flex-col leading-none">
             <span className="text-lg font-extrabold tracking-tight">
-              SOOGO <span className="text-primary">| سوقو</span>
+              SOOGO <span className="text-navy-foreground/80">| سوقو</span>
             </span>
             <span className="text-[10px] text-navy-foreground/60">سوق المعدات والأثاث والإلكترونيات</span>
           </span>
         </Link>
+
 
         <div className="hidden flex-1 md:block">
           <div className="relative">
