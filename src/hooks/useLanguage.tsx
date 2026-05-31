@@ -77,7 +77,7 @@ const dict: Dict = {
   "add.newAd": { ar: "أضف إعلان جديد", en: "Add a new listing" },
   "add.newAuction": { ar: "إنشاء مزاد جديد", en: "Create a new auction" },
   "add.newBusiness": { ar: "بيع نشاط تجاري كامل", en: "Sell a full business" },
-  "add.formSub": { ar: "املأ التفاصيل لعرض إعلانك على آلاف المشترين في البحرين والخليج.", en: "Fill in the details to show your ad to thousands of buyers in Bahrain & the Gulf." },
+  "add.formSub": { ar: "املأ التفاصيل لعرض إعلانك على آلاف المشترين في مملكة البحرين.", en: "Fill in the details to show your ad to thousands of buyers in the Kingdom of Bahrain." },
   "add.contactGuest": { ar: "بيانات التواصل (للنشر كزائر)", en: "Contact details (post as guest)" },
   "add.loginShort": { ar: "تسجيل الدخول", en: "Login" },
   "add.name": { ar: "الاسم", en: "Name" },
