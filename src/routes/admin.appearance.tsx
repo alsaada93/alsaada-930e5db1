@@ -317,6 +317,9 @@ function AppearancePage() {
         {/* Site identity */}
         <IdentitySection />
 
+        {/* Home page banners */}
+        <BannersSection />
+
 
         {/* Colors */}
         <div className="rounded-2xl border border-border bg-card p-5 shadow-card">
