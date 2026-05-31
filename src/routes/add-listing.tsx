@@ -16,6 +16,9 @@ import {
   Check,
   Pencil,
   Eye,
+  ChevronLeft,
+  ChevronRight,
+  GripVertical,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Header } from "@/components/Header";
