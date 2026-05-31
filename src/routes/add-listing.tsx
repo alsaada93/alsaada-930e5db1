@@ -216,6 +216,7 @@ function AddListingPage() {
         price: Number(price) || 0,
         condition,
         category_id: categoryId || null,
+        brand: brand || null,
         group_name: groupName || null,
         item_name: itemName || null,
         city: region,
