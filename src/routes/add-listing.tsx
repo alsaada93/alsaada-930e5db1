@@ -456,7 +456,7 @@ function AddListingPage() {
             <input ref={vidInput} type="file" accept="video/*" hidden onChange={(e) => handleVideo(e.target.files)} />
             {video ? (
               <div className="relative overflow-hidden rounded-xl border border-border">
-                <video src={video} controls className="h-56 w-full bg-black object-contain" />
+                <video src={video.url} controls className="h-56 w-full bg-black object-contain" />
                 <button
                   type="button"
                   onClick={() => setVideo(null)}
