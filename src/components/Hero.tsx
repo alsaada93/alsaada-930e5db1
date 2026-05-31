@@ -66,6 +66,11 @@ export function Hero() {
                 بحث
               </button>
             </div>
+            {imageName && (
+              <p className="px-2 pt-1 text-xs text-muted-foreground">
+                البحث بالصورة: {imageName}
+              </p>
+            )}
           </div>
 
           <div className="mt-6 flex flex-wrap gap-6">
