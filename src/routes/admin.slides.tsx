@@ -188,6 +188,15 @@ function AdminSlidesPage() {
           </ul>
         )}
       </div>
+      <ImageEditor
+        open={pendingFile !== null}
+        file={pendingFile}
+        onClose={() => setPendingFile(null)}
+        onApply={(edited) => {
+          setPendingFile(null);
+          uploadImage(edited);
+        }}
+      />
     </div>
   );
 }
