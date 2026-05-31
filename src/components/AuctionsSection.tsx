@@ -3,7 +3,7 @@ import { auctions } from "@/data/marketplace";
 
 export function AuctionsSection() {
   return (
-    <section className="bg-navy py-12 text-navy-foreground">
+    <section id="auctions" className="scroll-mt-20 bg-navy py-12 text-navy-foreground">
       <div className="mx-auto max-w-7xl px-4">
         <div className="mb-6 flex items-center gap-2">
           <Gavel className="h-6 w-6 text-primary" />

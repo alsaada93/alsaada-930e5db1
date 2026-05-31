@@ -34,7 +34,7 @@ export const Route = createFileRoute("/category/$id")({
   },
   head: ({ loaderData, params }) => {
     const name = loaderData?.category.name ?? "التصنيفات";
-    const url = `https://soogo-hub.lovable.app/category/${params.id}`;
+    const url = `https://alsaada-market.lovable.app/category/${params.id}`;
     return {
       meta: [
         { title: `${name} | السعادة ماركت Al Saada Market` },
@@ -94,7 +94,7 @@ interface SavedSearch {
   createdAt: number;
 }
 
-const SAVED_KEY = "soogo_saved_searches";
+const SAVED_KEY = "alsaada_saved_searches";
 
 function CategoryPage() {
   const { category } = Route.useLoaderData();

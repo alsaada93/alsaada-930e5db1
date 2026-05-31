@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://soogo-hub.lovable.app/sitemap.xml
+Sitemap: https://alsaada-market.lovable.app/sitemap.xml

@@ -32,9 +32,9 @@ export const Route = createFileRoute("/add-listing")({
       { name: "description", content: "أضف إعلانك لبيع معدات المطاعم والفنادق والإلكترونيات على السعادة ماركت." },
       { property: "og:title", content: "أضف إعلان | السعادة ماركت Al Saada Market" },
       { property: "og:description", content: "أنشئ إعلانًا جديدًا مع تسعير ذكي بالذكاء الاصطناعي على السعادة ماركت." },
-      { property: "og:url", content: "https://soogo-hub.lovable.app/add-listing" },
+      { property: "og:url", content: "https://alsaada-market.lovable.app/add-listing" },
     ],
-    links: [{ rel: "canonical", href: "https://soogo-hub.lovable.app/add-listing" }],
+    links: [{ rel: "canonical", href: "https://alsaada-market.lovable.app/add-listing" }],
   }),
   component: AddListingPage,
 });

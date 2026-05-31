@@ -14,9 +14,9 @@ export const Route = createFileRoute("/packages")({
       },
       { property: "og:title", content: "الباقات والأسعار | السعادة ماركت Al Saada Market" },
       { property: "og:description", content: "باقات اشتراك مرنة لبيع معدات المطاعم والأثاث والإلكترونيات." },
-      { property: "og:url", content: "https://soogo-hub.lovable.app/packages" },
+      { property: "og:url", content: "https://alsaada-market.lovable.app/packages" },
     ],
-    links: [{ rel: "canonical", href: "https://soogo-hub.lovable.app/packages" }],
+    links: [{ rel: "canonical", href: "https://alsaada-market.lovable.app/packages" }],
   }),
   component: PackagesPage,
 });

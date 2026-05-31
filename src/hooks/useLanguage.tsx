@@ -170,7 +170,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   const [lang, setLangState] = useState<Lang>("ar");
 
   useEffect(() => {
-    const stored = (typeof window !== "undefined" && localStorage.getItem("soogo_lang")) as Lang | null;
+    const stored = (typeof window !== "undefined" && localStorage.getItem("alsaada_lang")) as Lang | null;
     if (stored === "ar" || stored === "en") setLangState(stored);
   }, []);
 
@@ -182,7 +182,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
   const setLang = useCallback((l: Lang) => {
     setLangState(l);
-    if (typeof window !== "undefined") localStorage.setItem("soogo_lang", l);
+    if (typeof window !== "undefined") localStorage.setItem("alsaada_lang", l);
   }, []);
 
   const toggle = useCallback(() => setLang(lang === "ar" ? "en" : "ar"), [lang, setLang]);
