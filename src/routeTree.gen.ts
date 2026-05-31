@@ -15,6 +15,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminListingsRouteImport } from './routes/admin.listings'
 import { Route as AdminCategoriesRouteImport } from './routes/admin.categories'
+import { Route as AdminAuctionsRouteImport } from './routes/admin.auctions'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -46,11 +47,17 @@ const AdminCategoriesRoute = AdminCategoriesRouteImport.update({
   path: '/categories',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminAuctionsRoute = AdminAuctionsRouteImport.update({
+  id: '/auctions',
+  path: '/auctions',
+  getParentRoute: () => AdminRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/admin/auctions': typeof AdminAuctionsRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/listings': typeof AdminListingsRoute
   '/admin/': typeof AdminIndexRoute
@@ -58,6 +65,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/admin/auctions': typeof AdminAuctionsRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/listings': typeof AdminListingsRoute
   '/admin': typeof AdminIndexRoute
@@ -67,6 +75,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/admin/auctions': typeof AdminAuctionsRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/listings': typeof AdminListingsRoute
   '/admin/': typeof AdminIndexRoute
@@ -77,16 +86,24 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/sitemap.xml'
+    | '/admin/auctions'
     | '/admin/categories'
     | '/admin/listings'
     | '/admin/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/sitemap.xml' | '/admin/categories' | '/admin/listings' | '/admin'
+  to:
+    | '/'
+    | '/sitemap.xml'
+    | '/admin/auctions'
+    | '/admin/categories'
+    | '/admin/listings'
+    | '/admin'
   id:
     | '__root__'
     | '/'
     | '/admin'
     | '/sitemap.xml'
+    | '/admin/auctions'
     | '/admin/categories'
     | '/admin/listings'
     | '/admin/'
@@ -142,16 +159,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCategoriesRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/auctions': {
+      id: '/admin/auctions'
+      path: '/auctions'
+      fullPath: '/admin/auctions'
+      preLoaderRoute: typeof AdminAuctionsRouteImport
+      parentRoute: typeof AdminRoute
+    }
   }
 }
 
 interface AdminRouteChildren {
+  AdminAuctionsRoute: typeof AdminAuctionsRoute
   AdminCategoriesRoute: typeof AdminCategoriesRoute
   AdminListingsRoute: typeof AdminListingsRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminAuctionsRoute: AdminAuctionsRoute,
   AdminCategoriesRoute: AdminCategoriesRoute,
   AdminListingsRoute: AdminListingsRoute,
   AdminIndexRoute: AdminIndexRoute,
