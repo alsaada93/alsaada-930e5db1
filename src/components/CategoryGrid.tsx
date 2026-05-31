@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { UtensilsCrossed, Hotel, Smartphone, Sofa, Store, Gavel, type LucideIcon } from "lucide-react";
-import { categories } from "@/data/marketplace";
+import { useCategories } from "@/hooks/useCategories";
 import { useLanguage } from "@/hooks/useLanguage";
 
 const icons: Record<string, LucideIcon> = {
