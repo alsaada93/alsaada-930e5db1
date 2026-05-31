@@ -251,7 +251,12 @@ function ListingPage() {
   const verified = seller?.verified ?? false;
 
   const isOwner = !!user && !!item.userId && user.id === item.userId;
-  const expiresAt = item.createdAt ? new Date(item.createdAt).getTime() + EXPIRY_DAYS * 86400_000 : null;
+  const expiresAt = item.expiresAt
+    ? new Date(item.expiresAt).getTime()
+    : item.createdAt
+      ? new Date(item.createdAt).getTime() + EXPIRY_DAYS * 86400_000
+      : null;
+  const publishedAt = item.publishedAt ?? item.createdAt;
   const expired = expiresAt != null && expiresAt < Date.now();
   const daysLeft = expiresAt != null ? Math.ceil((expiresAt - Date.now()) / 86400_000) : null;
 
