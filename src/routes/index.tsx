@@ -13,18 +13,20 @@ import { useLanguage } from "@/hooks/useLanguage";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "سوقو SOOGO | سوق معدات المطاعم والأثاث والإلكترونيات في البحرين" },
+      { title: "سوقو SOOGO | سوق المعدات والأثاث في البحرين" },
       {
         name: "description",
         content:
           "سوقو منصة بيع وشراء ومزاد معدات المطاعم والأثاث والإلكترونيات في مملكة البحرين مع تسعير ذكي بالذكاء الاصطناعي.",
       },
-      { property: "og:title", content: "سوقو SOOGO | سوق المعدات والأثاث والإلكترونيات" },
+      { property: "og:title", content: "سوقو SOOGO | سوق المعدات والأثاث في البحرين" },
       {
         property: "og:description",
         content: "بيع وشراء ومزاد المعدات بثقة في مملكة البحرين — تسعير ذكي وحماية من الاحتيال.",
       },
+      { property: "og:url", content: "https://soogo-hub.lovable.app/" },
     ],
+    links: [{ rel: "canonical", href: "https://soogo-hub.lovable.app/" }],
   }),
   component: Index,
 });

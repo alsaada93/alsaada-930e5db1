@@ -19,7 +19,7 @@ export function FeatureStrip() {
               <f.icon className="h-5 w-5" />
             </span>
             <div>
-              <h3 className="font-bold">{f.title}</h3>
+              <h2 className="font-bold">{f.title}</h2>
               <p className="text-xs text-muted-foreground">{f.desc}</p>
             </div>
           </div>
