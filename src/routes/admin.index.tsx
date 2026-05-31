@@ -80,6 +80,10 @@ function AdminDashboard() {
           ))}
         </div>
 
+        <DeletionStats />
+
+
+
         <div className="grid gap-6 lg:grid-cols-3">
           <div className="rounded-2xl border border-border bg-card p-5 shadow-card lg:col-span-2">
             <h3 className="mb-4 font-bold text-card-foreground">الزوار والإعلانات (آخر 7 أيام)</h3>
