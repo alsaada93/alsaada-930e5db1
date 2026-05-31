@@ -71,7 +71,7 @@ export function CategoryGrid() {
                         key={g.name}
                         to="/category/$id"
                         params={{ id: c.id }}
-                        search={{ group: g.name }}
+                        search={{ sub: g.name }}
                         className="rounded-full bg-white/20 px-2 py-0.5 text-[11px] font-semibold backdrop-blur-sm transition-colors hover:bg-white/40"
                       >
                         {g.name}
