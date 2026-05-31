@@ -41,6 +41,54 @@ export type Database = {
         }
         Relationships: []
       }
+      equipment_requests: {
+        Row: {
+          budget: number | null
+          category_id: string | null
+          city: string | null
+          contact_name: string | null
+          contact_phone: string | null
+          created_at: string
+          description: string | null
+          id: string
+          images: string[]
+          status: string
+          title: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          budget?: number | null
+          category_id?: string | null
+          city?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          images?: string[]
+          status?: string
+          title: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          budget?: number | null
+          category_id?: string | null
+          city?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          images?: string[]
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       hero_slides: {
         Row: {
           active: boolean
