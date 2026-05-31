@@ -37,8 +37,9 @@ export const Route = createFileRoute("/")({
 function Index() {
   const { t } = useLanguage();
   const { listings } = useListings();
-  const featured = listings.filter((l) => l.featured);
-  const latest = listings;
+  const normal = listings.filter((l) => (l.listingType ?? "normal") === "normal");
+  const featured = normal.filter((l) => l.featured);
+  const latest = normal;
 
   return (
     <div className="min-h-screen bg-background">

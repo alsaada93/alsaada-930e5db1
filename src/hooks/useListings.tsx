@@ -12,10 +12,11 @@ function categoryName(categoryId: string | null): string {
 
 function mapRow(d: Row): Listing {
   const images = (d.images as string[] | null) ?? [];
+  const type = (d.listing_type as Listing["listingType"]) ?? "normal";
   return {
     id: String(d.id),
     title: String(d.title ?? ""),
-    price: Number(d.price ?? 0),
+    price: Number(d.price ?? d.start_price ?? 0),
     negotiable: Boolean(d.negotiable),
     condition: (d.condition as Listing["condition"]) ?? "مستعمل",
     city: (d.city as string | null) ?? "",
@@ -26,10 +27,16 @@ function mapRow(d: Row): Listing {
     views: Number(d.views ?? 0),
     phone: (d.contact_phone as string | null) ?? undefined,
     seller: (d.contact_name as string | null) ?? undefined,
+    listingType: type,
+    startPrice: d.start_price != null ? Number(d.start_price) : undefined,
+    auctionEndsAt: (d.auction_ends_at as string | null) ?? undefined,
+    monthlyRevenue: d.monthly_revenue != null ? Number(d.monthly_revenue) : undefined,
+    area: d.area_sqm != null ? Number(d.area_sqm) : undefined,
+    staff: d.staff_count != null ? Number(d.staff_count) : undefined,
   };
 }
 
-/** يجلب الإعلانات الحقيقية من قاعدة البيانات (بدون الإعلانات التجريبية) */
+/** يجلب الإعلانات الحقيقية المعتمدة من قاعدة البيانات (بدون الإعلانات التجريبية) */
 export function useListings() {
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
@@ -39,7 +46,7 @@ export function useListings() {
     supabase
       .from("listings")
       .select("*")
-      .eq("status", "active")
+      .eq("status", "approved")
       .order("created_at", { ascending: false })
       .then(({ data }) => {
         if (!active) return;
