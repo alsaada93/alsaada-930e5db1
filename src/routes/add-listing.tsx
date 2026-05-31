@@ -65,9 +65,14 @@ function AddListingPage() {
   const { user } = useAuth();
   const { t, lang } = useLanguage();
   const ar = lang === "ar";
+  const { edit: editId } = Route.useSearch();
+  const isEdit = !!editId;
   const [listingType, setListingType] = useState<ListingType | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [step, setStep] = useState(1);
+  const [showPreview, setShowPreview] = useState(false);
+  // Already-uploaded images (edit mode)
+  const [existingImages, setExistingImages] = useState<string[]>([]);
 
   // Guest contact (required if not logged in)
   const [guestName, setGuestName] = useState("");
