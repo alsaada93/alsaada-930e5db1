@@ -158,6 +158,7 @@ export const categories: Category[] = [
         items: ["غسالات صناعية", "مجففات", "معدات تنظيف"],
       },
     ],
+    brands: commonBrands.hotels,
   },
   {
     id: "other",
