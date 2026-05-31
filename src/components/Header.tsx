@@ -12,7 +12,7 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-navy text-navy-foreground">
       <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 py4">
-        <Link to="/" className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+        <Link to="/" className="flex shrink-0 items-center gap-1.5 sm:gap2">
           <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/95 p-1 sm:h-9 sm:w-9">
             <BrandLogo size={20} />
           </span>
