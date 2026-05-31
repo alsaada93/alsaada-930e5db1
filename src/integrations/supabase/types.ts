@@ -14,6 +14,117 @@ export type Database = {
   }
   public: {
     Tables: {
+      listings: {
+        Row: {
+          area_sqm: number | null
+          auction_ends_at: string | null
+          category_id: string | null
+          city: string | null
+          condition: string
+          contact_name: string | null
+          contact_phone: string | null
+          created_at: string
+          description: string | null
+          featured: boolean
+          group_name: string | null
+          has_license: boolean | null
+          id: string
+          images: string[]
+          includes_equipment: boolean | null
+          item_name: string | null
+          lat: number | null
+          listing_type: string
+          lng: number | null
+          monthly_revenue: number | null
+          negotiable: boolean
+          operating_cost: number | null
+          outlets: number | null
+          price: number
+          rent: number | null
+          sale_reason: string | null
+          staff_count: number | null
+          start_price: number | null
+          status: string
+          title: string
+          updated_at: string
+          user_id: string | null
+          video: string | null
+          views: number
+        }
+        Insert: {
+          area_sqm?: number | null
+          auction_ends_at?: string | null
+          category_id?: string | null
+          city?: string | null
+          condition?: string
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          description?: string | null
+          featured?: boolean
+          group_name?: string | null
+          has_license?: boolean | null
+          id?: string
+          images?: string[]
+          includes_equipment?: boolean | null
+          item_name?: string | null
+          lat?: number | null
+          listing_type?: string
+          lng?: number | null
+          monthly_revenue?: number | null
+          negotiable?: boolean
+          operating_cost?: number | null
+          outlets?: number | null
+          price?: number
+          rent?: number | null
+          sale_reason?: string | null
+          staff_count?: number | null
+          start_price?: number | null
+          status?: string
+          title: string
+          updated_at?: string
+          user_id?: string | null
+          video?: string | null
+          views?: number
+        }
+        Update: {
+          area_sqm?: number | null
+          auction_ends_at?: string | null
+          category_id?: string | null
+          city?: string | null
+          condition?: string
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          description?: string | null
+          featured?: boolean
+          group_name?: string | null
+          has_license?: boolean | null
+          id?: string
+          images?: string[]
+          includes_equipment?: boolean | null
+          item_name?: string | null
+          lat?: number | null
+          listing_type?: string
+          lng?: number | null
+          monthly_revenue?: number | null
+          negotiable?: boolean
+          operating_cost?: number | null
+          outlets?: number | null
+          price?: number
+          rent?: number | null
+          sale_reason?: string | null
+          staff_count?: number | null
+          start_price?: number | null
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string | null
+          video?: string | null
+          views?: number
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string

@@ -20,6 +20,7 @@ import { Footer } from "@/components/Footer";
 import { categories, bahrainRegions, listings } from "@/data/marketplace";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/hooks/useLanguage";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/add-listing")({
   head: () => ({
@@ -81,9 +82,9 @@ function AddListingPage() {
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [locating, setLocating] = useState(false);
 
-  // Media
-  const [images, setImages] = useState<string[]>([]);
-  const [video, setVideo] = useState<string | null>(null);
+  // Media (keep File objects so we can upload them to storage)
+  const [images, setImages] = useState<{ url: string; file: File }[]>([]);
+  const [video, setVideo] = useState<{ url: string; file: File } | null>(null);
   const imgInput = useRef<HTMLInputElement>(null);
   const vidInput = useRef<HTMLInputElement>(null);
 
@@ -92,6 +93,7 @@ function AddListingPage() {
   const [condition, setCondition] = useState("مستعمل");
   const [estimate, setEstimate] = useState<AiEstimate | null>(null);
   const [estimating, setEstimating] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   const handleImages = (files: FileList | null) => {
     if (!files) return;
@@ -100,13 +102,15 @@ function AddListingPage() {
       toast.error(t("toast.maxImages"));
       return;
     }
-    const next = Array.from(files).slice(0, remaining).map((f) => URL.createObjectURL(f));
+    const next = Array.from(files)
+      .slice(0, remaining)
+      .map((f) => ({ url: URL.createObjectURL(f), file: f }));
     setImages((p) => [...p, ...next]);
   };
 
   const handleVideo = (files: FileList | null) => {
     if (!files || !files[0]) return;
-    setVideo(URL.createObjectURL(files[0]));
+    setVideo({ url: URL.createObjectURL(files[0]), file: files[0] });
   };
 
   const useMyLocation = () => {
@@ -153,7 +157,23 @@ function AddListingPage() {
     }, 700);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const uploadFile = async (file: File, kind: string) => {
+    const ext = file.name.split(".").pop() || "bin";
+    const path = `${kind}/${crypto.randomUUID()}.${ext}`;
+    const { error } = await supabase.storage.from("listings").upload(path, file, {
+      cacheControl: "3600",
+      upsert: false,
+    });
+    if (error) throw error;
+    return supabase.storage.from("listings").getPublicUrl(path).data.publicUrl;
+  };
+
+  const numOrNull = (v: FormDataEntryValue | null) => {
+    const n = Number(v);
+    return v != null && v !== "" && !Number.isNaN(n) ? n : null;
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!user && (!guestName.trim() || !guestPhone.trim())) {
       toast.error(t("toast.guestNeeded"));
@@ -167,7 +187,60 @@ function AddListingPage() {
       toast.error(t("toast.needImage"));
       return;
     }
-    setSubmitted(true);
+
+    const fd = new FormData(e.currentTarget);
+    setSaving(true);
+    try {
+      // Upload media
+      const imageUrls = await Promise.all(images.map((img) => uploadFile(img.file, "images")));
+      const videoUrl = video ? await uploadFile(video.file, "videos") : null;
+
+      const isBusiness = listingType === "business";
+      const isAuction = listingType === "auction";
+      const auctionHours = numOrNull(fd.get("auctionDuration")) ?? 24;
+
+      const payload = {
+        user_id: user?.id ?? null,
+        listing_type: listingType ?? "normal",
+        title: String(fd.get("title") || "").trim(),
+        description: String(fd.get("description") || "").trim(),
+        price: Number(price) || 0,
+        condition,
+        category_id: categoryId || null,
+        group_name: groupName || null,
+        item_name: itemName || null,
+        city: region,
+        lat: coords?.lat ?? null,
+        lng: coords?.lng ?? null,
+        images: imageUrls,
+        video: videoUrl,
+        contact_name: user ? (user.email ?? null) : guestName.trim(),
+        contact_phone: user ? null : guestPhone.trim(),
+        status: "approved",
+        start_price: isAuction ? Number(price) || 0 : null,
+        auction_ends_at: isAuction
+          ? new Date(Date.now() + auctionHours * 3600_000).toISOString()
+          : null,
+        rent: isBusiness ? numOrNull(fd.get("rent")) : null,
+        area_sqm: isBusiness ? numOrNull(fd.get("area")) : null,
+        outlets: isBusiness ? numOrNull(fd.get("outlets")) : null,
+        staff_count: isBusiness ? numOrNull(fd.get("staff")) : null,
+        monthly_revenue: isBusiness ? numOrNull(fd.get("monthlyRevenue")) : null,
+        operating_cost: isBusiness ? numOrNull(fd.get("opCost")) : null,
+        has_license: isBusiness ? fd.get("license") === "with" : null,
+        includes_equipment: isBusiness ? fd.get("includesEquip") === "on" : null,
+        sale_reason: isBusiness ? String(fd.get("reason") || "").trim() || null : null,
+      };
+
+      const { error } = await supabase.from("listings").insert(payload);
+      if (error) throw error;
+      setSubmitted(true);
+    } catch (err) {
+      console.error(err);
+      toast.error(lang === "ar" ? "تعذّر نشر الإعلان، حاول مرة أخرى" : "Could not publish, try again");
+    } finally {
+      setSaving(false);
+    }
   };
 
   // ---- Success screen ----
@@ -292,6 +365,7 @@ function AddListingPage() {
             <input
               required
               type="text"
+              name="title"
               placeholder={t("add.adTitlePh")}
               className="h-11 w-full rounded-lg border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
             />
@@ -421,9 +495,9 @@ function AddListingPage() {
             </label>
             <input ref={imgInput} type="file" accept="image/*" multiple hidden onChange={(e) => handleImages(e.target.files)} />
             <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
-              {images.map((src, i) => (
-                <div key={src} className="group relative aspect-square overflow-hidden rounded-lg border border-border">
-                  <img src={src} alt={`${i + 1}`} className="h-full w-full object-cover" />
+              {images.map((img, i) => (
+                <div key={img.url} className="group relative aspect-square overflow-hidden rounded-lg border border-border">
+                  <img src={img.url} alt={`${i + 1}`} className="h-full w-full object-cover" />
                   <button
                     type="button"
                     onClick={() => setImages((p) => p.filter((_, idx) => idx !== i))}
@@ -452,7 +526,7 @@ function AddListingPage() {
             <input ref={vidInput} type="file" accept="video/*" hidden onChange={(e) => handleVideo(e.target.files)} />
             {video ? (
               <div className="relative overflow-hidden rounded-xl border border-border">
-                <video src={video} controls className="h-56 w-full bg-black object-contain" />
+                <video src={video.url} controls className="h-56 w-full bg-black object-contain" />
                 <button
                   type="button"
                   onClick={() => setVideo(null)}
@@ -493,6 +567,7 @@ function AddListingPage() {
                 <label className="mb-1 block text-sm font-semibold">{t("add.auctionDuration")}</label>
                 <input
                   type="number"
+                  name="auctionDuration"
                   min={1}
                   defaultValue={24}
                   className="h-11 w-full rounded-lg border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
@@ -537,6 +612,7 @@ function AddListingPage() {
             <textarea
               required
               rows={5}
+              name="description"
               placeholder={t("add.descPh")}
               className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
             />
@@ -544,9 +620,10 @@ function AddListingPage() {
 
           <button
             type="submit"
-            className="w-full rounded-full bg-gradient-primary px-6 py-3 font-bold text-primary-foreground shadow-glow transition-transform hover:scale-[1.01]"
+            disabled={saving}
+            className="w-full rounded-full bg-gradient-primary px-6 py-3 font-bold text-primary-foreground shadow-glow transition-transform hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {submitLabel}
+            {saving ? (lang === "ar" ? "جارٍ النشر..." : "Publishing...") : submitLabel}
           </button>
         </form>
       </main>
@@ -567,42 +644,42 @@ function BusinessFields({ t }: { t: (k: string) => string }) {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
           <label className="mb-1 block text-sm font-semibold">{t("biz.rent")}</label>
-          <input type="number" min={0} placeholder="0" className={input} />
+          <input type="number" name="rent" min={0} placeholder="0" className={input} />
         </div>
         <div>
           <label className="mb-1 block text-sm font-semibold">{t("biz.area")}</label>
-          <input type="number" min={0} placeholder="0" className={input} />
+          <input type="number" name="area" min={0} placeholder="0" className={input} />
         </div>
         <div>
           <label className="mb-1 block text-sm font-semibold">{t("biz.outlets")}</label>
-          <input type="number" min={0} placeholder="0" className={input} />
+          <input type="number" name="outlets" min={0} placeholder="0" className={input} />
         </div>
         <div>
           <label className="mb-1 block text-sm font-semibold">{t("biz.staff")}</label>
-          <input type="number" min={0} placeholder="0" className={input} />
+          <input type="number" name="staff" min={0} placeholder="0" className={input} />
         </div>
         <div>
           <label className="mb-1 block text-sm font-semibold">{t("biz.monthlyRevenue")}</label>
-          <input type="number" min={0} placeholder="0" className={input} />
+          <input type="number" name="monthlyRevenue" min={0} placeholder="0" className={input} />
         </div>
         <div>
           <label className="mb-1 block text-sm font-semibold">{t("biz.opCost")}</label>
-          <input type="number" min={0} placeholder="0" className={input} />
+          <input type="number" name="opCost" min={0} placeholder="0" className={input} />
         </div>
         <div>
           <label className="mb-1 block text-sm font-semibold">{t("biz.license")}</label>
-          <select value={license} onChange={(e) => setLicense(e.target.value)} className={input}>
+          <select name="license" value={license} onChange={(e) => setLicense(e.target.value)} className={input}>
             <option value="with">{t("biz.withLicense")}</option>
             <option value="without">{t("biz.withoutLicense")}</option>
           </select>
         </div>
         <div>
           <label className="mb-1 block text-sm font-semibold">{t("biz.reason")}</label>
-          <input type="text" placeholder={t("biz.reasonPh")} className={input} />
+          <input type="text" name="reason" placeholder={t("biz.reasonPh")} className={input} />
         </div>
       </div>
       <label className="mt-3 flex items-center gap-2 text-sm font-semibold">
-        <input type="checkbox" defaultChecked className="h-4 w-4 rounded border-border accent-primary" />
+        <input type="checkbox" name="includesEquip" defaultChecked className="h-4 w-4 rounded border-border accent-primary" />
         {t("biz.includesEquip")}
       </label>
     </div>

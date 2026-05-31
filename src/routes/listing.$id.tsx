@@ -15,13 +15,49 @@ import { Footer } from "@/components/Footer";
 import { listings } from "@/data/marketplace";
 import { useSeller } from "@/hooks/useSellers";
 import { SellerReviews } from "@/components/SellerReviews";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/listing/$id")({
-  loader: ({ params }) => {
-    const item = listings.find((l) => l.id === params.id);
-    if (!item) throw notFound();
-    return { item };
+  loader: async ({ params }) => {
+    const seed = listings.find((l) => l.id === params.id);
+    if (seed) {
+      return {
+        item: { ...seed, description: null as string | null, business: null as Record<string, number | boolean | string | null> | null },
+      };
+    }
+    const { data } = await supabase.from("listings").select("*").eq("id", params.id).maybeSingle();
+    if (!data) throw notFound();
+    return {
+      item: {
+        id: data.id,
+        title: data.title,
+        price: Number(data.price),
+        negotiable: data.negotiable,
+        condition: data.condition,
+        city: data.city ?? "",
+        category: data.item_name ?? data.category_id ?? "",
+        image: data.images?.[0] ?? "/placeholder.svg",
+        featured: data.featured,
+        views: data.views,
+        sellerId: undefined as string | undefined,
+        phone: data.contact_phone ?? undefined,
+        description: data.description as string | null,
+        business:
+          data.listing_type === "business"
+            ? {
+                rent: data.rent,
+                area_sqm: data.area_sqm,
+                outlets: data.outlets,
+                staff_count: data.staff_count,
+                monthly_revenue: data.monthly_revenue,
+                operating_cost: data.operating_cost,
+                has_license: data.has_license,
+                sale_reason: data.sale_reason,
+              }
+            : null,
+      },
+    };
   },
   head: ({ loaderData }) => {
     const t = loaderData?.item.title ?? "إعلان";
@@ -172,6 +208,30 @@ function ListingPage() {
           </div>
         </div>
 
+        {item.description && (
+          <div className="mt-8 rounded-2xl border border-border bg-card p-5">
+            <h2 className="mb-2 text-lg font-extrabold">الوصف</h2>
+            <p className="whitespace-pre-line text-sm leading-relaxed text-muted-foreground">{item.description}</p>
+          </div>
+        )}
+
+        {item.business && (
+          <div className="mt-6 rounded-2xl border border-primary/30 bg-accent/30 p-5">
+            <h2 className="mb-3 text-lg font-extrabold text-primary">تفاصيل النشاط التجاري</h2>
+            <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm sm:grid-cols-3">
+              {item.business.rent != null && <Detail label="الإيجار الشهري" value={`${item.business.rent} د.ب`} />}
+              {item.business.area_sqm != null && <Detail label="المساحة" value={`${item.business.area_sqm} م²`} />}
+              {item.business.outlets != null && <Detail label="عدد الفتحات" value={String(item.business.outlets)} />}
+              {item.business.staff_count != null && <Detail label="عدد الموظفين" value={String(item.business.staff_count)} />}
+              {item.business.monthly_revenue != null && <Detail label="المدخول الشهري" value={`${item.business.monthly_revenue} د.ب`} />}
+              {item.business.operating_cost != null && <Detail label="مصاريف التشغيل" value={`${item.business.operating_cost} د.ب`} />}
+              {item.business.has_license != null && <Detail label="السجل التجاري" value={item.business.has_license ? "مع سجل" : "بدون سجل"} />}
+              {item.business.sale_reason && <Detail label="سبب البيع" value={String(item.business.sale_reason)} />}
+            </div>
+          </div>
+        )}
+
+
         {/* تقييمات البائع */}
         {item.sellerId && (
           <div className="mt-10">
@@ -180,6 +240,15 @@ function ListingPage() {
         )}
       </main>
       <Footer />
+    </div>
+  );
+}
+
+function Detail({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <p className="text-xs text-muted-foreground">{label}</p>
+      <p className="font-bold text-card-foreground">{value}</p>
     </div>
   );
 }
