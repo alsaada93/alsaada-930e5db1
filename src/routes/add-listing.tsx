@@ -236,6 +236,23 @@ function AddListingPage() {
   const [estimating, setEstimating] = useState(false);
   const [saving, setSaving] = useState(false);
 
+  // Auto-suggested titles based on the chosen category/kind/brand to speed up posting.
+  const titleSuggestions = useMemo(() => {
+    if (!activeCategory) return [];
+    const condWord = condition === "جديد" ? "جديد" : "مستعمل";
+    const base = activeGroup?.name || activeCategory.name;
+    const set = new Set<string>();
+    if (brand) set.add(`${base} ${brand} ${condWord}`);
+    set.add(`${base} ${condWord} للبيع`);
+    set.add(`${base} بحالة ممتازة`);
+    if (activeGroup) set.add(`${activeGroup.name} ${activeCategory.name}`);
+    return Array.from(set)
+      .map((s) => s.replace(/\s+/g, " ").trim())
+      .slice(0, 4);
+  }, [activeCategory, activeGroup, brand, condition]);
+
+
+
   const handleImages = (files: FileList | null) => {
     if (!files) return;
     const remaining = MAX_IMAGES - media.length;
@@ -620,6 +637,23 @@ function AddListingPage() {
                 placeholder={t("add.adTitlePh")}
                 className={fieldCls}
               />
+              {titleSuggestions.length > 0 && (
+                <div className="mt-2">
+                  <span className="text-xs font-semibold text-muted-foreground">{t("add.suggestTitle")}</span>
+                  <div className="mt-1.5 flex flex-wrap gap-2">
+                    {titleSuggestions.map((s) => (
+                      <button
+                        key={s}
+                        type="button"
+                        onClick={() => setTitleText(s)}
+                        className="rounded-full border border-border bg-background px-3 py-1 text-xs font-semibold text-foreground transition-colors hover:border-primary hover:text-primary"
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             <div>

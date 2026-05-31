@@ -33,9 +33,13 @@ const dict: Dict = {
   "hero.uploaded": { ar: "تم رفع الصورة", en: "Image uploaded" },
   "hero.searching": { ar: "جارٍ البحث عن منتجات مشابهة", en: "Searching for similar products" },
   "hero.imageSearchLabel": { ar: "البحث بالصورة:", en: "Image search:" },
+  "hero.imageTooBig": { ar: "حجم الصورة كبير جداً (الحد 6 ميجابايت)", en: "Image too large (6MB max)" },
+  "hero.imageFailed": { ar: "تعذّر التعرف على الصورة، حاول بصورة أوضح", en: "Couldn't recognize the image, try a clearer photo" },
   "buy.title": { ar: "نشتري مباشرة", en: "We Buy Directly" },
   "buy.desc": { ar: "نشتري معدات المطاعم والأثاث والإلكترونيات المستعملة — تثمين مجاني وسعر مناسب.", en: "We buy used restaurant equipment, furniture and electronics — free valuation and a fair price." },
-  "buy.cta": { ar: "تواصل الآن: 36818153", en: "Contact now: 36818153" },
+  "buy.cta": { ar: "اتصل: 36818153", en: "Call: 36818153" },
+  "buy.ctaPhotos": { ar: "أرسل صور معداتك الآن للتثمين", en: "Send your equipment photos now for valuation" },
+  "buy.waMsg": { ar: "مرحباً، أريد تثمين معداتي. إليكم الصور:", en: "Hello, I'd like a valuation for my equipment. Here are the photos:" },
   "header.tagline2": { ar: "شراء وبيع معدات المطاعم والأثاث والإلكترونيات في البحرين", en: "Buy & sell restaurant equipment, furniture & electronics in Bahrain" },
 
 
@@ -90,6 +94,7 @@ const dict: Dict = {
   "add.postingAs": { ar: "تنشر باسم حسابك:", en: "Posting as:" },
   "add.adTitle": { ar: "عنوان الإعلان", en: "Listing title" },
   "add.adTitlePh": { ar: "مثال: فرن بيتزا احترافي ستانلس ستيل", en: "e.g. Professional stainless steel pizza oven" },
+  "add.suggestTitle": { ar: "عناوين مقترحة (انقر للاستخدام):", en: "Suggested titles (tap to use):" },
   "add.mainCat": { ar: "التصنيف الرئيسي", en: "Main category" },
   "add.chooseCat": { ar: "اختر التصنيف", en: "Choose category" },
   "add.subCat": { ar: "نوع الصنف", en: "Item kind" },

@@ -9,6 +9,7 @@ import { PromoCarousel } from "@/components/PromoCarousel";
 import { ListingsSection } from "@/components/ListingsSection";
 import { AuctionsSection } from "@/components/AuctionsSection";
 import { BusinessSection } from "@/components/BusinessSection";
+import { Testimonials } from "@/components/Testimonials";
 import { Footer } from "@/components/Footer";
 import { useListings } from "@/hooks/useListings";
 import { useLanguage } from "@/hooks/useLanguage";
@@ -54,6 +55,7 @@ function Index() {
         <ListingsSection title={t("sec.featured")} subtitle={t("sec.featuredSub")} items={featured} />
         <AuctionsSection />
         <ListingsSection title={t("sec.latest")} subtitle={t("sec.latestSub")} items={latest} />
+        <Testimonials />
         <BusinessSection />
       </main>
       <Footer />

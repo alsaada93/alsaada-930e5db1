@@ -1,16 +1,18 @@
-import { Search, Camera, Sparkles } from "lucide-react";
+import { Search, Camera, Sparkles, Loader2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import heroImg from "@/assets/hero.jpg";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useHeroSlides } from "@/hooks/useHeroSlides";
+import { searchByImage } from "@/lib/image-search.functions";
 
 export function Hero() {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [imageName, setImageName] = useState<string | null>(null);
+  const [imageSearching, setImageSearching] = useState(false);
   const [query, setQuery] = useState("");
 
   const goSearch = () => navigate({ to: "/search", search: { q: query.trim() || undefined } });
@@ -29,13 +31,36 @@ export function Hero() {
     return () => clearInterval(id);
   }, [images.length, intervalMs]);
 
-  const handleImageSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    e.target.value = "";
     if (!file) return;
+    if (file.size > 6_000_000) {
+      toast.error(t("hero.imageTooBig"));
+      return;
+    }
     setImageName(file.name);
-    toast.success(t("hero.uploaded"), {
-      description: `${t("hero.searching")} "${file.name}"...`,
-    });
+    setImageSearching(true);
+    toast.info(t("hero.uploaded"), { description: t("hero.searching") });
+    try {
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+      const { query: found } = await searchByImage({ data: { imageDataUrl: dataUrl } });
+      if (found) {
+        setQuery(found);
+        navigate({ to: "/search", search: { q: found } });
+      } else {
+        toast.error(t("hero.imageFailed"));
+      }
+    } catch {
+      toast.error(t("hero.imageFailed"));
+    } finally {
+      setImageSearching(false);
+    }
   };
 
   const activeSlide = slides[current];
@@ -90,10 +115,11 @@ export function Hero() {
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-primary"
+                disabled={imageSearching}
+                className="rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-primary disabled:opacity-60"
                 aria-label={t("hero.imageSearch")}
               >
-                <Camera className="h-5 w-5" />
+                {imageSearching ? <Loader2 className="h-5 w-5 animate-spin" /> : <Camera className="h-5 w-5" />}
               </button>
               <button
                 type="button"
