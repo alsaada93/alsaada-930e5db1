@@ -36,6 +36,10 @@ function AdminSlidesPage() {
 
   const uploadImage = async (file: File) => {
     if (!file) return;
+    if (slides.length >= 10) {
+      toast.error("الحد الأقصى 10 صور في السلايدر");
+      return;
+    }
     setUploading(true);
     try {
       const ext = file.name.split(".").pop() || "jpg";
@@ -130,10 +134,10 @@ function AdminSlidesPage() {
           />
           <button
             onClick={() => fileInput.current?.click()}
-            disabled={uploading}
+            disabled={uploading || slides.length >= 10}
             className="flex items-center gap-1.5 rounded-lg bg-gradient-primary px-4 py-2 text-sm font-bold text-primary-foreground shadow-glow disabled:opacity-60"
           >
-            {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />} إضافة صورة
+            {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />} إضافة صورة ({slides.length}/10)
           </button>
         </div>
 

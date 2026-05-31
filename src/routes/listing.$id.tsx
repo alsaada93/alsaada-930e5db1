@@ -22,6 +22,7 @@ import { Footer } from "@/components/Footer";
 
 import { useSeller } from "@/hooks/useSellers";
 import { useAuth } from "@/hooks/useAuth";
+import { AuctionBidBox } from "@/components/AuctionBidBox";
 import { SellerReviews } from "@/components/SellerReviews";
 import { categories } from "@/data/marketplace";
 import { supabase } from "@/integrations/supabase/client";
@@ -50,6 +51,9 @@ export const Route = createFileRoute("/listing/$id")({
         lng: data.lng != null ? Number(data.lng) : null,
         featured: data.featured,
         views: data.views,
+        listingType: (data.listing_type as string | null) ?? "normal",
+        startPrice: data.start_price != null ? Number(data.start_price) : null,
+        auctionEndsAt: (data.auction_ends_at as string | null) ?? null,
         userId: (data.user_id as string | null) ?? null,
         createdAt: (data.created_at as string | null) ?? null,
         publishedAt: (data.published_at as string | null) ?? null,
@@ -414,8 +418,16 @@ function ListingPage() {
               </div>
             )}
 
+            {/* مزاد مباشر */}
+            {item.listingType === "auction" && (
+              <AuctionBidBox
+                listingId={item.id}
+                startPrice={item.startPrice ?? item.price}
+                auctionEndsAt={item.auctionEndsAt}
+              />
+            )}
 
-            {/* بطاقة البائع */}
+
             <div className="mt-5 rounded-2xl border border-border bg-card p-4">
               <div className="flex items-center justify-between">
                 <h2 className="font-bold">{sellerName}</h2>

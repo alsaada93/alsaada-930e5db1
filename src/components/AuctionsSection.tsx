@@ -1,7 +1,9 @@
+import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Gavel, Clock, MapPin } from "lucide-react";
+import { Gavel, Clock, MapPin, Users } from "lucide-react";
 import { useListings } from "@/hooks/useListings";
 import { useLanguage } from "@/hooks/useLanguage";
+import { supabase } from "@/integrations/supabase/client";
 
 function hoursLeft(endsAt?: string): number | null {
   if (!endsAt) return null;
@@ -10,10 +12,48 @@ function hoursLeft(endsAt?: string): number | null {
   return Math.ceil(diff / 3_600_000);
 }
 
+interface BidAgg {
+  highest: number;
+  bids: number;
+  bidders: number;
+}
+
 export function AuctionsSection() {
   const { lang } = useLanguage();
   const { listings } = useListings();
   const auctions = listings.filter((l) => l.listingType === "auction");
+  const [agg, setAgg] = useState<Record<string, BidAgg>>({});
+
+  const ids = auctions.map((a) => a.id).join(",");
+
+  useEffect(() => {
+    if (!ids) return;
+    let active = true;
+    (async () => {
+      const { data } = await supabase
+        .from("auction_bids")
+        .select("listing_id,user_id,amount")
+        .in("listing_id", ids.split(","));
+      if (!active || !data) return;
+      const map: Record<string, BidAgg> = {};
+      for (const b of data as { listing_id: string; user_id: string; amount: number }[]) {
+        const cur = map[b.listing_id] ?? { highest: 0, bids: 0, bidders: 0 };
+        cur.highest = Math.max(cur.highest, Number(b.amount));
+        cur.bids += 1;
+        map[b.listing_id] = cur;
+      }
+      // distinct bidders
+      const byListing: Record<string, Set<string>> = {};
+      for (const b of data as { listing_id: string; user_id: string }[]) {
+        (byListing[b.listing_id] ??= new Set()).add(b.user_id);
+      }
+      for (const k of Object.keys(map)) map[k].bidders = byListing[k]?.size ?? 0;
+      setAgg(map);
+    })();
+    return () => {
+      active = false;
+    };
+  }, [ids]);
 
   return (
     <section id="auctions" className="scroll-mt-20 bg-navy py-12 text-navy-foreground">
@@ -36,6 +76,8 @@ export function AuctionsSection() {
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {auctions.map((a) => {
               const hrs = hoursLeft(a.auctionEndsAt);
+              const info = agg[a.id];
+              const currentPrice = Math.max(info?.highest ?? 0, a.startPrice ?? a.price);
               return (
                 <Link
                   key={a.id}
@@ -54,8 +96,14 @@ export function AuctionsSection() {
                   </div>
                   <div className="p-4">
                     <h3 className="line-clamp-1 font-bold">{a.title}</h3>
-                    <div className="mt-1 flex items-center gap-1 text-xs text-navy-foreground/60">
-                      <MapPin className="h-3.5 w-3.5" /> {a.city}
+                    <div className="mt-1 flex items-center justify-between text-xs text-navy-foreground/60">
+                      <span className="flex items-center gap-1">
+                        <MapPin className="h-3.5 w-3.5" /> {a.city}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Users className="h-3.5 w-3.5" />
+                        {(info?.bidders ?? 0).toLocaleString(lang)} {lang === "ar" ? "مزايد" : "bidders"}
+                      </span>
                     </div>
                     <div className="mt-3 flex items-center justify-between">
                       <div>
@@ -63,7 +111,10 @@ export function AuctionsSection() {
                           {lang === "ar" ? "السعر الحالي" : "Current bid"}
                         </div>
                         <div className="text-lg font-extrabold text-primary">
-                          {(a.startPrice ?? a.price).toLocaleString(lang)} {lang === "ar" ? "د.ب" : "BHD"}
+                          {currentPrice.toLocaleString(lang)} {lang === "ar" ? "د.ب" : "BHD"}
+                        </div>
+                        <div className="text-[11px] text-navy-foreground/50">
+                          {(info?.bids ?? 0).toLocaleString(lang)} {lang === "ar" ? "مزايدة" : "bids"}
                         </div>
                       </div>
                       <span className="rounded-xl bg-gradient-primary px-4 py-2 text-sm font-bold text-primary-foreground">
