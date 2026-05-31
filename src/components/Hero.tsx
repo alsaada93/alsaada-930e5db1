@@ -73,18 +73,6 @@ export function Hero() {
             )}
           </div>
 
-          <div className="mt-6 flex flex-wrap gap-6">
-            {[
-              ["+15K", "إعلان نشط"],
-              ["+4K", "تاجر موثوق"],
-              ["+200", "مزاد أسبوعي"],
-            ].map(([n, l]) => (
-              <div key={l}>
-                <div className="text-2xl font-extrabold text-primary">{n}</div>
-                <div className="text-xs text-navy-foreground/70">{l}</div>
-              </div>
-            ))}
-          </div>
         </div>
       </div>
     </section>
