@@ -9,7 +9,7 @@ import {
   BadgeCheck,
   MessageCircle,
   Phone,
-  MessageSquare,
+  
   CalendarDays,
   Clock,
   Play,
