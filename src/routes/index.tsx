@@ -39,7 +39,6 @@ function Index() {
       <Header />
       <main>
         <Hero />
-        <FeatureStrip />
         <CategoryGrid />
         <ListingsSection title={t("sec.featured")} subtitle={t("sec.featuredSub")} items={featured} />
         <AuctionsSection />
