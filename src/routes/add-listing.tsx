@@ -156,6 +156,47 @@ function AddListingPage() {
       .then(({ data }) => setDbBrands(data ?? []));
   }, []);
 
+  // Load existing listing when editing
+  useEffect(() => {
+    if (!editId) return;
+    supabase
+      .from("listings")
+      .select("*")
+      .eq("id", editId)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (!data) return;
+        setListingType((data.listing_type as ListingType) ?? "normal");
+        setTitleText(data.title ?? "");
+        setDescText(data.description ?? "");
+        setCategoryId(data.category_id ?? "");
+        setGroupName(data.group_name ?? "");
+        setItemName(data.item_name ?? "");
+        setBrand(data.brand ?? "");
+        setRegion(data.city ?? "");
+        setPrice(String(data.price ?? ""));
+        setCondition(data.condition ?? "مستعمل");
+        setNegotiable(Boolean(data.negotiable_flag ?? data.negotiable));
+        setDelivery(Boolean(data.delivery_available));
+        setExistingImages((data.images as string[] | null) ?? []);
+        if (data.lat != null && data.lng != null) {
+          setCoords({ lat: Number(data.lat), lng: Number(data.lng) });
+        }
+        setBiz((p) => ({
+          ...p,
+          rent: data.rent != null ? String(data.rent) : "",
+          area: data.area_sqm != null ? String(data.area_sqm) : "",
+          outlets: data.outlets != null ? String(data.outlets) : "",
+          staff: data.staff_count != null ? String(data.staff_count) : "",
+          monthlyRevenue: data.monthly_revenue != null ? String(data.monthly_revenue) : "",
+          opCost: data.operating_cost != null ? String(data.operating_cost) : "",
+          license: data.has_license ? "with" : "without",
+          reason: data.sale_reason ?? "",
+        }));
+        setStep(1);
+      });
+  }, [editId]);
+
   const brandOptions = useMemo(() => {
     if (!categoryId) return [];
     const base = brandsFor(categoryId, itemName || undefined);
