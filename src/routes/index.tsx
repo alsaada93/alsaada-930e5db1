@@ -55,6 +55,7 @@ function Index() {
         <ListingsSection title={t("sec.featured")} subtitle={t("sec.featuredSub")} items={featured} />
         <AuctionsSection />
         <ListingsSection title={t("sec.latest")} subtitle={t("sec.latestSub")} items={latest} />
+        <Testimonials />
         <BusinessSection />
       </main>
       <Footer />
