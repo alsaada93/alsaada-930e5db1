@@ -34,6 +34,7 @@ export interface Listing {
   condition: "جديد" | "مستعمل";
   city: string;
   category: string;
+  sub?: string;
   image: string;
   featured?: boolean;
   views: number;
