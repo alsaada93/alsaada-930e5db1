@@ -154,6 +154,9 @@
   .bg-gradient-primary {
     background-image: var(--gradient-primary);
   }
+  .bg-gradient-teal {
+    background-image: var(--gradient-teal);
+  }
   .shadow-card {
     box-shadow: var(--shadow-card);
   }
