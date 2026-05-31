@@ -350,14 +350,18 @@ function AccountPage() {
         <div className="mt-4 overflow-hidden rounded-2xl border border-border bg-card shadow-card">
           {menuItems.map((m, i) => (
             <button
-              key={m.label}
-              onClick={() => toast.info("هذه الميزة ستتوفر قريباً")}
+              key={m.key}
+              onClick={() => setActivePanel((p) => (p === m.key ? null : m.key))}
               className={`flex w-full items-center justify-between px-4 py-3.5 text-sm hover:bg-muted ${
                 i > 0 ? "border-t border-border" : ""
-              }`}
+              } ${activePanel === m.key ? "bg-muted" : ""}`}
             >
               <span className="flex items-center gap-2 font-semibold">
-                <ChevronLeft className="h-4 w-4 text-muted-foreground" />
+                <ChevronLeft
+                  className={`h-4 w-4 text-muted-foreground transition-transform ${
+                    activePanel === m.key ? "-rotate-90" : ""
+                  }`}
+                />
                 {typeof m.count === "number" && <span className="font-bold text-primary">{m.count}</span>}
               </span>
               <span className="flex items-center gap-2 font-semibold">
@@ -367,6 +371,131 @@ function AccountPage() {
             </button>
           ))}
         </div>
+
+        {/* اللوحة النشطة */}
+        {activePanel && (
+          <div className="mt-4 rounded-2xl border border-border bg-card p-4 shadow-card">
+            {activePanel === "drafts" &&
+              (drafts.length ? (
+                <MiniList items={drafts} />
+              ) : (
+                <EmptyPanel text="لا توجد مسودات. الإعلانات غير المكتملة تظهر هنا." />
+              ))}
+
+            {activePanel === "favorites" &&
+              (favorites.length ? (
+                <MiniList items={favorites} onRemove={removeFavorite} removeLabel="إزالة" />
+              ) : (
+                <EmptyPanel text="لا توجد إعلانات مفضلة. اضغط القلب في أي إعلان لإضافته هنا." />
+              ))}
+
+            {activePanel === "searches" &&
+              (savedSearches.length ? (
+                <ul className="space-y-2">
+                  {savedSearches.map((s) => (
+                    <li
+                      key={s.id}
+                      className="flex items-center justify-between rounded-lg border border-border px-3 py-2"
+                    >
+                      <button
+                        onClick={() => deleteSearch(s.id)}
+                        className="rounded-lg border border-destructive/40 px-2 py-1 text-xs font-bold text-destructive hover:bg-destructive/10"
+                      >
+                        حذف
+                      </button>
+                      <button
+                        onClick={() => runSearch(s.query)}
+                        className="flex items-center gap-2 font-semibold hover:text-primary"
+                      >
+                        {s.label || s.query}
+                        <Search className="h-4 w-4 text-muted-foreground" />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <EmptyPanel text="لا توجد بحوث محفوظة بعد." />
+              ))}
+
+            {activePanel === "views" &&
+              (recentViews.length ? (
+                <>
+                  <div className="mb-3 text-left">
+                    <button onClick={clearRecentViews} className="text-xs font-bold text-destructive hover:underline">
+                      مسح السجل
+                    </button>
+                  </div>
+                  <MiniList items={recentViews} />
+                </>
+              ) : (
+                <EmptyPanel text="لا توجد إعلانات مشاهدة مؤخراً." />
+              ))}
+
+            {activePanel === "recentSearches" &&
+              (recentSearches.length ? (
+                <>
+                  <div className="mb-3 text-left">
+                    <button
+                      onClick={clearRecentSearches}
+                      className="text-xs font-bold text-destructive hover:underline"
+                    >
+                      مسح السجل
+                    </button>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {recentSearches.map((q, idx) => (
+                      <button
+                        key={`${q}-${idx}`}
+                        onClick={() => runSearch(q)}
+                        className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-sm font-semibold hover:bg-muted"
+                      >
+                        <Search className="h-3.5 w-3.5 text-muted-foreground" />
+                        {q}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <EmptyPanel text="لا توجد عمليات بحث سابقة." />
+              ))}
+
+            {activePanel === "follows" &&
+              (followedListings.length ? (
+                <MiniList items={followedListings} />
+              ) : (
+                <EmptyPanel text="لا توجد إعلانات من حسابات تتابعها." />
+              ))}
+
+            {activePanel === "verify" && (
+              <div className="space-y-3 text-sm">
+                <div className="flex items-center justify-between rounded-lg border border-border px-3 py-3">
+                  <span
+                    className={`rounded-full px-3 py-1 text-xs font-bold ${
+                      profile.verified
+                        ? "bg-primary/15 text-primary"
+                        : profile.verification_status === "requested"
+                          ? "bg-amber-500/15 text-amber-600"
+                          : "bg-muted text-muted-foreground"
+                    }`}
+                  >
+                    {verifyLabel}
+                  </span>
+                  <span className="font-semibold">حالة التوثيق</span>
+                </div>
+                {!profile.verified && (
+                  <button
+                    onClick={requestVerify}
+                    className="inline-flex items-center gap-1.5 rounded-full bg-gradient-primary px-5 py-2 font-bold text-primary-foreground shadow-glow"
+                  >
+                    <ShieldCheck className="h-4 w-4" />
+                    {profile.verification_status === "requested" ? "إعادة إرسال الطلب" : "تقديم طلب توثيق"}
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
 
         {/* بيانات الحساب */}
         <div className="mt-6 rounded-2xl border border-border bg-card p-5 shadow-card">
