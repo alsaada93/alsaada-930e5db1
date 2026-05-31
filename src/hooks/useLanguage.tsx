@@ -56,7 +56,7 @@ const dict: Dict = {
   "sec.latestSub": { ar: "آخر ما تم إضافته على سوقو", en: "Newest additions on SOOGO" },
 
   // Footer
-  "footer.tagline": { ar: "سوق معدات المطاعم والأثاث والإلكترونيات في البحرين والخليج.", en: "Restaurant equipment, furniture and electronics market in Bahrain & the Gulf." },
+  "footer.tagline": { ar: "سوقو — منصة بيع وشراء ومزاد معدات المطاعم والأثاث والإلكترونيات في مملكة البحرين.", en: "SOOGO — buy, sell and bid on restaurant equipment, furniture and electronics in the Kingdom of Bahrain." },
   "footer.rights": { ar: "جميع الحقوق محفوظة", en: "All rights reserved" },
   "footer.admin": { ar: "لوحة الإدارة", en: "Admin panel" },
 
