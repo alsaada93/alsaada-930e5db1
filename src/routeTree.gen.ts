@@ -18,6 +18,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as ListingIdRouteImport } from './routes/listing.$id'
 import { Route as CategoryIdRouteImport } from './routes/category.$id'
+import { Route as AdminSlidesRouteImport } from './routes/admin.slides'
 import { Route as AdminListingsRouteImport } from './routes/admin.listings'
 import { Route as AdminCategoriesRouteImport } from './routes/admin.categories'
 import { Route as AdminAuctionsRouteImport } from './routes/admin.auctions'
@@ -67,6 +68,11 @@ const CategoryIdRoute = CategoryIdRouteImport.update({
   path: '/category/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminSlidesRoute = AdminSlidesRouteImport.update({
+  id: '/slides',
+  path: '/slides',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminListingsRoute = AdminListingsRouteImport.update({
   id: '/listings',
   path: '/listings',
@@ -93,6 +99,7 @@ export interface FileRoutesByFullPath {
   '/admin/auctions': typeof AdminAuctionsRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/listings': typeof AdminListingsRoute
+  '/admin/slides': typeof AdminSlidesRoute
   '/category/$id': typeof CategoryIdRoute
   '/listing/$id': typeof ListingIdRoute
   '/admin/': typeof AdminIndexRoute
@@ -106,6 +113,7 @@ export interface FileRoutesByTo {
   '/admin/auctions': typeof AdminAuctionsRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/listings': typeof AdminListingsRoute
+  '/admin/slides': typeof AdminSlidesRoute
   '/category/$id': typeof CategoryIdRoute
   '/listing/$id': typeof ListingIdRoute
   '/admin': typeof AdminIndexRoute
@@ -121,6 +129,7 @@ export interface FileRoutesById {
   '/admin/auctions': typeof AdminAuctionsRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/listings': typeof AdminListingsRoute
+  '/admin/slides': typeof AdminSlidesRoute
   '/category/$id': typeof CategoryIdRoute
   '/listing/$id': typeof ListingIdRoute
   '/admin/': typeof AdminIndexRoute
@@ -137,6 +146,7 @@ export interface FileRouteTypes {
     | '/admin/auctions'
     | '/admin/categories'
     | '/admin/listings'
+    | '/admin/slides'
     | '/category/$id'
     | '/listing/$id'
     | '/admin/'
@@ -150,6 +160,7 @@ export interface FileRouteTypes {
     | '/admin/auctions'
     | '/admin/categories'
     | '/admin/listings'
+    | '/admin/slides'
     | '/category/$id'
     | '/listing/$id'
     | '/admin'
@@ -164,6 +175,7 @@ export interface FileRouteTypes {
     | '/admin/auctions'
     | '/admin/categories'
     | '/admin/listings'
+    | '/admin/slides'
     | '/category/$id'
     | '/listing/$id'
     | '/admin/'
@@ -245,6 +257,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CategoryIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/slides': {
+      id: '/admin/slides'
+      path: '/slides'
+      fullPath: '/admin/slides'
+      preLoaderRoute: typeof AdminSlidesRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/listings': {
       id: '/admin/listings'
       path: '/listings'
@@ -273,6 +292,7 @@ interface AdminRouteChildren {
   AdminAuctionsRoute: typeof AdminAuctionsRoute
   AdminCategoriesRoute: typeof AdminCategoriesRoute
   AdminListingsRoute: typeof AdminListingsRoute
+  AdminSlidesRoute: typeof AdminSlidesRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
@@ -280,6 +300,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminAuctionsRoute: AdminAuctionsRoute,
   AdminCategoriesRoute: AdminCategoriesRoute,
   AdminListingsRoute: AdminListingsRoute,
+  AdminSlidesRoute: AdminSlidesRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 

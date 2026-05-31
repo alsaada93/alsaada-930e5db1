@@ -1,11 +1,12 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, ClipboardCheck, FolderTree, Gavel, ArrowRight } from "lucide-react";
+import { LayoutDashboard, ClipboardCheck, FolderTree, Gavel, Images, ArrowRight } from "lucide-react";
 
 const items = [
   { title: "الإحصائيات", url: "/admin", icon: LayoutDashboard, exact: true },
   { title: "مراجعة الإعلانات", url: "/admin/listings", icon: ClipboardCheck },
   { title: "التصنيفات", url: "/admin/categories", icon: FolderTree },
   { title: "المزادات", url: "/admin/auctions", icon: Gavel },
+  { title: "صور العرض", url: "/admin/slides", icon: Images },
 ];
 
 export function AdminSidebar() {
