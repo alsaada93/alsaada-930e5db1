@@ -567,6 +567,7 @@ function AddListingPage() {
                 <label className="mb-1 block text-sm font-semibold">{t("add.auctionDuration")}</label>
                 <input
                   type="number"
+                  name="auctionDuration"
                   min={1}
                   defaultValue={24}
                   className="h-11 w-full rounded-lg border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
