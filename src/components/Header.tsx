@@ -24,12 +24,8 @@ export function Header({ hideSearch = false }: { hideSearch?: boolean }) {
           </span>
         </Link>
 
-        <div className="flex flex-1 justify-start">
-          <span className="hidden items-center gap-1 rounded-full bg-white/10 px-2.5 py-1 text-[11px] font-bold text-navy-foreground/90 sm:inline-flex">
-            <Sparkles className="h-3.5 w-3.5" />
-            {lang === "ar" ? "مدعوم بالذكاء الاصطناعي" : "Powered by AI"}
-          </span>
-        </div>
+        <div className="flex flex-1 justify-start" />
+
 
 
 
