@@ -10,12 +10,16 @@ import {
   Sparkles,
   Search,
   LogIn,
+  Tag,
+  Gavel,
+  Store,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { categories, bahrainRegions, listings } from "@/data/marketplace";
 import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/hooks/useLanguage";
 
 export const Route = createFileRoute("/add-listing")({
   head: () => ({
@@ -29,6 +33,8 @@ export const Route = createFileRoute("/add-listing")({
 
 const MAX_IMAGES = 30;
 
+type ListingType = "normal" | "auction" | "business";
+
 interface AiEstimate {
   average: number;
   suggested: number;
@@ -39,6 +45,8 @@ interface AiEstimate {
 function AddListingPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t, lang } = useLanguage();
+  const [listingType, setListingType] = useState<ListingType | null>(null);
   const [submitted, setSubmitted] = useState(false);
 
   // Guest contact (required if not logged in)
@@ -89,7 +97,7 @@ function AddListingPage() {
     if (!files) return;
     const remaining = MAX_IMAGES - images.length;
     if (remaining <= 0) {
-      toast.error(`الحد الأقصى ${MAX_IMAGES} صورة`);
+      toast.error(t("toast.maxImages"));
       return;
     }
     const next = Array.from(files).slice(0, remaining).map((f) => URL.createObjectURL(f));
@@ -103,7 +111,7 @@ function AddListingPage() {
 
   const useMyLocation = () => {
     if (!navigator.geolocation) {
-      toast.error("المتصفح لا يدعم تحديد الموقع");
+      toast.error(t("toast.noGeo"));
       return;
     }
     setLocating(true);
@@ -111,22 +119,21 @@ function AddListingPage() {
       (pos) => {
         setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
         setLocating(false);
-        toast.success("تم تحديد موقعك على الخريطة");
+        toast.success(t("toast.located"));
       },
       () => {
         setLocating(false);
-        toast.error("تعذّر تحديد الموقع، تأكد من السماح بالوصول");
+        toast.error(t("toast.geoFail"));
       },
     );
   };
 
   const estimatePrice = () => {
     if (!activeCategory) {
-      toast.error("اختر التصنيف أولاً لتقدير السعر");
+      toast.error(t("toast.pickCat"));
       return;
     }
     setEstimating(true);
-    // تقدير ذكي مبني على بيانات السوق الحالية للتصنيف
     setTimeout(() => {
       const peers = listings.filter((l) => l.category.includes(activeCategory.name.slice(0, 4)));
       const base = peers.length
@@ -138,11 +145,8 @@ function AddListingPage() {
       setEstimate({
         average,
         suggested,
-        speed: condition === "جديد" ? "سريع (3-7 أيام)" : "متوسط (1-3 أسابيع)",
-        market:
-          suggested > average
-            ? "أعلى قليلاً من متوسط السوق"
-            : "ضمن متوسط السوق ومنافس",
+        speed: condition === "جديد" ? t("speed.fast") : t("speed.medium"),
+        market: suggested > average ? t("market.above") : t("market.within"),
       });
       if (!price) setPrice(String(suggested));
       setEstimating(false);
@@ -152,20 +156,21 @@ function AddListingPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!user && (!guestName.trim() || !guestPhone.trim())) {
-      toast.error("أدخل الاسم ورقم الهاتف للنشر كزائر، أو سجّل الدخول");
+      toast.error(t("toast.guestNeeded"));
       return;
     }
     if (!region) {
-      toast.error("اختر المنطقة");
+      toast.error(t("toast.pickRegion"));
       return;
     }
     if (images.length === 0) {
-      toast.error("أضف صورة واحدة على الأقل");
+      toast.error(t("toast.needImage"));
       return;
     }
     setSubmitted(true);
   };
 
+  // ---- Success screen ----
   if (submitted) {
     return (
       <div className="flex min-h-screen flex-col">
@@ -173,15 +178,13 @@ function AddListingPage() {
         <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-12">
           <div className="rounded-2xl border border-border bg-card p-10 text-center shadow-card">
             <CheckCircle2 className="mx-auto h-14 w-14 text-primary" />
-            <h1 className="mt-4 text-2xl font-extrabold">تم استلام إعلانك</h1>
-            <p className="mt-2 text-muted-foreground">
-              سيتم مراجعة الإعلان من قبل الإدارة قبل نشره. شكراً لاستخدامك سوقو.
-            </p>
+            <h1 className="mt-4 text-2xl font-extrabold">{t("add.received")}</h1>
+            <p className="mt-2 text-muted-foreground">{t("add.receivedDesc")}</p>
             <button
               onClick={() => navigate({ to: "/" })}
               className="mt-6 rounded-full bg-primary px-6 py-2 font-bold text-primary-foreground"
             >
-              العودة للرئيسية
+              {t("add.back")}
             </button>
           </div>
         </main>
@@ -190,33 +193,73 @@ function AddListingPage() {
     );
   }
 
+  // ---- Type chooser screen ----
+  if (!listingType) {
+    const options: { type: ListingType; icon: typeof Tag; title: string; desc: string }[] = [
+      { type: "normal", icon: Tag, title: t("add.typeNormal"), desc: t("add.typeNormalDesc") },
+      { type: "auction", icon: Gavel, title: t("add.typeAuction"), desc: t("add.typeAuctionDesc") },
+      { type: "business", icon: Store, title: t("add.typeBusiness"), desc: t("add.typeBusinessDesc") },
+    ];
+    return (
+      <div className="flex min-h-screen flex-col">
+        <Header />
+        <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-10">
+          <Link to="/" className="mb-4 inline-flex items-center gap-1 text-sm font-semibold text-primary hover:underline">
+            <ArrowRight className="h-4 w-4 rtl:rotate-0 ltr:rotate-180" /> {t("add.back")}
+          </Link>
+          <h1 className="text-2xl font-extrabold">{t("add.chooseTitle")}</h1>
+          <p className="text-sm text-muted-foreground">{t("add.chooseSub")}</p>
+
+          <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+            {options.map((o) => (
+              <button
+                key={o.type}
+                type="button"
+                onClick={() => setListingType(o.type)}
+                className="group flex flex-col items-start gap-3 rounded-2xl border border-border bg-card p-5 text-start shadow-card transition-all hover:-translate-y-1 hover:border-primary/50"
+              >
+                <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-primary text-primary-foreground">
+                  <o.icon className="h-6 w-6" />
+                </span>
+                <h3 className="text-lg font-extrabold">{o.title}</h3>
+                <p className="text-sm text-muted-foreground">{o.desc}</p>
+                <span className="mt-2 text-sm font-bold text-primary group-hover:underline">{t("add.continue")} →</span>
+              </button>
+            ))}
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  const heading =
+    listingType === "auction" ? t("add.newAuction") : listingType === "business" ? t("add.newBusiness") : t("add.newAd");
+  const submitLabel =
+    listingType === "auction" ? t("add.publishAuction") : listingType === "business" ? t("add.publishBusiness") : t("add.publish");
+
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
       <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-8">
-        <Link
-          to="/"
+        <button
+          onClick={() => setListingType(null)}
           className="mb-4 inline-flex items-center gap-1 text-sm font-semibold text-primary hover:underline"
         >
-          <ArrowRight className="h-4 w-4" /> العودة للرئيسية
-        </Link>
+          <ArrowRight className="h-4 w-4" /> {t("add.changeType")}
+        </button>
 
-        <h1 className="text-2xl font-extrabold">أضف إعلان جديد</h1>
-        <p className="text-sm text-muted-foreground">
-          املأ تفاصيل المنتج لعرضه على آلاف المشترين في البحرين والخليج.
-        </p>
+        <h1 className="text-2xl font-extrabold">{heading}</h1>
+        <p className="text-sm text-muted-foreground">{t("add.formSub")}</p>
 
         <form onSubmit={handleSubmit} className="mt-6 space-y-5">
           {/* Contact / login */}
           {!user ? (
             <div className="rounded-2xl border border-border bg-muted/40 p-4">
               <div className="mb-3 flex items-center justify-between">
-                <span className="text-sm font-bold">بيانات التواصل (للنشر كزائر)</span>
-                <Link
-                  to="/login"
-                  className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
-                >
-                  <LogIn className="h-3.5 w-3.5" /> تسجيل الدخول
+                <span className="text-sm font-bold">{t("add.contactGuest")}</span>
+                <Link to="/login" className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline">
+                  <LogIn className="h-3.5 w-3.5" /> {t("add.loginShort")}
                 </Link>
               </div>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -224,7 +267,7 @@ function AddListingPage() {
                   required
                   value={guestName}
                   onChange={(e) => setGuestName(e.target.value)}
-                  placeholder="الاسم"
+                  placeholder={t("add.name")}
                   className="h-11 w-full rounded-lg border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                 />
                 <input
@@ -232,24 +275,24 @@ function AddListingPage() {
                   type="tel"
                   value={guestPhone}
                   onChange={(e) => setGuestPhone(e.target.value)}
-                  placeholder="رقم الهاتف (مثال: 3xxxxxxx)"
+                  placeholder={t("add.phone")}
                   className="h-11 w-full rounded-lg border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                 />
               </div>
             </div>
           ) : (
             <div className="rounded-lg border border-border bg-muted/40 px-4 py-3 text-sm">
-              تنشر باسم حسابك: <span className="font-bold">{user.email}</span>
+              {t("add.postingAs")} <span className="font-bold">{user.email}</span>
             </div>
           )}
 
           {/* Title */}
           <div>
-            <label className="mb-1 block text-sm font-semibold">عنوان الإعلان</label>
+            <label className="mb-1 block text-sm font-semibold">{t("add.adTitle")}</label>
             <input
               required
               type="text"
-              placeholder="مثال: فرن بيتزا احترافي ستانلس ستيل"
+              placeholder={t("add.adTitlePh")}
               className="h-11 w-full rounded-lg border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
@@ -257,7 +300,7 @@ function AddListingPage() {
           {/* Category cascade */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <div>
-              <label className="mb-1 block text-sm font-semibold">التصنيف الرئيسي</label>
+              <label className="mb-1 block text-sm font-semibold">{t("add.mainCat")}</label>
               <select
                 required
                 value={categoryId}
@@ -268,14 +311,14 @@ function AddListingPage() {
                 }}
                 className="h-11 w-full rounded-lg border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
               >
-                <option value="" disabled>اختر التصنيف</option>
+                <option value="" disabled>{t("add.chooseCat")}</option>
                 {categories.map((c) => (
-                  <option key={c.id} value={c.id}>{c.icon} {c.name}</option>
+                  <option key={c.id} value={c.id}>{c.icon} {lang === "ar" ? c.name : c.nameEn}</option>
                 ))}
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-sm font-semibold">التصنيف الفرعي</label>
+              <label className="mb-1 block text-sm font-semibold">{t("add.subCat")}</label>
               <select
                 value={groupName}
                 disabled={!activeCategory}
@@ -285,21 +328,21 @@ function AddListingPage() {
                 }}
                 className="h-11 w-full rounded-lg border border-border bg-background px-3 text-sm disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-primary"
               >
-                <option value="">اختر القسم</option>
+                <option value="">{t("add.chooseSection")}</option>
                 {activeCategory?.groups.map((g) => (
                   <option key={g.name} value={g.name}>{g.name}</option>
                 ))}
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-sm font-semibold">النوع</label>
+              <label className="mb-1 block text-sm font-semibold">{t("add.type")}</label>
               <select
                 value={itemName}
                 disabled={!activeGroup}
                 onChange={(e) => setItemName(e.target.value)}
                 className="h-11 w-full rounded-lg border border-border bg-background px-3 text-sm disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-primary"
               >
-                <option value="">اختر النوع</option>
+                <option value="">{t("add.chooseTypeOpt")}</option>
                 {activeGroup?.items.map((it) => (
                   <option key={it} value={it}>{it}</option>
                 ))}
@@ -307,11 +350,14 @@ function AddListingPage() {
             </div>
           </div>
 
+          {/* Business details */}
+          {listingType === "business" && <BusinessFields t={t} />}
+
           {/* Region search */}
           <div className="relative">
-            <label className="mb-1 block text-sm font-semibold">المنطقة (ابحث عن مناطق البحرين)</label>
+            <label className="mb-1 block text-sm font-semibold">{t("add.region")}</label>
             <div className="relative">
-              <Search className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Search className="absolute end-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <input
                 value={region || regionQuery}
                 onChange={(e) => {
@@ -320,8 +366,8 @@ function AddListingPage() {
                   setRegionOpen(true);
                 }}
                 onFocus={() => setRegionOpen(true)}
-                placeholder="ابحث: المنامة، الرفاع، المحرق..."
-                className="h-11 w-full rounded-lg border border-border bg-background pr-10 pl-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                placeholder={t("add.regionPh")}
+                className="h-11 w-full rounded-lg border border-border bg-background pe-10 ps-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
             {regionOpen && filteredRegions.length > 0 && (
@@ -335,7 +381,7 @@ function AddListingPage() {
                         setRegionQuery("");
                         setRegionOpen(false);
                       }}
-                      className="w-full rounded-md px-3 py-2 text-right text-sm hover:bg-accent"
+                      className="w-full rounded-md px-3 py-2 text-start text-sm hover:bg-accent"
                     >
                       {r}
                     </button>
@@ -347,19 +393,19 @@ function AddListingPage() {
 
           {/* Map location */}
           <div>
-            <label className="mb-1 block text-sm font-semibold">الموقع على الخريطة</label>
+            <label className="mb-1 block text-sm font-semibold">{t("add.mapLocation")}</label>
             <button
               type="button"
               onClick={useMyLocation}
               className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-background px-4 py-2 text-sm font-semibold hover:bg-accent"
             >
               <MapPin className="h-4 w-4 text-primary" />
-              {locating ? "جارٍ التحديد..." : coords ? "تحديث الموقع" : "استخدم موقعي الحالي"}
+              {locating ? t("add.locating") : coords ? t("add.updateLocation") : t("add.useMyLocation")}
             </button>
             {coords && (
               <div className="mt-3 overflow-hidden rounded-xl border border-border">
                 <iframe
-                  title="الموقع"
+                  title="map"
                   className="h-56 w-full"
                   loading="lazy"
                   src={`https://www.openstreetmap.org/export/embed.html?bbox=${coords.lng - 0.01}%2C${coords.lat - 0.01}%2C${coords.lng + 0.01}%2C${coords.lat + 0.01}&layer=mapnik&marker=${coords.lat}%2C${coords.lng}`}
@@ -371,24 +417,17 @@ function AddListingPage() {
           {/* Images */}
           <div>
             <label className="mb-1 block text-sm font-semibold">
-              الصور ({images.length}/{MAX_IMAGES})
+              {t("add.images")} ({images.length}/{MAX_IMAGES})
             </label>
-            <input
-              ref={imgInput}
-              type="file"
-              accept="image/*"
-              multiple
-              hidden
-              onChange={(e) => handleImages(e.target.files)}
-            />
+            <input ref={imgInput} type="file" accept="image/*" multiple hidden onChange={(e) => handleImages(e.target.files)} />
             <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
               {images.map((src, i) => (
                 <div key={src} className="group relative aspect-square overflow-hidden rounded-lg border border-border">
-                  <img src={src} alt={`صورة ${i + 1}`} className="h-full w-full object-cover" />
+                  <img src={src} alt={`${i + 1}`} className="h-full w-full object-cover" />
                   <button
                     type="button"
                     onClick={() => setImages((p) => p.filter((_, idx) => idx !== i))}
-                    className="absolute left-1 top-1 rounded-full bg-destructive p-1 text-destructive-foreground opacity-0 transition group-hover:opacity-100"
+                    className="absolute start-1 top-1 rounded-full bg-destructive p-1 text-destructive-foreground opacity-0 transition group-hover:opacity-100"
                   >
                     <X className="h-3.5 w-3.5" />
                   </button>
@@ -401,7 +440,7 @@ function AddListingPage() {
                   className="flex aspect-square flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed border-border text-muted-foreground hover:border-primary hover:text-primary"
                 >
                   <ImagePlus className="h-6 w-6" />
-                  <span className="text-[10px] font-semibold">إضافة</span>
+                  <span className="text-[10px] font-semibold">{t("add.addImg")}</span>
                 </button>
               )}
             </div>
@@ -409,7 +448,7 @@ function AddListingPage() {
 
           {/* Video */}
           <div>
-            <label className="mb-1 block text-sm font-semibold">فيديو للإعلان (اختياري)</label>
+            <label className="mb-1 block text-sm font-semibold">{t("add.video")}</label>
             <input ref={vidInput} type="file" accept="video/*" hidden onChange={(e) => handleVideo(e.target.files)} />
             {video ? (
               <div className="relative overflow-hidden rounded-xl border border-border">
@@ -417,7 +456,7 @@ function AddListingPage() {
                 <button
                   type="button"
                   onClick={() => setVideo(null)}
-                  className="absolute left-2 top-2 rounded-full bg-destructive p-1.5 text-destructive-foreground"
+                  className="absolute start-2 top-2 rounded-full bg-destructive p-1.5 text-destructive-foreground"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -428,7 +467,7 @@ function AddListingPage() {
                 onClick={() => vidInput.current?.click()}
                 className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border py-6 text-muted-foreground hover:border-primary hover:text-primary"
               >
-                <Video className="h-5 w-5" /> إضافة فيديو
+                <Video className="h-5 w-5" /> {t("add.addVideo")}
               </button>
             )}
           </div>
@@ -436,7 +475,9 @@ function AddListingPage() {
           {/* Price + condition + AI */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <label className="mb-1 block text-sm font-semibold">السعر (د.ب)</label>
+              <label className="mb-1 block text-sm font-semibold">
+                {listingType === "auction" ? t("add.startPrice") : t("add.price")}
+              </label>
               <input
                 required
                 type="number"
@@ -447,17 +488,29 @@ function AddListingPage() {
                 className="h-11 w-full rounded-lg border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
-            <div>
-              <label className="mb-1 block text-sm font-semibold">الحالة</label>
-              <select
-                value={condition}
-                onChange={(e) => setCondition(e.target.value)}
-                className="h-11 w-full rounded-lg border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-              >
-                <option value="جديد">جديد</option>
-                <option value="مستعمل">مستعمل</option>
-              </select>
-            </div>
+            {listingType === "auction" ? (
+              <div>
+                <label className="mb-1 block text-sm font-semibold">{t("add.auctionDuration")}</label>
+                <input
+                  type="number"
+                  min={1}
+                  defaultValue={24}
+                  className="h-11 w-full rounded-lg border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+              </div>
+            ) : (
+              <div>
+                <label className="mb-1 block text-sm font-semibold">{t("add.condition")}</label>
+                <select
+                  value={condition}
+                  onChange={(e) => setCondition(e.target.value)}
+                  className="h-11 w-full rounded-lg border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                >
+                  <option value="جديد">{t("add.new")}</option>
+                  <option value="مستعمل">{t("add.used")}</option>
+                </select>
+              </div>
+            )}
           </div>
 
           <button
@@ -466,25 +519,25 @@ function AddListingPage() {
             className="inline-flex items-center gap-1.5 rounded-lg border border-primary/40 bg-accent px-4 py-2 text-sm font-bold text-accent-foreground hover:bg-accent/70"
           >
             <Sparkles className="h-4 w-4" />
-            {estimating ? "جارٍ التحليل..." : "اقتراح السعر بالذكاء الاصطناعي"}
+            {estimating ? t("add.analyzing") : t("add.aiSuggest")}
           </button>
 
           {estimate && (
             <div className="grid grid-cols-2 gap-3 rounded-2xl border border-border bg-card p-4 shadow-card sm:grid-cols-4">
-              <Stat label="متوسط السعر" value={`${estimate.average} د.ب`} />
-              <Stat label="السعر المقترح" value={`${estimate.suggested} د.ب`} />
-              <Stat label="سرعة البيع" value={estimate.speed} />
-              <Stat label="مقارنة السوق" value={estimate.market} />
+              <Stat label={t("add.avgPrice")} value={`${estimate.average} ${lang === "ar" ? "د.ب" : "BHD"}`} />
+              <Stat label={t("add.suggestedPrice")} value={`${estimate.suggested} ${lang === "ar" ? "د.ب" : "BHD"}`} />
+              <Stat label={t("add.sellSpeed")} value={estimate.speed} />
+              <Stat label={t("add.marketCompare")} value={estimate.market} />
             </div>
           )}
 
           {/* Description */}
           <div>
-            <label className="mb-1 block text-sm font-semibold">الوصف</label>
+            <label className="mb-1 block text-sm font-semibold">{t("add.description")}</label>
             <textarea
               required
               rows={5}
-              placeholder="اكتب وصفاً تفصيلياً للمنتج..."
+              placeholder={t("add.descPh")}
               className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
@@ -493,11 +546,65 @@ function AddListingPage() {
             type="submit"
             className="w-full rounded-full bg-gradient-primary px-6 py-3 font-bold text-primary-foreground shadow-glow transition-transform hover:scale-[1.01]"
           >
-            نشر الإعلان
+            {submitLabel}
           </button>
         </form>
       </main>
       <Footer />
+    </div>
+  );
+}
+
+function BusinessFields({ t }: { t: (k: string) => string }) {
+  const [license, setLicense] = useState("with");
+  const input =
+    "h-11 w-full rounded-lg border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary";
+  return (
+    <div className="rounded-2xl border border-primary/30 bg-accent/30 p-4">
+      <h3 className="mb-3 flex items-center gap-1.5 text-sm font-extrabold text-primary">
+        <Store className="h-4 w-4" /> {t("biz.heading")}
+      </h3>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div>
+          <label className="mb-1 block text-sm font-semibold">{t("biz.rent")}</label>
+          <input type="number" min={0} placeholder="0" className={input} />
+        </div>
+        <div>
+          <label className="mb-1 block text-sm font-semibold">{t("biz.area")}</label>
+          <input type="number" min={0} placeholder="0" className={input} />
+        </div>
+        <div>
+          <label className="mb-1 block text-sm font-semibold">{t("biz.outlets")}</label>
+          <input type="number" min={0} placeholder="0" className={input} />
+        </div>
+        <div>
+          <label className="mb-1 block text-sm font-semibold">{t("biz.staff")}</label>
+          <input type="number" min={0} placeholder="0" className={input} />
+        </div>
+        <div>
+          <label className="mb-1 block text-sm font-semibold">{t("biz.monthlyRevenue")}</label>
+          <input type="number" min={0} placeholder="0" className={input} />
+        </div>
+        <div>
+          <label className="mb-1 block text-sm font-semibold">{t("biz.opCost")}</label>
+          <input type="number" min={0} placeholder="0" className={input} />
+        </div>
+        <div>
+          <label className="mb-1 block text-sm font-semibold">{t("biz.license")}</label>
+          <select value={license} onChange={(e) => setLicense(e.target.value)} className={input}>
+            <option value="with">{t("biz.withLicense")}</option>
+            <option value="without">{t("biz.withoutLicense")}</option>
+          </select>
+        </div>
+        <div>
+          <label className="mb-1 block text-sm font-semibold">{t("biz.reason")}</label>
+          <input type="text" placeholder={t("biz.reasonPh")} className={input} />
+        </div>
+      </div>
+      <label className="mt-3 flex items-center gap-2 text-sm font-semibold">
+        <input type="checkbox" defaultChecked className="h-4 w-4 rounded border-border accent-primary" />
+        {t("biz.includesEquip")}
+      </label>
     </div>
   );
 }
