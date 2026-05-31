@@ -18,7 +18,7 @@ function AdminLayout() {
 
   useEffect(() => {
     if (!loading && !user) {
-      navigate({ to: "/login" });
+      navigate({ to: "/login/admin" });
     }
   }, [loading, user, navigate]);
 
