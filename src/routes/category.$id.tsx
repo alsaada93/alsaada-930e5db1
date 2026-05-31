@@ -3,7 +3,7 @@ import { ArrowRight } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ListingCard } from "@/components/ListingCard";
-import { categories, listings } from "@/data/marketplace";
+import { categories, listings, type Listing } from "@/data/marketplace";
 
 export const Route = createFileRoute("/category/$id")({
   loader: ({ params }) => {
