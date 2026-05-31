@@ -113,9 +113,10 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       .maybeSingle()
       .then(({ data }) => {
         if (data?.value) {
+          const v = data.value as unknown as ThemeSettings;
           const merged: ThemeSettings = {
-            colors: { ...DEFAULT_THEME.colors, ...(data.value as ThemeSettings).colors },
-            font: (data.value as ThemeSettings).font || DEFAULT_THEME.font,
+            colors: { ...DEFAULT_THEME.colors, ...v.colors },
+            font: v.font || DEFAULT_THEME.font,
           };
           setTheme(merged);
           applyTheme(merged);
