@@ -208,6 +208,30 @@ function ListingPage() {
           </div>
         </div>
 
+        {item.description && (
+          <div className="mt-8 rounded-2xl border border-border bg-card p-5">
+            <h2 className="mb-2 text-lg font-extrabold">الوصف</h2>
+            <p className="whitespace-pre-line text-sm leading-relaxed text-muted-foreground">{item.description}</p>
+          </div>
+        )}
+
+        {item.business && (
+          <div className="mt-6 rounded-2xl border border-primary/30 bg-accent/30 p-5">
+            <h2 className="mb-3 text-lg font-extrabold text-primary">تفاصيل النشاط التجاري</h2>
+            <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm sm:grid-cols-3">
+              {item.business.rent != null && <Detail label="الإيجار الشهري" value={`${item.business.rent} د.ب`} />}
+              {item.business.area_sqm != null && <Detail label="المساحة" value={`${item.business.area_sqm} م²`} />}
+              {item.business.outlets != null && <Detail label="عدد الفتحات" value={String(item.business.outlets)} />}
+              {item.business.staff_count != null && <Detail label="عدد الموظفين" value={String(item.business.staff_count)} />}
+              {item.business.monthly_revenue != null && <Detail label="المدخول الشهري" value={`${item.business.monthly_revenue} د.ب`} />}
+              {item.business.operating_cost != null && <Detail label="مصاريف التشغيل" value={`${item.business.operating_cost} د.ب`} />}
+              {item.business.has_license != null && <Detail label="السجل التجاري" value={item.business.has_license ? "مع سجل" : "بدون سجل"} />}
+              {item.business.sale_reason && <Detail label="سبب البيع" value={String(item.business.sale_reason)} />}
+            </div>
+          </div>
+        )}
+
+
         {/* تقييمات البائع */}
         {item.sellerId && (
           <div className="mt-10">
