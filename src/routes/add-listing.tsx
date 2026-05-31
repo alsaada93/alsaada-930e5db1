@@ -58,6 +58,7 @@ function AddListingPage() {
   const [categoryId, setCategoryId] = useState("");
   const [groupName, setGroupName] = useState("");
   const [itemName, setItemName] = useState("");
+  const [brand, setBrand] = useState("");
 
   const activeCategory = useMemo(
     () => categories.find((c) => c.id === categoryId),
