@@ -157,7 +157,23 @@ function AddListingPage() {
     }, 700);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const uploadFile = async (file: File, kind: string) => {
+    const ext = file.name.split(".").pop() || "bin";
+    const path = `${kind}/${crypto.randomUUID()}.${ext}`;
+    const { error } = await supabase.storage.from("listings").upload(path, file, {
+      cacheControl: "3600",
+      upsert: false,
+    });
+    if (error) throw error;
+    return supabase.storage.from("listings").getPublicUrl(path).data.publicUrl;
+  };
+
+  const numOrNull = (v: FormDataEntryValue | null) => {
+    const n = Number(v);
+    return v != null && v !== "" && !Number.isNaN(n) ? n : null;
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!user && (!guestName.trim() || !guestPhone.trim())) {
       toast.error(t("toast.guestNeeded"));
@@ -171,7 +187,60 @@ function AddListingPage() {
       toast.error(t("toast.needImage"));
       return;
     }
-    setSubmitted(true);
+
+    const fd = new FormData(e.currentTarget);
+    setSaving(true);
+    try {
+      // Upload media
+      const imageUrls = await Promise.all(images.map((img) => uploadFile(img.file, "images")));
+      const videoUrl = video ? await uploadFile(video.file, "videos") : null;
+
+      const isBusiness = listingType === "business";
+      const isAuction = listingType === "auction";
+      const auctionHours = numOrNull(fd.get("auctionDuration")) ?? 24;
+
+      const payload: Record<string, unknown> = {
+        user_id: user?.id ?? null,
+        listing_type: listingType,
+        title: String(fd.get("title") || "").trim(),
+        description: String(fd.get("description") || "").trim(),
+        price: Number(price) || 0,
+        condition,
+        category_id: categoryId || null,
+        group_name: groupName || null,
+        item_name: itemName || null,
+        city: region,
+        lat: coords?.lat ?? null,
+        lng: coords?.lng ?? null,
+        images: imageUrls,
+        video: videoUrl,
+        contact_name: user ? (user.email ?? null) : guestName.trim(),
+        contact_phone: user ? null : guestPhone.trim(),
+        status: "approved",
+        start_price: isAuction ? Number(price) || 0 : null,
+        auction_ends_at: isAuction
+          ? new Date(Date.now() + auctionHours * 3600_000).toISOString()
+          : null,
+        rent: isBusiness ? numOrNull(fd.get("rent")) : null,
+        area_sqm: isBusiness ? numOrNull(fd.get("area")) : null,
+        outlets: isBusiness ? numOrNull(fd.get("outlets")) : null,
+        staff_count: isBusiness ? numOrNull(fd.get("staff")) : null,
+        monthly_revenue: isBusiness ? numOrNull(fd.get("monthlyRevenue")) : null,
+        operating_cost: isBusiness ? numOrNull(fd.get("opCost")) : null,
+        has_license: isBusiness ? fd.get("license") === "with" : null,
+        includes_equipment: isBusiness ? fd.get("includesEquip") === "on" : null,
+        sale_reason: isBusiness ? String(fd.get("reason") || "").trim() || null : null,
+      };
+
+      const { error } = await supabase.from("listings").insert(payload);
+      if (error) throw error;
+      setSubmitted(true);
+    } catch (err) {
+      console.error(err);
+      toast.error(lang === "ar" ? "تعذّر نشر الإعلان، حاول مرة أخرى" : "Could not publish, try again");
+    } finally {
+      setSaving(false);
+    }
   };
 
   // ---- Success screen ----
