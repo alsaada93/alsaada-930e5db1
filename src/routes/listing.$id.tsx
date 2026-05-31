@@ -386,12 +386,12 @@ function ListingPage() {
               </span>
             </div>
 
-            {/* تاريخ ووقت النشر + مدة الصلاحية */}
-            {item.createdAt && (
+            {/* سجل تاريخ ووقت النشر والانتهاء */}
+            {publishedAt && (
               <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
                 <span className="flex items-center gap-1">
-                  <Clock className="h-3.5 w-3.5" /> نُشر {timeAgo(item.createdAt)} —{" "}
-                  {new Date(item.createdAt).toLocaleString("ar", {
+                  <Clock className="h-3.5 w-3.5" /> نُشر {timeAgo(publishedAt)} —{" "}
+                  {new Date(publishedAt).toLocaleString("ar", {
                     year: "numeric",
                     month: "long",
                     day: "numeric",
@@ -399,13 +399,21 @@ function ListingPage() {
                     minute: "2-digit",
                   })}
                 </span>
-                {!expired && daysLeft != null && (
+                {expiresAt != null && (
                   <span className="flex items-center gap-1">
-                    <CalendarDays className="h-3.5 w-3.5" /> يُحذف خلال {daysLeft} يوم
+                    <CalendarDays className="h-3.5 w-3.5" />
+                    {expired ? "انتهى في" : "ينتهي في"}{" "}
+                    {new Date(expiresAt).toLocaleString("ar", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
+                    {!expired && daysLeft != null ? ` (خلال ${daysLeft} يوم)` : ""}
                   </span>
                 )}
               </div>
             )}
+
 
             {/* بطاقة البائع */}
             <div className="mt-5 rounded-2xl border border-border bg-card p-4">
