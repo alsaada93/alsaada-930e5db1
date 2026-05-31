@@ -1,10 +1,13 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
 import { Search, Heart, Bell, Menu, Plus, User, Globe } from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
 import { useLanguage } from "@/hooks/useLanguage";
 
 export function Header() {
   const { t, lang, toggle } = useLanguage();
+  const navigate = useNavigate();
+  const [q, setQ] = useState("");
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-navy text-navy-foreground">
