@@ -620,6 +620,23 @@ function AddListingPage() {
                 placeholder={t("add.adTitlePh")}
                 className={fieldCls}
               />
+              {titleSuggestions.length > 0 && (
+                <div className="mt-2">
+                  <span className="text-xs font-semibold text-muted-foreground">{t("add.suggestTitle")}</span>
+                  <div className="mt-1.5 flex flex-wrap gap-2">
+                    {titleSuggestions.map((s) => (
+                      <button
+                        key={s}
+                        type="button"
+                        onClick={() => setTitleText(s)}
+                        className="rounded-full border border-border bg-background px-3 py-1 text-xs font-semibold text-foreground transition-colors hover:border-primary hover:text-primary"
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             <div>
