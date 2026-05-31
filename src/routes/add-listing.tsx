@@ -431,7 +431,9 @@ function AddListingPage() {
                   <option key={it} value={it}>{it}</option>
                 ))}
               </select>
+            </div>
           </div>
+
 
           {/* Brand */}
           <div>
