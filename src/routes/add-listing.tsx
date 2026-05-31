@@ -365,6 +365,7 @@ function AddListingPage() {
             <input
               required
               type="text"
+              name="title"
               placeholder={t("add.adTitlePh")}
               className="h-11 w-full rounded-lg border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
             />
