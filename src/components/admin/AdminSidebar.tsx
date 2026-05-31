@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, ClipboardCheck, FolderTree, Tags, Gavel, Images, ArrowRight } from "lucide-react";
+import { LayoutDashboard, ClipboardCheck, FolderTree, Tags, Gavel, Images, Palette, ArrowRight } from "lucide-react";
 
 const items = [
   { title: "الإحصائيات", url: "/admin", icon: LayoutDashboard, exact: true },
@@ -8,6 +8,7 @@ const items = [
   { title: "الماركات", url: "/admin/brands", icon: Tags },
   { title: "المزادات", url: "/admin/auctions", icon: Gavel },
   { title: "صور العرض", url: "/admin/slides", icon: Images },
+  { title: "مظهر الموقع", url: "/admin/appearance", icon: Palette },
 ];
 
 export function AdminSidebar() {
