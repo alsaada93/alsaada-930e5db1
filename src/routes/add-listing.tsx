@@ -1102,14 +1102,14 @@ function AddListingPage() {
       <Footer />
       <ImageEditor
         open={editingIndex !== null}
-        file={editingIndex !== null ? images[editingIndex]?.file ?? null : null}
+        file={editingIndex !== null ? media[editingIndex]?.file ?? null : null}
         onClose={() => setEditingIndex(null)}
         onApply={(edited) => {
-          setImages((prev) =>
-            prev.map((img, idx) => {
-              if (idx !== editingIndex) return img;
-              URL.revokeObjectURL(img.url);
-              return { url: URL.createObjectURL(edited), file: edited };
+          setMedia((prev) =>
+            prev.map((m, idx) => {
+              if (idx !== editingIndex) return m;
+              URL.revokeObjectURL(m.url);
+              return { ...m, url: URL.createObjectURL(edited), file: edited };
             }),
           );
         }}
