@@ -418,8 +418,16 @@ function ListingPage() {
               </div>
             )}
 
+            {/* مزاد مباشر */}
+            {item.listingType === "auction" && (
+              <AuctionBidBox
+                listingId={item.id}
+                startPrice={item.startPrice ?? item.price}
+                auctionEndsAt={item.auctionEndsAt}
+              />
+            )}
 
-            {/* بطاقة البائع */}
+
             <div className="mt-5 rounded-2xl border border-border bg-card p-4">
               <div className="flex items-center justify-between">
                 <h2 className="font-bold">{sellerName}</h2>
