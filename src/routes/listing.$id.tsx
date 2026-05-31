@@ -562,33 +562,68 @@ function ListingPage() {
                 href={waLink}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() =>
+                  logContactAttempt({
+                    recipientId: item.userId,
+                    listingId: item.id,
+                    method: "whatsapp",
+                    listingTitle: item.title,
+                  })
+                }
                 className="inline-flex items-center justify-center gap-1 rounded-xl bg-[#25D366] px-3 py-2.5 text-sm font-bold text-white transition-opacity hover:opacity-90"
               >
-                <MessageCircle className="h-4 w-4" /> واتساب
+                <MessageCircle className="h-4 w-4" /> {lang === "ar" ? "واتساب" : "WhatsApp"}
               </a>
               <a
                 href={`tel:+${phone}`}
+                onClick={() =>
+                  logContactAttempt({
+                    recipientId: item.userId,
+                    listingId: item.id,
+                    method: "call",
+                    listingTitle: item.title,
+                  })
+                }
                 className="inline-flex items-center justify-center gap-1 rounded-xl bg-primary px-3 py-2.5 text-sm font-bold text-primary-foreground transition-opacity hover:opacity-90"
               >
-                <Phone className="h-4 w-4" /> اتصال
+                <Phone className="h-4 w-4" /> {lang === "ar" ? "اتصال" : "Call"}
               </a>
               <button
                 type="button"
-                onClick={() =>
-                  toast.info("الرسائل الداخلية", { description: "سيتم فتح المحادثة بعد تسجيل الدخول." })
-                }
+                onClick={() => setOfferOpen(true)}
                 className="inline-flex items-center justify-center gap-1 rounded-xl border border-border bg-muted px-3 py-2.5 text-sm font-bold text-foreground transition-colors hover:bg-accent"
               >
-                <MessageSquare className="h-4 w-4" /> رسالة
+                <Tag className="h-4 w-4" /> {lang === "ar" ? "عرض سعر" : "Offer"}
               </button>
             </div>
+
+            {/* مشاركة الإعلان على منصات التواصل */}
+            <div className="mt-4 rounded-2xl border border-border bg-card p-3">
+              <ShareButtons
+                url={`https://alsaada.lovable.app/listing/${item.id}`}
+                title={displayTitle}
+                compact
+              />
+            </div>
+
+            {/* هاشتاقات تلقائية لزيادة الظهور */}
+            <ListingHashtags
+              tags={[
+                cat?.name,
+                item.groupName,
+                item.itemName,
+                item.city,
+                item.condition,
+              ]}
+              className="mt-3"
+            />
           </div>
         </div>
 
-        {item.description && (
+        {displayDescription && (
           <div className="mt-8 rounded-2xl border border-border bg-card p-5">
-            <h2 className="mb-2 text-lg font-extrabold">الوصف</h2>
-            <p className="whitespace-pre-line text-sm leading-relaxed text-muted-foreground">{item.description}</p>
+            <h2 className="mb-2 text-lg font-extrabold">{lang === "ar" ? "الوصف" : "Description"}</h2>
+            <p className="whitespace-pre-line text-sm leading-relaxed text-muted-foreground">{displayDescription}</p>
           </div>
         )}
 
