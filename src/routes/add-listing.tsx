@@ -1060,6 +1060,49 @@ function AddListingPage() {
           );
         }}
       />
+      {showPreview && (
+        <div
+          className="fixed inset-0 z-[100] flex items-start justify-center overflow-auto bg-black/70 p-4"
+          onClick={() => setShowPreview(false)}
+        >
+          <div
+            className="my-8 w-full max-w-md rounded-2xl border border-border bg-card p-5 shadow-card"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="text-lg font-extrabold">{ar ? "معاينة الإعلان" : "Listing preview"}</h2>
+              <button type="button" onClick={() => setShowPreview(false)} aria-label="إغلاق">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            {(existingImages[0] || images[0]) && (
+              <img
+                src={existingImages[0] ?? images[0].url}
+                alt={titleText}
+                className="aspect-[4/3] w-full rounded-xl object-cover"
+              />
+            )}
+            <h3 className="mt-3 text-xl font-extrabold">{titleText || (ar ? "بدون عنوان" : "Untitled")}</h3>
+            <div className="mt-1 flex items-baseline gap-1">
+              <span className="text-2xl font-extrabold text-primary">{Number(price || 0).toLocaleString("ar")}</span>
+              <span className="text-sm text-muted-foreground">د.ب</span>
+            </div>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {[region, condition].filter(Boolean).join(" • ")}
+            </p>
+            {descText && (
+              <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">{descText}</p>
+            )}
+            <button
+              type="button"
+              onClick={() => setShowPreview(false)}
+              className="mt-4 w-full rounded-full bg-primary px-5 py-2.5 font-bold text-primary-foreground"
+            >
+              {ar ? "متابعة" : "Continue"}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
