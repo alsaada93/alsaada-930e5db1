@@ -184,6 +184,33 @@ function AccountPage() {
   }, [user]);
 
   const totalViews = useMemo(() => listings.reduce((s, l) => s + (l.views ?? 0), 0), [listings]);
+  const drafts = useMemo(() => listings.filter((l) => l.status === "draft"), [listings]);
+
+  const removeFavorite = async (id: string) => {
+    if (!user) return;
+    await (supabase as any).from("favorites").delete().eq("user_id", user.id).eq("listing_id", id);
+    setFavorites((p) => p.filter((x) => x.id !== id));
+    toast.success("تمت الإزالة من المفضلة");
+  };
+
+  const deleteSearch = async (id: string) => {
+    if (!user) return;
+    await (supabase as any).from("saved_searches").delete().eq("id", id);
+    setSavedSearches((p) => p.filter((x) => x.id !== id));
+    toast.success("تم حذف البحث");
+  };
+
+  const runSearch = (q: string) => navigate({ to: "/search", search: { q } as any });
+
+  const clearRecentViews = () => {
+    localStorage.removeItem("recent_views");
+    setRecentViews([]);
+  };
+  const clearRecentSearches = () => {
+    localStorage.removeItem("recent_searches");
+    setRecentSearches([]);
+  };
+
 
   const onAvatar = async (file: File | undefined) => {
     if (!file || !user) return;
