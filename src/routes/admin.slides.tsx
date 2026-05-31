@@ -16,6 +16,7 @@ function AdminSlidesPage() {
   const [intervalSec, setIntervalSec] = useState(4);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
 
   const load = async () => {
