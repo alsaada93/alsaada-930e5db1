@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import { categories } from "@/data/marketplace";
 
 export function CategoryGrid() {
