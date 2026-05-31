@@ -104,7 +104,7 @@ function AddListingPage() {
 
   const activeCategory = useMemo(
     () => categories.find((c) => c.id === categoryId),
-    [categoryId],
+    [categoryId, categories],
   );
   const activeGroup = useMemo(
     () => activeCategory?.groups.find((g) => g.name === groupName),
