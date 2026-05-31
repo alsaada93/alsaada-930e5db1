@@ -202,8 +202,12 @@ function AppearancePage() {
 
   return (
     <div>
-      <AdminHeader title="مظهر الموقع" subtitle="تحكّم كامل بألوان وخطوط الموقع" />
+      <AdminHeader title="مظهر الموقع" subtitle="تحكّم كامل بهوية وألوان وخطوط الموقع" />
       <div className="space-y-6 p-6">
+        {/* Site identity */}
+        <IdentitySection />
+
+
         {/* Colors */}
         <div className="rounded-2xl border border-border bg-card p-5 shadow-card">
           <h3 className="mb-4 font-bold text-card-foreground">الألوان</h3>
