@@ -125,16 +125,31 @@ function PackagesPage() {
                   ))}
                 </ul>
 
-                <Link
-                  to="/add-listing"
-                  className={`mt-6 inline-flex items-center justify-center rounded-full px-5 py-2.5 text-sm font-bold transition-transform hover:scale-[1.02] ${
-                    p.highlight
-                      ? "bg-gradient-primary text-primary-foreground shadow-glow"
-                      : "border border-border bg-background hover:bg-muted"
-                  }`}
-                >
-                  {p.price === 0 ? (ar ? "ابدأ مجاناً" : "Start free") : ar ? "اشترك الآن" : "Subscribe now"}
-                </Link>
+                {p.price === 0 ? (
+                  <Link
+                    to="/add-listing"
+                    className="mt-6 inline-flex items-center justify-center rounded-full border border-border bg-background px-5 py-2.5 text-sm font-bold transition-transform hover:scale-[1.02] hover:bg-muted"
+                  >
+                    {ar ? "ابدأ مجاناً" : "Start free"}
+                  </Link>
+                ) : (
+                  <a
+                    href={`https://wa.me/97336818153?text=${encodeURIComponent(
+                      ar
+                        ? `مرحباً، أرغب في الاشتراك في باقة ${p.name.ar} على السعادة ماركت.`
+                        : `Hello, I'd like to subscribe to the ${p.name.en} plan on Al Saada Market.`,
+                    )}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`mt-6 inline-flex items-center justify-center rounded-full px-5 py-2.5 text-sm font-bold transition-transform hover:scale-[1.02] ${
+                      p.highlight
+                        ? "bg-gradient-primary text-primary-foreground shadow-glow"
+                        : "border border-border bg-background hover:bg-muted"
+                    }`}
+                  >
+                    {ar ? "اشترك الآن" : "Subscribe now"}
+                  </a>
+                )}
               </div>
             ))}
           </div>
