@@ -357,7 +357,8 @@ function AddListingPage() {
 
     setSaving(true);
     try {
-      const imageUrls = await Promise.all(images.map((img) => uploadFile(img.file, "images")));
+      const uploadedUrls = await Promise.all(images.map((img) => uploadFile(img.file, "images")));
+      const imageUrls = [...existingImages, ...uploadedUrls];
 
       const isBusiness = listingType === "business";
       const isAuction = listingType === "auction";
@@ -379,7 +380,6 @@ function AddListingPage() {
         lat: coords?.lat ?? null,
         lng: coords?.lng ?? null,
         images: imageUrls,
-        video: null,
         contact_name: user ? (user.email ?? null) : guestName.trim(),
         contact_phone: user ? null : guestPhone.trim(),
         status: "approved",
@@ -398,7 +398,15 @@ function AddListingPage() {
         delivery_available: isAuction ? false : delivery,
       };
 
-      const { data, error } = await supabase.from("listings").insert(payload).select("id").single();
+      if (isEdit && editId) {
+        const { error } = await supabase.from("listings").update(payload).eq("id", editId);
+        if (error) throw error;
+        toast.success(ar ? "تم تحديث الإعلان" : "Listing updated");
+        navigate({ to: "/listing/$id", params: { id: editId } });
+        return;
+      }
+
+      const { data, error } = await supabase.from("listings").insert({ ...payload, video: null }).select("id").single();
       if (error) throw error;
       setNewId(data?.id ?? null);
       setSubmitted(true);
