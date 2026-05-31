@@ -32,14 +32,29 @@ export const Route = createFileRoute("/category/$id")({
     const items = listings.filter((l) => l.category === category.name);
     return { category, items };
   },
-  head: ({ loaderData }) => {
+  head: ({ loaderData, params }) => {
     const name = loaderData?.category.name ?? "التصنيفات";
+    const url = `https://soogo-hub.lovable.app/category/${params.id}`;
     return {
       meta: [
         { title: `${name} | سوقو SOOGO` },
         { name: "description", content: loaderData?.category.description ?? "تصفّح التصنيفات في سوقو" },
         { property: "og:title", content: `${name} | سوقو SOOGO` },
         { property: "og:description", content: loaderData?.category.description ?? "" },
+        { property: "og:url", content: url },
+      ],
+      links: [{ rel: "canonical", href: url }],
+      scripts: [
+        {
+          type: "application/ld+json",
+          children: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "CollectionPage",
+            name: `${name} | سوقو SOOGO`,
+            description: loaderData?.category.description ?? "",
+            url,
+          }),
+        },
       ],
     };
   },
