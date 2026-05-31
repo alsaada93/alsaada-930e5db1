@@ -83,9 +83,27 @@ function AccountPage() {
   const [editProfile, setEditProfile] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<ListingRow | null>(null);
 
+  const [favorites, setFavorites] = useState<ListingRow[]>([]);
+  const [savedSearches, setSavedSearches] = useState<{ id: string; query: string; label: string | null }[]>([]);
+  const [followedListings, setFollowedListings] = useState<ListingRow[]>([]);
+  const [recentViews, setRecentViews] = useState<ListingRow[]>([]);
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const [activePanel, setActivePanel] = useState<string | null>(null);
+
   useEffect(() => {
     if (!loading && !user) navigate({ to: "/login" });
   }, [loading, user, navigate]);
+
+  useEffect(() => {
+    try {
+      const v = JSON.parse(localStorage.getItem("recent_views") || "[]");
+      const s = JSON.parse(localStorage.getItem("recent_searches") || "[]");
+      if (Array.isArray(v)) setRecentViews(v);
+      if (Array.isArray(s)) setRecentSearches(s);
+    } catch {
+      /* ignore */
+    }
+  }, []);
 
   useEffect(() => {
     if (!user) return;
