@@ -28,7 +28,11 @@ export const Route = createFileRoute("/add-listing")({
     meta: [
       { title: "أضف إعلان | سوقو SOOGO" },
       { name: "description", content: "أضف إعلانك لبيع معدات المطاعم والفنادق والإلكترونيات على سوقو." },
+      { property: "og:title", content: "أضف إعلان | سوقو SOOGO" },
+      { property: "og:description", content: "أنشئ إعلانًا جديدًا مع تسعير ذكي بالذكاء الاصطناعي على سوقو." },
+      { property: "og:url", content: "https://soogo-hub.lovable.app/add-listing" },
     ],
+    links: [{ rel: "canonical", href: "https://soogo-hub.lovable.app/add-listing" }],
   }),
   component: AddListingPage,
 });
