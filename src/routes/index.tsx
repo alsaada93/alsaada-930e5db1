@@ -9,7 +9,7 @@ import { ListingsSection } from "@/components/ListingsSection";
 import { AuctionsSection } from "@/components/AuctionsSection";
 import { BusinessSection } from "@/components/BusinessSection";
 import { Footer } from "@/components/Footer";
-import { listings } from "@/data/marketplace";
+import { useListings } from "@/hooks/useListings";
 import { useLanguage } from "@/hooks/useLanguage";
 
 export const Route = createFileRoute("/")({
