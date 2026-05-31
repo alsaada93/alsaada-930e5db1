@@ -3,25 +3,41 @@ import { useState } from "react";
 import { Search, Heart, Bell, Menu, Plus, User, Globe } from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
 import { useLanguage } from "@/hooks/useLanguage";
+import { useSiteIdentity } from "@/hooks/useSiteIdentity";
 
 export function Header({ hideSearch = false }: { hideSearch?: boolean }) {
   const { t, lang, toggle } = useLanguage();
+  const { identity } = useSiteIdentity();
   const navigate = useNavigate();
   const [q, setQ] = useState("");
+
+  const siteName = lang === "ar" ? identity.nameAr : identity.nameEn;
+  const altName = lang === "ar" ? identity.nameEn : identity.nameAr;
+  const tagline = lang === "ar" ? identity.taglineAr : identity.taglineEn;
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-navy text-navy-foreground">
       <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-1.5">
         <Link to="/" className="flex shrink-0 items-center gap-1.5 sm:gap-2">
-          <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-white/95 p-1 sm:h-8 sm:w-8">
-            <BrandLogo size={18} />
-          </span>
-          <span className="flex flex-col leading-none">
-            <span className="text-sm font-extrabold tracking-tight sm:text-base">
-              السعادة ماركت <span className="hidden text-navy-foreground/80 sm:inline">| Al Saada Market</span>
+          {identity.showLogo && (
+            <span className="flex h-6 w-6 items-center justify-center overflow-hidden rounded-lg bg-white/95 p-1 sm:h-8 sm:w-8">
+              {identity.logoUrl ? (
+                <img src={identity.logoUrl} alt={siteName} className="h-full w-full object-contain" />
+              ) : (
+                <BrandLogo size={18} />
+              )}
             </span>
-            <span className="hidden text-[10px] text-navy-foreground/60 sm:block">{t("header.tagline2")}</span>
-          </span>
+          )}
+          {identity.showName && (
+            <span className="flex flex-col leading-none">
+              <span className="text-sm font-extrabold tracking-tight sm:text-base">
+                {siteName} <span className="hidden text-navy-foreground/80 sm:inline">| {altName}</span>
+              </span>
+              {tagline && (
+                <span className="hidden text-[10px] text-navy-foreground/60 sm:block">{tagline}</span>
+              )}
+            </span>
+          )}
         </Link>
 
         <div className="flex flex-1 justify-start" />
