@@ -466,7 +466,7 @@ function ListingPage() {
               )}
             </div>
             <div className="mt-3 flex items-start justify-between gap-3">
-              <h1 className="text-2xl font-extrabold">{item.title}</h1>
+              <h1 className="text-2xl font-extrabold">{displayTitle}</h1>
               <button
                 onClick={toggleFavorite}
                 aria-label="إضافة إلى المفضلة"
