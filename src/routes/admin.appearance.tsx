@@ -173,6 +173,109 @@ function IdentitySection() {
   );
 }
 
+function BannersSection() {
+  const { banners, save } = useHomeBanners();
+  const [draft, setDraft] = useState<HomeBanners>(banners);
+  const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState<string | null>(null);
+
+  const addImage = async (pos: BannerPosition, file: File | undefined) => {
+    if (!file) return;
+    setUploading(pos);
+    try {
+      const url = await uploadImage(file);
+      const item: HomeBanner = { id: crypto.randomUUID(), imageUrl: url, link: "" };
+      setDraft((d) => ({ ...d, [pos]: [...d[pos], item] }));
+      toast.success("تم رفع الصورة");
+    } catch {
+      toast.error("تعذّر رفع الصورة");
+    } finally {
+      setUploading(null);
+    }
+  };
+
+  const setLink = (pos: BannerPosition, id: string, link: string) =>
+    setDraft((d) => ({ ...d, [pos]: d[pos].map((b) => (b.id === id ? { ...b, link } : b)) }));
+
+  const remove = (pos: BannerPosition, id: string) =>
+    setDraft((d) => ({ ...d, [pos]: d[pos].filter((b) => b.id !== id) }));
+
+  const onSave = async () => {
+    setSaving(true);
+    try {
+      await save(draft);
+      toast.success("تم حفظ صور الصفحة الرئيسية");
+    } catch {
+      toast.error("تعذّر الحفظ، تأكد من صلاحياتك");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const field = "h-9 w-full rounded-lg border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary";
+
+  return (
+    <div className="rounded-2xl border border-border bg-card p-5 shadow-card">
+      <h3 className="mb-1 font-bold text-card-foreground">صور الصفحة الرئيسية</h3>
+      <p className="mb-4 text-xs text-muted-foreground">
+        ارفع صوراً إعلانية في أعلى وأسفل ويمين ويسار الصفحة الرئيسية. كل صورة يمكن ربطها برابط.
+      </p>
+
+      <div className="grid gap-5 lg:grid-cols-2">
+        {BANNER_POSITIONS.map(({ key, ar }) => (
+          <div key={key} className="rounded-xl border border-border p-4">
+            <div className="mb-3 flex items-center justify-between">
+              <span className="font-semibold">{ar}</span>
+              <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-border px-3 py-1.5 text-sm font-bold hover:bg-muted">
+                {uploading === key ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                رفع صورة
+                <input type="file" accept="image/*" className="hidden" onChange={(e) => addImage(key, e.target.files?.[0])} />
+              </label>
+            </div>
+            {draft[key].length === 0 ? (
+              <p className="text-xs text-muted-foreground">لا توجد صور بعد.</p>
+            ) : (
+              <div className="space-y-3">
+                {draft[key].map((b) => (
+                  <div key={b.id} className="flex items-center gap-3 rounded-lg border border-border p-2">
+                    <img src={b.imageUrl} alt="" className="h-14 w-20 shrink-0 rounded-md object-cover" />
+                    <input
+                      className={field}
+                      placeholder="رابط عند النقر (اختياري)"
+                      value={b.link}
+                      onChange={(e) => setLink(key, b.id, e.target.value)}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => remove(key, b.id)}
+                      className="shrink-0 text-xs text-destructive hover:underline"
+                    >
+                      حذف
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-5">
+        <button
+          onClick={onSave}
+          disabled={saving}
+          className="inline-flex items-center gap-2 rounded-full bg-gradient-primary px-6 py-2.5 font-bold text-primary-foreground shadow-glow disabled:opacity-60"
+        >
+          {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+          حفظ صور الصفحة
+        </button>
+      </div>
+    </div>
+  );
+}
+
+
+
 function AppearancePage() {
   const { theme, preview, save } = useTheme();
   const [draft, setDraft] = useState<ThemeSettings>(theme);
