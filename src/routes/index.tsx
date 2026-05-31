@@ -4,6 +4,7 @@ import { WeBuyBanner } from "@/components/WeBuyBanner";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { Hero } from "@/components/Hero";
 import { CategoryGrid } from "@/components/CategoryGrid";
+import { PromoCarousel } from "@/components/PromoCarousel";
 // FeatureStrip removed per request — no marketing feature text on home page
 import { ListingsSection } from "@/components/ListingsSection";
 import { AuctionsSection } from "@/components/AuctionsSection";
@@ -48,6 +49,7 @@ function Index() {
       <WeBuyBanner />
       <main>
         <Hero />
+        <PromoCarousel />
         <CategoryGrid />
         <ListingsSection title={t("sec.featured")} subtitle={t("sec.featuredSub")} items={featured} />
         <AuctionsSection />

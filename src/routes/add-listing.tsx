@@ -15,6 +15,7 @@ import {
   Store,
   Check,
   Pencil,
+  Eye,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Header } from "@/components/Header";
@@ -27,7 +28,14 @@ import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/hooks/useLanguage";
 import { supabase } from "@/integrations/supabase/client";
 
+interface AddListingSearch {
+  edit?: string;
+}
+
 export const Route = createFileRoute("/add-listing")({
+  validateSearch: (search: Record<string, unknown>): AddListingSearch => ({
+    edit: typeof search.edit === "string" ? search.edit : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "أضف إعلان | السعادة ماركت Al Saada Market" },
@@ -57,9 +65,14 @@ function AddListingPage() {
   const { user } = useAuth();
   const { t, lang } = useLanguage();
   const ar = lang === "ar";
+  const { edit: editId } = Route.useSearch();
+  const isEdit = !!editId;
   const [listingType, setListingType] = useState<ListingType | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [step, setStep] = useState(1);
+  const [showPreview, setShowPreview] = useState(false);
+  // Already-uploaded images (edit mode)
+  const [existingImages, setExistingImages] = useState<string[]>([]);
 
   // Guest contact (required if not logged in)
   const [guestName, setGuestName] = useState("");
@@ -142,6 +155,47 @@ function AddListingPage() {
       .select("name, category_id, item_name")
       .then(({ data }) => setDbBrands(data ?? []));
   }, []);
+
+  // Load existing listing when editing
+  useEffect(() => {
+    if (!editId) return;
+    supabase
+      .from("listings")
+      .select("*")
+      .eq("id", editId)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (!data) return;
+        setListingType((data.listing_type as ListingType) ?? "normal");
+        setTitleText(data.title ?? "");
+        setDescText(data.description ?? "");
+        setCategoryId(data.category_id ?? "");
+        setGroupName(data.group_name ?? "");
+        setItemName(data.item_name ?? "");
+        setBrand(data.brand ?? "");
+        setRegion(data.city ?? "");
+        setPrice(String(data.price ?? ""));
+        setCondition(data.condition ?? "مستعمل");
+        setNegotiable(Boolean(data.negotiable_flag ?? data.negotiable));
+        setDelivery(Boolean(data.delivery_available));
+        setExistingImages((data.images as string[] | null) ?? []);
+        if (data.lat != null && data.lng != null) {
+          setCoords({ lat: Number(data.lat), lng: Number(data.lng) });
+        }
+        setBiz((p) => ({
+          ...p,
+          rent: data.rent != null ? String(data.rent) : "",
+          area: data.area_sqm != null ? String(data.area_sqm) : "",
+          outlets: data.outlets != null ? String(data.outlets) : "",
+          staff: data.staff_count != null ? String(data.staff_count) : "",
+          monthlyRevenue: data.monthly_revenue != null ? String(data.monthly_revenue) : "",
+          opCost: data.operating_cost != null ? String(data.operating_cost) : "",
+          license: data.has_license ? "with" : "without",
+          reason: data.sale_reason ?? "",
+        }));
+        setStep(1);
+      });
+  }, [editId]);
 
   const brandOptions = useMemo(() => {
     if (!categoryId) return [];
@@ -268,7 +322,7 @@ function AddListingPage() {
     if (s === 1) {
       if (!titleText.trim()) return fail(ar ? "اكتب عنوان الإعلان" : "Enter a title");
       if (!descText.trim()) return fail(ar ? "اكتب وصف الإعلان" : "Enter a description");
-      if (images.length === 0) return fail(t("toast.needImage"));
+      if (images.length === 0 && existingImages.length === 0) return fail(t("toast.needImage"));
       return true;
     }
     if (s === 2) {
@@ -303,7 +357,8 @@ function AddListingPage() {
 
     setSaving(true);
     try {
-      const imageUrls = await Promise.all(images.map((img) => uploadFile(img.file, "images")));
+      const uploadedUrls = await Promise.all(images.map((img) => uploadFile(img.file, "images")));
+      const imageUrls = [...existingImages, ...uploadedUrls];
 
       const isBusiness = listingType === "business";
       const isAuction = listingType === "auction";
@@ -325,7 +380,6 @@ function AddListingPage() {
         lat: coords?.lat ?? null,
         lng: coords?.lng ?? null,
         images: imageUrls,
-        video: null,
         contact_name: user ? (user.email ?? null) : guestName.trim(),
         contact_phone: user ? null : guestPhone.trim(),
         status: "approved",
@@ -344,7 +398,15 @@ function AddListingPage() {
         delivery_available: isAuction ? false : delivery,
       };
 
-      const { data, error } = await supabase.from("listings").insert(payload).select("id").single();
+      if (isEdit && editId) {
+        const { error } = await supabase.from("listings").update(payload).eq("id", editId);
+        if (error) throw error;
+        toast.success(ar ? "تم تحديث الإعلان" : "Listing updated");
+        navigate({ to: "/listing/$id", params: { id: editId } });
+        return;
+      }
+
+      const { data, error } = await supabase.from("listings").insert({ ...payload, video: null }).select("id").single();
       if (error) throw error;
       setNewId(data?.id ?? null);
       setSubmitted(true);
@@ -560,6 +622,19 @@ function AddListingPage() {
               </label>
               <input ref={imgInput} type="file" accept="image/*" multiple hidden onChange={(e) => handleImages(e.target.files)} />
               <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
+                {existingImages.map((url, i) => (
+                  <div key={url} className="group relative aspect-square overflow-hidden rounded-lg border border-border">
+                    <img src={url} alt={`صورة ${i + 1}`} className="h-full w-full object-cover" />
+                    <button
+                      type="button"
+                      aria-label={`حذف الصورة ${i + 1}`}
+                      onClick={() => setExistingImages((p) => p.filter((_, idx) => idx !== i))}
+                      className="absolute start-1 top-1 rounded-full bg-destructive p-1 text-destructive-foreground opacity-0 transition group-hover:opacity-100"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                ))}
                 {images.map((img, i) => (
                   <div key={img.url} className="group relative aspect-square overflow-hidden rounded-lg border border-border">
                     <img src={img.url} alt={`صورة الإعلان ${i + 1}`} className="h-full w-full object-cover" />
@@ -942,13 +1017,30 @@ function AddListingPage() {
                 {ar ? "التالي" : "Next"}
               </button>
             ) : (
-              <button
-                type="submit"
-                disabled={saving}
-                className="flex-1 rounded-full bg-gradient-primary px-6 py-3 font-bold text-primary-foreground shadow-glow transition-transform hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {saving ? (ar ? "جارٍ النشر..." : "Publishing...") : submitLabel}
-              </button>
+              <>
+                <button
+                  type="button"
+                  onClick={() => setShowPreview(true)}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-primary/40 px-5 py-3 font-bold text-primary hover:bg-accent"
+                >
+                  <Eye className="h-4 w-4" /> {ar ? "معاينة" : "Preview"}
+                </button>
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="flex-1 rounded-full bg-gradient-primary px-6 py-3 font-bold text-primary-foreground shadow-glow transition-transform hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {saving
+                    ? ar
+                      ? "جارٍ الحفظ..."
+                      : "Saving..."
+                    : isEdit
+                      ? ar
+                        ? "حفظ التعديلات"
+                        : "Save changes"
+                      : submitLabel}
+                </button>
+              </>
             )}
           </div>
         </form>
@@ -968,6 +1060,49 @@ function AddListingPage() {
           );
         }}
       />
+      {showPreview && (
+        <div
+          className="fixed inset-0 z-[100] flex items-start justify-center overflow-auto bg-black/70 p-4"
+          onClick={() => setShowPreview(false)}
+        >
+          <div
+            className="my-8 w-full max-w-md rounded-2xl border border-border bg-card p-5 shadow-card"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="text-lg font-extrabold">{ar ? "معاينة الإعلان" : "Listing preview"}</h2>
+              <button type="button" onClick={() => setShowPreview(false)} aria-label="إغلاق">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            {(existingImages[0] || images[0]) && (
+              <img
+                src={existingImages[0] ?? images[0].url}
+                alt={titleText}
+                className="aspect-[4/3] w-full rounded-xl object-cover"
+              />
+            )}
+            <h3 className="mt-3 text-xl font-extrabold">{titleText || (ar ? "بدون عنوان" : "Untitled")}</h3>
+            <div className="mt-1 flex items-baseline gap-1">
+              <span className="text-2xl font-extrabold text-primary">{Number(price || 0).toLocaleString("ar")}</span>
+              <span className="text-sm text-muted-foreground">د.ب</span>
+            </div>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {[region, condition].filter(Boolean).join(" • ")}
+            </p>
+            {descText && (
+              <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">{descText}</p>
+            )}
+            <button
+              type="button"
+              onClick={() => setShowPreview(false)}
+              className="mt-4 w-full rounded-full bg-primary px-5 py-2.5 font-bold text-primary-foreground"
+            >
+              {ar ? "متابعة" : "Continue"}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
