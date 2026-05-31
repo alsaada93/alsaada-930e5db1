@@ -1,13 +1,15 @@
 import { Sparkles, ShieldCheck, MessageSquare, Smartphone } from "lucide-react";
-
-const features = [
-  { icon: Sparkles, title: "تسعير ذكي بالـ AI", desc: "اعرف السعر السوقي العادل والمدة المتوقعة للبيع فور إضافة الإعلان." },
-  { icon: ShieldCheck, title: "حماية من الاحتيال", desc: "اكتشاف الإعلانات المكررة والصور المزيفة والحسابات غير الموثوقة." },
-  { icon: MessageSquare, title: "تواصل مباشر", desc: "دردشة داخل الموقع وواتساب واتصال مباشر مع البائع." },
-  { icon: Smartphone, title: "تطبيق PWA", desc: "تجربة سريعة على الجوال مع إشعارات فورية ودعم العربية والإنجليزية." },
-];
+import { useLanguage } from "@/hooks/useLanguage";
 
 export function FeatureStrip() {
+  const { t } = useLanguage();
+  const features = [
+    { icon: Sparkles, title: t("feat.aiTitle"), desc: t("feat.aiDesc") },
+    { icon: ShieldCheck, title: t("feat.fraudTitle"), desc: t("feat.fraudDesc") },
+    { icon: MessageSquare, title: t("feat.chatTitle"), desc: t("feat.chatDesc") },
+    { icon: Smartphone, title: t("feat.pwaTitle"), desc: t("feat.pwaDesc") },
+  ];
+
   return (
     <section className="border-y border-border bg-accent/40">
       <div className="mx-auto grid max-w-7xl gap-4 px-4 py-10 sm:grid-cols-2 lg:grid-cols-4">

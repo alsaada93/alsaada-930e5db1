@@ -1,22 +1,42 @@
 import { Link } from "@tanstack/react-router";
+import { useLanguage } from "@/hooks/useLanguage";
 
 export function Footer() {
+  const { t, lang } = useLanguage();
   const cols = [
-    { title: "سوقو", links: ["من نحن", "كيف تبيع", "كيف تشتري", "الباقات والأسعار"] },
-    { title: "التصنيفات", links: ["معدات المطاعم", "الكوفي شوب", "الأثاث", "الإلكترونيات"] },
-    { title: "المساعدة", links: ["الأسئلة الشائعة", "تواصل معنا", "الإبلاغ عن إعلان", "مركز الدعم"] },
-    { title: "قانوني", links: ["سياسة الخصوصية", "الشروط والأحكام", "سياسة المزادات"] },
+    {
+      title: lang === "ar" ? "سوقو" : "SOOGO",
+      links: lang === "ar"
+        ? ["من نحن", "كيف تبيع", "كيف تشتري", "الباقات والأسعار"]
+        : ["About us", "How to sell", "How to buy", "Plans & pricing"],
+    },
+    {
+      title: lang === "ar" ? "التصنيفات" : "Categories",
+      links: lang === "ar"
+        ? ["معدات المطاعم", "الكوفي شوب", "الأثاث", "الإلكترونيات"]
+        : ["Restaurant equipment", "Coffee shops", "Furniture", "Electronics"],
+    },
+    {
+      title: lang === "ar" ? "المساعدة" : "Help",
+      links: lang === "ar"
+        ? ["الأسئلة الشائعة", "تواصل معنا", "الإبلاغ عن إعلان", "مركز الدعم"]
+        : ["FAQ", "Contact us", "Report an ad", "Support center"],
+    },
+    {
+      title: lang === "ar" ? "قانوني" : "Legal",
+      links: lang === "ar"
+        ? ["سياسة الخصوصية", "الشروط والأحكام", "سياسة المزادات"]
+        : ["Privacy policy", "Terms & conditions", "Auction policy"],
+    },
   ];
   return (
     <footer className="bg-navy text-navy-foreground">
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:grid-cols-2 lg:grid-cols-5">
         <div className="lg:col-span-1">
           <div className="text-xl font-extrabold">
-            SOOGO <span className="text-primary">| سوقو</span>
+            SOOGO <span className="text-navy-foreground/80">| سوقو</span>
           </div>
-          <p className="mt-2 text-sm text-navy-foreground/60">
-            سوق معدات المطاعم والأثاث والإلكترونيات في البحرين والخليج.
-          </p>
+          <p className="mt-2 text-sm text-navy-foreground/60">{t("footer.tagline")}</p>
         </div>
         {cols.map((c) => (
           <div key={c.title}>
@@ -24,7 +44,7 @@ export function Footer() {
             <ul className="space-y-2 text-sm text-navy-foreground/60">
               {c.links.map((l) => (
                 <li key={l}>
-                  <a href="#" className="transition-colors hover:text-primary">{l}</a>
+                  <a href="#" className="transition-colors hover:text-navy-foreground">{l}</a>
                 </li>
               ))}
             </ul>
@@ -32,9 +52,9 @@ export function Footer() {
         ))}
       </div>
       <div className="flex flex-col items-center justify-center gap-1 border-t border-sidebar-border py-4 text-center text-xs text-navy-foreground/50 sm:flex-row sm:gap-3">
-        <span>© {new Date().getFullYear()} سوقو SOOGO — جميع الحقوق محفوظة</span>
-        <Link to="/admin" className="font-semibold text-primary hover:underline">
-          لوحة الإدارة
+        <span>© {new Date().getFullYear()} سوقو SOOGO — {t("footer.rights")}</span>
+        <Link to="/admin" className="font-semibold text-navy-foreground/80 hover:underline">
+          {t("footer.admin")}
         </Link>
       </div>
     </footer>
