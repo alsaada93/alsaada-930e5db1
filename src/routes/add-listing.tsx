@@ -233,15 +233,25 @@ function AddListingPage() {
 
   const handleImages = (files: FileList | null) => {
     if (!files) return;
-    const remaining = MAX_IMAGES - images.length;
+    const remaining = MAX_IMAGES - media.length;
     if (remaining <= 0) {
       toast.error(t("toast.maxImages"));
       return;
     }
     const next = Array.from(files)
       .slice(0, remaining)
-      .map((f) => ({ url: URL.createObjectURL(f), file: f }));
-    setImages((p) => [...p, ...next]);
+      .map((f) => ({ id: `${Date.now()}-${Math.random().toString(36).slice(2)}`, url: URL.createObjectURL(f), file: f }));
+    setMedia((p) => [...p, ...next]);
+  };
+
+  const moveMedia = (from: number, to: number) => {
+    setMedia((p) => {
+      if (to < 0 || to >= p.length) return p;
+      const arr = [...p];
+      const [item] = arr.splice(from, 1);
+      arr.splice(to, 0, item);
+      return arr;
+    });
   };
 
   const useMyLocation = () => {
