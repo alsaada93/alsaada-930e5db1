@@ -1,6 +1,7 @@
 import { createFileRoute, Outlet, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
+import { AdminLayoutProvider } from "@/components/admin/AdminLayoutContext";
 import { useAuth } from "@/hooks/useAuth";
 import { Loader2, ShieldX } from "lucide-react";
 import { Button } from "@/components/ui/button";
