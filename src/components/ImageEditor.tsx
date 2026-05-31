@@ -60,8 +60,8 @@ async function getCroppedFile(
 }
 
 export default function ImageEditor({ file, open, onClose, onApply }: ImageEditorProps) {
-  const { language } = useLanguage();
-  const ar = language === "ar";
+  const { lang } = useLanguage();
+  const ar = lang === "ar";
   const [src, setSrc] = useState<string>("");
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
