@@ -25,7 +25,7 @@ const dict: Dict = {
   // Hero
   "hero.badge": { ar: "مدعوم بالذكاء الاصطناعي", en: "Powered by AI" },
   "hero.title1": { ar: "سوق معدات المطاعم والأثاث والإلكترونيات", en: "Restaurant equipment, furniture & electronics market" },
-  "hero.title2": { ar: "في البحرين والخليج", en: "in Bahrain & the Gulf" },
+  "hero.title2": { ar: "في مملكة البحرين", en: "in the Kingdom of Bahrain" },
   "hero.subtitle": { ar: "بيع، شراء ومزاد على المعدات بثقة — تسعير ذكي، حماية من الاحتيال، وآلاف الإعلانات.", en: "Buy, sell and bid on equipment with confidence — smart pricing, fraud protection, and thousands of listings." },
   "hero.searchPlaceholder": { ar: "ماذا تبحث عنه اليوم؟", en: "What are you looking for today?" },
   "hero.imageSearch": { ar: "بحث بالصورة", en: "Image search" },
@@ -56,7 +56,7 @@ const dict: Dict = {
   "sec.latestSub": { ar: "آخر ما تم إضافته على سوقو", en: "Newest additions on SOOGO" },
 
   // Footer
-  "footer.tagline": { ar: "سوق معدات المطاعم والأثاث والإلكترونيات في البحرين والخليج.", en: "Restaurant equipment, furniture and electronics market in Bahrain & the Gulf." },
+  "footer.tagline": { ar: "سوقو — منصة بيع وشراء ومزاد معدات المطاعم والأثاث والإلكترونيات في مملكة البحرين.", en: "SOOGO — buy, sell and bid on restaurant equipment, furniture and electronics in the Kingdom of Bahrain." },
   "footer.rights": { ar: "جميع الحقوق محفوظة", en: "All rights reserved" },
   "footer.admin": { ar: "لوحة الإدارة", en: "Admin panel" },
 
@@ -77,7 +77,7 @@ const dict: Dict = {
   "add.newAd": { ar: "أضف إعلان جديد", en: "Add a new listing" },
   "add.newAuction": { ar: "إنشاء مزاد جديد", en: "Create a new auction" },
   "add.newBusiness": { ar: "بيع نشاط تجاري كامل", en: "Sell a full business" },
-  "add.formSub": { ar: "املأ التفاصيل لعرض إعلانك على آلاف المشترين في البحرين والخليج.", en: "Fill in the details to show your ad to thousands of buyers in Bahrain & the Gulf." },
+  "add.formSub": { ar: "املأ التفاصيل لعرض إعلانك على آلاف المشترين في مملكة البحرين.", en: "Fill in the details to show your ad to thousands of buyers in the Kingdom of Bahrain." },
   "add.contactGuest": { ar: "بيانات التواصل (للنشر كزائر)", en: "Contact details (post as guest)" },
   "add.loginShort": { ar: "تسجيل الدخول", en: "Login" },
   "add.name": { ar: "الاسم", en: "Name" },

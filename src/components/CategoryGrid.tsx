@@ -30,11 +30,11 @@ export function CategoryGrid() {
             params={{ id: c.id }}
             className="group flex flex-col items-start gap-2 rounded-2xl border border-border bg-card p-4 text-start shadow-card transition-all hover:-translate-y-1 hover:border-primary/40"
           >
-            <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-accent to-secondary p-2.5 ring-1 ring-border transition-transform group-hover:scale-110">
+            <span className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-primary/15 via-accent to-secondary p-2 ring-1 ring-primary/20 transition-transform group-hover:scale-110 group-hover:ring-primary/40">
               {logos[c.id] ? (
-                <img src={logos[c.id]} alt={c.nameEn} width={56} height={56} loading="lazy" className="h-full w-full object-contain" />
+                <img src={logos[c.id]} alt={c.nameEn} width={64} height={64} loading="lazy" className="h-full w-full scale-110 object-contain" />
               ) : (
-                <span className="text-2xl">{c.icon}</span>
+                <span className="text-3xl">{c.icon}</span>
               )}
             </span>
             <h3 className="font-bold text-card-foreground">{lang === "ar" ? c.name : c.nameEn}</h3>
