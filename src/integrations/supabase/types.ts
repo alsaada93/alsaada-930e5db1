@@ -35,6 +35,83 @@ export type Database = {
         }
         Relationships: []
       }
+      seller_reviews: {
+        Row: {
+          comment: string | null
+          created_at: string
+          id: string
+          rating: number
+          reviewer_id: string
+          seller_id: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          rating: number
+          reviewer_id: string
+          seller_id: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          rating?: number
+          reviewer_id?: string
+          seller_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seller_reviews_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "sellers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sellers: {
+        Row: {
+          city: string | null
+          created_at: string
+          deals_count: number
+          id: string
+          member_since: string
+          name: string
+          phone: string | null
+          rating: number
+          reviews_count: number
+          updated_at: string
+          verified: boolean
+        }
+        Insert: {
+          city?: string | null
+          created_at?: string
+          deals_count?: number
+          id: string
+          member_since?: string
+          name: string
+          phone?: string | null
+          rating?: number
+          reviews_count?: number
+          updated_at?: string
+          verified?: boolean
+        }
+        Update: {
+          city?: string | null
+          created_at?: string
+          deals_count?: number
+          id?: string
+          member_since?: string
+          name?: string
+          phone?: string | null
+          rating?: number
+          reviews_count?: number
+          updated_at?: string
+          verified?: boolean
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
