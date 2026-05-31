@@ -152,8 +152,8 @@ const dict: Dict = {
   "toast.needImage": { ar: "أضف صورة واحدة على الأقل", en: "Add at least one image" },
   "speed.fast": { ar: "سريع (3-7 أيام)", en: "Fast (3-7 days)" },
   "speed.medium": { ar: "متوسط (1-3 أسابيع)", en: "Medium (1-3 weeks)" },
-  "market.above": { ar: "أعلى قليلاً من متوسط السوق", en: "Slightly above market average" },
-  "market.within": { ar: "ضمن متوسط السوق ومنافس", en: "Within market average and competitive" },
+  "market.above": { ar: "أعلى قليلاً من أسعار أولكس والسوق المفتوح", en: "Slightly above OLX & Open Souq prices" },
+  "market.within": { ar: "منافس ضمن أسعار أولكس والسوق المفتوح", en: "Competitive with OLX & Open Souq prices" },
 };
 
 interface LanguageContextValue {
