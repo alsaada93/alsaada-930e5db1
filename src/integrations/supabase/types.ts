@@ -157,6 +157,36 @@ export type Database = {
         }
         Relationships: []
       }
+      listing_deletions: {
+        Row: {
+          created_at: string
+          id: string
+          listing_id: string
+          listing_title: string | null
+          other_site: string | null
+          reason: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          listing_id: string
+          listing_title?: string | null
+          other_site?: string | null
+          reason: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          listing_id?: string
+          listing_title?: string | null
+          other_site?: string | null
+          reason?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       listings: {
         Row: {
           area_sqm: number | null

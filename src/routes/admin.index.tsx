@@ -1,4 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Area,
   AreaChart,
@@ -24,6 +26,7 @@ import {
   Eye,
 } from "lucide-react";
 import { AdminHeader } from "@/components/admin/AdminHeader";
+import { DELETE_REASONS } from "@/components/DeleteListingDialog";
 import {
   adminStats,
   visitorsTrend,
@@ -76,6 +79,10 @@ function AdminDashboard() {
             </div>
           ))}
         </div>
+
+        <DeletionStats />
+
+
 
         <div className="grid gap-6 lg:grid-cols-3">
           <div className="rounded-2xl border border-border bg-card p-5 shadow-card lg:col-span-2">
@@ -140,3 +147,69 @@ function AdminDashboard() {
     </div>
   );
 }
+
+function DeletionStats() {
+  const [counts, setCounts] = useState<Record<string, number>>({});
+  const [sites, setSites] = useState<string[]>([]);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+    supabase
+      .from("listing_deletions")
+      .select("reason,other_site")
+      .then(({ data }) => {
+        if (!active) return;
+        const c: Record<string, number> = {};
+        const s: string[] = [];
+        (data ?? []).forEach((r: { reason: string; other_site: string | null }) => {
+          c[r.reason] = (c[r.reason] ?? 0) + 1;
+          if (r.other_site) s.push(r.other_site);
+        });
+        setCounts(c);
+        setSites(Array.from(new Set(s)));
+        setTotal((data ?? []).length);
+        setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  return (
+    <div className="rounded-2xl border border-border bg-card p-5 shadow-card">
+      <h3 className="mb-4 font-bold text-card-foreground">أسباب حذف الإعلانات ({total.toLocaleString("ar")})</h3>
+      {loading ? (
+        <p className="text-sm text-muted-foreground">جارٍ التحميل...</p>
+      ) : total === 0 ? (
+        <p className="text-sm text-muted-foreground">لا توجد بيانات بعد.</p>
+      ) : (
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {DELETE_REASONS.map((r) => {
+            const value = counts[r.key] ?? 0;
+            const pct = total ? Math.round((value / total) * 100) : 0;
+            return (
+              <div key={r.key} className="rounded-xl border border-border bg-background p-3">
+                <div className="flex items-center justify-between text-sm font-semibold">
+                  <span>{r.label}</span>
+                  <span className="text-primary">{value.toLocaleString("ar")}</span>
+                </div>
+                <div className="mt-2 h-2 overflow-hidden rounded-full bg-muted">
+                  <div className="h-full rounded-full bg-gradient-primary" style={{ width: `${pct}%` }} />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+      {sites.length > 0 && (
+        <div className="mt-4 text-sm">
+          <span className="font-semibold">مواقع البيع الأخرى المذكورة: </span>
+          <span className="text-muted-foreground">{sites.join("، ")}</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
