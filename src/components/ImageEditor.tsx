@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Cropper from "react-easy-crop";
 import type { Area } from "react-easy-crop";
-import { Loader2, RotateCcw, RotateCw, Scissors, Sparkles, Check, X } from "lucide-react";
+import { Loader2, RotateCcw, RotateCw, Sparkles, Check, X } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
