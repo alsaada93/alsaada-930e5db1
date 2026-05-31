@@ -110,7 +110,7 @@ function CategoryPage() {
   }, [items, search]);
 
   const regionOptions = useMemo(() => {
-    const present = new Set(items.map((l) => l.city));
+    const present = new Set(items.map((l: Listing) => l.city));
     const list = bahrainRegions.filter((r) => present.has(r));
     if (!regionQuery.trim()) return list;
     return list.filter((r) => r.includes(regionQuery.trim()));
