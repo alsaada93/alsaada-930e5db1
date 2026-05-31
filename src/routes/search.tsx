@@ -54,9 +54,11 @@ function SearchPage() {
     const term = (q ?? "").trim().toLowerCase();
     let list: Listing[] = [...listings];
     if (term) {
+      const words = term.split(/\s+/).filter(Boolean) as string[];
       list = list.filter((l) => {
         const haystack = `${l.title} ${l.category} ${l.sub ?? ""} ${l.city}`.toLowerCase();
-        return haystack.includes(term);
+        // Match if ANY single search word appears in the listing.
+        return words.some((w) => haystack.includes(w));
       });
     }
     if (search.region) list = list.filter((l) => l.city === search.region);

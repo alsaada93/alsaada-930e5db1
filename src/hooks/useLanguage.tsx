@@ -26,7 +26,7 @@ const dict: Dict = {
   "hero.badge": { ar: "مدعوم بالذكاء الاصطناعي", en: "Powered by AI" },
   "hero.title1": { ar: "السعادة ماركت", en: "Al Saada Market" },
   "hero.title2": { ar: "Al Saada Market", en: "السعادة ماركت" },
-  "hero.subtitle": { ar: "شراء وبيع معدات المطاعم والأثاث والإلكترونيات في البحرين — تسعير ذكي وحماية من الاحتيال.", en: "Buy and sell restaurant equipment, furniture and electronics in Bahrain — smart pricing and fraud protection." },
+  "hero.subtitle": { ar: "شراء وبيع معدات المطاعم والأثاث والإلكترونيات في البحرين", en: "Buy and sell restaurant equipment, furniture and electronics in Bahrain" },
   "hero.searchPlaceholder": { ar: "ماذا تبحث عنه اليوم؟", en: "What are you looking for today?" },
   "hero.imageSearch": { ar: "بحث بالصورة", en: "Image search" },
   "hero.search": { ar: "بحث", en: "Search" },

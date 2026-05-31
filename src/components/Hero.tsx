@@ -83,14 +83,18 @@ export function Hero() {
       <div className="absolute inset-0 bg-gradient-hero opacity-80" />
       <div className="relative mx-auto max-w-7xl px-4 py-16 md:py-24">
         <div className="max-w-2xl">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/20 px-3 py-1 text-xs font-bold text-navy-foreground ring-1 ring-white/30">
-            <Sparkles className="h-3.5 w-3.5" /> {t("hero.badge")}
-          </span>
-          <h1 className="mt-4 text-3xl font-extrabold leading-tight md:text-5xl">
+          <h1 className="mt-2 text-3xl font-extrabold leading-tight md:text-5xl">
             <span className="sr-only">السعادة ماركت — سوق بيع وشراء معدات المطاعم والأثاث في البحرين. </span>
             {activeSlide?.title || t("hero.title1")}
             <span className="block text-navy-foreground/90">{activeSlide?.subtitle || t("hero.title2")}</span>
           </h1>
+
+          <p className="mt-4 text-base text-navy-foreground/75 md:text-lg">{t("hero.subtitle")}</p>
+
+          <span className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-primary/20 px-3 py-1 text-xs font-bold text-navy-foreground ring-1 ring-white/30">
+            <Sparkles className="h-3.5 w-3.5" /> {t("hero.badge")}
+          </span>
+
 
           <p className="mt-4 text-base text-navy-foreground/75 md:text-lg">{t("hero.subtitle")}</p>
 
