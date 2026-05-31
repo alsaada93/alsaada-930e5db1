@@ -115,10 +115,11 @@ export function Hero() {
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-primary"
+                disabled={imageSearching}
+                className="rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-primary disabled:opacity-60"
                 aria-label={t("hero.imageSearch")}
               >
-                <Camera className="h-5 w-5" />
+                {imageSearching ? <Loader2 className="h-5 w-5 animate-spin" /> : <Camera className="h-5 w-5" />}
               </button>
               <button
                 type="button"
