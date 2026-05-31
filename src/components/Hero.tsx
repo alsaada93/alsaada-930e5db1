@@ -71,7 +71,7 @@ export function Hero() {
             <div className="flex items-center gap-2">
               <Search className="ms-2 h-5 w-5 shrink-0 text-muted-foreground" />
               <input
-                type="text"
+                type="search"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && goSearch()}
