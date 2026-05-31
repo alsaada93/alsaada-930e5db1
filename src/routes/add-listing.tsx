@@ -71,8 +71,10 @@ function AddListingPage() {
   const [submitted, setSubmitted] = useState(false);
   const [step, setStep] = useState(1);
   const [showPreview, setShowPreview] = useState(false);
-  // Already-uploaded images (edit mode)
-  const [existingImages, setExistingImages] = useState<string[]>([]);
+  // Unified, reorderable media (existing URLs in edit mode + newly added files)
+  const [media, setMedia] = useState<{ id: string; url: string; file?: File }[]>([]);
+  // Existing video (edit mode) — can be removed
+  const [existingVideo, setExistingVideo] = useState<string | null>(null);
 
   // Guest contact (required if not logged in)
   const [guestName, setGuestName] = useState("");
