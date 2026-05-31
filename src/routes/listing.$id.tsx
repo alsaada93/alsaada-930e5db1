@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import { listings } from "@/data/marketplace";
+
 import { useSeller } from "@/hooks/useSellers";
 import { SellerReviews } from "@/components/SellerReviews";
 import { supabase } from "@/integrations/supabase/client";
