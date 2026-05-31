@@ -16,6 +16,13 @@ import {
   DEFAULT_IDENTITY,
   type SiteIdentity,
 } from "@/hooks/useSiteIdentity";
+import {
+  useHomeBanners,
+  BANNER_POSITIONS,
+  type HomeBanners,
+  type HomeBanner,
+  type BannerPosition,
+} from "@/hooks/useHomeBanners";
 
 export const Route = createFileRoute("/admin/appearance")({
   component: AppearancePage,
