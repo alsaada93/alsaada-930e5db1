@@ -18,6 +18,7 @@ export type Database = {
         Row: {
           area_sqm: number | null
           auction_ends_at: string | null
+          brand: string | null
           category_id: string | null
           city: string | null
           condition: string
@@ -54,6 +55,7 @@ export type Database = {
         Insert: {
           area_sqm?: number | null
           auction_ends_at?: string | null
+          brand?: string | null
           category_id?: string | null
           city?: string | null
           condition?: string
@@ -90,6 +92,7 @@ export type Database = {
         Update: {
           area_sqm?: number | null
           auction_ends_at?: string | null
+          brand?: string | null
           category_id?: string | null
           city?: string | null
           condition?: string
