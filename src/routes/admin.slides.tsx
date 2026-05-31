@@ -3,7 +3,6 @@ import { useEffect, useRef, useState } from "react";
 import { Plus, Trash2, ImagePlus, ChevronUp, ChevronDown, Eye, EyeOff, Save, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { AdminHeader } from "@/components/admin/AdminHeader";
-import ImageEditor from "@/components/ImageEditor";
 import { supabase } from "@/integrations/supabase/client";
 import type { HeroSlide } from "@/hooks/useHeroSlides";
 
