@@ -29,8 +29,7 @@ export const Route = createFileRoute("/category/$id")({
   loader: ({ params }) => {
     const category = categories.find((c) => c.id === params.id);
     if (!category) throw notFound();
-    const items = listings.filter((l) => l.category === category.name);
-    return { category, items };
+    return { category };
   },
   head: ({ loaderData, params }) => {
     const name = loaderData?.category.name ?? "التصنيفات";
