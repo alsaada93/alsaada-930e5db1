@@ -131,6 +131,52 @@ function AccountPage() {
       );
       setListings((rows as ListingRow[]) ?? []);
       setLoadingData(false);
+
+      const db = supabase as any;
+      const listingCols = "id,title,price,status,views,images,published_at,expires_at";
+
+      // المفضلة
+      const { data: favRows } = await db
+        .from("favorites")
+        .select("listing_id")
+        .eq("user_id", user.id);
+      const favIds = (favRows ?? []).map((r: any) => r.listing_id);
+      if (favIds.length) {
+        const { data: favListings } = await db
+          .from("listings")
+          .select(listingCols)
+          .in("id", favIds);
+        if (active) setFavorites((favListings as ListingRow[]) ?? []);
+      } else if (active) {
+        setFavorites([]);
+      }
+
+      // البحوث المفضلة
+      const { data: searches } = await db
+        .from("saved_searches")
+        .select("id,query,label")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
+      if (active) setSavedSearches((searches as any) ?? []);
+
+      // إعلانات المتابعون
+      const { data: follows } = await db
+        .from("user_follows")
+        .select("following_id")
+        .eq("follower_id", user.id);
+      const followIds = (follows ?? []).map((r: any) => r.following_id);
+      if (followIds.length) {
+        const { data: followListings } = await db
+          .from("listings")
+          .select(listingCols)
+          .in("user_id", followIds)
+          .eq("status", "approved")
+          .order("published_at", { ascending: false })
+          .limit(30);
+        if (active) setFollowedListings((followListings as ListingRow[]) ?? []);
+      } else if (active) {
+        setFollowedListings([]);
+      }
     })();
     return () => {
       active = false;
