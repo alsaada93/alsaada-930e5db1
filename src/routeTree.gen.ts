@@ -15,6 +15,7 @@ import { Route as PackagesRouteImport } from './routes/packages'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AddListingRouteImport } from './routes/add-listing'
+import { Route as AccountRouteImport } from './routes/account'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as LoginAdminRouteImport } from './routes/login.admin'
@@ -55,6 +56,11 @@ const AdminRoute = AdminRouteImport.update({
 const AddListingRoute = AddListingRouteImport.update({
   id: '/add-listing',
   path: '/add-listing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AccountRoute = AccountRouteImport.update({
+  id: '/account',
+  path: '/account',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -115,6 +121,7 @@ const AdminAppearanceRoute = AdminAppearanceRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/account': typeof AccountRoute
   '/add-listing': typeof AddListingRoute
   '/admin': typeof AdminRouteWithChildren
   '/login': typeof LoginRouteWithChildren
@@ -134,6 +141,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/account': typeof AccountRoute
   '/add-listing': typeof AddListingRoute
   '/login': typeof LoginRouteWithChildren
   '/packages': typeof PackagesRoute
@@ -153,6 +161,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/account': typeof AccountRoute
   '/add-listing': typeof AddListingRoute
   '/admin': typeof AdminRouteWithChildren
   '/login': typeof LoginRouteWithChildren
@@ -174,6 +183,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/account'
     | '/add-listing'
     | '/admin'
     | '/login'
@@ -193,6 +203,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/account'
     | '/add-listing'
     | '/login'
     | '/packages'
@@ -211,6 +222,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/account'
     | '/add-listing'
     | '/admin'
     | '/login'
@@ -231,6 +243,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AccountRoute: typeof AccountRoute
   AddListingRoute: typeof AddListingRoute
   AdminRoute: typeof AdminRouteWithChildren
   LoginRoute: typeof LoginRouteWithChildren
@@ -283,6 +296,13 @@ declare module '@tanstack/react-router' {
       path: '/add-listing'
       fullPath: '/add-listing'
       preLoaderRoute: typeof AddListingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/account': {
+      id: '/account'
+      path: '/account'
+      fullPath: '/account'
+      preLoaderRoute: typeof AccountRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -399,6 +419,7 @@ const LoginRouteWithChildren = LoginRoute._addFileChildren(LoginRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AccountRoute: AccountRoute,
   AddListingRoute: AddListingRoute,
   AdminRoute: AdminRouteWithChildren,
   LoginRoute: LoginRouteWithChildren,
