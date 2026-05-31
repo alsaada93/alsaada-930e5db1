@@ -620,9 +620,10 @@ function AddListingPage() {
 
           <button
             type="submit"
-            className="w-full rounded-full bg-gradient-primary px-6 py-3 font-bold text-primary-foreground shadow-glow transition-transform hover:scale-[1.01]"
+            disabled={saving}
+            className="w-full rounded-full bg-gradient-primary px-6 py-3 font-bold text-primary-foreground shadow-glow transition-transform hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {submitLabel}
+            {saving ? (lang === "ar" ? "جارٍ النشر..." : "Publishing...") : submitLabel}
           </button>
         </form>
       </main>
