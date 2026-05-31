@@ -47,10 +47,19 @@ export function Hero() {
                 placeholder="ماذا تبحث عنه اليوم؟"
                 className="h-11 w-full border-0 bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
               />
-              <button className="rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-primary" aria-label="بحث صوتي">
-                <Mic className="h-5 w-5" />
-              </button>
-              <button className="rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-primary" aria-label="بحث بالصورة">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleImageSelected}
+              />
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-primary"
+                aria-label="بحث بالصورة"
+              >
                 <Camera className="h-5 w-5" />
               </button>
               <button className="rounded-xl bg-gradient-primary px-5 py-2.5 text-sm font-bold text-primary-foreground">
