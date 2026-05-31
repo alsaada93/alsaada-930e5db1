@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { Plus, Trash2, ImagePlus, ChevronUp, ChevronDown, Eye, EyeOff, Save, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { AdminHeader } from "@/components/admin/AdminHeader";
+import ImageEditor from "@/components/ImageEditor";
 import { supabase } from "@/integrations/supabase/client";
 import type { HeroSlide } from "@/hooks/useHeroSlides";
 
@@ -15,6 +16,7 @@ function AdminSlidesPage() {
   const [intervalSec, setIntervalSec] = useState(4);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
 
   const load = async () => {
@@ -32,8 +34,7 @@ function AdminSlidesPage() {
     load();
   }, []);
 
-  const uploadImage = async (files: FileList | null) => {
-    const file = files?.[0];
+  const uploadImage = async (file: File) => {
     if (!file) return;
     setUploading(true);
     try {
@@ -116,7 +117,17 @@ function AdminSlidesPage() {
 
         {/* Add image */}
         <div className="flex justify-end">
-          <input ref={fileInput} type="file" accept="image/*" hidden onChange={(e) => uploadImage(e.target.files)} />
+          <input
+            ref={fileInput}
+            type="file"
+            accept="image/*"
+            hidden
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) setPendingFile(f);
+              e.target.value = "";
+            }}
+          />
           <button
             onClick={() => fileInput.current?.click()}
             disabled={uploading}
@@ -177,6 +188,15 @@ function AdminSlidesPage() {
           </ul>
         )}
       </div>
+      <ImageEditor
+        open={pendingFile !== null}
+        file={pendingFile}
+        onClose={() => setPendingFile(null)}
+        onApply={(edited) => {
+          setPendingFile(null);
+          uploadImage(edited);
+        }}
+      />
     </div>
   );
 }

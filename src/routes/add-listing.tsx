@@ -14,10 +14,12 @@ import {
   Gavel,
   Store,
   Check,
+  Pencil,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import ImageEditor from "@/components/ImageEditor";
 import { categories, bahrainRegions, listings, brandsFor } from "@/data/marketplace";
 import { brandLabel } from "@/data/brandLabels";
 import { countries, type Country } from "@/data/countries";
@@ -106,6 +108,7 @@ function AddListingPage() {
   // Media (keep File objects so we can upload them to storage)
   const [images, setImages] = useState<{ url: string; file: File }[]>([]);
   const imgInput = useRef<HTMLInputElement>(null);
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
   // Post-publish video
   const [newId, setNewId] = useState<string | null>(null);
@@ -566,8 +569,15 @@ function AddListingPage() {
                       onClick={() => setImages((p) => p.filter((_, idx) => idx !== i))}
                       className="absolute start-1 top-1 rounded-full bg-destructive p-1 text-destructive-foreground opacity-0 transition group-hover:opacity-100"
                     >
-
                       <X className="h-3.5 w-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      aria-label={ar ? `تعديل الصورة ${i + 1}` : `Edit image ${i + 1}`}
+                      onClick={() => setEditingIndex(i)}
+                      className="absolute end-1 top-1 rounded-full bg-primary p-1 text-primary-foreground opacity-0 transition group-hover:opacity-100"
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
                     </button>
                   </div>
                 ))}
@@ -944,6 +954,20 @@ function AddListingPage() {
         </form>
       </main>
       <Footer />
+      <ImageEditor
+        open={editingIndex !== null}
+        file={editingIndex !== null ? images[editingIndex]?.file ?? null : null}
+        onClose={() => setEditingIndex(null)}
+        onApply={(edited) => {
+          setImages((prev) =>
+            prev.map((img, idx) => {
+              if (idx !== editingIndex) return img;
+              URL.revokeObjectURL(img.url);
+              return { url: URL.createObjectURL(edited), file: edited };
+            }),
+          );
+        }}
+      />
     </div>
   );
 }
