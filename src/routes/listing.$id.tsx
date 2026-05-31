@@ -59,15 +59,38 @@ export const Route = createFileRoute("/listing/$id")({
       },
     };
   },
-  head: ({ loaderData }) => {
+  head: ({ loaderData, params }) => {
     const t = loaderData?.item.title ?? "إعلان";
+    const url = `https://soogo-hub.lovable.app/listing/${params.id}`;
+    const image = loaderData?.item.image ?? "";
     return {
       meta: [
         { title: `${t} | سوقو SOOGO` },
         { name: "description", content: `${t} — ${loaderData?.item.city ?? ""} على سوقو` },
         { property: "og:title", content: `${t} | سوقو SOOGO` },
         { property: "og:description", content: `${t} للبيع في ${loaderData?.item.city ?? "البحرين"}` },
-        { property: "og:image", content: loaderData?.item.image ?? "" },
+        { property: "og:type", content: "product" },
+        { property: "og:url", content: url },
+        ...(image ? [{ property: "og:image", content: image }] : []),
+      ],
+      links: [{ rel: "canonical", href: url }],
+      scripts: [
+        {
+          type: "application/ld+json",
+          children: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Product",
+            name: t,
+            ...(image ? { image } : {}),
+            ...(loaderData?.item.description ? { description: loaderData.item.description } : {}),
+            offers: {
+              "@type": "Offer",
+              price: loaderData?.item.price ?? 0,
+              priceCurrency: "BHD",
+              url,
+            },
+          }),
+        },
       ],
     };
   },
