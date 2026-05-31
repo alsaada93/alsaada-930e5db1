@@ -48,6 +48,7 @@ function Index() {
       <WeBuyBanner />
       <main>
         <Hero />
+        <PromoCarousel />
         <CategoryGrid />
         <ListingsSection title={t("sec.featured")} subtitle={t("sec.featuredSub")} items={featured} />
         <AuctionsSection />
