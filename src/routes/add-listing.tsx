@@ -199,7 +199,7 @@ function AddListingPage() {
       const isAuction = listingType === "auction";
       const auctionHours = numOrNull(fd.get("auctionDuration")) ?? 24;
 
-      const payload: Record<string, unknown> = {
+      const payload = {
         user_id: user?.id ?? null,
         listing_type: listingType,
         title: String(fd.get("title") || "").trim(),
