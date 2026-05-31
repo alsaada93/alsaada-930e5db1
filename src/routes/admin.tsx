@@ -53,7 +53,7 @@ function AdminLayout() {
               variant="ghost"
               onClick={async () => {
                 await signOut();
-                navigate({ to: "/login" });
+                navigate({ to: "/login/admin" });
               }}
             >
               تسجيل الخروج
