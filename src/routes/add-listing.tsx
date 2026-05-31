@@ -559,12 +559,14 @@ function AddListingPage() {
               <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
                 {images.map((img, i) => (
                   <div key={img.url} className="group relative aspect-square overflow-hidden rounded-lg border border-border">
-                    <img src={img.url} alt={`${i + 1}`} className="h-full w-full object-cover" />
+                    <img src={img.url} alt={`صورة الإعلان ${i + 1}`} className="h-full w-full object-cover" />
                     <button
                       type="button"
+                      aria-label={`حذف الصورة ${i + 1}`}
                       onClick={() => setImages((p) => p.filter((_, idx) => idx !== i))}
                       className="absolute start-1 top-1 rounded-full bg-destructive p-1 text-destructive-foreground opacity-0 transition group-hover:opacity-100"
                     >
+
                       <X className="h-3.5 w-3.5" />
                     </button>
                   </div>
