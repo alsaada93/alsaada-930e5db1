@@ -15,19 +15,15 @@ export const Route = createFileRoute("/search")({
   validateSearch: (search: Record<string, unknown>): SearchParams => ({
     q: typeof search.q === "string" ? search.q : undefined,
   }),
-  head: ({ search }) => {
-    const q = (search as SearchParams)?.q ?? "";
-    const title = q ? `نتائج البحث: ${q} | السعادة ماركت` : "بحث | السعادة ماركت";
-    return {
-      meta: [
-        { title },
-        { name: "description", content: "ابحث عن معدات المطاعم والأثاث والإلكترونيات في السعادة ماركت." },
-        { property: "og:title", content: title },
-        { property: "og:url", content: "https://soogo-hub.lovable.app/search" },
-      ],
-      links: [{ rel: "canonical", href: "https://soogo-hub.lovable.app/search" }],
-    };
-  },
+  head: () => ({
+    meta: [
+      { title: "بحث | السعادة ماركت" },
+      { name: "description", content: "ابحث عن معدات المطاعم والأثاث والإلكترونيات في السعادة ماركت." },
+      { property: "og:title", content: "بحث | السعادة ماركت" },
+      { property: "og:url", content: "https://soogo-hub.lovable.app/search" },
+    ],
+    links: [{ rel: "canonical", href: "https://soogo-hub.lovable.app/search" }],
+  }),
   component: SearchPage,
 });
 
