@@ -174,6 +174,8 @@ export interface Listing {
   sellerVerified?: boolean;
   sellerDeals?: number;
   phone?: string;
+  userId?: string;
+  description?: string;
   listingType?: "normal" | "auction" | "business";
   // حقول المزاد
   startPrice?: number;
