@@ -31,13 +31,36 @@ export function Hero() {
     return () => clearInterval(id);
   }, [images.length, intervalMs]);
 
-  const handleImageSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    e.target.value = "";
     if (!file) return;
+    if (file.size > 6_000_000) {
+      toast.error(t("hero.imageTooBig"));
+      return;
+    }
     setImageName(file.name);
-    toast.success(t("hero.uploaded"), {
-      description: `${t("hero.searching")} "${file.name}"...`,
-    });
+    setImageSearching(true);
+    toast.info(t("hero.uploaded"), { description: t("hero.searching") });
+    try {
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+      const { query: found } = await searchByImage({ data: { imageDataUrl: dataUrl } });
+      if (found) {
+        setQuery(found);
+        navigate({ to: "/search", search: { q: found } });
+      } else {
+        toast.error(t("hero.imageFailed"));
+      }
+    } catch {
+      toast.error(t("hero.imageFailed"));
+    } finally {
+      setImageSearching(false);
+    }
   };
 
   const activeSlide = slides[current];
