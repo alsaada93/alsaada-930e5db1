@@ -15,6 +15,7 @@ import {
   Store,
   Check,
   Pencil,
+  Eye,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Header } from "@/components/Header";
