@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Gavel, Clock, Users, TrendingUp, Loader2, Radio } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
