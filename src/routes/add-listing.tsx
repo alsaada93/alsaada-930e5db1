@@ -491,11 +491,35 @@ function AddListingPage() {
               className="h-11 w-full rounded-lg border border-border bg-background px-3 text-sm disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-primary"
             >
               <option value="">{lang === "ar" ? "اختر الماركة" : "Choose brand"}</option>
-              {activeCategory?.brands.map((b) => (
+              {brandOptions.map((b) => (
                 <option key={b} value={b}>{b}</option>
               ))}
             </select>
           </div>
+
+          {/* Negotiable + delivery */}
+          {listingType !== "auction" && (
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <label className="flex cursor-pointer items-center justify-between rounded-xl border border-border bg-card px-4 py-3 text-sm font-semibold shadow-card">
+                {lang === "ar" ? "السعر قابل للتفاوض" : "Negotiable price"}
+                <input
+                  type="checkbox"
+                  checked={negotiable}
+                  onChange={(e) => setNegotiable(e.target.checked)}
+                  className="h-5 w-5 rounded border-border accent-primary"
+                />
+              </label>
+              <label className="flex cursor-pointer items-center justify-between rounded-xl border border-border bg-card px-4 py-3 text-sm font-semibold shadow-card">
+                {lang === "ar" ? "خدمة التوصيل متاحة" : "Delivery available"}
+                <input
+                  type="checkbox"
+                  checked={delivery}
+                  onChange={(e) => setDelivery(e.target.checked)}
+                  className="h-5 w-5 rounded border-border accent-primary"
+                />
+              </label>
+            </div>
+          )}
 
 
 
