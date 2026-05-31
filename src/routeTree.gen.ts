@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as PackagesRouteImport } from './routes/packages'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AddListingRouteImport } from './routes/add-listing'
@@ -24,6 +25,11 @@ import { Route as AdminAuctionsRouteImport } from './routes/admin.auctions'
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PackagesRoute = PackagesRouteImport.update({
+  id: '/packages',
+  path: '/packages',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -82,6 +88,7 @@ export interface FileRoutesByFullPath {
   '/add-listing': typeof AddListingRoute
   '/admin': typeof AdminRouteWithChildren
   '/login': typeof LoginRoute
+  '/packages': typeof PackagesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin/auctions': typeof AdminAuctionsRoute
   '/admin/categories': typeof AdminCategoriesRoute
@@ -94,6 +101,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/add-listing': typeof AddListingRoute
   '/login': typeof LoginRoute
+  '/packages': typeof PackagesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin/auctions': typeof AdminAuctionsRoute
   '/admin/categories': typeof AdminCategoriesRoute
@@ -108,6 +116,7 @@ export interface FileRoutesById {
   '/add-listing': typeof AddListingRoute
   '/admin': typeof AdminRouteWithChildren
   '/login': typeof LoginRoute
+  '/packages': typeof PackagesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin/auctions': typeof AdminAuctionsRoute
   '/admin/categories': typeof AdminCategoriesRoute
@@ -123,6 +132,7 @@ export interface FileRouteTypes {
     | '/add-listing'
     | '/admin'
     | '/login'
+    | '/packages'
     | '/sitemap.xml'
     | '/admin/auctions'
     | '/admin/categories'
@@ -135,6 +145,7 @@ export interface FileRouteTypes {
     | '/'
     | '/add-listing'
     | '/login'
+    | '/packages'
     | '/sitemap.xml'
     | '/admin/auctions'
     | '/admin/categories'
@@ -148,6 +159,7 @@ export interface FileRouteTypes {
     | '/add-listing'
     | '/admin'
     | '/login'
+    | '/packages'
     | '/sitemap.xml'
     | '/admin/auctions'
     | '/admin/categories'
@@ -162,6 +174,7 @@ export interface RootRouteChildren {
   AddListingRoute: typeof AddListingRoute
   AdminRoute: typeof AdminRouteWithChildren
   LoginRoute: typeof LoginRoute
+  PackagesRoute: typeof PackagesRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   CategoryIdRoute: typeof CategoryIdRoute
   ListingIdRoute: typeof ListingIdRoute
@@ -174,6 +187,13 @@ declare module '@tanstack/react-router' {
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/packages': {
+      id: '/packages'
+      path: '/packages'
+      fullPath: '/packages'
+      preLoaderRoute: typeof PackagesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -270,6 +290,7 @@ const rootRouteChildren: RootRouteChildren = {
   AddListingRoute: AddListingRoute,
   AdminRoute: AdminRouteWithChildren,
   LoginRoute: LoginRoute,
+  PackagesRoute: PackagesRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   CategoryIdRoute: CategoryIdRoute,
   ListingIdRoute: ListingIdRoute,
@@ -277,3 +298,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
