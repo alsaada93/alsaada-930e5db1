@@ -443,7 +443,20 @@ function ListingPage() {
                 </span>
               )}
             </div>
-            <h1 className="mt-3 text-2xl font-extrabold">{item.title}</h1>
+            <div className="mt-3 flex items-start justify-between gap-3">
+              <h1 className="text-2xl font-extrabold">{item.title}</h1>
+              <button
+                onClick={toggleFavorite}
+                aria-label="إضافة إلى المفضلة"
+                className={`shrink-0 rounded-full border p-2 transition-colors ${
+                  isFav
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border text-muted-foreground hover:bg-muted"
+                }`}
+              >
+                <Heart className={`h-5 w-5 ${isFav ? "fill-current" : ""}`} />
+              </button>
+            </div>
             <div className="mt-2 flex items-baseline gap-1">
               <span className="text-3xl font-extrabold text-primary">{item.price.toLocaleString("ar")}</span>
               <span className="text-sm font-semibold text-muted-foreground">د.ب</span>
