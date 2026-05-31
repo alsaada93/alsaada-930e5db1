@@ -59,7 +59,7 @@ export function ListingsSection({
           }`}
         >
           {items.map((item) => (
-            <ListingCard key={item.id} item={item} />
+            <ListingCard key={item.id} item={item} displayTitle={map[item.id]?.title} />
           ))}
         </div>
       ) : (
