@@ -21,9 +21,9 @@ export const Route = createFileRoute("/search")({
       { title: "بحث | السعادة ماركت" },
       { name: "description", content: "ابحث عن معدات المطاعم والأثاث والإلكترونيات في السعادة ماركت." },
       { property: "og:title", content: "بحث | السعادة ماركت" },
-      { property: "og:url", content: "https://soogo-hub.lovable.app/search" },
+      { property: "og:url", content: "https://alsaada-market.lovable.app/search" },
     ],
-    links: [{ rel: "canonical", href: "https://soogo-hub.lovable.app/search" }],
+    links: [{ rel: "canonical", href: "https://alsaada-market.lovable.app/search" }],
   }),
   component: SearchPage,
 });
