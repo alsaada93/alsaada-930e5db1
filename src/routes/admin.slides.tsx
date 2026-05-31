@@ -36,6 +36,10 @@ function AdminSlidesPage() {
 
   const uploadImage = async (file: File) => {
     if (!file) return;
+    if (slides.length >= 10) {
+      toast.error("الحد الأقصى 10 صور في السلايدر");
+      return;
+    }
     setUploading(true);
     try {
       const ext = file.name.split(".").pop() || "jpg";
