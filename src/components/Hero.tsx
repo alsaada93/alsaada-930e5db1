@@ -1,7 +1,21 @@
-import { Search, Mic, Camera, Sparkles } from "lucide-react";
+import { Search, Camera, Sparkles } from "lucide-react";
+import { useRef, useState } from "react";
+import { toast } from "sonner";
 import heroImg from "@/assets/hero.jpg";
 
 export function Hero() {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [imageName, setImageName] = useState<string | null>(null);
+
+  const handleImageSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImageName(file.name);
+    toast.success("تم رفع الصورة", {
+      description: `جارٍ البحث عن منتجات مشابهة لـ "${file.name}"...`,
+    });
+  };
+
   return (
     <section className="relative overflow-hidden bg-gradient-hero text-navy-foreground">
       <img
