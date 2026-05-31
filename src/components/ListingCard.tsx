@@ -1,24 +1,31 @@
+import { useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { MapPin, Eye, Star, BadgeCheck, MessageCircle, Phone, MessageSquare } from "lucide-react";
-import { toast } from "sonner";
+import { MapPin, Eye, Star, BadgeCheck, MessageCircle, Phone, Tag } from "lucide-react";
 import type { Listing } from "@/data/marketplace";
 import { useSellers } from "@/hooks/useSellers";
+import { useLanguage } from "@/hooks/useLanguage";
+import { logContactAttempt } from "@/lib/contact";
+import { PriceOfferDialog } from "@/components/PriceOfferDialog";
 
 const DEFAULT_PHONE = "97333000000"; // E.164 without +
 
-export function ListingCard({ item }: { item: Listing }) {
+export function ListingCard({ item, displayTitle }: { item: Listing; displayTitle?: string }) {
   const { byId } = useSellers();
+  const { t, lang } = useLanguage();
   const seller = item.sellerId ? byId.get(item.sellerId) : undefined;
+  const [offerOpen, setOfferOpen] = useState(false);
 
   const phone = seller?.phone ?? item.phone ?? DEFAULT_PHONE;
-  const sellerName = seller?.name ?? item.seller ?? "بائع موثوق";
+  const sellerName = seller?.name ?? item.seller ?? t("card.trustedSeller");
   const rating = seller?.rating ?? item.sellerRating ?? 4.8;
   const reviews = seller?.reviews_count ?? item.sellerReviews ?? 0;
   const deals = seller?.deals_count ?? item.sellerDeals ?? 0;
   const verified = seller?.verified ?? item.sellerVerified ?? false;
+  const title = displayTitle || item.title;
+  const condLabel = item.condition === "جديد" ? t("cond.new") : t("cond.used");
 
   const waLink = `https://wa.me/${phone}?text=${encodeURIComponent(
-    `مرحباً، أنا مهتم بإعلان "${item.title}" المعروض على السعادة ماركت.`,
+    `${t("card.contactWaMsg")} "${title}" ${t("card.onSite")}.`,
   )}`;
 
   return (
@@ -27,42 +34,41 @@ export function ListingCard({ item }: { item: Listing }) {
         <div className="relative aspect-[4/3] overflow-hidden bg-muted">
           <img
             src={item.image}
-            alt={item.title}
+            alt={title}
             loading="lazy"
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
           {item.featured && (
             <span className="absolute right-2 top-2 rounded-full bg-gradient-primary px-2 py-0.5 text-[11px] font-bold text-primary-foreground shadow-glow">
-              مميّز
+              {t("card.featured")}
             </span>
           )}
           <span className="absolute left-2 top-2 rounded-full bg-navy/80 px-2 py-0.5 text-[11px] font-semibold text-navy-foreground">
-            {item.condition}
+            {condLabel}
           </span>
         </div>
       </Link>
       <div className="p-3">
         <Link to="/listing/$id" params={{ id: item.id }}>
-          <h3 className="line-clamp-1 font-bold text-card-foreground hover:text-primary">{item.title}</h3>
+          <h3 className="line-clamp-1 font-bold text-card-foreground hover:text-primary">{title}</h3>
         </Link>
         <div className="mt-1 flex items-baseline gap-1">
           <span className="text-lg font-extrabold text-primary">{item.price.toLocaleString("ar")}</span>
           <span className="text-xs font-semibold text-muted-foreground">د.ب</span>
-          {item.negotiable && <span className="text-[11px] text-muted-foreground">• قابل للتفاوض</span>}
+          {item.negotiable && <span className="text-[11px] text-muted-foreground">• {t("card.negotiable")}</span>}
         </div>
 
-        {/* تقييم البائع الحقيقي */}
         <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
           {verified && (
             <span className="inline-flex items-center gap-0.5 font-semibold text-primary">
-              <BadgeCheck className="h-3.5 w-3.5" /> موثق
+              <BadgeCheck className="h-3.5 w-3.5" /> {t("card.verified")}
             </span>
           )}
           <span className="inline-flex items-center gap-0.5 font-semibold text-amber-500">
             <Star className="h-3.5 w-3.5 fill-amber-500" /> {rating.toLocaleString("ar")}
           </span>
-          <span className="text-muted-foreground">({reviews.toLocaleString("ar")} تقييم)</span>
-          {deals > 0 && <span className="text-muted-foreground">• {deals.toLocaleString("ar")} صفقة</span>}
+          <span className="text-muted-foreground">({reviews.toLocaleString("ar")} {t("card.reviews")})</span>
+          {deals > 0 && <span className="text-muted-foreground">• {deals.toLocaleString("ar")} {t("card.deal")}</span>}
         </div>
 
         <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
@@ -74,40 +80,53 @@ export function ListingCard({ item }: { item: Listing }) {
           </span>
         </div>
 
-        {/* أزرار التواصل */}
         <div className="mt-3 grid grid-cols-3 gap-1.5">
           <a
             href={waLink}
             target="_blank"
             rel="noopener noreferrer"
-            onClick={(e) => e.stopPropagation()}
+            onClick={(e) => {
+              e.stopPropagation();
+              logContactAttempt({ recipientId: item.userId, listingId: item.id, method: "whatsapp", listingTitle: item.title });
+            }}
             className="inline-flex items-center justify-center gap-1 rounded-lg bg-[#25D366] px-2 py-1.5 text-xs font-bold text-white transition-opacity hover:opacity-90"
-            aria-label={`تواصل عبر واتساب مع ${sellerName}`}
+            aria-label={t("card.whatsapp")}
           >
-            <MessageCircle className="h-3.5 w-3.5" /> واتساب
+            <MessageCircle className="h-3.5 w-3.5" /> {t("card.whatsapp")}
           </a>
           <a
             href={`tel:+${phone}`}
-            onClick={(e) => e.stopPropagation()}
+            onClick={(e) => {
+              e.stopPropagation();
+              logContactAttempt({ recipientId: item.userId, listingId: item.id, method: "call", listingTitle: item.title });
+            }}
             className="inline-flex items-center justify-center gap-1 rounded-lg bg-primary px-2 py-1.5 text-xs font-bold text-primary-foreground transition-opacity hover:opacity-90"
-            aria-label={`اتصل بـ ${sellerName}`}
+            aria-label={t("card.call")}
           >
-            <Phone className="h-3.5 w-3.5" /> اتصال
+            <Phone className="h-3.5 w-3.5" /> {t("card.call")}
           </a>
           <button
             type="button"
             onClick={(e) => {
               e.stopPropagation();
-              toast.info("الرسائل الداخلية", {
-                description: "سيتم فتح المحادثة بعد تسجيل الدخول.",
-              });
+              setOfferOpen(true);
             }}
             className="inline-flex items-center justify-center gap-1 rounded-lg border border-border bg-muted px-2 py-1.5 text-xs font-bold text-foreground transition-colors hover:bg-accent"
           >
-            <MessageSquare className="h-3.5 w-3.5" /> رسالة
+            <Tag className="h-3.5 w-3.5" /> {t("card.offer")}
           </button>
         </div>
       </div>
+
+      {offerOpen && (
+        <PriceOfferDialog
+          listingId={item.id}
+          recipientId={item.userId}
+          listingTitle={item.title}
+          currentPrice={item.price}
+          onClose={() => setOfferOpen(false)}
+        />
+      )}
     </article>
   );
 }

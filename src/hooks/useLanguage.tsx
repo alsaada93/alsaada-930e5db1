@@ -64,7 +64,27 @@ const dict: Dict = {
   "sec.latest": { ar: "أحدث الإعلانات", en: "Latest listings" },
   "sec.latestSub": { ar: "آخر ما تم إضافته على السعادة ماركت", en: "Newest additions on Al Saada Market" },
 
-  // Footer
+  // Listing card / detail shared labels
+  "card.featured": { ar: "مميّز", en: "Featured" },
+  "card.verified": { ar: "موثق", en: "Verified" },
+  "card.trustedSeller": { ar: "بائع موثوق", en: "Trusted seller" },
+  "card.negotiable": { ar: "قابل للتفاوض", en: "Negotiable" },
+  "card.reviews": { ar: "تقييم", en: "reviews" },
+  "card.deal": { ar: "صفقة", en: "deals" },
+  "card.whatsapp": { ar: "واتساب", en: "WhatsApp" },
+  "card.call": { ar: "اتصال", en: "Call" },
+  "card.message": { ar: "رسالة", en: "Message" },
+  "card.offer": { ar: "عرض سعر", en: "Offer" },
+  "cond.new": { ar: "جديد", en: "New" },
+  "cond.used": { ar: "مستعمل", en: "Used" },
+  "card.views": { ar: "مشاهدة", en: "views" },
+  "card.contactWaMsg": { ar: "مرحباً، أنا مهتم بإعلان", en: "Hello, I'm interested in the listing" },
+  "card.onSite": { ar: "المعروض على السعادة ماركت", en: "on Al Saada Market" },
+  "listing.description": { ar: "الوصف", en: "Description" },
+  "listing.relatedTags": { ar: "وسوم للبحث", en: "Search tags" },
+  "listing.internalMsg": { ar: "الرسائل الداخلية", en: "Internal messages" },
+  "listing.internalMsgDesc": { ar: "سيتم فتح المحادثة بعد تسجيل الدخول.", en: "Chat will open after you log in." },
+
   "footer.tagline": { ar: "السعادة ماركت — منصة بيع وشراء ومزاد معدات المطاعم والأثاث والإلكترونيات في مملكة البحرين.", en: "Al Saada Market — buy, sell and bid on restaurant equipment, furniture and electronics in the Kingdom of Bahrain." },
   "footer.rights": { ar: "جميع الحقوق محفوظة", en: "All rights reserved" },
   "footer.admin": { ar: "لوحة الإدارة", en: "Admin panel" },

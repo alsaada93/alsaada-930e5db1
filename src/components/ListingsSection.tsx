@@ -3,6 +3,7 @@ import { Grid2x2, LayoutGrid } from "lucide-react";
 import { ListingCard } from "./ListingCard";
 import type { Listing } from "@/data/marketplace";
 import { useLanguage } from "@/hooks/useLanguage";
+import { useListingTranslations } from "@/hooks/useListingTranslations";
 
 export function ListingsSection({
   title,
@@ -16,6 +17,7 @@ export function ListingsSection({
   emptyText?: string;
 }) {
   const { lang } = useLanguage();
+  const { map } = useListingTranslations(items.map((i) => ({ id: i.id, title: i.title, description: i.description })));
   // كثافة العرض على الهاتف: عمودان (افتراضي) أو أربعة أعمدة
   const [denseMobile, setDenseMobile] = useState(false);
 
