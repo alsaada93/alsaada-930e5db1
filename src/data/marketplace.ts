@@ -135,6 +135,7 @@ export const categories: Category[] = [
       prepEquip,
       tablesSinks,
     ],
+    brands: commonBrands.restaurant,
   },
   {
     id: "hotels",
