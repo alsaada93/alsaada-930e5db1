@@ -82,9 +82,9 @@ function AddListingPage() {
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [locating, setLocating] = useState(false);
 
-  // Media
-  const [images, setImages] = useState<string[]>([]);
-  const [video, setVideo] = useState<string | null>(null);
+  // Media (keep File objects so we can upload them to storage)
+  const [images, setImages] = useState<{ url: string; file: File }[]>([]);
+  const [video, setVideo] = useState<{ url: string; file: File } | null>(null);
   const imgInput = useRef<HTMLInputElement>(null);
   const vidInput = useRef<HTMLInputElement>(null);
 
@@ -93,6 +93,7 @@ function AddListingPage() {
   const [condition, setCondition] = useState("مستعمل");
   const [estimate, setEstimate] = useState<AiEstimate | null>(null);
   const [estimating, setEstimating] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   const handleImages = (files: FileList | null) => {
     if (!files) return;
