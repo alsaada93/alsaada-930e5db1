@@ -26,7 +26,7 @@ function AdminCategoriesPage() {
     if (!name) return;
     setCats((p) => [
       ...p,
-      { id: crypto.randomUUID(), name, icon: "📦", count: 0, description: "تصنيف جديد", sub: [] },
+      { id: crypto.randomUUID(), name, icon: "📦", count: 0, description: "تصنيف جديد", sub: [], groups: [] },
     ]);
   };
 
