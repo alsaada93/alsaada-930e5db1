@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      brands: {
+        Row: {
+          category_id: string
+          created_at: string
+          id: string
+          item_name: string | null
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          category_id: string
+          created_at?: string
+          id?: string
+          item_name?: string | null
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          category_id?: string
+          created_at?: string
+          id?: string
+          item_name?: string | null
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       hero_slides: {
         Row: {
           active: boolean
@@ -61,6 +88,7 @@ export type Database = {
           contact_name: string | null
           contact_phone: string | null
           created_at: string
+          delivery_available: boolean | null
           description: string | null
           featured: boolean
           group_name: string | null
@@ -74,6 +102,7 @@ export type Database = {
           lng: number | null
           monthly_revenue: number | null
           negotiable: boolean
+          negotiable_flag: boolean | null
           operating_cost: number | null
           outlets: number | null
           price: number
@@ -98,6 +127,7 @@ export type Database = {
           contact_name?: string | null
           contact_phone?: string | null
           created_at?: string
+          delivery_available?: boolean | null
           description?: string | null
           featured?: boolean
           group_name?: string | null
@@ -111,6 +141,7 @@ export type Database = {
           lng?: number | null
           monthly_revenue?: number | null
           negotiable?: boolean
+          negotiable_flag?: boolean | null
           operating_cost?: number | null
           outlets?: number | null
           price?: number
@@ -135,6 +166,7 @@ export type Database = {
           contact_name?: string | null
           contact_phone?: string | null
           created_at?: string
+          delivery_available?: boolean | null
           description?: string | null
           featured?: boolean
           group_name?: string | null
@@ -148,6 +180,7 @@ export type Database = {
           lng?: number | null
           monthly_revenue?: number | null
           negotiable?: boolean
+          negotiable_flag?: boolean | null
           operating_cost?: number | null
           outlets?: number | null
           price?: number

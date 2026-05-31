@@ -21,6 +21,7 @@ import { Route as CategoryIdRouteImport } from './routes/category.$id'
 import { Route as AdminSlidesRouteImport } from './routes/admin.slides'
 import { Route as AdminListingsRouteImport } from './routes/admin.listings'
 import { Route as AdminCategoriesRouteImport } from './routes/admin.categories'
+import { Route as AdminBrandsRouteImport } from './routes/admin.brands'
 import { Route as AdminAuctionsRouteImport } from './routes/admin.auctions'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -83,6 +84,11 @@ const AdminCategoriesRoute = AdminCategoriesRouteImport.update({
   path: '/categories',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminBrandsRoute = AdminBrandsRouteImport.update({
+  id: '/brands',
+  path: '/brands',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminAuctionsRoute = AdminAuctionsRouteImport.update({
   id: '/auctions',
   path: '/auctions',
@@ -97,6 +103,7 @@ export interface FileRoutesByFullPath {
   '/packages': typeof PackagesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin/auctions': typeof AdminAuctionsRoute
+  '/admin/brands': typeof AdminBrandsRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/listings': typeof AdminListingsRoute
   '/admin/slides': typeof AdminSlidesRoute
@@ -111,6 +118,7 @@ export interface FileRoutesByTo {
   '/packages': typeof PackagesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin/auctions': typeof AdminAuctionsRoute
+  '/admin/brands': typeof AdminBrandsRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/listings': typeof AdminListingsRoute
   '/admin/slides': typeof AdminSlidesRoute
@@ -127,6 +135,7 @@ export interface FileRoutesById {
   '/packages': typeof PackagesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin/auctions': typeof AdminAuctionsRoute
+  '/admin/brands': typeof AdminBrandsRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/listings': typeof AdminListingsRoute
   '/admin/slides': typeof AdminSlidesRoute
@@ -144,6 +153,7 @@ export interface FileRouteTypes {
     | '/packages'
     | '/sitemap.xml'
     | '/admin/auctions'
+    | '/admin/brands'
     | '/admin/categories'
     | '/admin/listings'
     | '/admin/slides'
@@ -158,6 +168,7 @@ export interface FileRouteTypes {
     | '/packages'
     | '/sitemap.xml'
     | '/admin/auctions'
+    | '/admin/brands'
     | '/admin/categories'
     | '/admin/listings'
     | '/admin/slides'
@@ -173,6 +184,7 @@ export interface FileRouteTypes {
     | '/packages'
     | '/sitemap.xml'
     | '/admin/auctions'
+    | '/admin/brands'
     | '/admin/categories'
     | '/admin/listings'
     | '/admin/slides'
@@ -278,6 +290,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCategoriesRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/brands': {
+      id: '/admin/brands'
+      path: '/brands'
+      fullPath: '/admin/brands'
+      preLoaderRoute: typeof AdminBrandsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/auctions': {
       id: '/admin/auctions'
       path: '/auctions'
@@ -290,6 +309,7 @@ declare module '@tanstack/react-router' {
 
 interface AdminRouteChildren {
   AdminAuctionsRoute: typeof AdminAuctionsRoute
+  AdminBrandsRoute: typeof AdminBrandsRoute
   AdminCategoriesRoute: typeof AdminCategoriesRoute
   AdminListingsRoute: typeof AdminListingsRoute
   AdminSlidesRoute: typeof AdminSlidesRoute
@@ -298,6 +318,7 @@ interface AdminRouteChildren {
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminAuctionsRoute: AdminAuctionsRoute,
+  AdminBrandsRoute: AdminBrandsRoute,
   AdminCategoriesRoute: AdminCategoriesRoute,
   AdminListingsRoute: AdminListingsRoute,
   AdminSlidesRoute: AdminSlidesRoute,

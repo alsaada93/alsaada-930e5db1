@@ -17,10 +17,11 @@ import {
 import { toast } from "sonner";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import { categories, bahrainRegions, listings } from "@/data/marketplace";
+import { categories, bahrainRegions, listings, brandsFor } from "@/data/marketplace";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/hooks/useLanguage";
 import { supabase } from "@/integrations/supabase/client";
+import { useEffect } from "react";
 
 export const Route = createFileRoute("/add-listing")({
   head: () => ({
@@ -89,6 +90,30 @@ function AddListingPage() {
   const imgInput = useRef<HTMLInputElement>(null);
   const vidInput = useRef<HTMLInputElement>(null);
 
+  // Extra options
+  const [negotiable, setNegotiable] = useState(true);
+  const [delivery, setDelivery] = useState(false);
+  const [descText, setDescText] = useState("");
+
+  // Brands from the database (managed in admin), merged with built-in lists
+  const [dbBrands, setDbBrands] = useState<{ name: string; category_id: string; item_name: string | null }[]>([]);
+  useEffect(() => {
+    supabase
+      .from("brands")
+      .select("name, category_id, item_name")
+      .then(({ data }) => setDbBrands(data ?? []));
+  }, []);
+
+  const brandOptions = useMemo(() => {
+    if (!categoryId) return [];
+    const base = brandsFor(categoryId, itemName || undefined);
+    const fromDb = dbBrands
+      .filter((b) => b.category_id === categoryId && (!itemName || !b.item_name || b.item_name === itemName))
+      .map((b) => b.name);
+    const merged = [...new Set([...base.filter((b) => b !== "أخرى"), ...fromDb])].sort((a, b) => a.localeCompare(b));
+    return [...merged, "أخرى"];
+  }, [categoryId, itemName, dbBrands]);
+
   // Price + AI
   const [price, setPrice] = useState("");
   const [condition, setCondition] = useState("مستعمل");
@@ -151,9 +176,26 @@ function AddListingPage() {
       const base = sample.length
         ? sample.reduce((s, l) => s + l.price, 0) / sample.length
         : 600;
-      const factor = condition === "جديد" ? 1.1 : 0.95;
+
+      // حالة المنتج
+      let factor = condition === "جديد" ? 1.12 : 0.92;
+
+      // الماركة: ماركات راقية ترفع السعر، الماركات الاقتصادية تخفّضه قليلاً
+      const premium = ["Apple", "Sony", "Bose", "Daikin", "Miele", "Rational", "La Marzocco", "Herman Miller", "Bosch", "Samsung", "LG"];
+      const budget = ["Nikai", "Geepas", "TCL", "Hisense", "Realme", "Oppo", "Home Box"];
+      if (brand && premium.includes(brand)) factor *= 1.15;
+      else if (brand && budget.includes(brand)) factor *= 0.9;
+
+      // الوصف: وصف غني (أكثر تفصيلاً) يدل على منتج أفضل عرضاً
+      const len = descText.trim().length;
+      if (len > 220) factor *= 1.05;
+      else if (len > 0 && len < 40) factor *= 0.97;
+
+      // قابلية التفاوض تخفّض السعر المعروض قليلاً
+      if (negotiable) factor *= 0.98;
+
       const average = Math.round(base);
-      const suggested = Math.round((base * factor) / 5) * 5;
+      const suggested = Math.max(5, Math.round((base * factor) / 5) * 5);
       setEstimate({
         average,
         suggested,
@@ -240,6 +282,8 @@ function AddListingPage() {
         has_license: isBusiness ? fd.get("license") === "with" : null,
         includes_equipment: isBusiness ? fd.get("includesEquip") === "on" : null,
         sale_reason: isBusiness ? String(fd.get("reason") || "").trim() || null : null,
+        negotiable_flag: listingType === "auction" ? false : negotiable,
+        delivery_available: listingType === "auction" ? false : delivery,
       };
 
       const { error } = await supabase.from("listings").insert(payload);
@@ -424,7 +468,10 @@ function AddListingPage() {
               <select
                 value={itemName}
                 disabled={!activeGroup}
-                onChange={(e) => setItemName(e.target.value)}
+                onChange={(e) => {
+                  setItemName(e.target.value);
+                  setBrand("");
+                }}
                 className="h-11 w-full rounded-lg border border-border bg-background px-3 text-sm disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-primary"
               >
                 <option value="">{t("add.chooseTypeOpt")}</option>
@@ -446,11 +493,35 @@ function AddListingPage() {
               className="h-11 w-full rounded-lg border border-border bg-background px-3 text-sm disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-primary"
             >
               <option value="">{lang === "ar" ? "اختر الماركة" : "Choose brand"}</option>
-              {activeCategory?.brands.map((b) => (
+              {brandOptions.map((b) => (
                 <option key={b} value={b}>{b}</option>
               ))}
             </select>
           </div>
+
+          {/* Negotiable + delivery */}
+          {listingType !== "auction" && (
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <label className="flex cursor-pointer items-center justify-between rounded-xl border border-border bg-card px-4 py-3 text-sm font-semibold shadow-card">
+                {lang === "ar" ? "السعر قابل للتفاوض" : "Negotiable price"}
+                <input
+                  type="checkbox"
+                  checked={negotiable}
+                  onChange={(e) => setNegotiable(e.target.checked)}
+                  className="h-5 w-5 rounded border-border accent-primary"
+                />
+              </label>
+              <label className="flex cursor-pointer items-center justify-between rounded-xl border border-border bg-card px-4 py-3 text-sm font-semibold shadow-card">
+                {lang === "ar" ? "خدمة التوصيل متاحة" : "Delivery available"}
+                <input
+                  type="checkbox"
+                  checked={delivery}
+                  onChange={(e) => setDelivery(e.target.checked)}
+                  className="h-5 w-5 rounded border-border accent-primary"
+                />
+              </label>
+            </div>
+          )}
 
 
 
@@ -643,6 +714,8 @@ function AddListingPage() {
               required
               rows={5}
               name="description"
+              value={descText}
+              onChange={(e) => setDescText(e.target.value)}
               placeholder={t("add.descPh")}
               className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
             />
