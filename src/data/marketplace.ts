@@ -18,6 +18,12 @@ export interface Listing {
   image: string;
   featured?: boolean;
   views: number;
+  seller?: string;
+  sellerRating?: number;
+  sellerReviews?: number;
+  sellerVerified?: boolean;
+  sellerDeals?: number;
+  phone?: string; // E.164 without + for wa.me / tel
 }
 
 export interface Auction {
