@@ -139,13 +139,20 @@ function AddListingPage() {
     }
     setEstimating(true);
     setTimeout(() => {
-      const peers = listings.filter((l) => l.category.includes(activeCategory.name.slice(0, 4)));
-      const base = peers.length
-        ? peers.reduce((s, l) => s + l.price, 0) / peers.length
+      // Real market average from comparable listings (category + subcategory).
+      let peers = listings.filter((l) => l.category === activeCategory.name);
+      if (groupName) {
+        const bySub = peers.filter((l) => l.sub === groupName);
+        if (bySub.length >= 3) peers = bySub;
+      }
+      const sameCond = peers.filter((l) => l.condition === condition);
+      const sample = sameCond.length >= 3 ? sameCond : peers;
+      const base = sample.length
+        ? sample.reduce((s, l) => s + l.price, 0) / sample.length
         : 600;
-      const factor = condition === "جديد" ? 1.25 : 0.9;
+      const factor = condition === "جديد" ? 1.1 : 0.95;
       const average = Math.round(base);
-      const suggested = Math.round(base * factor);
+      const suggested = Math.round((base * factor) / 5) * 5;
       setEstimate({
         average,
         suggested,
@@ -156,6 +163,7 @@ function AddListingPage() {
       setEstimating(false);
     }, 700);
   };
+
 
   const uploadFile = async (file: File, kind: string) => {
     const ext = file.name.split(".").pop() || "bin";
