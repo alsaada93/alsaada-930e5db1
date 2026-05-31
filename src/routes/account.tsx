@@ -717,3 +717,53 @@ function StatCard({
     </div>
   );
 }
+
+function EmptyPanel({ text }: { text: string }) {
+  return <p className="py-6 text-center text-sm text-muted-foreground">{text}</p>;
+}
+
+function MiniList({
+  items,
+  onRemove,
+  removeLabel,
+}: {
+  items: ListingRow[];
+  onRemove?: (id: string) => void;
+  removeLabel?: string;
+}) {
+  return (
+    <ul className="space-y-2">
+      {items.map((l) => (
+        <li
+          key={l.id}
+          className="flex items-center gap-3 rounded-lg border border-border p-2"
+        >
+          <img
+            src={l.images?.[0] ?? "/placeholder.svg"}
+            alt=""
+            className="h-14 w-20 shrink-0 rounded-md object-cover"
+          />
+          <Link
+            to="/listing/$id"
+            params={{ id: l.id }}
+            className="flex-1 truncate font-semibold hover:text-primary"
+          >
+            {l.title}
+            <span className="mt-0.5 block text-xs font-bold text-primary">
+              {l.price.toLocaleString("ar")} د.ب
+            </span>
+          </Link>
+          {onRemove && (
+            <button
+              onClick={() => onRemove(l.id)}
+              className="shrink-0 rounded-lg border border-destructive/40 px-2 py-1 text-xs font-bold text-destructive hover:bg-destructive/10"
+            >
+              {removeLabel ?? "حذف"}
+            </button>
+          )}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
