@@ -236,6 +236,23 @@ function AddListingPage() {
   const [estimating, setEstimating] = useState(false);
   const [saving, setSaving] = useState(false);
 
+  // Auto-suggested titles based on the chosen category/kind/brand to speed up posting.
+  const titleSuggestions = useMemo(() => {
+    if (!activeCategory) return [];
+    const condWord = condition === "جديد" ? "جديد" : "مستعمل";
+    const base = activeGroup?.name || activeCategory.name;
+    const set = new Set<string>();
+    if (brand) set.add(`${base} ${brand} ${condWord}`);
+    set.add(`${base} ${condWord} للبيع`);
+    set.add(`${base} بحالة ممتازة`);
+    if (activeGroup) set.add(`${activeGroup.name} ${activeCategory.name}`);
+    return Array.from(set)
+      .map((s) => s.replace(/\s+/g, " ").trim())
+      .slice(0, 4);
+  }, [activeCategory, activeGroup, brand, condition]);
+
+
+
   const handleImages = (files: FileList | null) => {
     if (!files) return;
     const remaining = MAX_IMAGES - media.length;
