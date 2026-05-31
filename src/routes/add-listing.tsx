@@ -633,45 +633,64 @@ function AddListingPage() {
 
             <div>
               <label className="mb-1 block text-sm font-semibold">
-                {t("add.images")} ({images.length}/{MAX_IMAGES})
+                {t("add.images")} ({media.length}/{MAX_IMAGES})
               </label>
+              <p className="mb-2 text-xs text-muted-foreground">
+                {ar
+                  ? "أول صورة هي الغلاف. استخدم الأسهم لتغيير الترتيب."
+                  : "First image is the cover. Use the arrows to reorder."}
+              </p>
               <input ref={imgInput} type="file" accept="image/*" multiple hidden onChange={(e) => handleImages(e.target.files)} />
               <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
-                {existingImages.map((url, i) => (
-                  <div key={url} className="group relative aspect-square overflow-hidden rounded-lg border border-border">
-                    <img src={url} alt={`صورة ${i + 1}`} className="h-full w-full object-cover" />
+                {media.map((m, i) => (
+                  <div key={m.id} className="group relative aspect-square overflow-hidden rounded-lg border border-border">
+                    <img src={m.url} alt={ar ? `صورة الإعلان ${i + 1}` : `Listing image ${i + 1}`} className="h-full w-full object-cover" />
+                    {i === 0 && (
+                      <span className="absolute start-1 bottom-1 rounded bg-primary/90 px-1.5 py-0.5 text-[9px] font-bold text-primary-foreground">
+                        {ar ? "الغلاف" : "Cover"}
+                      </span>
+                    )}
                     <button
                       type="button"
-                      aria-label={`حذف الصورة ${i + 1}`}
-                      onClick={() => setExistingImages((p) => p.filter((_, idx) => idx !== i))}
-                      className="absolute start-1 top-1 rounded-full bg-destructive p-1 text-destructive-foreground opacity-0 transition group-hover:opacity-100"
+                      aria-label={ar ? `حذف الصورة ${i + 1}` : `Delete image ${i + 1}`}
+                      onClick={() => setMedia((p) => p.filter((_, idx) => idx !== i))}
+                      className="absolute end-1 top-1 rounded-full bg-destructive p-1 text-destructive-foreground opacity-0 transition group-hover:opacity-100"
                     >
                       <X className="h-3.5 w-3.5" />
                     </button>
+                    {m.file && (
+                      <button
+                        type="button"
+                        aria-label={ar ? `تعديل الصورة ${i + 1}` : `Edit image ${i + 1}`}
+                        onClick={() => setEditingIndex(i)}
+                        className="absolute start-1 top-1 rounded-full bg-primary p-1 text-primary-foreground opacity-0 transition group-hover:opacity-100"
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                      </button>
+                    )}
+                    <div className="absolute inset-x-0 bottom-0 flex justify-center gap-1 bg-gradient-to-t from-black/60 to-transparent p-1 opacity-0 transition group-hover:opacity-100">
+                      <button
+                        type="button"
+                        disabled={i === 0}
+                        aria-label={ar ? "تحريك لليمين" : "Move forward"}
+                        onClick={() => moveMedia(i, i - 1)}
+                        className="rounded bg-white/90 p-0.5 text-foreground disabled:opacity-30"
+                      >
+                        <ChevronRight className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        type="button"
+                        disabled={i === media.length - 1}
+                        aria-label={ar ? "تحريك لليسار" : "Move back"}
+                        onClick={() => moveMedia(i, i + 1)}
+                        className="rounded bg-white/90 p-0.5 text-foreground disabled:opacity-30"
+                      >
+                        <ChevronLeft className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
                   </div>
                 ))}
-                {images.map((img, i) => (
-                  <div key={img.url} className="group relative aspect-square overflow-hidden rounded-lg border border-border">
-                    <img src={img.url} alt={`صورة الإعلان ${i + 1}`} className="h-full w-full object-cover" />
-                    <button
-                      type="button"
-                      aria-label={`حذف الصورة ${i + 1}`}
-                      onClick={() => setImages((p) => p.filter((_, idx) => idx !== i))}
-                      className="absolute start-1 top-1 rounded-full bg-destructive p-1 text-destructive-foreground opacity-0 transition group-hover:opacity-100"
-                    >
-                      <X className="h-3.5 w-3.5" />
-                    </button>
-                    <button
-                      type="button"
-                      aria-label={ar ? `تعديل الصورة ${i + 1}` : `Edit image ${i + 1}`}
-                      onClick={() => setEditingIndex(i)}
-                      className="absolute end-1 top-1 rounded-full bg-primary p-1 text-primary-foreground opacity-0 transition group-hover:opacity-100"
-                    >
-                      <Pencil className="h-3.5 w-3.5" />
-                    </button>
-                  </div>
-                ))}
-                {images.length < MAX_IMAGES && (
+                {media.length < MAX_IMAGES && (
                   <button
                     type="button"
                     onClick={() => imgInput.current?.click()}
@@ -682,10 +701,30 @@ function AddListingPage() {
                   </button>
                 )}
               </div>
-              <p className="mt-1 text-xs text-muted-foreground">
+
+              {/* Existing video preview (edit mode) */}
+              {existingVideo && (
+                <div className="mt-3">
+                  <label className="mb-1 block text-sm font-semibold">{ar ? "الفيديو" : "Video"}</label>
+                  <div className="relative w-full max-w-xs overflow-hidden rounded-lg border border-border">
+                    <video src={existingVideo} controls className="h-full w-full" />
+                    <button
+                      type="button"
+                      aria-label={ar ? "حذف الفيديو" : "Delete video"}
+                      onClick={() => setExistingVideo(null)}
+                      className="absolute end-1 top-1 rounded-full bg-destructive p-1 text-destructive-foreground"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              <p className="mt-2 text-xs text-muted-foreground">
                 {ar ? "يمكنك إضافة الفيديو بعد نشر الإعلان." : "You can add a video after publishing."}
               </p>
             </div>
+
           </div>
 
           {/* ===== Step 2: Category, brand, country, region, map ===== */}
