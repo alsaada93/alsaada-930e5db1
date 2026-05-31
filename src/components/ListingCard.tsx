@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Heart, MapPin, Eye, Star, BadgeCheck, MessageCircle, Phone, MessageSquare } from "lucide-react";
+import { MapPin, Eye, Star, BadgeCheck, MessageCircle, Phone, MessageSquare } from "lucide-react";
 import { toast } from "sonner";
 import type { Listing } from "@/data/marketplace";
 import { useSellers } from "@/hooks/useSellers";
