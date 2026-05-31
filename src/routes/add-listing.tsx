@@ -68,6 +68,7 @@ function AddListingPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { t, lang } = useLanguage();
+  const { categories } = useCategories();
   const ar = lang === "ar";
   const { edit: editId } = Route.useSearch();
   const isEdit = !!editId;
