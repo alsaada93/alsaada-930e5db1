@@ -117,6 +117,8 @@ export function ListingCard({ item, displayTitle }: { item: Listing; displayTitl
             <Tag className="h-3.5 w-3.5" /> {t("card.offer")}
           </button>
         </div>
+
+        <ListingHashtags tags={[item.category, item.sub, item.city]} className="mt-2.5" />
       </div>
 
       {offerOpen && (
