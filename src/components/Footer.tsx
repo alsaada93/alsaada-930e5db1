@@ -1,3 +1,5 @@
+import { Link } from "@tanstack/react-router";
+
 export function Footer() {
   const cols = [
     { title: "سوقو", links: ["من نحن", "كيف تبيع", "كيف تشتري", "الباقات والأسعار"] },
@@ -29,8 +31,11 @@ export function Footer() {
           </div>
         ))}
       </div>
-      <div className="border-t border-sidebar-border py-4 text-center text-xs text-navy-foreground/50">
-        © {new Date().getFullYear()} سوقو SOOGO — جميع الحقوق محفوظة
+      <div className="flex flex-col items-center justify-center gap-1 border-t border-sidebar-border py-4 text-center text-xs text-navy-foreground/50 sm:flex-row sm:gap-3">
+        <span>© {new Date().getFullYear()} سوقو SOOGO — جميع الحقوق محفوظة</span>
+        <Link to="/admin" className="font-semibold text-primary hover:underline">
+          لوحة الإدارة
+        </Link>
       </div>
     </footer>
   );
