@@ -9,8 +9,6 @@ import {
   LogOut,
   RotateCw,
   Plus,
-  Phone,
-  MessageCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Header } from "@/components/Header";
