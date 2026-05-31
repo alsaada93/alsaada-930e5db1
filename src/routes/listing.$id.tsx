@@ -674,6 +674,15 @@ function ListingPage() {
         )}
       </main>
       <Footer />
+      {offerOpen && (
+        <PriceOfferDialog
+          listingId={item.id}
+          recipientId={item.userId}
+          listingTitle={item.title}
+          currentPrice={item.price}
+          onClose={() => setOfferOpen(false)}
+        />
+      )}
     </div>
   );
 }
