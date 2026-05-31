@@ -66,6 +66,13 @@ function AddListingPage() {
   const [groupName, setGroupName] = useState("");
   const [itemName, setItemName] = useState("");
   const [brand, setBrand] = useState("");
+  const [brandQuery, setBrandQuery] = useState("");
+  const [brandOpen, setBrandOpen] = useState(false);
+
+  // Country of manufacture
+  const [country, setCountry] = useState<Country | null>(null);
+  const [countryQuery, setCountryQuery] = useState("");
+  const [countryOpen, setCountryOpen] = useState(false);
 
   const activeCategory = useMemo(
     () => categories.find((c) => c.id === categoryId),
