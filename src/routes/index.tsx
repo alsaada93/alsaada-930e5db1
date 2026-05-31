@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Header } from "@/components/Header";
 import { Hero } from "@/components/Hero";
-import { FeatureStrip } from "@/components/FeatureStrip";
 import { CategoryGrid } from "@/components/CategoryGrid";
+// FeatureStrip removed per request — no marketing feature text on home page
 import { ListingsSection } from "@/components/ListingsSection";
 import { AuctionsSection } from "@/components/AuctionsSection";
 import { BusinessSection } from "@/components/BusinessSection";
@@ -39,7 +39,6 @@ function Index() {
       <Header />
       <main>
         <Hero />
-        <FeatureStrip />
         <CategoryGrid />
         <ListingsSection title={t("sec.featured")} subtitle={t("sec.featuredSub")} items={featured} />
         <AuctionsSection />
