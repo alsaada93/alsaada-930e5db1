@@ -714,6 +714,8 @@ function AddListingPage() {
               required
               rows={5}
               name="description"
+              value={descText}
+              onChange={(e) => setDescText(e.target.value)}
               placeholder={t("add.descPh")}
               className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
             />
