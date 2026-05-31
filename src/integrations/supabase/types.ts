@@ -139,6 +139,7 @@ export type Database = {
           created_at: string
           delivery_available: boolean | null
           description: string | null
+          expires_at: string
           featured: boolean
           group_name: string | null
           has_license: boolean | null
@@ -155,6 +156,7 @@ export type Database = {
           operating_cost: number | null
           outlets: number | null
           price: number
+          published_at: string
           rent: number | null
           sale_reason: string | null
           staff_count: number | null
@@ -179,6 +181,7 @@ export type Database = {
           created_at?: string
           delivery_available?: boolean | null
           description?: string | null
+          expires_at?: string
           featured?: boolean
           group_name?: string | null
           has_license?: boolean | null
@@ -195,6 +198,7 @@ export type Database = {
           operating_cost?: number | null
           outlets?: number | null
           price?: number
+          published_at?: string
           rent?: number | null
           sale_reason?: string | null
           staff_count?: number | null
@@ -219,6 +223,7 @@ export type Database = {
           created_at?: string
           delivery_available?: boolean | null
           description?: string | null
+          expires_at?: string
           featured?: boolean
           group_name?: string | null
           has_license?: boolean | null
@@ -235,6 +240,7 @@ export type Database = {
           operating_cost?: number | null
           outlets?: number | null
           price?: number
+          published_at?: string
           rent?: number | null
           sale_reason?: string | null
           staff_count?: number | null
@@ -390,6 +396,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      expire_old_listings: { Args: never; Returns: undefined }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
