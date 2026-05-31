@@ -178,7 +178,8 @@ function AddListingPage() {
         setCondition(data.condition ?? "مستعمل");
         setNegotiable(Boolean(data.negotiable_flag ?? data.negotiable));
         setDelivery(Boolean(data.delivery_available));
-        setExistingImages((data.images as string[] | null) ?? []);
+        setMedia((((data.images as string[] | null) ?? []).map((url) => ({ id: url, url }))));
+        setExistingVideo((data.video as string | null) ?? null);
         if (data.lat != null && data.lng != null) {
           setCoords({ lat: Number(data.lat), lng: Number(data.lng) });
         }
