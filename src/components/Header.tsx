@@ -26,24 +26,8 @@ export function Header({ hideSearch = false }: { hideSearch?: boolean }) {
 
 
 
-        <div className={`flex-1 md:block ${hideSearch ? "hidden md:hidden" : "hidden"}`}>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              navigate({ to: "/search", search: { q: q.trim() || undefined } });
-            }}
-            className="relative"
-          >
-            <Search className="absolute end-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <input
-              type="search"
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder={t("header.searchPlaceholder")}
-              className="h-10 w-full rounded-lg bg-white/95 pe-10 ps-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary border"
-            />
-          </form>
-        </div>
+        <div className="flex-1" />
+
 
         <nav className="flex items-center gap-1">
           <button
