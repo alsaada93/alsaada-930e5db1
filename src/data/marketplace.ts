@@ -450,10 +450,12 @@ function generateListings(): Listing[] {
   return out;
 }
 
+/** بيانات مرجعية لاقتراح السعر فقط (لا تُعرض كإعلانات) */
 export const listings: Listing[] = generateListings();
 
+// عدّاد الإعلانات يعتمد على الإعلانات الحقيقية ويُحدّث من قاعدة البيانات لاحقاً
 categories.forEach((c) => {
-  c.count = listings.filter((l) => l.category === c.name).length;
+  c.count = 0;
 });
 
 export const auctions: Auction[] = [
