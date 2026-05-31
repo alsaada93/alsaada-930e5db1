@@ -58,6 +58,7 @@ function AddListingPage() {
   const [categoryId, setCategoryId] = useState("");
   const [groupName, setGroupName] = useState("");
   const [itemName, setItemName] = useState("");
+  const [brand, setBrand] = useState("");
 
   const activeCategory = useMemo(
     () => categories.find((c) => c.id === categoryId),
@@ -215,6 +216,7 @@ function AddListingPage() {
         price: Number(price) || 0,
         condition,
         category_id: categoryId || null,
+        brand: brand || null,
         group_name: groupName || null,
         item_name: itemName || null,
         city: region,
@@ -390,6 +392,7 @@ function AddListingPage() {
                   setCategoryId(e.target.value);
                   setGroupName("");
                   setItemName("");
+                  setBrand("");
                 }}
                 className="h-11 w-full rounded-lg border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
               >
@@ -431,6 +434,25 @@ function AddListingPage() {
               </select>
             </div>
           </div>
+
+
+          {/* Brand */}
+          <div>
+            <label className="mb-1 block text-sm font-semibold">{lang === "ar" ? "الماركة" : "Brand"}</label>
+            <select
+              value={brand}
+              disabled={!activeCategory}
+              onChange={(e) => setBrand(e.target.value)}
+              className="h-11 w-full rounded-lg border border-border bg-background px-3 text-sm disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-primary"
+            >
+              <option value="">{lang === "ar" ? "اختر الماركة" : "Choose brand"}</option>
+              {activeCategory?.brands.map((b) => (
+                <option key={b} value={b}>{b}</option>
+              ))}
+            </select>
+          </div>
+
+
 
           {/* Business details */}
           {listingType === "business" && <BusinessFields t={t} />}

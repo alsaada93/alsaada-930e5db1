@@ -13,7 +13,25 @@ export interface Category {
   descriptionEn: string;
   sub: string[];
   groups: SubCategory[];
+  brands: string[];
 }
+
+/** ماركات شائعة لكل تصنيف */
+export const commonBrands: Record<string, string[]> = {
+  restaurant: [
+    "Rational", "Hobart", "Electrolux", "Robot Coupe", "La Marzocco", "Nuova Simonelli",
+    "Sinmag", "Sanremo", "Fagor", "Convotherm", "Unox", "Berto's", "Inomak", "Brema",
+    "Hoshizaki", "Winterhalter", "Kitchenaid", "أخرى",
+  ],
+  hotels: [
+    "Samsung", "LG", "Daikin", "Carrier", "Electrolux", "Whirlpool", "Bosch", "Miele",
+    "Speed Queen", "Primus", "Ariston", "Panasonic", "أخرى",
+  ],
+  other: [
+    "Apple", "Samsung", "Dell", "HP", "Lenovo", "LG", "Sony", "Hikvision", "Dahua",
+    "Cisco", "Canon", "Epson", "IKEA", "أخرى",
+  ],
+};
 
 /** مناطق ومحافظات البحرين للبحث عند إضافة إعلان */
 export const bahrainRegions: string[] = [
@@ -117,6 +135,7 @@ export const categories: Category[] = [
       prepEquip,
       tablesSinks,
     ],
+    brands: commonBrands.restaurant,
   },
   {
     id: "hotels",
@@ -139,6 +158,7 @@ export const categories: Category[] = [
         items: ["غسالات صناعية", "مجففات", "معدات تنظيف"],
       },
     ],
+    brands: commonBrands.hotels,
   },
   {
     id: "other",
@@ -163,6 +183,7 @@ export const categories: Category[] = [
         items: ["متفرقات"],
       },
     ],
+    brands: commonBrands.other,
   },
 ];
 
