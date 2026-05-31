@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Header } from "@/components/Header";
+import { WeBuyBanner } from "@/components/WeBuyBanner";
+import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { Hero } from "@/components/Hero";
 import { CategoryGrid } from "@/components/CategoryGrid";
 // FeatureStrip removed per request — no marketing feature text on home page
