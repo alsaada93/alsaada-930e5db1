@@ -27,7 +27,14 @@ import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/hooks/useLanguage";
 import { supabase } from "@/integrations/supabase/client";
 
+interface AddListingSearch {
+  edit?: string;
+}
+
 export const Route = createFileRoute("/add-listing")({
+  validateSearch: (search: Record<string, unknown>): AddListingSearch => ({
+    edit: typeof search.edit === "string" ? search.edit : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "أضف إعلان | السعادة ماركت Al Saada Market" },
