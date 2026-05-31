@@ -20,6 +20,7 @@ import { Footer } from "@/components/Footer";
 import { categories, bahrainRegions, listings } from "@/data/marketplace";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/hooks/useLanguage";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/add-listing")({
   head: () => ({
