@@ -456,7 +456,7 @@ function AddListingPage() {
                 <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-primary text-primary-foreground">
                   <o.icon className="h-6 w-6" />
                 </span>
-                <h3 className="text-lg font-extrabold">{o.title}</h3>
+                <h2 className="text-lg font-extrabold">{o.title}</h2>
                 <p className="text-sm text-muted-foreground">{o.desc}</p>
                 <span className="mt-2 text-sm font-bold text-primary group-hover:underline">{t("add.continue")} →</span>
               </button>
