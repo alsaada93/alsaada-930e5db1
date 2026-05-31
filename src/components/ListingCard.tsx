@@ -41,13 +41,6 @@ export function ListingCard({ item }: { item: Listing }) {
           </span>
         </div>
       </Link>
-      <button
-        className="absolute hidden"
-        aria-hidden
-        tabIndex={-1}
-      >
-        <Heart className="h-4 w-4" />
-      </button>
       <div className="p-3">
         <Link to="/listing/$id" params={{ id: item.id }}>
           <h3 className="line-clamp-1 font-bold text-card-foreground hover:text-primary">{item.title}</h3>
