@@ -36,6 +36,7 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   const { t } = useLanguage();
+  const { listings } = useListings();
   const featured = listings.filter((l) => l.featured);
   const latest = listings;
 
