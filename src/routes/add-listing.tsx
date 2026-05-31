@@ -368,8 +368,9 @@ function AddListingPage() {
 
     setSaving(true);
     try {
-      const uploadedUrls = await Promise.all(images.map((img) => uploadFile(img.file, "images")));
-      const imageUrls = [...existingImages, ...uploadedUrls];
+      const imageUrls = await Promise.all(
+        media.map((m) => (m.file ? uploadFile(m.file, "images") : Promise.resolve(m.url))),
+      );
 
       const isBusiness = listingType === "business";
       const isAuction = listingType === "auction";
