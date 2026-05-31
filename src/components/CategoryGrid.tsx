@@ -19,6 +19,7 @@ const gradients: Record<string, string> = {
 
 export function CategoryGrid() {
   const { t, lang } = useLanguage();
+  const { categories } = useCategories();
 
   return (
     <section className="mx-auto max-w-7xl px-4 py-12">
