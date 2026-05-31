@@ -18,6 +18,8 @@ import { toast } from "sonner";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { categories, bahrainRegions, listings, brandsFor } from "@/data/marketplace";
+import { brandLabel } from "@/data/brandLabels";
+import { countries, type Country } from "@/data/countries";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/hooks/useLanguage";
 import { supabase } from "@/integrations/supabase/client";
