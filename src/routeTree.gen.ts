@@ -13,6 +13,8 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as AdminListingsRouteImport } from './routes/admin.listings'
+import { Route as AdminCategoriesRouteImport } from './routes/admin.categories'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -34,16 +36,30 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminListingsRoute = AdminListingsRouteImport.update({
+  id: '/listings',
+  path: '/listings',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminCategoriesRoute = AdminCategoriesRouteImport.update({
+  id: '/categories',
+  path: '/categories',
+  getParentRoute: () => AdminRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/admin/categories': typeof AdminCategoriesRoute
+  '/admin/listings': typeof AdminListingsRoute
   '/admin/': typeof AdminIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/admin/categories': typeof AdminCategoriesRoute
+  '/admin/listings': typeof AdminListingsRoute
   '/admin': typeof AdminIndexRoute
 }
 export interface FileRoutesById {
@@ -51,14 +67,29 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/admin/categories': typeof AdminCategoriesRoute
+  '/admin/listings': typeof AdminListingsRoute
   '/admin/': typeof AdminIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/admin' | '/sitemap.xml' | '/admin/'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/sitemap.xml'
+    | '/admin/categories'
+    | '/admin/listings'
+    | '/admin/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/sitemap.xml' | '/admin'
-  id: '__root__' | '/' | '/admin' | '/sitemap.xml' | '/admin/'
+  to: '/' | '/sitemap.xml' | '/admin/categories' | '/admin/listings' | '/admin'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/sitemap.xml'
+    | '/admin/categories'
+    | '/admin/listings'
+    | '/admin/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -97,14 +128,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/listings': {
+      id: '/admin/listings'
+      path: '/listings'
+      fullPath: '/admin/listings'
+      preLoaderRoute: typeof AdminListingsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/categories': {
+      id: '/admin/categories'
+      path: '/categories'
+      fullPath: '/admin/categories'
+      preLoaderRoute: typeof AdminCategoriesRouteImport
+      parentRoute: typeof AdminRoute
+    }
   }
 }
 
 interface AdminRouteChildren {
+  AdminCategoriesRoute: typeof AdminCategoriesRoute
+  AdminListingsRoute: typeof AdminListingsRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminCategoriesRoute: AdminCategoriesRoute,
+  AdminListingsRoute: AdminListingsRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 
@@ -118,3 +167,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
