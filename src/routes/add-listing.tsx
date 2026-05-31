@@ -120,8 +120,6 @@ function AddListingPage() {
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [locating, setLocating] = useState(false);
 
-  // Media (keep File objects so we can upload them to storage)
-  const [images, setImages] = useState<{ url: string; file: File }[]>([]);
   const imgInput = useRef<HTMLInputElement>(null);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
