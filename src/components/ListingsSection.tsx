@@ -3,6 +3,7 @@ import { Grid2x2, LayoutGrid } from "lucide-react";
 import { ListingCard } from "./ListingCard";
 import type { Listing } from "@/data/marketplace";
 import { useLanguage } from "@/hooks/useLanguage";
+import { useListingTranslations } from "@/hooks/useListingTranslations";
 
 export function ListingsSection({
   title,
