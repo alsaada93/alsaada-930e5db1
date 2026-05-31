@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as AddListingRouteImport } from './routes/add-listing'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as CategoryIdRouteImport } from './routes/category.$id'
@@ -32,6 +33,11 @@ const LoginRoute = LoginRouteImport.update({
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AddListingRoute = AddListingRouteImport.update({
+  id: '/add-listing',
+  path: '/add-listing',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -67,6 +73,7 @@ const AdminAuctionsRoute = AdminAuctionsRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/add-listing': typeof AddListingRoute
   '/admin': typeof AdminRouteWithChildren
   '/login': typeof LoginRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -78,6 +85,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/add-listing': typeof AddListingRoute
   '/login': typeof LoginRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin/auctions': typeof AdminAuctionsRoute
@@ -89,6 +97,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/add-listing': typeof AddListingRoute
   '/admin': typeof AdminRouteWithChildren
   '/login': typeof LoginRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -102,6 +111,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/add-listing'
     | '/admin'
     | '/login'
     | '/sitemap.xml'
@@ -113,6 +123,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/add-listing'
     | '/login'
     | '/sitemap.xml'
     | '/admin/auctions'
@@ -123,6 +134,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/add-listing'
     | '/admin'
     | '/login'
     | '/sitemap.xml'
@@ -135,6 +147,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AddListingRoute: typeof AddListingRoute
   AdminRoute: typeof AdminRouteWithChildren
   LoginRoute: typeof LoginRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
@@ -162,6 +175,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/add-listing': {
+      id: '/add-listing'
+      path: '/add-listing'
+      fullPath: '/add-listing'
+      preLoaderRoute: typeof AddListingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -227,6 +247,7 @@ const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AddListingRoute: AddListingRoute,
   AdminRoute: AdminRouteWithChildren,
   LoginRoute: LoginRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
@@ -235,3 +256,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
