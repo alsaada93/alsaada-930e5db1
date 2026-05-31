@@ -6,6 +6,9 @@ import { ListingCard } from "@/components/ListingCard";
 import { categories, listings, type Listing } from "@/data/marketplace";
 
 export const Route = createFileRoute("/category/$id")({
+  validateSearch: (search: Record<string, unknown>): { sub?: string } => ({
+    sub: typeof search.sub === "string" ? search.sub : undefined,
+  }),
   loader: ({ params }) => {
     const category = categories.find((c) => c.id === params.id);
     if (!category) throw notFound();
