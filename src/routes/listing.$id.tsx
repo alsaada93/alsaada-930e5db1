@@ -1,6 +1,8 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
 import {
-  ArrowRight,
+  ChevronLeft,
+  ChevronRight,
   MapPin,
   Eye,
   Star,
@@ -9,14 +11,23 @@ import {
   Phone,
   MessageSquare,
   CalendarDays,
+  Clock,
+  Play,
+  Pencil,
+  RotateCw,
+  Home,
 } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 
 import { useSeller } from "@/hooks/useSellers";
+import { useAuth } from "@/hooks/useAuth";
 import { SellerReviews } from "@/components/SellerReviews";
+import { categories } from "@/data/marketplace";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+
+const EXPIRY_DAYS = 60;
 
 export const Route = createFileRoute("/listing/$id")({
   loader: async ({ params }) => {
@@ -30,10 +41,17 @@ export const Route = createFileRoute("/listing/$id")({
         negotiable: data.negotiable,
         condition: data.condition,
         city: data.city ?? "",
-        category: data.item_name ?? data.category_id ?? "",
-        image: data.images?.[0] ?? "/placeholder.svg",
+        categoryId: (data.category_id as string | null) ?? null,
+        groupName: (data.group_name as string | null) ?? null,
+        itemName: (data.item_name as string | null) ?? null,
+        images: (data.images as string[] | null)?.length ? (data.images as string[]) : ["/placeholder.svg"],
+        video: (data.video as string | null) ?? null,
+        lat: data.lat != null ? Number(data.lat) : null,
+        lng: data.lng != null ? Number(data.lng) : null,
         featured: data.featured,
         views: data.views,
+        userId: (data.user_id as string | null) ?? null,
+        createdAt: (data.created_at as string | null) ?? null,
         sellerId: undefined as string | undefined,
         phone: data.contact_phone ?? undefined,
         description: data.description as string | null,
@@ -56,7 +74,7 @@ export const Route = createFileRoute("/listing/$id")({
   head: ({ loaderData, params }) => {
     const t = loaderData?.item.title ?? "إعلان";
     const url = `https://alsaada-market.lovable.app/listing/${params.id}`;
-    const image = loaderData?.item.image ?? "";
+    const image = loaderData?.item.images?.[0] ?? "";
     return {
       meta: [
         { title: `${t} | السعادة ماركت Al Saada Market` },
@@ -116,9 +134,112 @@ export const Route = createFileRoute("/listing/$id")({
   component: ListingPage,
 });
 
+/** صياغة المدة المنقضية منذ النشر بالدقائق/الساعات/الأيام */
+function timeAgo(iso: string | null): string {
+  if (!iso) return "";
+  const diff = Date.now() - new Date(iso).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return "الآن";
+  if (mins < 60) return `قبل ${mins} دقيقة`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `قبل ${hrs} ساعة`;
+  const days = Math.floor(hrs / 24);
+  return `قبل ${days} يوم`;
+}
+
+/** نوع الوسائط في المعرض */
+type MediaSlide = { type: "image" | "video"; url: string };
+
+function Gallery({ images, video, title }: { images: string[]; video: string | null; title: string }) {
+  const slides: MediaSlide[] = [
+    ...images.map((url) => ({ type: "image" as const, url })),
+    ...(video ? [{ type: "video" as const, url: video }] : []),
+  ];
+  const [idx, setIdx] = useState(0);
+  const [lightbox, setLightbox] = useState(false);
+  const active = slides[idx];
+  const go = (d: number) => setIdx((i) => (i + d + slides.length) % slides.length);
+
+  return (
+    <div>
+      <div className="relative overflow-hidden rounded-2xl border border-border bg-muted">
+        {active.type === "image" ? (
+          <img
+            src={active.url}
+            alt={title}
+            onClick={() => setLightbox(true)}
+            className="aspect-[4/3] w-full cursor-zoom-in object-cover"
+          />
+        ) : (
+          <video src={active.url} controls className="aspect-[4/3] w-full bg-black object-contain" />
+        )}
+
+        {slides.length > 1 && (
+          <>
+            <button
+              type="button"
+              onClick={() => go(-1)}
+              aria-label="السابق"
+              className="absolute start-2 top-1/2 -translate-y-1/2 rounded-full bg-black/50 p-2 text-white backdrop-blur hover:bg-black/70"
+            >
+              <ChevronRight className="h-5 w-5" />
+            </button>
+            <button
+              type="button"
+              onClick={() => go(1)}
+              aria-label="التالي"
+              className="absolute end-2 top-1/2 -translate-y-1/2 rounded-full bg-black/50 p-2 text-white backdrop-blur hover:bg-black/70"
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </button>
+            <span className="absolute bottom-2 end-2 rounded-full bg-black/60 px-2 py-0.5 text-xs font-semibold text-white">
+              {idx + 1} / {slides.length}
+            </span>
+          </>
+        )}
+      </div>
+
+      {slides.length > 1 && (
+        <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+          {slides.map((s, i) => (
+            <button
+              key={s.url + i}
+              type="button"
+              onClick={() => setIdx(i)}
+              className={`relative h-16 w-16 shrink-0 overflow-hidden rounded-lg border-2 transition-colors ${
+                i === idx ? "border-primary" : "border-transparent opacity-70 hover:opacity-100"
+              }`}
+            >
+              {s.type === "image" ? (
+                <img src={s.url} alt="" className="h-full w-full object-cover" />
+              ) : (
+                <span className="flex h-full w-full items-center justify-center bg-black text-white">
+                  <Play className="h-5 w-5" />
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {lightbox && active.type === "image" && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4"
+          onClick={() => setLightbox(false)}
+        >
+          <img src={active.url} alt={title} className="max-h-full max-w-full object-contain" />
+        </div>
+      )}
+    </div>
+  );
+}
+
 function ListingPage() {
   const { item } = Route.useLoaderData();
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const { data: seller } = useSeller(item.sellerId);
+  const [reposting, setReposting] = useState(false);
 
   const phone = seller?.phone ?? item.phone ?? "97333000000";
   const sellerName = seller?.name ?? "بائع موثوق";
@@ -127,22 +248,104 @@ function ListingPage() {
   const deals = seller?.deals_count ?? 0;
   const verified = seller?.verified ?? false;
 
+  const isOwner = !!user && !!item.userId && user.id === item.userId;
+  const expiresAt = item.createdAt ? new Date(item.createdAt).getTime() + EXPIRY_DAYS * 86400_000 : null;
+  const expired = expiresAt != null && expiresAt < Date.now();
+  const daysLeft = expiresAt != null ? Math.ceil((expiresAt - Date.now()) / 86400_000) : null;
+
+  const cat = categories.find((c) => c.id === item.categoryId);
+
+  const handleRepost = async () => {
+    setReposting(true);
+    const { error } = await supabase
+      .from("listings")
+      .update({ created_at: new Date().toISOString(), status: "approved" })
+      .eq("id", item.id);
+    setReposting(false);
+    if (error) {
+      toast.error("تعذّرت إعادة النشر، تأكد من تسجيل الدخول.");
+      return;
+    }
+    toast.success("تمت إعادة نشر الإعلان لمدة 60 يوماً إضافية.");
+    navigate({ to: "/listing/$id", params: { id: item.id } });
+  };
+
   const waLink = `https://wa.me/${phone}?text=${encodeURIComponent(
     `مرحباً، أنا مهتم بإعلان "${item.title}" المعروض على السعادة ماركت.`,
   )}`;
 
+  const mapSrc = item.lat != null && item.lng != null
+    ? `https://www.openstreetmap.org/export/embed.html?bbox=${item.lng - 0.01}%2C${item.lat - 0.01}%2C${item.lng + 0.01}%2C${item.lat + 0.01}&layer=mapnik&marker=${item.lat}%2C${item.lng}`
+    : null;
+
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
-      <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8">
-        <Link to="/" className="mb-4 inline-flex items-center gap-1 text-sm font-semibold text-primary hover:underline">
-          <ArrowRight className="h-4 w-4" /> العودة للرئيسية
-        </Link>
+      <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6">
+        {/* مسار التنقّل: الرئيسية ← التصنيف ← المجموعة ← الإعلان */}
+        <nav className="mb-4 flex flex-wrap items-center gap-1 text-xs text-muted-foreground" aria-label="مسار التنقّل">
+          <Link to="/" className="inline-flex items-center gap-1 font-semibold text-primary hover:underline">
+            <Home className="h-3.5 w-3.5" /> الرئيسية
+          </Link>
+          {cat && (
+            <>
+              <ChevronLeft className="h-3.5 w-3.5" />
+              <Link
+                to="/category/$id"
+                params={{ id: cat.id }}
+                className="font-semibold text-primary hover:underline"
+              >
+                {cat.name}
+              </Link>
+            </>
+          )}
+          {cat && item.groupName && (
+            <>
+              <ChevronLeft className="h-3.5 w-3.5" />
+              <Link
+                to="/category/$id"
+                params={{ id: cat.id }}
+                search={{ sub: item.groupName }}
+                className="font-semibold text-primary hover:underline"
+              >
+                {item.groupName}
+              </Link>
+            </>
+          )}
+          {item.itemName && (
+            <>
+              <ChevronLeft className="h-3.5 w-3.5" />
+              <span className="truncate">{item.itemName}</span>
+            </>
+          )}
+        </nav>
+
+        {/* تحكّم المالك: تعديل وإعادة نشر */}
+        {isOwner && (
+          <div className="mb-4 flex flex-wrap items-center gap-2 rounded-2xl border border-primary/30 bg-accent/30 p-3">
+            <span className="text-sm font-bold text-primary">إدارة إعلانك</span>
+            <div className="flex flex-1 flex-wrap items-center justify-end gap-2">
+              <Link
+                to="/add-listing"
+                search={{ edit: item.id }}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-bold text-primary-foreground hover:opacity-90"
+              >
+                <Pencil className="h-4 w-4" /> تعديل الإعلان
+              </Link>
+              <button
+                type="button"
+                disabled={reposting}
+                onClick={handleRepost}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-primary/40 bg-background px-3 py-2 text-sm font-bold hover:bg-accent disabled:opacity-60"
+              >
+                <RotateCw className="h-4 w-4" /> {reposting ? "جارٍ..." : "إعادة النشر (60 يوم)"}
+              </button>
+            </div>
+          </div>
+        )}
 
         <div className="grid gap-6 lg:grid-cols-2">
-          <div className="overflow-hidden rounded-2xl border border-border bg-muted">
-            <img src={item.image} alt={item.title} className="aspect-[4/3] w-full object-cover" />
-          </div>
+          <Gallery images={item.images} video={item.video} title={item.title} />
 
           <div>
             <div className="flex flex-wrap items-center gap-2">
@@ -154,6 +357,11 @@ function ListingPage() {
                   مميّز
                 </span>
               )}
+              {expired && (
+                <span className="rounded-full bg-destructive/15 px-2 py-0.5 text-[11px] font-bold text-destructive">
+                  منتهي
+                </span>
+              )}
             </div>
             <h1 className="mt-3 text-2xl font-extrabold">{item.title}</h1>
             <div className="mt-2 flex items-baseline gap-1">
@@ -162,7 +370,7 @@ function ListingPage() {
               {item.negotiable && <span className="text-xs text-muted-foreground">• قابل للتفاوض</span>}
             </div>
 
-            <div className="mt-3 flex items-center gap-4 text-sm text-muted-foreground">
+            <div className="mt-3 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
               <span className="flex items-center gap-1">
                 <MapPin className="h-4 w-4" /> {item.city}
               </span>
@@ -170,6 +378,27 @@ function ListingPage() {
                 <Eye className="h-4 w-4" /> {item.views.toLocaleString("ar")} مشاهدة
               </span>
             </div>
+
+            {/* تاريخ ووقت النشر + مدة الصلاحية */}
+            {item.createdAt && (
+              <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                <span className="flex items-center gap-1">
+                  <Clock className="h-3.5 w-3.5" /> نُشر {timeAgo(item.createdAt)} —{" "}
+                  {new Date(item.createdAt).toLocaleString("ar", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </span>
+                {!expired && daysLeft != null && (
+                  <span className="flex items-center gap-1">
+                    <CalendarDays className="h-3.5 w-3.5" /> يُحذف خلال {daysLeft} يوم
+                  </span>
+                )}
+              </div>
+            )}
 
             {/* بطاقة البائع */}
             <div className="mt-5 rounded-2xl border border-border bg-card p-4">
@@ -248,6 +477,28 @@ function ListingPage() {
           </div>
         )}
 
+        {/* خريطة الموقع */}
+        {mapSrc && (
+          <div className="mt-6 overflow-hidden rounded-2xl border border-border bg-card">
+            <h2 className="flex items-center gap-1.5 p-4 pb-2 text-lg font-extrabold">
+              <MapPin className="h-5 w-5 text-primary" /> الموقع على الخريطة
+            </h2>
+            <iframe
+              title="خريطة موقع الإعلان"
+              src={mapSrc}
+              className="h-72 w-full border-0"
+              loading="lazy"
+            />
+            <a
+              href={`https://www.openstreetmap.org/?mlat=${item.lat}&mlon=${item.lng}#map=16/${item.lat}/${item.lng}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block p-3 text-center text-sm font-semibold text-primary hover:underline"
+            >
+              فتح في الخريطة الكاملة
+            </a>
+          </div>
+        )}
 
         {/* تقييمات البائع */}
         {item.sellerId && (
