@@ -1017,13 +1017,30 @@ function AddListingPage() {
                 {ar ? "التالي" : "Next"}
               </button>
             ) : (
-              <button
-                type="submit"
-                disabled={saving}
-                className="flex-1 rounded-full bg-gradient-primary px-6 py-3 font-bold text-primary-foreground shadow-glow transition-transform hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {saving ? (ar ? "جارٍ النشر..." : "Publishing...") : submitLabel}
-              </button>
+              <>
+                <button
+                  type="button"
+                  onClick={() => setShowPreview(true)}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-primary/40 px-5 py-3 font-bold text-primary hover:bg-accent"
+                >
+                  <Eye className="h-4 w-4" /> {ar ? "معاينة" : "Preview"}
+                </button>
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="flex-1 rounded-full bg-gradient-primary px-6 py-3 font-bold text-primary-foreground shadow-glow transition-transform hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {saving
+                    ? ar
+                      ? "جارٍ الحفظ..."
+                      : "Saving..."
+                    : isEdit
+                      ? ar
+                        ? "حفظ التعديلات"
+                        : "Save changes"
+                      : submitLabel}
+                </button>
+              </>
             )}
           </div>
         </form>
