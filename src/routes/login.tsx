@@ -12,7 +12,15 @@ import { ShieldCheck } from "lucide-react";
 
 export const Route = createFileRoute("/login")({
   head: () => ({
-    meta: [{ title: "تسجيل الدخول | سوقو SOOGO" }],
+    meta: [
+      { title: "تسجيل الدخول | سوقو SOOGO" },
+      { name: "description", content: "سجّل الدخول أو أنشئ حسابًا لإدارة إعلاناتك على سوقو." },
+      { property: "og:title", content: "تسجيل الدخول | سوقو SOOGO" },
+      { property: "og:description", content: "سجّل الدخول أو أنشئ حسابًا على سوقو." },
+      { property: "og:url", content: "https://soogo-hub.lovable.app/login" },
+      { name: "robots", content: "noindex" },
+    ],
+    links: [{ rel: "canonical", href: "https://soogo-hub.lovable.app/login" }],
   }),
   component: LoginPage,
 });
