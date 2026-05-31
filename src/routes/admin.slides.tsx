@@ -117,7 +117,17 @@ function AdminSlidesPage() {
 
         {/* Add image */}
         <div className="flex justify-end">
-          <input ref={fileInput} type="file" accept="image/*" hidden onChange={(e) => uploadImage(e.target.files)} />
+          <input
+            ref={fileInput}
+            type="file"
+            accept="image/*"
+            hidden
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) setPendingFile(f);
+              e.target.value = "";
+            }}
+          />
           <button
             onClick={() => fileInput.current?.click()}
             disabled={uploading}
