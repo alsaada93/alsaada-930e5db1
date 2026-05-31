@@ -1,5 +1,5 @@
 import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ChevronLeft,
   ChevronRight,
@@ -16,6 +16,7 @@ import {
   Pencil,
   RotateCw,
   Home,
+  Heart,
 } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
@@ -253,6 +254,67 @@ function ListingPage() {
   const { user } = useAuth();
   const { data: seller } = useSeller(item.sellerId);
   const [reposting, setReposting] = useState(false);
+  const [isFav, setIsFav] = useState(false);
+
+  // سجل آخر الإعلانات المشاهدة
+  useEffect(() => {
+    try {
+      const entry = {
+        id: item.id,
+        title: item.title,
+        price: item.price,
+        status: "approved",
+        views: item.views ?? 0,
+        images: item.images ?? [],
+        published_at: item.publishedAt ?? null,
+        expires_at: item.expiresAt ?? null,
+      };
+      const prev = JSON.parse(localStorage.getItem("recent_views") || "[]");
+      const next = [entry, ...(Array.isArray(prev) ? prev.filter((x: any) => x.id !== item.id) : [])].slice(0, 15);
+      localStorage.setItem("recent_views", JSON.stringify(next));
+    } catch {
+      /* ignore */
+    }
+  }, [item.id]);
+
+  // حالة المفضلة
+  useEffect(() => {
+    if (!user) {
+      setIsFav(false);
+      return;
+    }
+    let active = true;
+    (async () => {
+      const { data } = await (supabase as any)
+        .from("favorites")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("listing_id", item.id)
+        .maybeSingle();
+      if (active) setIsFav(!!data);
+    })();
+    return () => {
+      active = false;
+    };
+  }, [user, item.id]);
+
+  const toggleFavorite = async () => {
+    if (!user) {
+      toast.info("سجّل الدخول لإضافة الإعلان إلى المفضلة");
+      navigate({ to: "/login" });
+      return;
+    }
+    if (isFav) {
+      await (supabase as any).from("favorites").delete().eq("user_id", user.id).eq("listing_id", item.id);
+      setIsFav(false);
+      toast.success("تمت الإزالة من المفضلة");
+    } else {
+      await (supabase as any).from("favorites").insert({ user_id: user.id, listing_id: item.id });
+      setIsFav(true);
+      toast.success("تمت الإضافة إلى المفضلة");
+    }
+  };
+
 
   const phone = seller?.phone ?? item.phone ?? "97333000000";
   const sellerName = seller?.name ?? "بائع موثوق";
@@ -381,7 +443,20 @@ function ListingPage() {
                 </span>
               )}
             </div>
-            <h1 className="mt-3 text-2xl font-extrabold">{item.title}</h1>
+            <div className="mt-3 flex items-start justify-between gap-3">
+              <h1 className="text-2xl font-extrabold">{item.title}</h1>
+              <button
+                onClick={toggleFavorite}
+                aria-label="إضافة إلى المفضلة"
+                className={`shrink-0 rounded-full border p-2 transition-colors ${
+                  isFav
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border text-muted-foreground hover:bg-muted"
+                }`}
+              >
+                <Heart className={`h-5 w-5 ${isFav ? "fill-current" : ""}`} />
+              </button>
+            </div>
             <div className="mt-2 flex items-baseline gap-1">
               <span className="text-3xl font-extrabold text-primary">{item.price.toLocaleString("ar")}</span>
               <span className="text-sm font-semibold text-muted-foreground">د.ب</span>

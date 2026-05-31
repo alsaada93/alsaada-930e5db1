@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ArrowRight, Search as SearchIcon, SlidersHorizontal, X } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
@@ -45,6 +45,19 @@ function SearchPage() {
   const { lang } = useLanguage();
   const { listings } = useListings();
   const [query, setQuery] = useState(q ?? "");
+
+  useEffect(() => {
+    const term = (q ?? "").trim();
+    if (!term) return;
+    try {
+      const prev: string[] = JSON.parse(localStorage.getItem("recent_searches") || "[]");
+      const next = [term, ...prev.filter((x) => x !== term)].slice(0, 15);
+      localStorage.setItem("recent_searches", JSON.stringify(next));
+    } catch {
+      /* ignore */
+    }
+  }, [q]);
+
 
   const update = (patch: Partial<SearchParams>) => {
     navigate({ to: "/search", search: (prev: SearchParams) => ({ ...prev, ...patch }) });
