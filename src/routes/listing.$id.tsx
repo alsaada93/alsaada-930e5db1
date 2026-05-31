@@ -28,6 +28,12 @@ import { SellerReviews } from "@/components/SellerReviews";
 import { categories } from "@/data/marketplace";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { logContactAttempt } from "@/lib/contact";
+import { PriceOfferDialog } from "@/components/PriceOfferDialog";
+import { ListingHashtags } from "@/components/ListingHashtags";
+import { ShareButtons } from "@/components/ShareButtons";
+import { useListingTranslations } from "@/hooks/useListingTranslations";
+import { Tag } from "lucide-react";
 
 const EXPIRY_DAYS = 60;
 
