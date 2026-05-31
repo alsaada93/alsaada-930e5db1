@@ -4,7 +4,7 @@ import { Search, Heart, Bell, Menu, Plus, User, Globe } from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
 import { useLanguage } from "@/hooks/useLanguage";
 
-export function Header() {
+export function Header({ hideSearch = false }: { hideSearch?: boolean }) {
   const { t, lang, toggle } = useLanguage();
   const navigate = useNavigate();
   const [q, setQ] = useState("");
@@ -26,7 +26,7 @@ export function Header() {
 
 
 
-        <div className="hidden flex-1 md:block">
+        <div className={`flex-1 md:block ${hideSearch ? "hidden md:hidden" : "hidden"}`}>
           <form
             onSubmit={(e) => {
               e.preventDefault();
