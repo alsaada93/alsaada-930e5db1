@@ -82,7 +82,7 @@ export function Hero() {
       ))}
       <div className="absolute inset-0 bg-gradient-hero opacity-80" />
       <div className="relative mx-auto max-w-7xl px-4 py-16 md:py-24">
-        <div class-name="max-w-2xl">
+        <div className="max-w-2xl">
           <h1 className="mt-2 text-3xl font-extrabold leading-tight md:text-5xl">
             <span className="sr-only">السعادة ماركت — سوق بيع وشراء معدات المطاعم والأثاث في البحرين. </span>
             {activeSlide?.title || t("hero.title1")}
