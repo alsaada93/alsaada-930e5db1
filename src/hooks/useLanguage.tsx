@@ -24,15 +24,20 @@ const dict: Dict = {
 
   // Hero
   "hero.badge": { ar: "مدعوم بالذكاء الاصطناعي", en: "Powered by AI" },
-  "hero.title1": { ar: "سوق معدات المطاعم والأثاث والإلكترونيات", en: "Restaurant equipment, furniture & electronics market" },
-  "hero.title2": { ar: "في مملكة البحرين", en: "in the Kingdom of Bahrain" },
-  "hero.subtitle": { ar: "بيع، شراء ومزاد على المعدات بثقة — تسعير ذكي، حماية من الاحتيال، وآلاف الإعلانات.", en: "Buy, sell and bid on equipment with confidence — smart pricing, fraud protection, and thousands of listings." },
+  "hero.title1": { ar: "السعادة ماركت", en: "Al Saada Market" },
+  "hero.title2": { ar: "Al Saada Market", en: "السعادة ماركت" },
+  "hero.subtitle": { ar: "شراء وبيع معدات المطاعم والأثاث والإلكترونيات في البحرين — تسعير ذكي وحماية من الاحتيال.", en: "Buy and sell restaurant equipment, furniture and electronics in Bahrain — smart pricing and fraud protection." },
   "hero.searchPlaceholder": { ar: "ماذا تبحث عنه اليوم؟", en: "What are you looking for today?" },
   "hero.imageSearch": { ar: "بحث بالصورة", en: "Image search" },
   "hero.search": { ar: "بحث", en: "Search" },
   "hero.uploaded": { ar: "تم رفع الصورة", en: "Image uploaded" },
   "hero.searching": { ar: "جارٍ البحث عن منتجات مشابهة", en: "Searching for similar products" },
   "hero.imageSearchLabel": { ar: "البحث بالصورة:", en: "Image search:" },
+  "buy.title": { ar: "نشتري مباشرة", en: "We Buy Directly" },
+  "buy.desc": { ar: "نشتري معدات المطاعم والأثاث والإلكترونيات المستعملة — تثمين مجاني وسعر مناسب.", en: "We buy used restaurant equipment, furniture and electronics — free valuation and a fair price." },
+  "buy.cta": { ar: "تواصل الآن: 36818153", en: "Contact now: 36818153" },
+  "header.tagline2": { ar: "شراء وبيع معدات المطاعم والأثاث والإلكترونيات في البحرين", en: "Buy & sell restaurant equipment, furniture & electronics in Bahrain" },
+
 
   // Features
   "feat.aiTitle": { ar: "تسعير ذكي بالـ AI", en: "Smart AI pricing" },

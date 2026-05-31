@@ -80,15 +80,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "سوقو SOOGO" },
+      { title: "السعادة ماركت" },
       { name: "description", content: "سوقو منصة بيع وشراء ومزاد معدات المطاعم والأثاث والإلكترونيات في مملكة البحرين." },
-      { name: "author", content: "سوقو SOOGO" },
-      { property: "og:title", content: "سوقو SOOGO" },
+      { name: "author", content: "السعادة ماركت" },
+      { property: "og:title", content: "السعادة ماركت" },
       { property: "og:description", content: "سوقو منصة بيع وشراء ومزاد معدات المطاعم والأثاث والإلكترونيات في مملكة البحرين." },
       { property: "og:type", content: "website" },
-      { property: "og:site_name", content: "سوقو SOOGO" },
+      { property: "og:site_name", content: "السعادة ماركت" },
       { name: "twitter:card", content: "summary" },
-      { name: "twitter:title", content: "سوقو SOOGO" },
+      { name: "twitter:title", content: "السعادة ماركت" },
       { name: "twitter:description", content: "سوقو منصة بيع وشراء ومزاد معدات المطاعم والأثاث والإلكترونيات في مملكة البحرين." },
     ],
     links: [
@@ -103,7 +103,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         children: JSON.stringify({
           "@context": "https://schema.org",
           "@type": "Organization",
-          name: "سوقو SOOGO",
+          name: "السعادة ماركت",
           url: "https://soogo-hub.lovable.app",
         }),
       },
@@ -112,7 +112,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         children: JSON.stringify({
           "@context": "https://schema.org",
           "@type": "WebSite",
-          name: "سوقو SOOGO",
+          name: "السعادة ماركت",
           url: "https://soogo-hub.lovable.app",
         }),
       },

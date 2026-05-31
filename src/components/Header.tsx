@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Search, Heart, Bell, Menu, Plus, User, Globe } from "lucide-react";
-import logo from "@/assets/soogo-logo.png";
+import { BrandLogo } from "@/components/BrandLogo";
 import { useLanguage } from "@/hooks/useLanguage";
 
 export function Header() {
@@ -11,15 +11,16 @@ export function Header() {
       <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-3">
         <Link to="/" className="flex shrink-0 items-center gap-2">
           <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/95 p-1">
-            <img src={logo} alt="SOOGO" width={36} height={36} className="h-full w-full object-contain" />
+            <BrandLogo size={28} />
           </span>
           <span className="flex flex-col leading-none">
             <span className="text-lg font-extrabold tracking-tight">
-              SOOGO <span className="text-navy-foreground/80">| سوقو</span>
+              السعادة ماركت <span className="text-navy-foreground/80">| Al Saada Market</span>
             </span>
-            <span className="hidden text-[10px] text-navy-foreground/60 sm:block">{t("header.tagline")}</span>
+            <span className="hidden text-[10px] text-navy-foreground/60 sm:block">{t("header.tagline2")}</span>
           </span>
         </Link>
+
 
         <div className="hidden flex-1 md:block">
           <div className="relative">
