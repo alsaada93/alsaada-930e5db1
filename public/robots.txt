@@ -1,2 +1,4 @@
 User-agent: *
 Allow: /
+
+Sitemap: https://soogo-hub.lovable.app/sitemap.xml
