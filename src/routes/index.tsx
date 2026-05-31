@@ -8,6 +8,7 @@ import { AuctionsSection } from "@/components/AuctionsSection";
 import { BusinessSection } from "@/components/BusinessSection";
 import { Footer } from "@/components/Footer";
 import { listings } from "@/data/marketplace";
+import { useLanguage } from "@/hooks/useLanguage";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -29,6 +30,7 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
+  const { t } = useLanguage();
   const featured = listings.filter((l) => l.featured);
   const latest = listings;
 
@@ -39,9 +41,9 @@ function Index() {
         <Hero />
         <FeatureStrip />
         <CategoryGrid />
-        <ListingsSection title="الإعلانات المميزة" subtitle="إعلانات مختارة من تجار موثوقين" items={featured} />
+        <ListingsSection title={t("sec.featured")} subtitle={t("sec.featuredSub")} items={featured} />
         <AuctionsSection />
-        <ListingsSection title="أحدث الإعلانات" subtitle="آخر ما تم إضافته على سوقو" items={latest} />
+        <ListingsSection title={t("sec.latest")} subtitle={t("sec.latestSub")} items={latest} />
         <BusinessSection />
       </main>
       <Footer />
