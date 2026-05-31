@@ -1,7 +1,21 @@
-import { Search, Mic, Camera, Sparkles } from "lucide-react";
+import { Search, Camera, Sparkles } from "lucide-react";
+import { useRef, useState } from "react";
+import { toast } from "sonner";
 import heroImg from "@/assets/hero.jpg";
 
 export function Hero() {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [imageName, setImageName] = useState<string | null>(null);
+
+  const handleImageSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImageName(file.name);
+    toast.success("تم رفع الصورة", {
+      description: `جارٍ البحث عن منتجات مشابهة لـ "${file.name}"...`,
+    });
+  };
+
   return (
     <section className="relative overflow-hidden bg-gradient-hero text-navy-foreground">
       <img
@@ -33,16 +47,30 @@ export function Hero() {
                 placeholder="ماذا تبحث عنه اليوم؟"
                 className="h-11 w-full border-0 bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
               />
-              <button className="rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-primary" aria-label="بحث صوتي">
-                <Mic className="h-5 w-5" />
-              </button>
-              <button className="rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-primary" aria-label="بحث بالصورة">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleImageSelected}
+              />
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-primary"
+                aria-label="بحث بالصورة"
+              >
                 <Camera className="h-5 w-5" />
               </button>
               <button className="rounded-xl bg-gradient-primary px-5 py-2.5 text-sm font-bold text-primary-foreground">
                 بحث
               </button>
             </div>
+            {imageName && (
+              <p className="px-2 pt-1 text-xs text-muted-foreground">
+                البحث بالصورة: {imageName}
+              </p>
+            )}
           </div>
 
           <div className="mt-6 flex flex-wrap gap-6">
