@@ -42,7 +42,7 @@ function SearchPage() {
       const haystack = `${l.title} ${l.category} ${l.sub ?? ""} ${l.city}`.toLowerCase();
       return haystack.includes(term);
     });
-  }, [q]);
+  }, [q, listings]);
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
