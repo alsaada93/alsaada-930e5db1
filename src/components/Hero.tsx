@@ -95,9 +95,6 @@ export function Hero() {
             <Sparkles className="h-3.5 w-3.5" /> {t("hero.badge")}
           </span>
 
-
-          <p className="mt-4 text-base text-navy-foreground/75 md:text-lg">{t("hero.subtitle")}</p>
-
           <div className="mt-7 rounded-2xl bg-white p-2 shadow-card">
             <div className="flex items-center gap-2">
               <Search className="ms-2 h-5 w-5 shrink-0 text-muted-foreground" />
