@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { Search, Heart, Bell, Menu, Plus, User, Globe } from "lucide-react";
+import { Search, Heart, Bell, Menu, Plus, User, Globe, Sparkles } from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
 import { useLanguage } from "@/hooks/useLanguage";
 
@@ -11,22 +11,27 @@ export function Header({ hideSearch = false }: { hideSearch?: boolean }) {
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-navy text-navy-foreground">
-      <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-3">
+      <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-1.5">
         <Link to="/" className="flex shrink-0 items-center gap-1.5 sm:gap-2">
-          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/95 p-1 sm:h-9 sm:w-9">
-            <BrandLogo size={20} />
+          <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-white/95 p-1 sm:h-8 sm:w-8">
+            <BrandLogo size={18} />
           </span>
           <span className="flex flex-col leading-none">
-            <span className="text-sm font-extrabold tracking-tight sm:text-lg">
+            <span className="text-sm font-extrabold tracking-tight sm:text-base">
               السعادة ماركت <span className="hidden text-navy-foreground/80 sm:inline">| Al Saada Market</span>
             </span>
             <span className="hidden text-[10px] text-navy-foreground/60 sm:block">{t("header.tagline2")}</span>
           </span>
         </Link>
 
+        <div className="flex flex-1 justify-start">
+          <span className="hidden items-center gap-1 rounded-full bg-white/10 px-2.5 py-1 text-[11px] font-bold text-navy-foreground/90 sm:inline-flex">
+            <Sparkles className="h-3.5 w-3.5" />
+            {lang === "ar" ? "مدعوم بالذكاء الاصطناعي" : "Powered by AI"}
+          </span>
+        </div>
 
 
-        <div className="flex-1" />
 
 
         <nav className="flex items-center gap-1">
