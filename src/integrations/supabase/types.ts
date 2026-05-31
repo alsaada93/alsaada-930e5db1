@@ -208,6 +208,33 @@ export type Database = {
         }
         Relationships: []
       }
+      listing_translations: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          lang: string
+          listing_id: string
+          title: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          lang: string
+          listing_id: string
+          title?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          lang?: string
+          listing_id?: string
+          title?: string | null
+        }
+        Relationships: []
+      }
       listings: {
         Row: {
           area_sqm: number | null
@@ -334,6 +361,81 @@ export type Database = {
           user_id?: string | null
           video?: string | null
           views?: number
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          listing_id: string | null
+          message: string | null
+          read: boolean
+          recipient_id: string
+          sender_name: string | null
+          sender_phone: string | null
+          type: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          listing_id?: string | null
+          message?: string | null
+          read?: boolean
+          recipient_id: string
+          sender_name?: string | null
+          sender_phone?: string | null
+          type?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          listing_id?: string | null
+          message?: string | null
+          read?: boolean
+          recipient_id?: string
+          sender_name?: string | null
+          sender_phone?: string | null
+          type?: string
+        }
+        Relationships: []
+      }
+      price_offers: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          listing_id: string
+          message: string | null
+          recipient_id: string
+          sender_id: string | null
+          sender_name: string | null
+          sender_phone: string | null
+          status: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          listing_id: string
+          message?: string | null
+          recipient_id: string
+          sender_id?: string | null
+          sender_name?: string | null
+          sender_phone?: string | null
+          status?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          listing_id?: string
+          message?: string | null
+          recipient_id?: string
+          sender_id?: string | null
+          sender_name?: string | null
+          sender_phone?: string | null
+          status?: string
         }
         Relationships: []
       }
@@ -547,6 +649,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      increment_listing_views: { Args: { _id: string }; Returns: undefined }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
