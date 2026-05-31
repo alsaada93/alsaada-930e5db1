@@ -15,8 +15,10 @@ import { Route as PackagesRouteImport } from './routes/packages'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AddListingRouteImport } from './routes/add-listing'
+import { Route as AccountRouteImport } from './routes/account'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as LoginAdminRouteImport } from './routes/login.admin'
 import { Route as ListingIdRouteImport } from './routes/listing.$id'
 import { Route as CategoryIdRouteImport } from './routes/category.$id'
 import { Route as AdminSlidesRouteImport } from './routes/admin.slides'
@@ -56,6 +58,11 @@ const AddListingRoute = AddListingRouteImport.update({
   path: '/add-listing',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AccountRoute = AccountRouteImport.update({
+  id: '/account',
+  path: '/account',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -65,6 +72,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AdminRoute,
+} as any)
+const LoginAdminRoute = LoginAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => LoginRoute,
 } as any)
 const ListingIdRoute = ListingIdRouteImport.update({
   id: '/listing/$id',
@@ -109,9 +121,10 @@ const AdminAppearanceRoute = AdminAppearanceRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/account': typeof AccountRoute
   '/add-listing': typeof AddListingRoute
   '/admin': typeof AdminRouteWithChildren
-  '/login': typeof LoginRoute
+  '/login': typeof LoginRouteWithChildren
   '/packages': typeof PackagesRoute
   '/search': typeof SearchRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -123,12 +136,14 @@ export interface FileRoutesByFullPath {
   '/admin/slides': typeof AdminSlidesRoute
   '/category/$id': typeof CategoryIdRoute
   '/listing/$id': typeof ListingIdRoute
+  '/login/admin': typeof LoginAdminRoute
   '/admin/': typeof AdminIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/account': typeof AccountRoute
   '/add-listing': typeof AddListingRoute
-  '/login': typeof LoginRoute
+  '/login': typeof LoginRouteWithChildren
   '/packages': typeof PackagesRoute
   '/search': typeof SearchRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -140,14 +155,16 @@ export interface FileRoutesByTo {
   '/admin/slides': typeof AdminSlidesRoute
   '/category/$id': typeof CategoryIdRoute
   '/listing/$id': typeof ListingIdRoute
+  '/login/admin': typeof LoginAdminRoute
   '/admin': typeof AdminIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/account': typeof AccountRoute
   '/add-listing': typeof AddListingRoute
   '/admin': typeof AdminRouteWithChildren
-  '/login': typeof LoginRoute
+  '/login': typeof LoginRouteWithChildren
   '/packages': typeof PackagesRoute
   '/search': typeof SearchRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -159,12 +176,14 @@ export interface FileRoutesById {
   '/admin/slides': typeof AdminSlidesRoute
   '/category/$id': typeof CategoryIdRoute
   '/listing/$id': typeof ListingIdRoute
+  '/login/admin': typeof LoginAdminRoute
   '/admin/': typeof AdminIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/account'
     | '/add-listing'
     | '/admin'
     | '/login'
@@ -179,10 +198,12 @@ export interface FileRouteTypes {
     | '/admin/slides'
     | '/category/$id'
     | '/listing/$id'
+    | '/login/admin'
     | '/admin/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/account'
     | '/add-listing'
     | '/login'
     | '/packages'
@@ -196,10 +217,12 @@ export interface FileRouteTypes {
     | '/admin/slides'
     | '/category/$id'
     | '/listing/$id'
+    | '/login/admin'
     | '/admin'
   id:
     | '__root__'
     | '/'
+    | '/account'
     | '/add-listing'
     | '/admin'
     | '/login'
@@ -214,14 +237,16 @@ export interface FileRouteTypes {
     | '/admin/slides'
     | '/category/$id'
     | '/listing/$id'
+    | '/login/admin'
     | '/admin/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AccountRoute: typeof AccountRoute
   AddListingRoute: typeof AddListingRoute
   AdminRoute: typeof AdminRouteWithChildren
-  LoginRoute: typeof LoginRoute
+  LoginRoute: typeof LoginRouteWithChildren
   PackagesRoute: typeof PackagesRoute
   SearchRoute: typeof SearchRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
@@ -273,6 +298,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AddListingRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/account': {
+      id: '/account'
+      path: '/account'
+      fullPath: '/account'
+      preLoaderRoute: typeof AccountRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -286,6 +318,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
+    }
+    '/login/admin': {
+      id: '/login/admin'
+      path: '/admin'
+      fullPath: '/login/admin'
+      preLoaderRoute: typeof LoginAdminRouteImport
+      parentRoute: typeof LoginRoute
     }
     '/listing/$id': {
       id: '/listing/$id'
@@ -368,11 +407,22 @@ const AdminRouteChildren: AdminRouteChildren = {
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
+interface LoginRouteChildren {
+  LoginAdminRoute: typeof LoginAdminRoute
+}
+
+const LoginRouteChildren: LoginRouteChildren = {
+  LoginAdminRoute: LoginAdminRoute,
+}
+
+const LoginRouteWithChildren = LoginRoute._addFileChildren(LoginRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AccountRoute: AccountRoute,
   AddListingRoute: AddListingRoute,
   AdminRoute: AdminRouteWithChildren,
-  LoginRoute: LoginRoute,
+  LoginRoute: LoginRouteWithChildren,
   PackagesRoute: PackagesRoute,
   SearchRoute: SearchRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,

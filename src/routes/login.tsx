@@ -36,7 +36,7 @@ function LoginPage() {
 
   useEffect(() => {
     if (!loading && user) {
-      navigate({ to: "/admin" });
+      navigate({ to: "/account" });
     }
   }, [user, loading, navigate]);
 
@@ -49,7 +49,7 @@ function LoginPage() {
           email,
           password,
           options: {
-            emailRedirectTo: `${window.location.origin}/admin`,
+            emailRedirectTo: `${window.location.origin}/account`,
             data: { full_name: fullName },
           },
         });
@@ -62,7 +62,7 @@ function LoginPage() {
         });
         if (error) throw error;
         toast.success("تم تسجيل الدخول بنجاح");
-        navigate({ to: "/admin" });
+        navigate({ to: "/account" });
       }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "حدث خطأ ما");
@@ -73,7 +73,7 @@ function LoginPage() {
 
   const handleGoogle = async () => {
     const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: `${window.location.origin}/admin`,
+      redirect_uri: `${window.location.origin}/account`,
     });
     if (result.error) {
       toast.error("تعذّر تسجيل الدخول عبر جوجل");
@@ -92,7 +92,7 @@ function LoginPage() {
           </h1>
           <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
             <ShieldCheck className="h-4 w-4" />
-            {mode === "login" ? "تسجيل الدخول للوحة الإدارة" : "إنشاء حساب جديد"}
+            {mode === "login" ? "تسجيل دخول الأعضاء" : "إنشاء حساب عضو جديد"}
           </p>
         </div>
 

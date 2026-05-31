@@ -144,13 +144,20 @@ export const Route = createFileRoute("/listing/$id")({
 function timeAgo(iso: string | null): string {
   if (!iso) return "";
   const diff = Date.now() - new Date(iso).getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return "الآن";
-  if (mins < 60) return `قبل ${mins} دقيقة`;
+  const secs = Math.floor(diff / 1000);
+  if (secs < 60) return secs <= 1 ? "قبل ثانية" : `قبل ${secs} ثانية`;
+  const mins = Math.floor(secs / 60);
+  if (mins < 60) return mins === 1 ? "قبل دقيقة" : `قبل ${mins} دقيقة`;
   const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `قبل ${hrs} ساعة`;
+  if (hrs < 24) return hrs === 1 ? "قبل ساعة" : `قبل ${hrs} ساعة`;
   const days = Math.floor(hrs / 24);
-  return `قبل ${days} يوم`;
+  if (days < 7) return days === 1 ? "قبل يوم" : `قبل ${days} يوم`;
+  const weeks = Math.floor(days / 7);
+  if (weeks < 4) return weeks === 1 ? "قبل أسبوع" : `قبل ${weeks} أسابيع`;
+  const months = Math.floor(days / 30);
+  if (months < 12) return months === 1 ? "قبل شهر" : `قبل ${months} أشهر`;
+  const years = Math.floor(days / 365);
+  return years === 1 ? "قبل سنة" : `قبل ${years} سنوات`;
 }
 
 /** نوع الوسائط في المعرض */
