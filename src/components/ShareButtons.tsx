@@ -80,7 +80,7 @@ export function ShareButtons({
       color: "#229ED9",
       href: `https://t.me/share/url?url=${enc(url)}&text=${enc(title)}`,
     },
-  ] as const;
+  ];
 
   const size = compact ? "h-8 w-8" : "h-10 w-10";
 
@@ -90,7 +90,7 @@ export function ShareButtons({
         <span className="text-sm font-bold text-foreground">{ar ? "مشاركة:" : "Share:"}</span>
       )}
       {platforms.map((p) =>
-        "onClick" in p && p.onClick ? (
+        p.onClick ? (
           <button
             key={p.key}
             type="button"
