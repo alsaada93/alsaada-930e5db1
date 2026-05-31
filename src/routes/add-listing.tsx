@@ -90,6 +90,30 @@ function AddListingPage() {
   const imgInput = useRef<HTMLInputElement>(null);
   const vidInput = useRef<HTMLInputElement>(null);
 
+  // Extra options
+  const [negotiable, setNegotiable] = useState(true);
+  const [delivery, setDelivery] = useState(false);
+  const [descText, setDescText] = useState("");
+
+  // Brands from the database (managed in admin), merged with built-in lists
+  const [dbBrands, setDbBrands] = useState<{ name: string; category_id: string; item_name: string | null }[]>([]);
+  useEffect(() => {
+    supabase
+      .from("brands")
+      .select("name, category_id, item_name")
+      .then(({ data }) => setDbBrands(data ?? []));
+  }, []);
+
+  const brandOptions = useMemo(() => {
+    if (!categoryId) return [];
+    const base = brandsFor(categoryId, itemName || undefined);
+    const fromDb = dbBrands
+      .filter((b) => b.category_id === categoryId && (!itemName || !b.item_name || b.item_name === itemName))
+      .map((b) => b.name);
+    const merged = [...new Set([...base.filter((b) => b !== "أخرى"), ...fromDb])].sort((a, b) => a.localeCompare(b));
+    return [...merged, "أخرى"];
+  }, [categoryId, itemName, dbBrands]);
+
   // Price + AI
   const [price, setPrice] = useState("");
   const [condition, setCondition] = useState("مستعمل");
