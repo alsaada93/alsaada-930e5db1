@@ -49,28 +49,28 @@ export function Header({ hideSearch = false }: { hideSearch?: boolean }) {
         <nav className="flex items-center gap-1">
           <button
             onClick={toggle}
-            className="flex items-center gap-1 rounded-lg px-2.5 py-2 text-sm font-bold hover:bg-white/10"
+            className="flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-bold hover:bg-white/10"
             aria-label="Switch language"
           >
-            <Globe className="h-4 w-4" />
+            <Globe className="h-3.5 w-3.5" />
             <span>{lang === "ar" ? "EN" : "ع"}</span>
           </button>
-          <button className="hidden rounded-lg p-2 hover:bg-white/10 sm:block" aria-label={t("header.favorites")}>
-            <Heart className="h-5 w-5" />
+          <button className="hidden rounded-lg p-1.5 hover:bg-white/10 sm:block" aria-label={t("header.favorites")}>
+            <Heart className="h-4 w-4" />
           </button>
-          <button className="hidden rounded-lg p-2 hover:bg-white/10 sm:block" aria-label={t("header.notifications")}>
-            <Bell className="h-5 w-5" />
+          <button className="hidden rounded-lg p-1.5 hover:bg-white/10 sm:block" aria-label={t("header.notifications")}>
+            <Bell className="h-4 w-4" />
           </button>
-          <Link to="/login" className="flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-medium hover:bg-white/10">
-            <User className="h-4 w-4" />
+          <Link to="/login" className="flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium hover:bg-white/10">
+            <User className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">{t("header.login")}</span>
           </Link>
-          <Link to="/add-listing" className="flex items-center gap-1.5 rounded-lg bg-gradient-primary px-3 py-2 text-sm font-bold text-primary-foreground shadow-glow transition-transform hover:scale-[1.03]">
-            <Plus className="h-4 w-4" />
+          <Link to="/add-listing" className="flex items-center gap-1 rounded-lg bg-gradient-primary px-2.5 py-1 text-xs font-bold text-primary-foreground shadow-glow transition-transform hover:scale-[1.03]">
+            <Plus className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">{t("header.addListing")}</span>
           </Link>
-          <button className="rounded-lg p-2 hover:bg-white/10 md:hidden" aria-label={t("header.menu")}>
-            <Menu className="h-5 w-5" />
+          <button className="rounded-lg p-1.5 hover:bg-white/10 md:hidden" aria-label={t("header.menu")}>
+            <Menu className="h-4 w-4" />
           </button>
         </nav>
       </div>
