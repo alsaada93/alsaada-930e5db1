@@ -170,7 +170,7 @@ export function AuctionBidBox({ listingId, startPrice, auctionEndsAt }: Props) {
         </div>
       ) : (
         <Link
-          to="/auth"
+          to="/login"
           className="mt-4 block rounded-xl bg-gradient-primary px-4 py-3 text-center text-sm font-bold text-primary-foreground shadow-glow"
         >
           سجّل الدخول للمزايدة
