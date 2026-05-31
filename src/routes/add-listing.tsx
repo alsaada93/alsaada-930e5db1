@@ -176,9 +176,26 @@ function AddListingPage() {
       const base = sample.length
         ? sample.reduce((s, l) => s + l.price, 0) / sample.length
         : 600;
-      const factor = condition === "جديد" ? 1.1 : 0.95;
+
+      // حالة المنتج
+      let factor = condition === "جديد" ? 1.12 : 0.92;
+
+      // الماركة: ماركات راقية ترفع السعر، الماركات الاقتصادية تخفّضه قليلاً
+      const premium = ["Apple", "Sony", "Bose", "Daikin", "Miele", "Rational", "La Marzocco", "Herman Miller", "Bosch", "Samsung", "LG"];
+      const budget = ["Nikai", "Geepas", "TCL", "Hisense", "Realme", "Oppo", "Home Box"];
+      if (brand && premium.includes(brand)) factor *= 1.15;
+      else if (brand && budget.includes(brand)) factor *= 0.9;
+
+      // الوصف: وصف غني (أكثر تفصيلاً) يدل على منتج أفضل عرضاً
+      const len = descText.trim().length;
+      if (len > 220) factor *= 1.05;
+      else if (len > 0 && len < 40) factor *= 0.97;
+
+      // قابلية التفاوض تخفّض السعر المعروض قليلاً
+      if (negotiable) factor *= 0.98;
+
       const average = Math.round(base);
-      const suggested = Math.round((base * factor) / 5) * 5;
+      const suggested = Math.max(5, Math.round((base * factor) / 5) * 5);
       setEstimate({
         average,
         suggested,
