@@ -297,15 +297,23 @@ function AccountPage() {
 
   const rating = listings.length ? "0.0" : "0.0";
 
+  const verifyLabel =
+    profile.verified
+      ? "حساب موثّق"
+      : profile.verification_status === "requested"
+        ? "تم إرسال الطلب"
+        : "لم يتم التقديم";
+
   const menuItems = [
-    { icon: FileEdit, label: "المسودات", count: 0, soon: true },
-    { icon: Heart, label: "الإعلانات المفضلة", count: 0, soon: true },
-    { icon: Search, label: "البحوث المفضلة", count: 0, soon: true },
-    { icon: History, label: "آخر الإعلانات المشاهدة", soon: true },
-    { icon: History, label: "آخر البحوث", soon: true },
-    { icon: Users, label: "إعلانات المتابعون", soon: true },
-    { icon: ShieldCheck, label: "طلبات التوثيق", soon: true },
+    { key: "drafts", icon: FileEdit, label: "المسودات", count: drafts.length },
+    { key: "favorites", icon: Heart, label: "الإعلانات المفضلة", count: favorites.length },
+    { key: "searches", icon: Search, label: "البحوث المفضلة", count: savedSearches.length },
+    { key: "views", icon: History, label: "آخر الإعلانات المشاهدة", count: recentViews.length },
+    { key: "recentSearches", icon: History, label: "آخر البحوث", count: recentSearches.length },
+    { key: "follows", icon: Users, label: "إعلانات المتابعون", count: followedListings.length },
+    { key: "verify", icon: ShieldCheck, label: "طلبات التوثيق" },
   ];
+
 
   return (
     <div className="flex min-h-screen flex-col">
