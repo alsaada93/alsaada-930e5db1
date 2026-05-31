@@ -22,6 +22,7 @@ import { Footer } from "@/components/Footer";
 
 import { useSeller } from "@/hooks/useSellers";
 import { useAuth } from "@/hooks/useAuth";
+import { AuctionBidBox } from "@/components/AuctionBidBox";
 import { SellerReviews } from "@/components/SellerReviews";
 import { categories } from "@/data/marketplace";
 import { supabase } from "@/integrations/supabase/client";
