@@ -261,6 +261,22 @@ function ListingPage() {
   const { data: seller } = useSeller(item.sellerId);
   const [reposting, setReposting] = useState(false);
   const [isFav, setIsFav] = useState(false);
+  const [offerOpen, setOfferOpen] = useState(false);
+
+  // ترجمة العنوان والوصف حسب اللغة المختارة
+  const { map: trMap, lang } = useListingTranslations([
+    { id: item.id, title: item.title, description: item.description ?? "" },
+  ]);
+  const displayTitle = trMap[item.id]?.title || item.title;
+  const displayDescription = trMap[item.id]?.description || item.description || "";
+
+  // زيادة عدّاد المشاهدات الفعلي مرة واحدة لكل جلسة عرض
+  useEffect(() => {
+    const key = `viewed_${item.id}`;
+    if (sessionStorage.getItem(key)) return;
+    sessionStorage.setItem(key, "1");
+    (supabase as any).rpc("increment_listing_views", { _id: item.id }).then(() => {});
+  }, [item.id]);
 
   // سجل آخر الإعلانات المشاهدة
   useEffect(() => {
