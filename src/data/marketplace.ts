@@ -174,6 +174,14 @@ export interface Listing {
   sellerVerified?: boolean;
   sellerDeals?: number;
   phone?: string;
+  listingType?: "normal" | "auction" | "business";
+  // حقول المزاد
+  startPrice?: number;
+  auctionEndsAt?: string;
+  // حقول الأنشطة التجارية
+  monthlyRevenue?: number;
+  area?: number;
+  staff?: number;
 }
 
 export interface Seller {
