@@ -25,7 +25,7 @@ const dict: Dict = {
   // Hero
   "hero.badge": { ar: "مدعوم بالذكاء الاصطناعي", en: "Powered by AI" },
   "hero.title1": { ar: "سوق معدات المطاعم والأثاث والإلكترونيات", en: "Restaurant equipment, furniture & electronics market" },
-  "hero.title2": { ar: "في البحرين والخليج", en: "in Bahrain & the Gulf" },
+  "hero.title2": { ar: "في مملكة البحرين", en: "in the Kingdom of Bahrain" },
   "hero.subtitle": { ar: "بيع، شراء ومزاد على المعدات بثقة — تسعير ذكي، حماية من الاحتيال، وآلاف الإعلانات.", en: "Buy, sell and bid on equipment with confidence — smart pricing, fraud protection, and thousands of listings." },
   "hero.searchPlaceholder": { ar: "ماذا تبحث عنه اليوم؟", en: "What are you looking for today?" },
   "hero.imageSearch": { ar: "بحث بالصورة", en: "Image search" },
