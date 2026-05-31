@@ -391,6 +391,7 @@ function AddListingPage() {
                   setCategoryId(e.target.value);
                   setGroupName("");
                   setItemName("");
+                  setBrand("");
                 }}
                 className="h-11 w-full rounded-lg border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
               >
