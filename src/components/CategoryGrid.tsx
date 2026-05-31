@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { UtensilsCrossed, Hotel, Smartphone, Sofa, Store, type LucideIcon } from "lucide-react";
+import { UtensilsCrossed, Hotel, Smartphone, Sofa, Store, Gavel, type LucideIcon } from "lucide-react";
 import { categories } from "@/data/marketplace";
 import { useLanguage } from "@/hooks/useLanguage";
 
@@ -97,6 +97,22 @@ export function CategoryGrid() {
             {lang === "ar"
               ? "مطاعم وأنشطة تجارية كاملة جاهزة للتشغيل"
               : "Restaurants and full businesses ready to operate"}
+          </p>
+        </a>
+
+        {/* تصنيف: المزادات */}
+        <a
+          href="#auctions"
+          className="group relative flex flex-col items-start gap-3 overflow-hidden rounded-2xl border border-border bg-card p-4 text-start shadow-card transition-all hover:-translate-y-1 hover:border-primary/40"
+        >
+          <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-500 text-white shadow-lg transition-transform group-hover:scale-110">
+            <Gavel className="h-8 w-8" strokeWidth={1.75} />
+          </span>
+          <h3 className="font-bold text-card-foreground">{lang === "ar" ? "المزادات" : "Auctions"}</h3>
+          <p className="line-clamp-2 text-xs text-muted-foreground">
+            {lang === "ar"
+              ? "زايد على أفضل الصفقات واربح بأقل الأسعار"
+              : "Bid on the best deals and win at lower prices"}
           </p>
         </a>
       </div>
