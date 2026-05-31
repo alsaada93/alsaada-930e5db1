@@ -1,6 +1,7 @@
 import { createFileRoute, Outlet, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
+import { AdminLayoutProvider } from "@/components/admin/AdminLayoutContext";
 import { useAuth } from "@/hooks/useAuth";
 import { Loader2, ShieldX } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -65,11 +66,13 @@ function AdminLayout() {
   }
 
   return (
-    <div className="flex min-h-screen w-full bg-background">
-      <AdminSidebar />
-      <div className="flex-1 overflow-x-hidden">
-        <Outlet />
+    <AdminLayoutProvider>
+      <div className="flex min-h-screen w-full bg-muted/30">
+        <AdminSidebar />
+        <div className="flex min-w-0 flex-1 flex-col overflow-x-hidden">
+          <Outlet />
+        </div>
       </div>
-    </div>
+    </AdminLayoutProvider>
   );
 }
