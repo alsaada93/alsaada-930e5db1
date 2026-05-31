@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
-    meta: [{ title: "لوحة تحكم الإدارة | سوقو SOOGO" }],
+    meta: [{ title: "لوحة تحكم الإدارة | السعادة ماركت Al Saada Market" }],
   }),
   component: AdminLayout,
 });

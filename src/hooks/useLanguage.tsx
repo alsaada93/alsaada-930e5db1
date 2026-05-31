@@ -58,10 +58,10 @@ const dict: Dict = {
   "sec.featured": { ar: "الإعلانات المميزة", en: "Featured listings" },
   "sec.featuredSub": { ar: "إعلانات مختارة من تجار موثوقين", en: "Selected ads from trusted sellers" },
   "sec.latest": { ar: "أحدث الإعلانات", en: "Latest listings" },
-  "sec.latestSub": { ar: "آخر ما تم إضافته على سوقو", en: "Newest additions on SOOGO" },
+  "sec.latestSub": { ar: "آخر ما تم إضافته على السعادة ماركت", en: "Newest additions on Al Saada Market" },
 
   // Footer
-  "footer.tagline": { ar: "سوقو — منصة بيع وشراء ومزاد معدات المطاعم والأثاث والإلكترونيات في مملكة البحرين.", en: "SOOGO — buy, sell and bid on restaurant equipment, furniture and electronics in the Kingdom of Bahrain." },
+  "footer.tagline": { ar: "السعادة ماركت — منصة بيع وشراء ومزاد معدات المطاعم والأثاث والإلكترونيات في مملكة البحرين.", en: "Al Saada Market — buy, sell and bid on restaurant equipment, furniture and electronics in the Kingdom of Bahrain." },
   "footer.rights": { ar: "جميع الحقوق محفوظة", en: "All rights reserved" },
   "footer.admin": { ar: "لوحة الإدارة", en: "Admin panel" },
 
@@ -124,7 +124,7 @@ const dict: Dict = {
   "add.publishAuction": { ar: "نشر المزاد", en: "Publish auction" },
   "add.publishBusiness": { ar: "نشر النشاط للبيع", en: "Publish business for sale" },
   "add.received": { ar: "تم استلام إعلانك", en: "Your listing was received" },
-  "add.receivedDesc": { ar: "سيتم مراجعة الإعلان من قبل الإدارة قبل نشره. شكراً لاستخدامك سوقو.", en: "Your listing will be reviewed by the team before publishing. Thanks for using SOOGO." },
+  "add.receivedDesc": { ar: "سيتم مراجعة الإعلان من قبل الإدارة قبل نشره. شكراً لاستخدامك السعادة ماركت.", en: "Your listing will be reviewed by the team before publishing. Thanks for using Al Saada Market." },
 
   // Business sale fields
   "biz.heading": { ar: "تفاصيل النشاط التجاري", en: "Business details" },

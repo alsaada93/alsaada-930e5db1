@@ -41,7 +41,7 @@ export function Hero() {
         <img
           key={src + i}
           src={src}
-          alt="SOOGO marketplace"
+          alt="Al Saada Market marketplace"
           width={1536}
           height={1024}
           loading={i === 0 ? "eager" : "lazy"}

@@ -81,15 +81,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "السعادة ماركت" },
-      { name: "description", content: "سوقو منصة بيع وشراء ومزاد معدات المطاعم والأثاث والإلكترونيات في مملكة البحرين." },
+      { name: "description", content: "السعادة ماركت منصة بيع وشراء ومزاد معدات المطاعم والأثاث والإلكترونيات في مملكة البحرين." },
       { name: "author", content: "السعادة ماركت" },
       { property: "og:title", content: "السعادة ماركت" },
-      { property: "og:description", content: "سوقو منصة بيع وشراء ومزاد معدات المطاعم والأثاث والإلكترونيات في مملكة البحرين." },
+      { property: "og:description", content: "السعادة ماركت منصة بيع وشراء ومزاد معدات المطاعم والأثاث والإلكترونيات في مملكة البحرين." },
       { property: "og:type", content: "website" },
       { property: "og:site_name", content: "السعادة ماركت" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:title", content: "السعادة ماركت" },
-      { name: "twitter:description", content: "سوقو منصة بيع وشراء ومزاد معدات المطاعم والأثاث والإلكترونيات في مملكة البحرين." },
+      { name: "twitter:description", content: "السعادة ماركت منصة بيع وشراء ومزاد معدات المطاعم والأثاث والإلكترونيات في مملكة البحرين." },
     ],
     links: [
       {

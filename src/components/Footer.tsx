@@ -5,7 +5,7 @@ export function Footer() {
   const { t, lang } = useLanguage();
   const cols = [
     {
-      title: lang === "ar" ? "سوقو" : "SOOGO",
+      title: lang === "ar" ? "السعادة ماركت" : "Al Saada Market",
       links: lang === "ar"
         ? ["من نحن", "كيف تبيع", "كيف تشتري", "الباقات والأسعار"]
         : ["About us", "How to sell", "How to buy", "Plans & pricing"],
@@ -34,7 +34,7 @@ export function Footer() {
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:grid-cols-2 lg:grid-cols-5">
         <div className="lg:col-span-1">
           <div className="text-xl font-extrabold">
-            SOOGO <span className="text-navy-foreground/80">| سوقو</span>
+            Al Saada Market <span className="text-navy-foreground/80">| السعادة ماركت</span>
           </div>
           <p className="mt-2 text-sm text-navy-foreground/60">{t("footer.tagline")}</p>
         </div>
@@ -63,7 +63,7 @@ export function Footer() {
         ))}
       </div>
       <div className="flex flex-col items-center justify-center gap-1 border-t border-sidebar-border py-4 text-center text-xs text-navy-foreground/50 sm:flex-row sm:gap-3">
-        <span>© {new Date().getFullYear()} سوقو SOOGO — {t("footer.rights")}</span>
+        <span>© {new Date().getFullYear()} السعادة ماركت Al Saada Market — {t("footer.rights")}</span>
         <Link to="/admin" className="font-semibold text-navy-foreground/80 hover:underline">
           {t("footer.admin")}
         </Link>
