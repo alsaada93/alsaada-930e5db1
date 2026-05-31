@@ -35,7 +35,16 @@ export function ShareButtons({
     window.open("https://www.instagram.com/", "_blank", "noopener,noreferrer");
   };
 
-  const platforms = [
+  type Platform = {
+    key: string;
+    label: string;
+    icon: typeof MessageCircle;
+    color: string;
+    href?: string;
+    onClick?: () => void;
+  };
+
+  const platforms: Platform[] = [
     {
       key: "whatsapp",
       label: "WhatsApp",
