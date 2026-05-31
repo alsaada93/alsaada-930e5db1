@@ -94,6 +94,7 @@ const dict: Dict = {
   "add.postingAs": { ar: "تنشر باسم حسابك:", en: "Posting as:" },
   "add.adTitle": { ar: "عنوان الإعلان", en: "Listing title" },
   "add.adTitlePh": { ar: "مثال: فرن بيتزا احترافي ستانلس ستيل", en: "e.g. Professional stainless steel pizza oven" },
+  "add.suggestTitle": { ar: "عناوين مقترحة (انقر للاستخدام):", en: "Suggested titles (tap to use):" },
   "add.mainCat": { ar: "التصنيف الرئيسي", en: "Main category" },
   "add.chooseCat": { ar: "اختر التصنيف", en: "Choose category" },
   "add.subCat": { ar: "نوع الصنف", en: "Item kind" },
