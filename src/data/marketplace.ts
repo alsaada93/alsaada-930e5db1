@@ -169,17 +169,151 @@ export const categories: Category[] = [
 const img = (q: string) =>
   `https://images.unsplash.com/${q}?auto=format&fit=crop&w=600&q=70`;
 
-export const listings: Listing[] = [
-  { id: "l1", sellerId: "s1", title: "فرن بيتزا احترافي ستانلس ستيل", price: 850, negotiable: true, condition: "مستعمل", city: "المنامة", category: "معدات المطاعم", image: img("photo-1556910103-1c02745aae4d"), featured: true, views: 1240 },
-  { id: "l2", sellerId: "s2", title: "مكينة إسبرسو La Marzocco", price: 2300, condition: "مستعمل", city: "المحرق", category: "الكوفي شوب", image: img("photo-1510972527921-ce03766a1cf1"), featured: true, views: 980 },
-  { id: "l3", sellerId: "s3", title: "ثلاجة عرض زجاجية كبيرة", price: 620, negotiable: true, condition: "مستعمل", city: "الرفاع", category: "معدات المطاعم", image: img("photo-1571175443880-49e1d25b2bc5"), views: 540 },
-  { id: "l4", sellerId: "s4", title: "لابتوب MacBook Pro M2", price: 480, condition: "مستعمل", city: "المنامة", category: "الإلكترونيات", image: img("photo-1517336714731-489689fd1ca8"), featured: true, views: 2100 },
-  { id: "l5", sellerId: "s5", title: "طاولات وكراسي مطعم خشب فاخر", price: 350, negotiable: true, condition: "مستعمل", city: "عيسى", category: "الأثاث", image: img("photo-1517248135467-4c7edcad34c4"), views: 730 },
-  { id: "l6", sellerId: "s6", title: "ماكينة آيس كريم سوفت 3 نكهات", price: 1100, condition: "جديد", city: "سترة", category: "الآيس كريم", image: img("photo-1497034825429-c343d7c6a68f"), views: 410 },
-  { id: "l7", sellerId: "s4", title: "جهاز نقاط بيع POS كامل", price: 290, condition: "جديد", city: "المنامة", category: "الإلكترونيات", image: img("photo-1556742044-3c52d6e88c62"), views: 860 },
-  { id: "l8", sellerId: "s2", title: "عجانة مخبز صناعية 20 كجم", price: 740, negotiable: true, condition: "مستعمل", city: "المحرق", category: "المخابز", image: img("photo-1509440159596-0249088772ff"), views: 320 },
+/* ----------------------------------------------------------------------------
+ * Realistic listing generator (~100 per category)
+ * Deterministic so SSR and client render identical data.
+ * Prices are realistic BHD market values for used/new business equipment.
+ * -------------------------------------------------------------------------- */
 
+interface ProductSeed {
+  title: string;
+  sub: string;
+  base: number; // base price in BHD
+  img: string;
+}
+
+const P = (title: string, sub: string, base: number, img: string): ProductSeed => ({ title, sub, base, img });
+
+const catalogs: Record<string, ProductSeed[]> = {
+  مطاعم: [
+    P("عجانة مخبز صناعية 20 كجم", "مخابز", 740, "photo-1509440159596-0249088772ff"),
+    P("فرن مخبز دوّار 3 رفوف", "مخابز", 1650, "photo-1568254183919-78a4f43a2877"),
+    P("فرّادة عجين أوتوماتيك", "مخابز", 480, "photo-1509440159596-0249088772ff"),
+    P("خلاط مخبز عمودي 30 لتر", "مخابز", 520, "photo-1509440159596-0249088772ff"),
+    P("مكينة إسبرسو احترافية مزدوجة", "كوفي شوب", 2300, "photo-1510972527921-ce03766a1cf1"),
+    P("مطحنة قهوة تجارية", "كوفي شوب", 380, "photo-1510972527921-ce03766a1cf1"),
+    P("ثلاجة عرض مشروبات زجاجية", "كوفي شوب", 620, "photo-1571175443880-49e1d25b2bc5"),
+    P("بلندر مشروبات احترافي", "كوفي شوب", 145, "photo-1442512595331-e89e73853f31"),
+    P("فرن بيتزا احترافي ستانلس ستيل", "معدات كهربائية", 850, "photo-1556910103-1c02745aae4d"),
+    P("ثلاجة باب زجاجي عمودية", "معدات كهربائية", 540, "photo-1571175443880-49e1d25b2bc5"),
+    P("فريزر صدر أفقي كبير", "معدات كهربائية", 320, "photo-1571175443880-49e1d25b2bc5"),
+    P("غسالة صحون صناعية", "معدات كهربائية", 690, "photo-1581622558663-b2e33377dfb2"),
+    P("مايكروويف صناعي عالي الطاقة", "معدات كهربائية", 210, "photo-1556910103-1c02745aae4d"),
+    P("فرن غاز أربع عيون مع شواية", "معدات غاز", 470, "photo-1556910103-1c02745aae4d"),
+    P("شواية غاز فحمية تجارية", "معدات غاز", 360, "photo-1556910103-1c02745aae4d"),
+    P("قلاية غاز مزدوجة الأحواض", "معدات غاز", 290, "photo-1556910103-1c02745aae4d"),
+    P("صاج غاز مسطح للتحضير", "معدات غاز", 250, "photo-1556910103-1c02745aae4d"),
+    P("طاولة تحضير مبردة ستانلس", "معدات تحضير", 580, "photo-1581622558663-b2e33377dfb2"),
+    P("فرّامة لحم كهربائية", "معدات تحضير", 230, "photo-1581622558663-b2e33377dfb2"),
+    P("آلة تقطيع خضار متعددة", "معدات تحضير", 180, "photo-1581622558663-b2e33377dfb2"),
+    P("ميزان رقمي تجاري دقيق", "معدات تحضير", 75, "photo-1581622558663-b2e33377dfb2"),
+    P("طاولة تجهيز ستانلس ستيل", "طاولات ومغاسل", 160, "photo-1517248135467-4c7edcad34c4"),
+    P("مغسلة ستانلس مزدوجة الحوض", "طاولات ومغاسل", 195, "photo-1517248135467-4c7edcad34c4"),
+    P("رف تخزين ستانلس 4 طبقات", "طاولات ومغاسل", 110, "photo-1517248135467-4c7edcad34c4"),
+    P("عربة نقل مطبخ ستانلس", "طاولات ومغاسل", 95, "photo-1517248135467-4c7edcad34c4"),
+  ],
+  فنادق: [
+    P("سرير فندقي مزدوج بمرتبة فاخرة", "أثاث فنادق", 240, "photo-1582719478250-c89cae4dc85b"),
+    P("كنبة استقبال جلد للوبي", "أثاث فنادق", 380, "photo-1631049307264-da0ec9d70304"),
+    P("طقم كراسي لوبي عصري", "أثاث فنادق", 320, "photo-1540518614846-7eded433c457"),
+    P("خزانة ملابس غرفة فندقية", "أثاث فنادق", 210, "photo-1611892440504-42a792e24d32"),
+    P("طاولة جانبية خشبية للغرف", "أثاث فنادق", 65, "photo-1505693416388-ac5ce068fe85"),
+    P("ثلاجة ميني بار للغرف", "معدات كهربائية", 85, "photo-1571175443880-49e1d25b2bc5"),
+    P("سخان مياه كهربائي للغرف", "معدات كهربائية", 70, "photo-1571175443880-49e1d25b2bc5"),
+    P("مكيف سبليت غرفة فندقية", "معدات كهربائية", 180, "photo-1581622558663-b2e33377dfb2"),
+    P("مكواة بخار عمودية", "معدات كهربائية", 55, "photo-1581622558663-b2e33377dfb2"),
+    P("عربة تقديم طعام للغرف", "معدات تحضير", 140, "photo-1517248135467-4c7edcad34c4"),
+    P("بوفيه حافظ حرارة للأطعمة", "معدات تحضير", 420, "photo-1581622558663-b2e33377dfb2"),
+    P("طاولة بوفيه ستانلس قابلة للطي", "معدات تحضير", 160, "photo-1517248135467-4c7edcad34c4"),
+    P("غسالة ملابس صناعية كبيرة", "غسيل وتنظيف", 780, "photo-1581622558663-b2e33377dfb2"),
+    P("مجفف ملابس صناعي", "غسيل وتنظيف", 650, "photo-1581622558663-b2e33377dfb2"),
+    P("مكوى مسطح بخاري للبياضات", "غسيل وتنظيف", 540, "photo-1581622558663-b2e33377dfb2"),
+    P("عربة تنظيف وتدبير منزلي", "غسيل وتنظيف", 120, "photo-1517248135467-4c7edcad34c4"),
+  ],
+  "غير ذلك": [
+    P("لابتوب MacBook Pro M2", "إلكترونيات", 480, "photo-1517336714731-489689fd1ca8"),
+    P("شاشة كمبيوتر 27 بوصة 4K", "إلكترونيات", 130, "photo-1518770660439-4636190af475"),
+    P("طابعة ليزر متعددة الوظائف", "إلكترونيات", 95, "photo-1556742044-3c52d6e88c62"),
+    P("كاميرا مراقبة طقم 8 قنوات", "إلكترونيات", 160, "photo-1518770660439-4636190af475"),
+    P("جهاز نقاط بيع POS كامل", "إلكترونيات", 290, "photo-1556742044-3c52d6e88c62"),
+    P("راوتر شبكة احترافي", "إلكترونيات", 45, "photo-1518770660439-4636190af475"),
+    P("كنبة زاوية مودرن 5 مقاعد", "أثاث منزلي", 280, "photo-1555041469-a586c61ea9bc"),
+    P("طاولة طعام خشب مع 6 كراسي", "أثاث منزلي", 220, "photo-1517248135467-4c7edcad34c4"),
+    P("سرير كينج مع تسريحة", "أثاث منزلي", 260, "photo-1505693416388-ac5ce068fe85"),
+    P("خزانة ملابس 4 أبواب", "أثاث منزلي", 190, "photo-1505693416388-ac5ce068fe85"),
+    P("مكتب عمل خشبي كبير", "أثاث مكتبي", 110, "photo-1517336714731-489689fd1ca8"),
+    P("كرسي مكتب طبي دوّار", "أثاث مكتبي", 65, "photo-1540518614846-7eded433c457"),
+    P("خزانة ملفات معدنية", "أثاث مكتبي", 80, "photo-1505693416388-ac5ce068fe85"),
+    P("طاولة اجتماعات 8 أشخاص", "أثاث مكتبي", 240, "photo-1517248135467-4c7edcad34c4"),
+    P("مكيف سبليت 1.5 طن", "أخرى", 150, "photo-1518770660439-4636190af475"),
+    P("دراجة كهربائية للتوصيل", "أخرى", 320, "photo-1518770660439-4636190af475"),
+  ],
+};
+
+const descriptors = [
+  "بحالة ممتازة",
+  "شبه جديد",
+  "استعمال خفيف",
+  "موديل حديث",
+  "نظيف جداً",
+  "بالكرتون",
+  "استيراد أوروبي",
+  "اقتصادي",
+  "فاخر",
+  "ضمان متبقٍ",
 ];
+
+function mulberry32(seed: number) {
+  return function () {
+    seed |= 0;
+    seed = (seed + 0x6d2b79f5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function generateListings(): Listing[] {
+  const out: Listing[] = [];
+  const sellerIds = ["s1", "s2", "s3", "s4", "s5", "s6"];
+  categories.forEach((cat, ci) => {
+    const catalog = catalogs[cat.name] ?? [];
+    const rnd = mulberry32(1000 + ci * 97);
+    const prefix = cat.id[0];
+    for (let i = 0; i < 100; i++) {
+      const product = catalog[i % catalog.length];
+      const desc = descriptors[Math.floor(rnd() * descriptors.length)];
+      const condition: Listing["condition"] = rnd() > 0.7 ? "جديد" : "مستعمل";
+      const jitter = 0.7 + rnd() * 0.6; // ±30%
+      const condFactor = condition === "جديد" ? 1.25 : 1;
+      const price = Math.max(15, Math.round((product.base * jitter * condFactor) / 5) * 5);
+      const city = bahrainRegions[Math.floor(rnd() * bahrainRegions.length)];
+      out.push({
+        id: `${prefix}${i + 1}`,
+        sellerId: sellerIds[Math.floor(rnd() * sellerIds.length)],
+        title: `${product.title} — ${desc}`,
+        price,
+        negotiable: rnd() > 0.5,
+        condition,
+        city,
+        category: cat.name,
+        sub: product.sub,
+        image: img(product.img),
+        featured: i < 4 || rnd() > 0.9,
+        views: Math.floor(50 + rnd() * 2500),
+      });
+    }
+  });
+  return out;
+}
+
+export const listings: Listing[] = generateListings();
+
+// Keep category counts accurate based on generated data.
+categories.forEach((c) => {
+  c.count = listings.filter((l) => l.category === c.name).length;
+});
+
 
 export const auctions: Auction[] = [
   { id: "a1", title: "خط إنتاج مخبز متكامل", currentBid: 4200, bids: 23, endsInHours: 5, city: "الرفاع", image: img("photo-1568254183919-78a4f43a2877") },
