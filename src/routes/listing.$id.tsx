@@ -243,3 +243,12 @@ function ListingPage() {
     </div>
   );
 }
+
+function Detail({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <p className="text-xs text-muted-foreground">{label}</p>
+      <p className="font-bold text-card-foreground">{value}</p>
+    </div>
+  );
+}
