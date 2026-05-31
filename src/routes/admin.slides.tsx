@@ -15,7 +15,6 @@ function AdminSlidesPage() {
   const [intervalSec, setIntervalSec] = useState(4);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
-  const [pendingFile, setPendingFile] = useState<File | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
 
   const load = async () => {
@@ -127,7 +126,7 @@ function AdminSlidesPage() {
             hidden
             onChange={(e) => {
               const f = e.target.files?.[0];
-              if (f) setPendingFile(f);
+              if (f) uploadImage(f);
               e.target.value = "";
             }}
           />
