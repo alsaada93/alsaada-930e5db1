@@ -82,13 +82,32 @@ function CategoryPage() {
 
           {category.sub.length > 0 && (
             <div className="mt-5 flex flex-wrap gap-2">
+              <Link
+                to="/category/$id"
+                params={{ id: category.id }}
+                search={{ sub: undefined }}
+                className={`rounded-full border px-3 py-1 text-xs font-semibold transition-colors ${
+                  !sub
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-border bg-card text-card-foreground hover:border-primary/40"
+                }`}
+              >
+                الكل
+              </Link>
               {category.sub.map((s: string) => (
-                <span
+                <Link
                   key={s}
-                  className="rounded-full border border-border bg-card px-3 py-1 text-xs font-semibold text-card-foreground"
+                  to="/category/$id"
+                  params={{ id: category.id }}
+                  search={{ sub: s }}
+                  className={`rounded-full border px-3 py-1 text-xs font-semibold transition-colors ${
+                    sub === s
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-border bg-card text-card-foreground hover:border-primary/40"
+                  }`}
                 >
                   {s}
-                </span>
+                </Link>
               ))}
             </div>
           )}
@@ -96,17 +115,17 @@ function CategoryPage() {
 
         <section className="mx-auto max-w-7xl px-4 pb-16">
           <h2 className="mb-4 text-lg font-extrabold">
-            الإعلانات ({items.length.toLocaleString("ar")})
+            الإعلانات ({filtered.length.toLocaleString("ar")})
           </h2>
-          {items.length > 0 ? (
+          {filtered.length > 0 ? (
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-              {items.map((item: Listing) => (
+              {filtered.map((item: Listing) => (
                 <ListingCard key={item.id} item={item} />
               ))}
             </div>
           ) : (
             <div className="rounded-2xl border border-dashed border-border bg-card p-12 text-center">
-              <p className="text-muted-foreground">لا توجد إعلانات في هذا التصنيف حالياً.</p>
+              <p className="text-muted-foreground">لا توجد إعلانات مطابقة في هذا التصنيف حالياً.</p>
             </div>
           )}
         </section>
