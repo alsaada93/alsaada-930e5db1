@@ -57,7 +57,7 @@ export const Route = createFileRoute("/category/$id")({
 function CategoryPage() {
   const { category, items } = Route.useLoaderData();
   const { sub } = Route.useSearch();
-  const filtered = sub ? items.filter((l) => l.title.includes(sub)) : items;
+  const filtered = sub ? items.filter((l: Listing) => l.title.includes(sub)) : items;
 
   return (
     <div className="flex min-h-screen flex-col">
