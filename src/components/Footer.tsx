@@ -101,8 +101,8 @@ export function Footer() {
             {lang === "ar" ? identity.nameEn : identity.nameAr}{" "}
             <span className="text-navy-foreground/80">| {lang === "ar" ? identity.nameAr : identity.nameEn}</span>
           </div>
-          <p className="mt-2 text-sm text-navy-foreground/60">{t("footer.tagline")}</p>
-          <p className="mt-2 text-xs leading-relaxed text-navy-foreground/50">
+          <p className="mt-2 text-sm text-navy-foreground/80">{t("footer.tagline")}</p>
+          <p className="mt-2 text-xs leading-relaxed text-navy-foreground/75">
             {lang === "ar"
               ? "ورشة متخصصة في الاستانلس ستيل وتجهيز معدات المطاعم والأثاث المنزلي، وبيع وشراء جميع المعدات والأثاث والإلكترونيات في البحرين."
               : "Stainless steel workshop for restaurant equipment & home furniture, and buying/selling all equipment, furniture & electronics in Bahrain."}
