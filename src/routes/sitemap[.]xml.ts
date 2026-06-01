@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import type {} from "@tanstack/react-start";
+import { articles } from "@/data/articles";
 
 const BASE_URL = "https://alsaada.lovable.app";
 
@@ -27,6 +28,12 @@ export const Route = createFileRoute("/sitemap.xml")({
           { path: "/privacy", changefreq: "yearly", priority: "0.3" },
           { path: "/terms", changefreq: "yearly", priority: "0.3" },
           { path: "/login", changefreq: "monthly", priority: "0.3" },
+          { path: "/tips", changefreq: "weekly", priority: "0.7" },
+          ...articles.map((a) => ({
+            path: `/tips/${a.slug}`,
+            changefreq: "monthly" as const,
+            priority: "0.5",
+          })),
         ];
 
         const urls = entries.map((e) =>
