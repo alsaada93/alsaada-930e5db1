@@ -1,15 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { InfoLayout, InfoSection } from "@/components/InfoLayout";
 import { useLanguage } from "@/hooks/useLanguage";
+import { fetchSeoMeta, buildSeoHead } from "@/hooks/useSeoConfig";
 
 export const Route = createFileRoute("/privacy")({
-  head: () => ({
-    meta: [
-      { title: "سياسة الخصوصية | السعادة ماركت Al Saada Market" },
-      { name: "description", content: "سياسة الخصوصية وحماية بيانات المستخدمين في السعادة ماركت." },
-    ],
-    links: [{ rel: "canonical", href: "https://alsaada.lovable.app/privacy" }],
-  }),
+  loader: () => fetchSeoMeta("privacy"),
+  head: ({ loaderData }) => buildSeoHead("privacy", loaderData),
   component: PrivacyPage,
 });
 

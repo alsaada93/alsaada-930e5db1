@@ -1,18 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { InfoLayout, InfoSection } from "@/components/InfoLayout";
 import { useLanguage } from "@/hooks/useLanguage";
+import { fetchSeoMeta, buildSeoHead } from "@/hooks/useSeoConfig";
 
 export const Route = createFileRoute("/faq")({
-  head: () => ({
-    meta: [
-      { title: "الأسئلة الشائعة | السعادة ماركت Al Saada Market" },
-      {
-        name: "description",
-        content: "إجابات على الأسئلة الأكثر شيوعاً حول البيع والشراء والإعلانات في السعادة ماركت.",
-      },
-    ],
-    links: [{ rel: "canonical", href: "https://alsaada.lovable.app/faq" }],
-  }),
+  loader: () => fetchSeoMeta("faq"),
+  head: ({ loaderData }) => buildSeoHead("faq", loaderData),
   component: FaqPage,
 });
 

@@ -1,18 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { InfoLayout, InfoSection } from "@/components/InfoLayout";
 import { useLanguage } from "@/hooks/useLanguage";
+import { fetchSeoMeta, buildSeoHead } from "@/hooks/useSeoConfig";
 
 export const Route = createFileRoute("/report")({
-  head: () => ({
-    meta: [
-      { title: "الإبلاغ عن إعلان | السعادة ماركت Al Saada Market" },
-      {
-        name: "description",
-        content: "أبلغ عن إعلان مخالف أو محتوى غير لائق في السعادة ماركت لنحافظ على بيئة آمنة للجميع.",
-      },
-    ],
-    links: [{ rel: "canonical", href: "https://alsaada.lovable.app/report" }],
-  }),
+  loader: () => fetchSeoMeta("report"),
+  head: ({ loaderData }) => buildSeoHead("report", loaderData),
   component: ReportPage,
 });
 
