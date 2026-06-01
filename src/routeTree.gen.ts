@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SellRouteImport } from './routes/sell'
 import { Route as SearchRouteImport } from './routes/search'
@@ -36,6 +37,11 @@ import { Route as AdminBrandsRouteImport } from './routes/admin.brands'
 import { Route as AdminAuctionsRouteImport } from './routes/admin.auctions'
 import { Route as AdminAppearanceRouteImport } from './routes/admin.appearance'
 
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
@@ -183,6 +189,7 @@ export interface FileRoutesByFullPath {
   '/search': typeof SearchRoute
   '/sell': typeof SellRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/terms': typeof TermsRoute
   '/admin/appearance': typeof AdminAppearanceRoute
   '/admin/auctions': typeof AdminAuctionsRoute
   '/admin/brands': typeof AdminBrandsRoute
@@ -210,6 +217,7 @@ export interface FileRoutesByTo {
   '/search': typeof SearchRoute
   '/sell': typeof SellRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/terms': typeof TermsRoute
   '/admin/appearance': typeof AdminAppearanceRoute
   '/admin/auctions': typeof AdminAuctionsRoute
   '/admin/brands': typeof AdminBrandsRoute
@@ -239,6 +247,7 @@ export interface FileRoutesById {
   '/search': typeof SearchRoute
   '/sell': typeof SellRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/terms': typeof TermsRoute
   '/admin/appearance': typeof AdminAppearanceRoute
   '/admin/auctions': typeof AdminAuctionsRoute
   '/admin/brands': typeof AdminBrandsRoute
@@ -269,6 +278,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/sell'
     | '/sitemap.xml'
+    | '/terms'
     | '/admin/appearance'
     | '/admin/auctions'
     | '/admin/brands'
@@ -296,6 +306,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/sell'
     | '/sitemap.xml'
+    | '/terms'
     | '/admin/appearance'
     | '/admin/auctions'
     | '/admin/brands'
@@ -324,6 +335,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/sell'
     | '/sitemap.xml'
+    | '/terms'
     | '/admin/appearance'
     | '/admin/auctions'
     | '/admin/brands'
@@ -353,12 +365,20 @@ export interface RootRouteChildren {
   SearchRoute: typeof SearchRoute
   SellRoute: typeof SellRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  TermsRoute: typeof TermsRoute
   CategoryIdRoute: typeof CategoryIdRoute
   ListingIdRoute: typeof ListingIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sitemap.xml': {
       id: '/sitemap.xml'
       path: '/sitemap.xml'
@@ -594,6 +614,7 @@ const rootRouteChildren: RootRouteChildren = {
   SearchRoute: SearchRoute,
   SellRoute: SellRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  TermsRoute: TermsRoute,
   CategoryIdRoute: CategoryIdRoute,
   ListingIdRoute: ListingIdRoute,
 }
