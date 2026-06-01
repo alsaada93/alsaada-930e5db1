@@ -382,9 +382,14 @@ function ListingPage() {
 
   const waLink = whatsappLink({ phone, listingTitle: item.title, listingId: item.id });
 
-  const mapSrc = item.lat != null && item.lng != null
-    ? `https://www.openstreetmap.org/export/embed.html?bbox=${item.lng - 0.01}%2C${item.lat - 0.01}%2C${item.lng + 0.01}%2C${item.lat + 0.01}&layer=mapnik&marker=${item.lat}%2C${item.lng}`
-    : null;
+  // نقطة الخريطة: إحداثيات المعلن إن وُجدت، وإلا مركز المدينة المختارة
+  const exactPoint = item.lat != null && item.lng != null ? { lat: item.lat, lng: item.lng } : null;
+  const mapPoint = exactPoint ?? cityCenter(item.city);
+  const approxLocation = !exactPoint && !!mapPoint;
+  const mapSrc = mapPoint ? osmEmbed(mapPoint.lat, mapPoint.lng) : null;
+
+  // معلومات الماركة (الوصف وبلد المنشأ والتخصص) تُعرض تلقائياً
+  const bInfo = brandInfo(item.brand);
 
   return (
     <div className="flex min-h-screen flex-col">
