@@ -28,7 +28,7 @@ import { SellerReviews } from "@/components/SellerReviews";
 import { categories } from "@/data/marketplace";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { logContactAttempt } from "@/lib/contact";
+import { logContactAttempt, whatsappLink, telLink } from "@/lib/contact";
 import { PriceOfferDialog } from "@/components/PriceOfferDialog";
 import { ListingHashtags } from "@/components/ListingHashtags";
 import { ShareButtons } from "@/components/ShareButtons";
@@ -342,7 +342,7 @@ function ListingPage() {
   };
 
 
-  const phone = seller?.phone ?? item.phone ?? "97333000000";
+  const phone = seller?.phone ?? item.phone ?? "33982383";
   const sellerName = seller?.name ?? "بائع موثوق";
   const rating = seller?.rating ?? 4.8;
   const reviews = seller?.reviews_count ?? 0;
@@ -375,9 +375,7 @@ function ListingPage() {
     navigate({ to: "/listing/$id", params: { id: item.id } });
   };
 
-  const waLink = `https://wa.me/${phone}?text=${encodeURIComponent(
-    `مرحباً، أنا مهتم بإعلان "${item.title}" المعروض على حراج السعادة.`,
-  )}`;
+  const waLink = whatsappLink({ phone, listingTitle: item.title, listingId: item.id });
 
   const mapSrc = item.lat != null && item.lng != null
     ? `https://www.openstreetmap.org/export/embed.html?bbox=${item.lng - 0.01}%2C${item.lat - 0.01}%2C${item.lng + 0.01}%2C${item.lat + 0.01}&layer=mapnik&marker=${item.lat}%2C${item.lng}`
@@ -562,7 +560,7 @@ function ListingPage() {
                 <MessageCircle className="h-4 w-4" /> {lang === "ar" ? "واتساب" : "WhatsApp"}
               </a>
               <a
-                href={`tel:+${phone}`}
+                href={telLink(phone)}
                 onClick={() =>
                   logContactAttempt({
                     recipientId: item.userId,
