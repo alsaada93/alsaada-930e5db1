@@ -936,6 +936,9 @@ function AddListingPage() {
                           setRegion(r);
                           setRegionQuery("");
                           setRegionOpen(false);
+                          // تحديد موقع المدينة على الخريطة تلقائياً
+                          const c = cityCenter(r);
+                          if (c) setCoords(c);
                         }}
                         className="w-full rounded-md px-3 py-2 text-start text-sm hover:bg-accent"
                       >
