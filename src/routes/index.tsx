@@ -58,9 +58,11 @@ function Index() {
           <PromoCarousel />
           <CategoryGrid />
           <WeBuyBanner />
-          <ListingsSection title={t("sec.featured")} subtitle={t("sec.featuredSub")} items={featured} />
-          <AuctionsSection />
           <ListingsSection title={t("sec.latest")} subtitle={t("sec.latestSub")} items={latest} />
+          {featured.length > 0 && (
+            <ListingsSection title={t("sec.featured")} subtitle={t("sec.featuredSub")} items={featured} />
+          )}
+          <AuctionsSection />
           <Testimonials />
           <BusinessSection />
           <HomeBanners position="bottom" />
