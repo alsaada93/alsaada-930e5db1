@@ -2,7 +2,7 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
-import { getArticle } from "@/data/articles";
+import { getArticle, type Article, type ArticleSection } from "@/data/articles";
 
 export const Route = createFileRoute("/tips/$slug")({
   loader: ({ params }) => {
@@ -70,7 +70,7 @@ export const Route = createFileRoute("/tips/$slug")({
 });
 
 function ArticlePage() {
-  const a = Route.useLoaderData();
+  const a = Route.useLoaderData() as Article;
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -86,13 +86,13 @@ function ArticlePage() {
             <h1 className="text-3xl font-extrabold">{a.title}</h1>
             <p className="mt-3 text-muted-foreground">{a.excerpt}</p>
           </header>
-          {a.sections.map((s, i) => (
+          {a.sections.map((s: ArticleSection, i: number) => (
             <section key={i} className="rounded-2xl border border-border bg-card p-5">
               <h2 className="mb-3 text-xl font-bold text-primary">{s.heading}</h2>
               <p>{s.body}</p>
               {s.list_items && s.list_items.length > 0 && (
                 <ul className="mt-3 list-disc space-y-1 pr-5">
-                  {s.list_items.map((li, j) => (
+                  {s.list_items.map((li: string, j: number) => (
                     <li key={j}>{li}</li>
                   ))}
                 </ul>
@@ -101,7 +101,7 @@ function ArticlePage() {
           ))}
           {a.hashtags.length > 0 && (
             <div className="flex flex-wrap gap-2 pt-2">
-              {a.hashtags.map((h) => (
+              {a.hashtags.map((h: string) => (
                 <span
                   key={h}
                   className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground"
