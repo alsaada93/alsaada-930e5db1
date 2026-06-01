@@ -34,7 +34,7 @@ export const Route = createFileRoute("/category/$id")({
   },
   head: ({ loaderData, params }) => {
     const name = loaderData?.category.name ?? "التصنيفات";
-    const url = `https://alsaada-market.lovable.app/category/${params.id}`;
+    const url = `https://alsaada.lovable.app/category/${params.id}`;
     return {
       meta: [
         { title: `${name} | حراج السعادة Haraj Al Saada` },

@@ -29,9 +29,11 @@ export const Route = createFileRoute("/")({
         property: "og:description",
         content: "شراء وبيع معدات المطاعم والأثاث والإلكترونيات في البحرين — نشتري مباشرة وتثمين مجاني.",
       },
-      { property: "og:url", content: "https://soogo-hub.lovable.app/" },
+      { property: "og:url", content: "https://alsaada.lovable.app/" },
+      { property: "og:image", content: "https://alsaada.lovable.app/site-logo.png" },
+      { name: "twitter:image", content: "https://alsaada.lovable.app/site-logo.png" },
     ],
-    links: [{ rel: "canonical", href: "https://soogo-hub.lovable.app/" }],
+    links: [{ rel: "canonical", href: "https://alsaada.lovable.app/" }],
 
   }),
 

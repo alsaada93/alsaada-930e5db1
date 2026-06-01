@@ -5,7 +5,26 @@ import { fetchSeoMeta, buildSeoHead } from "@/hooks/useSeoConfig";
 
 export const Route = createFileRoute("/faq")({
   loader: () => fetchSeoMeta("faq"),
-  head: ({ loaderData }) => buildSeoHead("faq", loaderData),
+  head: ({ loaderData }) => {
+    const base = buildSeoHead("faq", loaderData);
+    return {
+      ...base,
+      scripts: [
+        {
+          type: "application/ld+json",
+          children: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: faqs.map((f) => ({
+              "@type": "Question",
+              name: f.q.ar,
+              acceptedAnswer: { "@type": "Answer", text: f.a.ar },
+            })),
+          }),
+        },
+      ],
+    };
+  },
   component: FaqPage,
 });
 
