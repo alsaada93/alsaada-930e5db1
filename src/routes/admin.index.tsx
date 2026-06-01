@@ -20,19 +20,14 @@ import {
   FileText,
   Gavel,
   Store,
-  Wallet,
-  Percent,
-  TrendingUp,
+  Heart,
+  ClipboardList,
+  Clock,
   Eye,
 } from "lucide-react";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import { DELETE_REASONS } from "@/components/DeleteListingDialog";
-import {
-  adminStats,
-  visitorsTrend,
-  revenueTrend,
-  categoryActivity,
-} from "@/data/admin";
+import { useAdminStats } from "@/hooks/useAdminStats";
 
 export const Route = createFileRoute("/admin/")({
   component: AdminDashboard,
