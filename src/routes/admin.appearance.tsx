@@ -3,6 +3,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Loader2, RotateCcw, Save, Upload } from "lucide-react";
 import { AdminHeader } from "@/components/admin/AdminHeader";
+import { Slider } from "@/components/ui/slider";
 import { supabase } from "@/integrations/supabase/client";
 import {
   useTheme,
