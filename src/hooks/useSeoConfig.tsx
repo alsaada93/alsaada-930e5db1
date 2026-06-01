@@ -104,6 +104,8 @@ export function buildSeoHead(page: SeoPageKey, meta: SeoMeta | undefined) {
       { property: "og:title", content: m.title },
       { property: "og:description", content: m.description },
       { property: "og:url", content: url },
+      { property: "og:image", content: `${SITE_ORIGIN}/site-logo.png` },
+      { name: "twitter:image", content: `${SITE_ORIGIN}/site-logo.png` },
     ],
     links: [{ rel: "canonical", href: url }],
   };
