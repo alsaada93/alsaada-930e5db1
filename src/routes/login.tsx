@@ -182,10 +182,16 @@ function LoginPage() {
               <div className="h-px flex-1 bg-border" />
             </div>
 
-            <Button variant="outline" className="w-full gap-2" onClick={handleGoogle}>
-              <img src={googleLogo} alt="" width={20} height={20} className="h-5 w-5" loading="lazy" />
-              المتابعة عبر جوجل
-            </Button>
+            <div className="space-y-2">
+              <Button variant="outline" className="w-full gap-2" onClick={handleGoogle}>
+                <img src={googleLogo} alt="" width={20} height={20} className="h-5 w-5" loading="lazy" />
+                المتابعة عبر جوجل
+              </Button>
+              <Button variant="outline" className="w-full gap-2" onClick={handleApple}>
+                <Apple className="h-5 w-5" />
+                المتابعة عبر آبل
+              </Button>
+            </div>
           </>
         )}
 
