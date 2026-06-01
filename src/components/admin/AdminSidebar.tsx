@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, ClipboardCheck, FolderTree, Tags, Gavel, Images, Palette, ExternalLink, ShoppingCart, MonitorPlay } from "lucide-react";
+import { LayoutDashboard, ClipboardCheck, FolderTree, Tags, Gavel, Images, Palette, ExternalLink, ShoppingCart, MonitorPlay, Search } from "lucide-react";
 import { useAdminLayout } from "./AdminLayoutContext";
 
 const items = [
@@ -11,6 +11,7 @@ const items = [
   { title: "واجهة الرئيسية", url: "/admin/hero", icon: MonitorPlay },
   { title: "صور العرض", url: "/admin/slides", icon: Images },
   { title: "مظهر الموقع", url: "/admin/appearance", icon: Palette },
+  { title: "تحسين SEO", url: "/admin/seo", icon: Search },
 ];
 
 export function AdminSidebar() {

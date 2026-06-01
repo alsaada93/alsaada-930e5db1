@@ -30,6 +30,7 @@ import { Route as LoginAdminRouteImport } from './routes/login.admin'
 import { Route as ListingIdRouteImport } from './routes/listing.$id'
 import { Route as CategoryIdRouteImport } from './routes/category.$id'
 import { Route as AdminSlidesRouteImport } from './routes/admin.slides'
+import { Route as AdminSeoRouteImport } from './routes/admin.seo'
 import { Route as AdminListingsRouteImport } from './routes/admin.listings'
 import { Route as AdminHeroRouteImport } from './routes/admin.hero'
 import { Route as AdminCategoriesRouteImport } from './routes/admin.categories'
@@ -142,6 +143,11 @@ const AdminSlidesRoute = AdminSlidesRouteImport.update({
   path: '/slides',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminSeoRoute = AdminSeoRouteImport.update({
+  id: '/seo',
+  path: '/seo',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminListingsRoute = AdminListingsRouteImport.update({
   id: '/listings',
   path: '/listings',
@@ -196,6 +202,7 @@ export interface FileRoutesByFullPath {
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/hero': typeof AdminHeroRoute
   '/admin/listings': typeof AdminListingsRoute
+  '/admin/seo': typeof AdminSeoRoute
   '/admin/slides': typeof AdminSlidesRoute
   '/category/$id': typeof CategoryIdRoute
   '/listing/$id': typeof ListingIdRoute
@@ -224,6 +231,7 @@ export interface FileRoutesByTo {
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/hero': typeof AdminHeroRoute
   '/admin/listings': typeof AdminListingsRoute
+  '/admin/seo': typeof AdminSeoRoute
   '/admin/slides': typeof AdminSlidesRoute
   '/category/$id': typeof CategoryIdRoute
   '/listing/$id': typeof ListingIdRoute
@@ -254,6 +262,7 @@ export interface FileRoutesById {
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/hero': typeof AdminHeroRoute
   '/admin/listings': typeof AdminListingsRoute
+  '/admin/seo': typeof AdminSeoRoute
   '/admin/slides': typeof AdminSlidesRoute
   '/category/$id': typeof CategoryIdRoute
   '/listing/$id': typeof ListingIdRoute
@@ -285,6 +294,7 @@ export interface FileRouteTypes {
     | '/admin/categories'
     | '/admin/hero'
     | '/admin/listings'
+    | '/admin/seo'
     | '/admin/slides'
     | '/category/$id'
     | '/listing/$id'
@@ -313,6 +323,7 @@ export interface FileRouteTypes {
     | '/admin/categories'
     | '/admin/hero'
     | '/admin/listings'
+    | '/admin/seo'
     | '/admin/slides'
     | '/category/$id'
     | '/listing/$id'
@@ -342,6 +353,7 @@ export interface FileRouteTypes {
     | '/admin/categories'
     | '/admin/hero'
     | '/admin/listings'
+    | '/admin/seo'
     | '/admin/slides'
     | '/category/$id'
     | '/listing/$id'
@@ -519,6 +531,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminSlidesRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/seo': {
+      id: '/admin/seo'
+      path: '/seo'
+      fullPath: '/admin/seo'
+      preLoaderRoute: typeof AdminSeoRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/listings': {
       id: '/admin/listings'
       path: '/listings'
@@ -571,6 +590,7 @@ interface AdminRouteChildren {
   AdminCategoriesRoute: typeof AdminCategoriesRoute
   AdminHeroRoute: typeof AdminHeroRoute
   AdminListingsRoute: typeof AdminListingsRoute
+  AdminSeoRoute: typeof AdminSeoRoute
   AdminSlidesRoute: typeof AdminSlidesRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
@@ -582,6 +602,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminCategoriesRoute: AdminCategoriesRoute,
   AdminHeroRoute: AdminHeroRoute,
   AdminListingsRoute: AdminListingsRoute,
+  AdminSeoRoute: AdminSeoRoute,
   AdminSlidesRoute: AdminSlidesRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
@@ -621,3 +642,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
