@@ -37,10 +37,38 @@ export function Footer() {
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:grid-cols-2 lg:grid-cols-5">
         <div className="lg:col-span-1">
           <div className="text-xl font-extrabold">
-            Al Saada Market <span className="text-navy-foreground/80">| السعادة ماركت</span>
+            {lang === "ar" ? identity.nameEn : identity.nameAr} <span className="text-navy-foreground/80">| {lang === "ar" ? identity.nameAr : identity.nameEn}</span>
           </div>
           <p className="mt-2 text-sm text-navy-foreground/60">{t("footer.tagline")}</p>
+
+          {/* Contact & social */}
+          <div className="mt-4 space-y-2 text-sm text-navy-foreground/70">
+            {(identity.locationAr || identity.locationEn) && (
+              <div className="flex items-center gap-2">
+                <MapPin className="h-4 w-4 shrink-0" />
+                <span>{lang === "ar" ? identity.locationAr : identity.locationEn}</span>
+              </div>
+            )}
+            {identity.contactPhone && (
+              <a href={`tel:${identity.contactPhone}`} className="flex items-center gap-2 hover:text-navy-foreground">
+                <Phone className="h-4 w-4 shrink-0" />
+                <span dir="ltr">{identity.contactPhone}</span>
+              </a>
+            )}
+            {identity.instagramUrl && (
+              <a
+                href={identity.instagramUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-lg bg-white/10 px-3 py-1.5 font-semibold transition-colors hover:bg-white/20"
+              >
+                <Instagram className="h-4 w-4 shrink-0" />
+                <span>{lang === "ar" ? "تابعنا على انستقرام" : "Follow us on Instagram"}</span>
+              </a>
+            )}
+          </div>
         </div>
+
         {cols.map((c) => (
           <div key={c.title}>
             <h4 className="mb-3 font-bold">{c.title}</h4>
