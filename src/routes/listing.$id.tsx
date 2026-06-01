@@ -531,6 +531,20 @@ function ListingPage() {
               )}
             </div>
 
+            {/* وصف الماركة التلقائي: بلد المنشأ، النوع، مستوى السوق والتخصص */}
+            {bInfo && (
+              <div className="mt-4 rounded-2xl border border-primary/30 bg-accent/30 p-4">
+                <div className="flex items-center gap-2">
+                  <BadgeCheck className="h-4 w-4 text-primary" />
+                  <h2 className="font-extrabold text-primary">
+                    {bInfo.name} <span className="text-foreground">— {bInfo.country}</span>
+                  </h2>
+                </div>
+                <p className="mt-1 text-xs font-semibold text-muted-foreground">{bInfo.type}</p>
+                <p className="mt-2 text-sm leading-relaxed text-foreground">{bInfo.description}</p>
+              </div>
+            )}
+
             {/* السعر */}
             <div className="mt-4 flex items-baseline gap-1">
               <span className="text-3xl font-extrabold text-primary">{item.price.toLocaleString("ar")}</span>
