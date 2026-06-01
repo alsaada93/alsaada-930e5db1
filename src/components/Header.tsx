@@ -146,10 +146,6 @@ export function Header() {
             <Plus className="h-4 w-4" />
             <span className="hidden sm:inline">{t("header.addListing")}</span>
           </Link>
-
-          <Link to="/search" className="rounded-lg p-2 hover:bg-white/10 md:hidden" aria-label="search">
-            <Search className="h-5 w-5" />
-          </Link>
         </nav>
       </div>
     </header>
