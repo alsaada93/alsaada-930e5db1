@@ -268,6 +268,9 @@ function ListingPage() {
   const [reposting, setReposting] = useState(false);
   const [isFav, setIsFav] = useState(false);
   const [offerOpen, setOfferOpen] = useState(false);
+  // لتفادي اختلاف وقت العرض بين الخادم والمتصفّح (hydration)
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   // ترجمة العنوان والوصف حسب اللغة المختارة
   const { map: trMap, lang } = useListingTranslations([
