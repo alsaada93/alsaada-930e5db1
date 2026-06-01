@@ -99,10 +99,10 @@ export function buildSeoHead(page: SeoPageKey, meta: SeoMeta | undefined) {
   const url = `${SITE_ORIGIN}/${page}`;
   return {
     meta: [
-      { title: meta.title },
-      { name: "description", content: meta.description },
-      { property: "og:title", content: meta.title },
-      { property: "og:description", content: meta.description },
+      { title: m.title },
+      { name: "description", content: m.description },
+      { property: "og:title", content: m.title },
+      { property: "og:description", content: m.description },
       { property: "og:url", content: url },
     ],
     links: [{ rel: "canonical", href: url }],
