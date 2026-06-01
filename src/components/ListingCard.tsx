@@ -24,9 +24,7 @@ export function ListingCard({ item, displayTitle }: { item: Listing; displayTitl
   const title = displayTitle || item.title;
   const condLabel = item.condition === "جديد" ? t("cond.new") : t("cond.used");
 
-  const waLink = `https://wa.me/${phone}?text=${encodeURIComponent(
-    `${t("card.contactWaMsg")} "${title}" ${t("card.onSite")}.`,
-  )}`;
+  const waLink = whatsappLink({ phone, listingTitle: title, listingId: item.id });
 
   return (
     <article className="group overflow-hidden rounded-2xl border border-border bg-card shadow-card transition-all hover:-translate-y-1">
