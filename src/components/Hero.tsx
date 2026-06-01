@@ -60,7 +60,7 @@ export function Hero() {
       {/* Static hero image */}
       <img
         src={heroImage}
-        alt="Al Saada Market marketplace"
+        alt="Haraj Al Saada marketplace"
         width={1536}
         height={1024}
         loading="eager"
@@ -76,7 +76,7 @@ export function Hero() {
         <div className="max-w-2xl" style={{ color: config.textColor }}>
           {config.showName && (
             <h1 className="mt-2 text-3xl font-extrabold leading-tight md:text-5xl">
-              <span className="sr-only">السعادة ماركت — سوق بيع وشراء معدات المطاعم والأثاث في البحرين. </span>
+              <span className="sr-only">حراج السعادة — سوق بيع وشراء معدات المطاعم والأثاث في البحرين. </span>
               {title}
               <span className="block opacity-90">{subtitle}</span>
             </h1>

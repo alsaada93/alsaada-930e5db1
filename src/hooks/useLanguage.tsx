@@ -24,8 +24,8 @@ const dict: Dict = {
 
   // Hero
   "hero.badge": { ar: "مدعوم بالذكاء الاصطناعي", en: "Powered by AI" },
-  "hero.title1": { ar: "السعادة ماركت", en: "Al Saada Market" },
-  "hero.title2": { ar: "Al Saada Market", en: "السعادة ماركت" },
+  "hero.title1": { ar: "حراج السعادة", en: "Haraj Al Saada" },
+  "hero.title2": { ar: "Haraj Al Saada", en: "حراج السعادة" },
   "hero.subtitle": { ar: "شراء وبيع معدات المطاعم والأثاث والإلكترونيات في البحرين", en: "Buy and sell restaurant equipment, furniture and electronics in Bahrain" },
   "hero.searchPlaceholder": { ar: "ماذا تبحث عنه اليوم؟", en: "What are you looking for today?" },
   "hero.imageSearch": { ar: "بحث بالصورة", en: "Image search" },
@@ -62,7 +62,7 @@ const dict: Dict = {
   "sec.featured": { ar: "الإعلانات المميزة", en: "Featured listings" },
   "sec.featuredSub": { ar: "إعلانات مختارة من تجار موثوقين", en: "Selected ads from trusted sellers" },
   "sec.latest": { ar: "أحدث الإعلانات", en: "Latest listings" },
-  "sec.latestSub": { ar: "آخر ما تم إضافته على السعادة ماركت", en: "Newest additions on Al Saada Market" },
+  "sec.latestSub": { ar: "آخر ما تم إضافته على حراج السعادة", en: "Newest additions on Haraj Al Saada" },
 
   // Listing card / detail shared labels
   "card.featured": { ar: "مميّز", en: "Featured" },
@@ -79,13 +79,13 @@ const dict: Dict = {
   "cond.used": { ar: "مستعمل", en: "Used" },
   "card.views": { ar: "مشاهدة", en: "views" },
   "card.contactWaMsg": { ar: "مرحباً، أنا مهتم بإعلان", en: "Hello, I'm interested in the listing" },
-  "card.onSite": { ar: "المعروض على السعادة ماركت", en: "on Al Saada Market" },
+  "card.onSite": { ar: "المعروض على حراج السعادة", en: "on Haraj Al Saada" },
   "listing.description": { ar: "الوصف", en: "Description" },
   "listing.relatedTags": { ar: "وسوم للبحث", en: "Search tags" },
   "listing.internalMsg": { ar: "الرسائل الداخلية", en: "Internal messages" },
   "listing.internalMsgDesc": { ar: "سيتم فتح المحادثة بعد تسجيل الدخول.", en: "Chat will open after you log in." },
 
-  "footer.tagline": { ar: "السعادة ماركت — منصة بيع وشراء ومزاد معدات المطاعم والأثاث والإلكترونيات في مملكة البحرين.", en: "Al Saada Market — buy, sell and bid on restaurant equipment, furniture and electronics in the Kingdom of Bahrain." },
+  "footer.tagline": { ar: "حراج السعادة — منصة بيع وشراء ومزاد معدات المطاعم والأثاث والإلكترونيات في مملكة البحرين.", en: "Haraj Al Saada — buy, sell and bid on restaurant equipment, furniture and electronics in the Kingdom of Bahrain." },
   "footer.rights": { ar: "جميع الحقوق محفوظة", en: "All rights reserved" },
   "footer.admin": { ar: "لوحة الإدارة", en: "Admin panel" },
 
@@ -149,7 +149,7 @@ const dict: Dict = {
   "add.publishAuction": { ar: "نشر المزاد", en: "Publish auction" },
   "add.publishBusiness": { ar: "نشر النشاط للبيع", en: "Publish business for sale" },
   "add.received": { ar: "تم استلام إعلانك", en: "Your listing was received" },
-  "add.receivedDesc": { ar: "سيتم مراجعة الإعلان من قبل الإدارة قبل نشره. شكراً لاستخدامك السعادة ماركت.", en: "Your listing will be reviewed by the team before publishing. Thanks for using Al Saada Market." },
+  "add.receivedDesc": { ar: "سيتم مراجعة الإعلان من قبل الإدارة قبل نشره. شكراً لاستخدامك حراج السعادة.", en: "Your listing will be reviewed by the team before publishing. Thanks for using Haraj Al Saada." },
 
   // Business sale fields
   "biz.heading": { ar: "تفاصيل النشاط التجاري", en: "Business details" },

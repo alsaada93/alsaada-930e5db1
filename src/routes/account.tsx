@@ -34,7 +34,7 @@ const VERIFY_WHATSAPP = "97333982383";
 export const Route = createFileRoute("/account")({
   head: () => ({
     meta: [
-      { title: "حسابي | السعادة ماركت" },
+      { title: "حسابي | حراج السعادة" },
       { name: "robots", content: "noindex" },
     ],
   }),
@@ -253,7 +253,7 @@ function AccountPage() {
     await supabase.from("profiles").upsert({ id: user.id, verification_status: "requested" });
     setProfile((p) => (p ? { ...p, verification_status: "requested" } : p));
     const msg = encodeURIComponent(
-      `مرحباً، أريد توثيق حسابي على السعادة ماركت.\nالاسم: ${profile.full_name ?? ""}\nالبريد: ${user.email ?? ""}`,
+      `مرحباً، أريد توثيق حسابي على حراج السعادة.\nالاسم: ${profile.full_name ?? ""}\nالبريد: ${user.email ?? ""}`,
     );
     window.open(`https://wa.me/${VERIFY_WHATSAPP}?text=${msg}`, "_blank");
   };

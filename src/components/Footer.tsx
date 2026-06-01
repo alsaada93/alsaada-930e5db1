@@ -23,7 +23,7 @@ export function Footer() {
 
   const cols: { title: string; links: FooterLink[] }[] = [
     {
-      title: lang === "ar" ? "السعادة ماركت" : "Al Saada Market",
+      title: lang === "ar" ? "حراج السعادة" : "Haraj Al Saada",
       links: [
         { label: lang === "ar" ? "من نحن" : "About us", to: "/about" },
         { label: lang === "ar" ? "كيف تبيع" : "How to sell", to: "/sell" },
@@ -127,7 +127,7 @@ export function Footer() {
         ))}
       </div>
       <div className="flex flex-col items-center justify-center gap-1 border-t border-sidebar-border py-4 text-center text-xs text-navy-foreground/50 sm:flex-row sm:gap-3">
-        <span>© {new Date().getFullYear()} السعادة ماركت Al Saada Market — {t("footer.rights")}</span>
+        <span>© {new Date().getFullYear()} حراج السعادة Haraj Al Saada — {t("footer.rights")}</span>
         <Link to="/admin" className="font-semibold text-navy-foreground/80 hover:underline">
           {t("footer.admin")}
         </Link>

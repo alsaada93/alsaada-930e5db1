@@ -15,8 +15,8 @@ function AboutPage() {
     <InfoLayout
       title={{ ar: "من نحن", en: "About us" }}
       subtitle={{
-        ar: "السعادة ماركت ومعدات المطاعم — متخصصون في الاستانلس ستيل وتجهيز المطاعم",
-        en: "Al Saada Market — specialists in stainless steel & restaurant equipment",
+        ar: "حراج السعادة ومعدات المطاعم — متخصصون في الاستانلس ستيل وتجهيز المطاعم",
+        en: "Haraj Al Saada — specialists in stainless steel & restaurant equipment",
       }}
     >
       <InfoSection heading={{ ar: "ورشتنا المتخصصة", en: "Our workshop" }}>

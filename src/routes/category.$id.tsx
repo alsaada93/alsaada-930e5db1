@@ -37,9 +37,9 @@ export const Route = createFileRoute("/category/$id")({
     const url = `https://alsaada-market.lovable.app/category/${params.id}`;
     return {
       meta: [
-        { title: `${name} | السعادة ماركت Al Saada Market` },
-        { name: "description", content: loaderData?.category.description ?? "تصفّح التصنيفات في السعادة ماركت" },
-        { property: "og:title", content: `${name} | السعادة ماركت Al Saada Market` },
+        { title: `${name} | حراج السعادة Haraj Al Saada` },
+        { name: "description", content: loaderData?.category.description ?? "تصفّح التصنيفات في حراج السعادة" },
+        { property: "og:title", content: `${name} | حراج السعادة Haraj Al Saada` },
         { property: "og:description", content: loaderData?.category.description ?? "" },
         { property: "og:url", content: url },
       ],
@@ -50,7 +50,7 @@ export const Route = createFileRoute("/category/$id")({
           children: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "CollectionPage",
-            name: `${name} | السعادة ماركت Al Saada Market`,
+            name: `${name} | حراج السعادة Haraj Al Saada`,
             description: loaderData?.category.description ?? "",
             url,
           }),

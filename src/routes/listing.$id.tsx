@@ -94,9 +94,9 @@ export const Route = createFileRoute("/listing/$id")({
     const image = loaderData?.item.images?.[0] ?? "";
     return {
       meta: [
-        { title: `${t} | السعادة ماركت Al Saada Market` },
-        { name: "description", content: `${t} — ${loaderData?.item.city ?? ""} على السعادة ماركت` },
-        { property: "og:title", content: `${t} | السعادة ماركت Al Saada Market` },
+        { title: `${t} | حراج السعادة Haraj Al Saada` },
+        { name: "description", content: `${t} — ${loaderData?.item.city ?? ""} على حراج السعادة` },
+        { property: "og:title", content: `${t} | حراج السعادة Haraj Al Saada` },
         { property: "og:description", content: `${t} للبيع في ${loaderData?.item.city ?? "البحرين"}` },
         { property: "og:type", content: "product" },
         { property: "og:url", content: url },
@@ -376,7 +376,7 @@ function ListingPage() {
   };
 
   const waLink = `https://wa.me/${phone}?text=${encodeURIComponent(
-    `مرحباً، أنا مهتم بإعلان "${item.title}" المعروض على السعادة ماركت.`,
+    `مرحباً، أنا مهتم بإعلان "${item.title}" المعروض على حراج السعادة.`,
   )}`;
 
   const mapSrc = item.lat != null && item.lng != null

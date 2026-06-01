@@ -1,6 +1,6 @@
 import { ShoppingCart, Smile } from "lucide-react";
 
-/** السعادة ماركت logo: a smile inside a shopping cart. */
+/** حراج السعادة logo: a smile inside a shopping cart. */
 export function BrandLogo({ size = 36 }: { size?: number }) {
   return (
     <span

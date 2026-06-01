@@ -13,10 +13,10 @@ import { ShieldCheck } from "lucide-react";
 export const Route = createFileRoute("/login")({
   head: () => ({
     meta: [
-      { title: "تسجيل الدخول | السعادة ماركت Al Saada Market" },
-      { name: "description", content: "سجّل الدخول أو أنشئ حسابًا لإدارة إعلاناتك على السعادة ماركت." },
-      { property: "og:title", content: "تسجيل الدخول | السعادة ماركت Al Saada Market" },
-      { property: "og:description", content: "سجّل الدخول أو أنشئ حسابًا على السعادة ماركت." },
+      { title: "تسجيل الدخول | حراج السعادة Haraj Al Saada" },
+      { name: "description", content: "سجّل الدخول أو أنشئ حسابًا لإدارة إعلاناتك على حراج السعادة." },
+      { property: "og:title", content: "تسجيل الدخول | حراج السعادة Haraj Al Saada" },
+      { property: "og:description", content: "سجّل الدخول أو أنشئ حسابًا على حراج السعادة." },
       { property: "og:url", content: "https://alsaada-market.lovable.app/login" },
       { name: "robots", content: "noindex" },
     ],
@@ -88,7 +88,7 @@ function LoginPage() {
             S
           </span>
           <h1 className="text-2xl font-extrabold text-foreground">
-            السعادة ماركت <span className="text-primary">Al Saada Market</span>
+            حراج السعادة <span className="text-primary">Haraj Al Saada</span>
           </h1>
           <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
             <ShieldCheck className="h-4 w-4" />

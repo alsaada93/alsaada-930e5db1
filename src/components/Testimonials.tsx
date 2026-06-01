@@ -13,7 +13,7 @@ const TESTIMONIALS: Testimonial[] = [
     name: { ar: "أبو محمد", en: "Abu Mohammed" },
     role: { ar: "صاحب مطعم — المنامة", en: "Restaurant owner — Manama" },
     text: {
-      ar: "بعت معدات مطبخ مطعمي كاملة خلال يومين فقط، التثمين كان عادل والتعامل ممتاز. شكراً السعادة ماركت.",
+      ar: "بعت معدات مطبخ مطعمي كاملة خلال يومين فقط، التثمين كان عادل والتعامل ممتاز. شكراً حراج السعادة.",
       en: "I sold my entire restaurant kitchen equipment in just two days, fair valuation and great service.",
     },
     initials: "أ.م",
@@ -48,7 +48,7 @@ export function Testimonials() {
         <div className="mb-6 text-center">
           <h2 className="text-2xl font-extrabold">{ar ? "ماذا يقول عملاؤنا" : "What our customers say"}</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            {ar ? "تجارب حقيقية لبائعين ومشترين عبر السعادة ماركت" : "Real experiences from buyers and sellers on Al Saada Market"}
+            {ar ? "تجارب حقيقية لبائعين ومشترين عبر حراج السعادة" : "Real experiences from buyers and sellers on Haraj Al Saada"}
           </p>
         </div>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
