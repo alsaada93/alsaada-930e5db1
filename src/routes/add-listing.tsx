@@ -1139,6 +1139,13 @@ function AddListingPage() {
       <ImageEditor
         open={editingIndex !== null}
         file={editingIndex !== null ? media[editingIndex]?.file ?? null : null}
+        isCover={editingIndex === 0}
+        onMakeCover={() => {
+          if (editingIndex !== null && editingIndex !== 0) {
+            moveMedia(editingIndex, 0);
+            setEditingIndex(0);
+          }
+        }}
         onClose={() => setEditingIndex(null)}
         onApply={(edited) => {
           setMedia((prev) =>
