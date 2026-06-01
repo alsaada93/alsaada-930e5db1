@@ -1,9 +1,9 @@
-import { useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Search, Globe, Heart, Bell, User, Plus, Menu, LogOut, LayoutDashboard, UserCircle } from "lucide-react";
+import { Globe, Heart, Bell, User, Plus, LogOut, LayoutDashboard, UserCircle } from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useAuth } from "@/hooks/useAuth";
+import { useSiteIdentity } from "@/hooks/useSiteIdentity";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,55 +14,53 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export function Header() {
-  const [q, setQ] = useState("");
   const navigate = useNavigate();
   const { t, lang, toggle } = useLanguage();
   const { user, isAdmin, signOut } = useAuth();
+  const { identity } = useSiteIdentity();
 
   const displayName =
     (user?.user_metadata?.full_name as string | undefined) ||
     user?.email?.split("@")[0] ||
     (lang === "ar" ? "حسابي" : "Account");
 
+  const logoSize = Math.round(Math.min(identity.logoBoxWidth, identity.logoBoxHeight) * 0.8);
+
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-navy text-navy-foreground">
       <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3 sm:gap-6 sm:px-6 sm:py-4">
         <Link to="/" className="flex shrink-0 items-center gap-2 sm:gap-2.5">
-          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white p-1 shadow-md">
-            <BrandLogo size={32} />
+          <span
+            className="flex items-center justify-center rounded-xl bg-white p-1 shadow-md"
+            style={{ width: identity.logoBoxWidth, height: identity.logoBoxHeight }}
+          >
+            {identity.logoUrl ? (
+              <img src={identity.logoUrl} alt="" className="h-full w-full object-contain" />
+            ) : (
+              <BrandLogo size={logoSize} />
+            )}
           </span>
 
           <span className="hidden min-w-0 flex-col leading-tight sm:flex">
-            <span className="truncate text-base font-extrabold tracking-tight text-white lg:text-lg">
-              السعادة ماركت
-              <span className="hidden text-white/80 lg:inline"> | Al Saada Market</span>
+            <span
+              className="truncate font-extrabold tracking-tight text-white"
+              style={{ fontSize: identity.logoFontSize }}
+            >
+              {lang === "ar" ? identity.nameAr : identity.nameEn}
+              <span className="hidden text-white/80 lg:inline"> | {lang === "ar" ? identity.nameEn : identity.nameAr}</span>
             </span>
 
-            <span className="hidden truncate text-xs text-white/70 lg:block">
-              شراء وبيع معدات المطاعم والأثاث والإلكترونيات في البحرين
+            <span
+              className="hidden truncate text-white/70 lg:block"
+              style={{ fontSize: Math.max(10, Math.round(identity.logoFontSize * 0.7)) }}
+            >
+              {lang === "ar" ? identity.taglineAr : identity.taglineEn}
             </span>
           </span>
         </Link>
 
-        <div className="hidden min-w-0 flex-1 md:block">
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              navigate({ to: "/search", search: { q: q.trim() || undefined } });
-            }}
-            className="relative"
-          >
-            <Search className="absolute end-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <div className="flex-1" />
 
-            <input
-              type="text"
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder={t("header.searchPlaceholder")}
-              className="h-12 w-full rounded-xl border-0 bg-white/95 pe-10 ps-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-            />
-          </form>
-        </div>
 
         <nav className="flex shrink-0 items-center gap-1 sm:gap-2">
           <button
@@ -147,10 +145,6 @@ export function Header() {
           >
             <Plus className="h-4 w-4" />
             <span className="hidden sm:inline">{t("header.addListing")}</span>
-          </Link>
-
-          <Link to="/search" className="rounded-lg p-2 hover:bg-white/10 md:hidden" aria-label="search">
-            <Search className="h-5 w-5" />
           </Link>
         </nav>
       </div>

@@ -3,6 +3,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Loader2, RotateCcw, Save, Upload } from "lucide-react";
 import { AdminHeader } from "@/components/admin/AdminHeader";
+import { Slider } from "@/components/ui/slider";
 import { supabase } from "@/integrations/supabase/client";
 import {
   useTheme,
@@ -141,6 +142,54 @@ function IdentitySection() {
           <input className={field} value={draft.taglineEn} onChange={(e) => set("taglineEn", e.target.value)} />
         </div>
       </div>
+
+      {/* Header logo box fine controls */}
+      <div className="mt-6 space-y-5 rounded-xl border border-border p-4">
+        <h4 className="font-bold text-card-foreground">حجم مربع الشعار والخط (ترويسة الموقع)</h4>
+        <div className="space-y-2">
+          <div className="flex items-center justify-between text-sm font-semibold">
+            <span>عرض المربع</span>
+            <span className="text-primary">{draft.logoBoxWidth}px</span>
+          </div>
+          <Slider min={24} max={120} step={1} value={[draft.logoBoxWidth]} onValueChange={(v) => set("logoBoxWidth", v[0])} />
+        </div>
+        <div className="space-y-2">
+          <div className="flex items-center justify-between text-sm font-semibold">
+            <span>ارتفاع المربع</span>
+            <span className="text-primary">{draft.logoBoxHeight}px</span>
+          </div>
+          <Slider min={24} max={120} step={1} value={[draft.logoBoxHeight]} onValueChange={(v) => set("logoBoxHeight", v[0])} />
+        </div>
+        <div className="space-y-2">
+          <div className="flex items-center justify-between text-sm font-semibold">
+            <span>حجم خط الاسم</span>
+            <span className="text-primary">{draft.logoFontSize}px</span>
+          </div>
+          <Slider min={10} max={40} step={1} value={[draft.logoFontSize]} onValueChange={(v) => set("logoFontSize", v[0])} />
+        </div>
+      </div>
+
+      {/* Contact & social */}
+      <div className="mt-6 grid gap-4 rounded-xl border border-border p-4 sm:grid-cols-2">
+        <h4 className="font-bold text-card-foreground sm:col-span-2">معلومات التواصل والروابط</h4>
+        <div className="space-y-1">
+          <label className="block text-sm font-semibold">رابط حساب الانستقرام</label>
+          <input className={field} placeholder="https://instagram.com/..." value={draft.instagramUrl} onChange={(e) => set("instagramUrl", e.target.value)} />
+        </div>
+        <div className="space-y-1">
+          <label className="block text-sm font-semibold">رقم الهاتف / واتساب</label>
+          <input className={field} placeholder="973XXXXXXXX" value={draft.contactPhone} onChange={(e) => set("contactPhone", e.target.value)} />
+        </div>
+        <div className="space-y-1">
+          <label className="block text-sm font-semibold">الموقع (عربي)</label>
+          <input className={field} value={draft.locationAr} onChange={(e) => set("locationAr", e.target.value)} />
+        </div>
+        <div className="space-y-1">
+          <label className="block text-sm font-semibold">الموقع (إنجليزي)</label>
+          <input className={field} value={draft.locationEn} onChange={(e) => set("locationEn", e.target.value)} />
+        </div>
+      </div>
+
 
       <div className="mt-4 flex flex-wrap gap-4">
         <label className="inline-flex items-center gap-2 text-sm font-semibold">
