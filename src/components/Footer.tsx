@@ -12,7 +12,8 @@ type FooterTo =
   | "/contact"
   | "/report"
   | "/privacy"
-  | "/terms";
+  | "/terms"
+  | "/tips";
 type FooterLink = { label: string; to: FooterTo };
 
 export function Footer() {
@@ -33,6 +34,7 @@ export function Footer() {
     {
       title: lang === "ar" ? "المساعدة" : "Help",
       links: [
+        { label: lang === "ar" ? "نصائح ومقالات" : "Tips & articles", to: "/tips" },
         { label: lang === "ar" ? "الأسئلة الشائعة" : "FAQ", to: "/faq" },
         { label: lang === "ar" ? "تواصل معنا" : "Contact us", to: "/contact" },
         { label: lang === "ar" ? "الإبلاغ عن إعلان" : "Report an ad", to: "/report" },

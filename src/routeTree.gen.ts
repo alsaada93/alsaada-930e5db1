@@ -26,7 +26,9 @@ import { Route as AddListingRouteImport } from './routes/add-listing'
 import { Route as AccountRouteImport } from './routes/account'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as TipsIndexRouteImport } from './routes/tips.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as TipsSlugRouteImport } from './routes/tips.$slug'
 import { Route as LoginAdminRouteImport } from './routes/login.admin'
 import { Route as ListingIdRouteImport } from './routes/listing.$id'
 import { Route as CategoryIdRouteImport } from './routes/category.$id'
@@ -124,10 +126,20 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TipsIndexRoute = TipsIndexRouteImport.update({
+  id: '/tips/',
+  path: '/tips/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AdminRoute,
+} as any)
+const TipsSlugRoute = TipsSlugRouteImport.update({
+  id: '/tips/$slug',
+  path: '/tips/$slug',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const LoginAdminRoute = LoginAdminRouteImport.update({
   id: '/admin',
@@ -214,7 +226,9 @@ export interface FileRoutesByFullPath {
   '/category/$id': typeof CategoryIdRoute
   '/listing/$id': typeof ListingIdRoute
   '/login/admin': typeof LoginAdminRoute
+  '/tips/$slug': typeof TipsSlugRoute
   '/admin/': typeof AdminIndexRoute
+  '/tips/': typeof TipsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -244,7 +258,9 @@ export interface FileRoutesByTo {
   '/category/$id': typeof CategoryIdRoute
   '/listing/$id': typeof ListingIdRoute
   '/login/admin': typeof LoginAdminRoute
+  '/tips/$slug': typeof TipsSlugRoute
   '/admin': typeof AdminIndexRoute
+  '/tips': typeof TipsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -276,7 +292,9 @@ export interface FileRoutesById {
   '/category/$id': typeof CategoryIdRoute
   '/listing/$id': typeof ListingIdRoute
   '/login/admin': typeof LoginAdminRoute
+  '/tips/$slug': typeof TipsSlugRoute
   '/admin/': typeof AdminIndexRoute
+  '/tips/': typeof TipsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -309,7 +327,9 @@ export interface FileRouteTypes {
     | '/category/$id'
     | '/listing/$id'
     | '/login/admin'
+    | '/tips/$slug'
     | '/admin/'
+    | '/tips/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -339,7 +359,9 @@ export interface FileRouteTypes {
     | '/category/$id'
     | '/listing/$id'
     | '/login/admin'
+    | '/tips/$slug'
     | '/admin'
+    | '/tips'
   id:
     | '__root__'
     | '/'
@@ -370,7 +392,9 @@ export interface FileRouteTypes {
     | '/category/$id'
     | '/listing/$id'
     | '/login/admin'
+    | '/tips/$slug'
     | '/admin/'
+    | '/tips/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -393,6 +417,8 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   CategoryIdRoute: typeof CategoryIdRoute
   ListingIdRoute: typeof ListingIdRoute
+  TipsSlugRoute: typeof TipsSlugRoute
+  TipsIndexRoute: typeof TipsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -516,12 +542,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/tips/': {
+      id: '/tips/'
+      path: '/tips'
+      fullPath: '/tips/'
+      preLoaderRoute: typeof TipsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/': {
       id: '/admin/'
       path: '/'
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
+    }
+    '/tips/$slug': {
+      id: '/tips/$slug'
+      path: '/tips/$slug'
+      fullPath: '/tips/$slug'
+      preLoaderRoute: typeof TipsSlugRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/login/admin': {
       id: '/login/admin'
@@ -659,6 +699,8 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   CategoryIdRoute: CategoryIdRoute,
   ListingIdRoute: ListingIdRoute,
+  TipsSlugRoute: TipsSlugRoute,
+  TipsIndexRoute: TipsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
