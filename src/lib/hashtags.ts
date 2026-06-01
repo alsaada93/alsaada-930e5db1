@@ -114,5 +114,6 @@ export function buildHashtags(
     }
   }
 
-  return out.slice(0, Math.max(min, out.length > min ? out.length : min));
+  // نُبقي عدداً معقولاً (حتى ١٤) مع ضمان الحد الأدنى
+  return out.slice(0, Math.max(min, Math.min(out.length, 14)));
 }
