@@ -1,5 +1,5 @@
 // Auto-generated tips articles (نصائح) — restaurant equipment, maintenance & more.
-export interface ArticleSection { heading: string; body: string; }
+export interface ArticleSection { heading: string; body: string; list_items?: string[]; }
 export interface Article {
   slug: string;
   title: string;
