@@ -35,6 +35,8 @@ import { ShareButtons } from "@/components/ShareButtons";
 import { useListingTranslations } from "@/hooks/useListingTranslations";
 import { Tag, Truck, Tag as TagIcon, Globe, Package } from "lucide-react";
 import { countryByName } from "@/data/countries";
+import { cityCenter, osmEmbed } from "@/data/bahrainCities";
+import { brandInfo } from "@/data/brandsCatalog";
 
 const EXPIRY_DAYS = 60;
 
@@ -266,6 +268,9 @@ function ListingPage() {
   const [reposting, setReposting] = useState(false);
   const [isFav, setIsFav] = useState(false);
   const [offerOpen, setOfferOpen] = useState(false);
+  // لتفادي اختلاف وقت العرض بين الخادم والمتصفّح (hydration)
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   // ترجمة العنوان والوصف حسب اللغة المختارة
   const { map: trMap, lang } = useListingTranslations([
@@ -377,9 +382,14 @@ function ListingPage() {
 
   const waLink = whatsappLink({ phone, listingTitle: item.title, listingId: item.id });
 
-  const mapSrc = item.lat != null && item.lng != null
-    ? `https://www.openstreetmap.org/export/embed.html?bbox=${item.lng - 0.01}%2C${item.lat - 0.01}%2C${item.lng + 0.01}%2C${item.lat + 0.01}&layer=mapnik&marker=${item.lat}%2C${item.lng}`
-    : null;
+  // نقطة الخريطة: إحداثيات المعلن إن وُجدت، وإلا مركز المدينة المختارة
+  const exactPoint = item.lat != null && item.lng != null ? { lat: item.lat, lng: item.lng } : null;
+  const mapPoint = exactPoint ?? cityCenter(item.city);
+  const approxLocation = !exactPoint && !!mapPoint;
+  const mapSrc = mapPoint ? osmEmbed(mapPoint.lat, mapPoint.lng) : null;
+
+  // معلومات الماركة (الوصف وبلد المنشأ والتخصص) تُعرض تلقائياً
+  const bInfo = brandInfo(item.brand);
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -521,6 +531,20 @@ function ListingPage() {
               )}
             </div>
 
+            {/* وصف الماركة التلقائي: بلد المنشأ، النوع، مستوى السوق والتخصص */}
+            {bInfo && (
+              <div className="mt-4 rounded-2xl border border-primary/30 bg-accent/30 p-4">
+                <div className="flex items-center gap-2">
+                  <BadgeCheck className="h-4 w-4 text-primary" />
+                  <h2 className="font-extrabold text-primary">
+                    {bInfo.name} <span className="text-foreground">— {bInfo.country}</span>
+                  </h2>
+                </div>
+                <p className="mt-1 text-xs font-semibold text-muted-foreground">{bInfo.type}</p>
+                <p className="mt-2 text-sm leading-relaxed text-foreground">{bInfo.description}</p>
+              </div>
+            )}
+
             {/* السعر */}
             <div className="mt-4 flex items-baseline gap-1">
               <span className="text-3xl font-extrabold text-primary">{item.price.toLocaleString("ar")}</span>
@@ -599,7 +623,7 @@ function ListingPage() {
                 <span className="text-muted-foreground">({reviews.toLocaleString("ar")} تقييم)</span>
                 <span className="text-muted-foreground">• {deals.toLocaleString("ar")} صفقة ناجحة</span>
               </div>
-              {publishedAt && (
+              {publishedAt && mounted && (
                 <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
                   <Clock className="h-3.5 w-3.5" /> نُشر {timeAgo(publishedAt)}
                 </p>
@@ -650,7 +674,7 @@ function ListingPage() {
         )}
 
         {/* خريطة الموقع */}
-        {mapSrc && (
+        {mapSrc && mapPoint && (
           <div className="mt-3 overflow-hidden rounded-2xl border border-border bg-card">
             <iframe
               title="خريطة موقع الإعلان"
@@ -658,8 +682,13 @@ function ListingPage() {
               className="h-72 w-full border-0"
               loading="lazy"
             />
+            {approxLocation && (
+              <p className="px-3 pt-2 text-center text-xs text-muted-foreground">
+                الموقع تقريبي حسب المدينة المختارة
+              </p>
+            )}
             <a
-              href={`https://www.openstreetmap.org/?mlat=${item.lat}&mlon=${item.lng}#map=16/${item.lat}/${item.lng}`}
+              href={`https://www.openstreetmap.org/?mlat=${mapPoint.lat}&mlon=${mapPoint.lng}#map=14/${mapPoint.lat}/${mapPoint.lng}`}
               target="_blank"
               rel="noopener noreferrer"
               className="block p-3 text-center text-sm font-semibold text-primary hover:underline"

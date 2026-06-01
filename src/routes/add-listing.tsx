@@ -25,6 +25,8 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import ImageEditor from "@/components/ImageEditor";
 import { bahrainRegions, listings, brandsFor } from "@/data/marketplace";
+import { cityCenter } from "@/data/bahrainCities";
+import { brandInfo } from "@/data/brandsCatalog";
 import { useCategories } from "@/hooks/useCategories";
 import { brandLabel } from "@/data/brandLabels";
 import { countries, type Country } from "@/data/countries";
@@ -862,6 +864,24 @@ function AddListingPage() {
               )}
             </div>
 
+            {/* وصف الماركة التلقائي عند الاختيار */}
+            {brand && brandInfo(brand) && (
+              <div className="rounded-2xl border border-primary/30 bg-accent/30 p-4 text-sm">
+                <p className="font-extrabold text-primary">
+                  {brandInfo(brand)!.name}{" "}
+                  <span className="text-foreground">— {brandInfo(brand)!.country}</span>
+                </p>
+                <p className="mt-0.5 text-xs font-semibold text-muted-foreground">
+                  {brandInfo(brand)!.type}
+                </p>
+                <p className="mt-1.5 leading-relaxed text-foreground">
+                  {brandInfo(brand)!.description}
+                </p>
+              </div>
+            )}
+
+
+
             {/* Country */}
             <div className="relative">
               <label className="mb-1 block text-sm font-semibold">{ar ? "بلد الصنع" : "Country of manufacture"}</label>
@@ -934,6 +954,9 @@ function AddListingPage() {
                           setRegion(r);
                           setRegionQuery("");
                           setRegionOpen(false);
+                          // تحديد موقع المدينة على الخريطة تلقائياً
+                          const c = cityCenter(r);
+                          if (c) setCoords(c);
                         }}
                         className="w-full rounded-md px-3 py-2 text-start text-sm hover:bg-accent"
                       >
