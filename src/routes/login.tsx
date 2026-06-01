@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
-import { ShieldCheck } from "lucide-react";
+import { ShieldCheck, Apple } from "lucide-react";
 import googleLogo from "@/assets/google-logo.png";
 
 export const Route = createFileRoute("/login")({
@@ -85,6 +85,15 @@ function LoginPage() {
     });
     if (result.error) {
       toast.error("تعذّر تسجيل الدخول عبر جوجل");
+    }
+  };
+
+  const handleApple = async () => {
+    const result = await lovable.auth.signInWithOAuth("apple", {
+      redirect_uri: `${window.location.origin}/account`,
+    });
+    if (result.error) {
+      toast.error("تعذّر تسجيل الدخول عبر آبل");
     }
   };
 
@@ -173,10 +182,16 @@ function LoginPage() {
               <div className="h-px flex-1 bg-border" />
             </div>
 
-            <Button variant="outline" className="w-full gap-2" onClick={handleGoogle}>
-              <img src={googleLogo} alt="" width={20} height={20} className="h-5 w-5" loading="lazy" />
-              المتابعة عبر جوجل
-            </Button>
+            <div className="space-y-2">
+              <Button variant="outline" className="w-full gap-2" onClick={handleGoogle}>
+                <img src={googleLogo} alt="" width={20} height={20} className="h-5 w-5" loading="lazy" />
+                المتابعة عبر جوجل
+              </Button>
+              <Button variant="outline" className="w-full gap-2" onClick={handleApple}>
+                <Apple className="h-5 w-5" />
+                المتابعة عبر آبل
+              </Button>
+            </div>
           </>
         )}
 
