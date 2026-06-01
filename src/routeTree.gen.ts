@@ -13,6 +13,7 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SellRouteImport } from './routes/sell'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as ReportRouteImport } from './routes/report'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PackagesRouteImport } from './routes/packages'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as FaqRouteImport } from './routes/faq'
@@ -53,6 +54,11 @@ const SearchRoute = SearchRouteImport.update({
 const ReportRoute = ReportRouteImport.update({
   id: '/report',
   path: '/report',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PackagesRoute = PackagesRouteImport.update({
@@ -172,6 +178,7 @@ export interface FileRoutesByFullPath {
   '/faq': typeof FaqRoute
   '/login': typeof LoginRouteWithChildren
   '/packages': typeof PackagesRoute
+  '/privacy': typeof PrivacyRoute
   '/report': typeof ReportRoute
   '/search': typeof SearchRoute
   '/sell': typeof SellRoute
@@ -198,6 +205,7 @@ export interface FileRoutesByTo {
   '/faq': typeof FaqRoute
   '/login': typeof LoginRouteWithChildren
   '/packages': typeof PackagesRoute
+  '/privacy': typeof PrivacyRoute
   '/report': typeof ReportRoute
   '/search': typeof SearchRoute
   '/sell': typeof SellRoute
@@ -226,6 +234,7 @@ export interface FileRoutesById {
   '/faq': typeof FaqRoute
   '/login': typeof LoginRouteWithChildren
   '/packages': typeof PackagesRoute
+  '/privacy': typeof PrivacyRoute
   '/report': typeof ReportRoute
   '/search': typeof SearchRoute
   '/sell': typeof SellRoute
@@ -255,6 +264,7 @@ export interface FileRouteTypes {
     | '/faq'
     | '/login'
     | '/packages'
+    | '/privacy'
     | '/report'
     | '/search'
     | '/sell'
@@ -281,6 +291,7 @@ export interface FileRouteTypes {
     | '/faq'
     | '/login'
     | '/packages'
+    | '/privacy'
     | '/report'
     | '/search'
     | '/sell'
@@ -308,6 +319,7 @@ export interface FileRouteTypes {
     | '/faq'
     | '/login'
     | '/packages'
+    | '/privacy'
     | '/report'
     | '/search'
     | '/sell'
@@ -336,6 +348,7 @@ export interface RootRouteChildren {
   FaqRoute: typeof FaqRoute
   LoginRoute: typeof LoginRouteWithChildren
   PackagesRoute: typeof PackagesRoute
+  PrivacyRoute: typeof PrivacyRoute
   ReportRoute: typeof ReportRoute
   SearchRoute: typeof SearchRoute
   SellRoute: typeof SellRoute
@@ -372,6 +385,13 @@ declare module '@tanstack/react-router' {
       path: '/report'
       fullPath: '/report'
       preLoaderRoute: typeof ReportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/packages': {
@@ -569,6 +589,7 @@ const rootRouteChildren: RootRouteChildren = {
   FaqRoute: FaqRoute,
   LoginRoute: LoginRouteWithChildren,
   PackagesRoute: PackagesRoute,
+  PrivacyRoute: PrivacyRoute,
   ReportRoute: ReportRoute,
   SearchRoute: SearchRoute,
   SellRoute: SellRoute,
