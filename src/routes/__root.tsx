@@ -93,6 +93,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:card", content: "summary" },
       { name: "twitter:title", content: "السعادة ماركت — بيع وشراء معدات المطاعم والأثاث" },
       { name: "twitter:description", content: "السعادة ماركت منصة بيع وشراء ومزاد معدات المطاعم والأثاث والإلكترونيات في مملكة البحرين." },
+      { name: "google-site-verification", content: "LcFK1WJ9S9-zthpcsGa5rr26P1h1pehsKPPjp0CosAo" },
+
 
     ],
     links: [
@@ -112,7 +114,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "@context": "https://schema.org",
           "@type": "Organization",
           name: "السعادة ماركت",
-          url: "https://soogo-hub.lovable.app",
+          url: "https://alsaada.lovable.app",
 
         }),
       },
