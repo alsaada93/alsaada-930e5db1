@@ -100,7 +100,11 @@ function LoginPage() {
           </h1>
           <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
             <ShieldCheck className="h-4 w-4" />
-            {mode === "login" ? "تسجيل دخول الأعضاء" : "إنشاء حساب عضو جديد"}
+            {mode === "login"
+              ? "تسجيل دخول الأعضاء"
+              : mode === "signup"
+                ? "إنشاء حساب عضو جديد"
+                : "استعادة كلمة المرور"}
           </p>
         </div>
 
