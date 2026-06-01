@@ -660,7 +660,7 @@ function ListingPage() {
         )}
 
         {/* خريطة الموقع */}
-        {mapSrc && (
+        {mapSrc && mapPoint && (
           <div className="mt-3 overflow-hidden rounded-2xl border border-border bg-card">
             <iframe
               title="خريطة موقع الإعلان"
@@ -668,8 +668,13 @@ function ListingPage() {
               className="h-72 w-full border-0"
               loading="lazy"
             />
+            {approxLocation && (
+              <p className="px-3 pt-2 text-center text-xs text-muted-foreground">
+                الموقع تقريبي حسب المدينة المختارة
+              </p>
+            )}
             <a
-              href={`https://www.openstreetmap.org/?mlat=${item.lat}&mlon=${item.lng}#map=16/${item.lat}/${item.lng}`}
+              href={`https://www.openstreetmap.org/?mlat=${mapPoint.lat}&mlon=${mapPoint.lng}#map=14/${mapPoint.lat}/${mapPoint.lng}`}
               target="_blank"
               rel="noopener noreferrer"
               className="block p-3 text-center text-sm font-semibold text-primary hover:underline"
