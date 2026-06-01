@@ -357,7 +357,6 @@ function ListingPage() {
       : null;
   const publishedAt = item.publishedAt ?? item.createdAt;
   const expired = expiresAt != null && expiresAt < Date.now();
-  const daysLeft = expiresAt != null ? Math.ceil((expiresAt - Date.now()) / 86400_000) : null;
 
   const cat = categories.find((c) => c.id === item.categoryId);
 

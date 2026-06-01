@@ -6,7 +6,6 @@ import { useSellers } from "@/hooks/useSellers";
 import { useLanguage } from "@/hooks/useLanguage";
 import { logContactAttempt } from "@/lib/contact";
 import { PriceOfferDialog } from "@/components/PriceOfferDialog";
-import { ListingHashtags } from "@/components/ListingHashtags";
 
 const DEFAULT_PHONE = "97333000000"; // E.164 without +
 
