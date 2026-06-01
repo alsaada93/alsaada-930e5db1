@@ -10,6 +10,16 @@ export interface SiteIdentity {
   taglineEn: string;
   showLogo: boolean;
   showName: boolean;
+  /** Header logo box size in px */
+  logoBoxWidth: number;
+  logoBoxHeight: number;
+  /** Header brand name font size in px */
+  logoFontSize: number;
+  /** Contact / social */
+  instagramUrl: string;
+  contactPhone: string;
+  locationAr: string;
+  locationEn: string;
 }
 
 export const DEFAULT_IDENTITY: SiteIdentity = {
@@ -21,6 +31,13 @@ export const DEFAULT_IDENTITY: SiteIdentity = {
   taglineEn: "Buy & sell restaurant equipment, furniture & electronics in Bahrain",
   showLogo: true,
   showName: true,
+  logoBoxWidth: 40,
+  logoBoxHeight: 40,
+  logoFontSize: 16,
+  instagramUrl: "",
+  contactPhone: "",
+  locationAr: "مملكة البحرين",
+  locationEn: "Kingdom of Bahrain",
 };
 
 const SETTINGS_KEY = "identity";
