@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as SellRouteImport } from './routes/sell'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as PackagesRouteImport } from './routes/packages'
 import { Route as LoginRouteImport } from './routes/login'
@@ -33,6 +34,11 @@ import { Route as AdminAppearanceRouteImport } from './routes/admin.appearance'
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SellRoute = SellRouteImport.update({
+  id: '/sell',
+  path: '/sell',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SearchRoute = SearchRouteImport.update({
@@ -140,6 +146,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRouteWithChildren
   '/packages': typeof PackagesRoute
   '/search': typeof SearchRoute
+  '/sell': typeof SellRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin/appearance': typeof AdminAppearanceRoute
   '/admin/auctions': typeof AdminAuctionsRoute
@@ -161,6 +168,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRouteWithChildren
   '/packages': typeof PackagesRoute
   '/search': typeof SearchRoute
+  '/sell': typeof SellRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin/appearance': typeof AdminAppearanceRoute
   '/admin/auctions': typeof AdminAuctionsRoute
@@ -184,6 +192,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRouteWithChildren
   '/packages': typeof PackagesRoute
   '/search': typeof SearchRoute
+  '/sell': typeof SellRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin/appearance': typeof AdminAppearanceRoute
   '/admin/auctions': typeof AdminAuctionsRoute
@@ -208,6 +217,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/packages'
     | '/search'
+    | '/sell'
     | '/sitemap.xml'
     | '/admin/appearance'
     | '/admin/auctions'
@@ -229,6 +239,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/packages'
     | '/search'
+    | '/sell'
     | '/sitemap.xml'
     | '/admin/appearance'
     | '/admin/auctions'
@@ -251,6 +262,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/packages'
     | '/search'
+    | '/sell'
     | '/sitemap.xml'
     | '/admin/appearance'
     | '/admin/auctions'
@@ -274,6 +286,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRouteWithChildren
   PackagesRoute: typeof PackagesRoute
   SearchRoute: typeof SearchRoute
+  SellRoute: typeof SellRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   CategoryIdRoute: typeof CategoryIdRoute
   ListingIdRoute: typeof ListingIdRoute
@@ -286,6 +299,13 @@ declare module '@tanstack/react-router' {
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sell': {
+      id: '/sell'
+      path: '/sell'
+      fullPath: '/sell'
+      preLoaderRoute: typeof SellRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/search': {
@@ -467,6 +487,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRouteWithChildren,
   PackagesRoute: PackagesRoute,
   SearchRoute: SearchRoute,
+  SellRoute: SellRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   CategoryIdRoute: CategoryIdRoute,
   ListingIdRoute: ListingIdRoute,
