@@ -107,13 +107,13 @@ export function AuctionsSection() {
                     </div>
                     <div className="mt-3 flex items-center justify-between">
                       <div>
-                        <div className="text-[11px] text-navy-foreground/60">
+                        <div className="text-[11px] text-navy-foreground/80">
                           {lang === "ar" ? "السعر الحالي" : "Current bid"}
                         </div>
                         <div className="text-lg font-extrabold text-primary">
                           {currentPrice.toLocaleString(lang)} {lang === "ar" ? "د.ب" : "BHD"}
                         </div>
-                        <div className="text-[11px] text-navy-foreground/50">
+                        <div className="text-[11px] text-navy-foreground/80">
                           {(info?.bids ?? 0).toLocaleString(lang)} {lang === "ar" ? "مزايدة" : "bids"}
                         </div>
                       </div>
