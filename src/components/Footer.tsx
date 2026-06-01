@@ -1,8 +1,11 @@
 import { Link } from "@tanstack/react-router";
+import { Instagram, Phone, MapPin } from "lucide-react";
 import { useLanguage } from "@/hooks/useLanguage";
+import { useSiteIdentity } from "@/hooks/useSiteIdentity";
 
 export function Footer() {
   const { t, lang } = useLanguage();
+  const { identity } = useSiteIdentity();
   const cols = [
     {
       title: lang === "ar" ? "السعادة ماركت" : "Al Saada Market",
