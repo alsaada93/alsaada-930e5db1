@@ -645,12 +645,16 @@ function ListingPage() {
           </div>
         )}
 
+        {/* اسم المنطقة فوق الخريطة */}
+        {item.city && (
+          <div className="mt-6 flex items-center gap-1.5 text-lg font-extrabold">
+            <MapPin className="h-5 w-5 text-primary" /> {item.city}
+          </div>
+        )}
+
         {/* خريطة الموقع */}
         {mapSrc && (
-          <div className="mt-6 overflow-hidden rounded-2xl border border-border bg-card">
-            <h2 className="flex items-center gap-1.5 p-4 pb-2 text-lg font-extrabold">
-              <MapPin className="h-5 w-5 text-primary" /> الموقع على الخريطة
-            </h2>
+          <div className="mt-3 overflow-hidden rounded-2xl border border-border bg-card">
             <iframe
               title="خريطة موقع الإعلان"
               src={mapSrc}
@@ -667,6 +671,12 @@ function ListingPage() {
             </a>
           </div>
         )}
+
+        {/* هاشتاقات تلقائية أسفل الخريطة */}
+        <ListingHashtags
+          tags={[cat?.name, item.groupName, item.itemName, item.city, item.condition]}
+          className="mt-4"
+        />
 
         {/* تقييمات البائع */}
         {item.sellerId && (
