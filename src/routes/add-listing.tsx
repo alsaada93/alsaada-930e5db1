@@ -414,7 +414,9 @@ function AddListingPage() {
         lat: coords?.lat ?? null,
         lng: coords?.lng ?? null,
         images: imageUrls,
-        contact_name: user ? (user.email ?? null) : guestName.trim(),
+        contact_name: user
+          ? ((user.user_metadata?.full_name as string | undefined)?.trim() || null)
+          : guestName.trim(),
         contact_phone: user ? null : guestPhone.trim(),
         status: "approved",
         start_price: isAuction ? Number(price) || 0 : null,
