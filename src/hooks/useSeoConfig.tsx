@@ -94,7 +94,8 @@ export async function fetchSeoMeta(page: SeoPageKey): Promise<SeoMeta> {
 }
 
 /** Builds the head() meta + canonical for an info page. */
-export function buildSeoHead(page: SeoPageKey, meta: SeoMeta) {
+export function buildSeoHead(page: SeoPageKey, meta: SeoMeta | undefined) {
+  const m = meta ?? DEFAULT_SEO_CONFIG[page];
   const url = `${SITE_ORIGIN}/${page}`;
   return {
     meta: [
