@@ -609,7 +609,7 @@ function ListingPage() {
                 <span className="text-muted-foreground">({reviews.toLocaleString("ar")} تقييم)</span>
                 <span className="text-muted-foreground">• {deals.toLocaleString("ar")} صفقة ناجحة</span>
               </div>
-              {publishedAt && (
+              {publishedAt && mounted && (
                 <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
                   <Clock className="h-3.5 w-3.5" /> نُشر {timeAgo(publishedAt)}
                 </p>
