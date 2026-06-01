@@ -4,10 +4,10 @@ import { MapPin, Eye, Star, BadgeCheck, MessageCircle, Phone, Tag } from "lucide
 import type { Listing } from "@/data/marketplace";
 import { useSellers } from "@/hooks/useSellers";
 import { useLanguage } from "@/hooks/useLanguage";
-import { logContactAttempt } from "@/lib/contact";
+import { logContactAttempt, whatsappLink, telLink } from "@/lib/contact";
 import { PriceOfferDialog } from "@/components/PriceOfferDialog";
 
-const DEFAULT_PHONE = "97333000000"; // E.164 without +
+const DEFAULT_PHONE = "33982383"; // الرقم المحلي البحريني
 
 export function ListingCard({ item, displayTitle }: { item: Listing; displayTitle?: string }) {
   const { byId } = useSellers();
@@ -24,9 +24,7 @@ export function ListingCard({ item, displayTitle }: { item: Listing; displayTitl
   const title = displayTitle || item.title;
   const condLabel = item.condition === "جديد" ? t("cond.new") : t("cond.used");
 
-  const waLink = `https://wa.me/${phone}?text=${encodeURIComponent(
-    `${t("card.contactWaMsg")} "${title}" ${t("card.onSite")}.`,
-  )}`;
+  const waLink = whatsappLink({ phone, listingTitle: title, listingId: item.id });
 
   return (
     <article className="group overflow-hidden rounded-2xl border border-border bg-card shadow-card transition-all hover:-translate-y-1">
@@ -95,7 +93,7 @@ export function ListingCard({ item, displayTitle }: { item: Listing; displayTitl
             <MessageCircle className="h-3.5 w-3.5" /> {t("card.whatsapp")}
           </a>
           <a
-            href={`tel:+${phone}`}
+            href={telLink(phone)}
             onClick={(e) => {
               e.stopPropagation();
               logContactAttempt({ recipientId: item.userId, listingId: item.id, method: "call", listingTitle: item.title });
