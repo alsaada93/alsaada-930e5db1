@@ -90,7 +90,7 @@ export const Route = createFileRoute("/listing/$id")({
   },
   head: ({ loaderData, params }) => {
     const t = loaderData?.item.title ?? "إعلان";
-    const url = `https://alsaada-market.lovable.app/listing/${params.id}`;
+    const url = `https://alsaada.lovable.app/listing/${params.id}`;
     const image = loaderData?.item.images?.[0] ?? "";
     return {
       meta: [

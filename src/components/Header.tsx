@@ -89,7 +89,7 @@ export function Header() {
 
           {user ? (
             <DropdownMenu>
-              <DropdownMenuTrigger className="flex items-center gap-2 rounded-lg px-2 py-2 text-sm font-medium hover:bg-white/10 focus:outline-none sm:px-3">
+              <DropdownMenuTrigger aria-label={displayName || (lang === "ar" ? "حساب المستخدم" : "User account")} className="flex items-center gap-2 rounded-lg px-2 py-2 text-sm font-medium hover:bg-white/10 focus:outline-none sm:px-3">
                 <UserCircle className="h-5 w-5" />
                 <span className="hidden max-w-[120px] truncate sm:inline">{displayName}</span>
               </DropdownMenuTrigger>

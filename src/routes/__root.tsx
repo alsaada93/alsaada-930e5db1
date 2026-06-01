@@ -124,7 +124,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "@context": "https://schema.org",
           "@type": "WebSite",
           name: "حراج السعادة",
-          url: "https://soogo-hub.lovable.app",
+          url: "https://alsaada.lovable.app",
         }),
       },
     ],
