@@ -1,20 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { InfoLayout, InfoSection } from "@/components/InfoLayout";
 import { useLanguage } from "@/hooks/useLanguage";
+import { fetchSeoMeta, buildSeoHead } from "@/hooks/useSeoConfig";
 
 export const Route = createFileRoute("/about")({
-  head: () => ({
-    meta: [
-      { title: "من نحن | السعادة ماركت Al Saada Market" },
-      {
-        name: "description",
-        content:
-          "ورشة متخصصة في الاستانلس ستيل وتجهيز معدات المطاعم والأثاث المنزلي في البحرين — بيع وشراء معدات وأثاث وإلكترونيات.",
-      },
-      { property: "og:title", content: "من نحن | السعادة ماركت" },
-    ],
-    links: [{ rel: "canonical", href: "https://alsaada.lovable.app/about" }],
-  }),
+  loader: () => fetchSeoMeta("about"),
+  head: ({ loaderData }) => buildSeoHead("about", loaderData),
   component: AboutPage,
 });
 
