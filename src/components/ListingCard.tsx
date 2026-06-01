@@ -4,10 +4,10 @@ import { MapPin, Eye, Star, BadgeCheck, MessageCircle, Phone, Tag } from "lucide
 import type { Listing } from "@/data/marketplace";
 import { useSellers } from "@/hooks/useSellers";
 import { useLanguage } from "@/hooks/useLanguage";
-import { logContactAttempt } from "@/lib/contact";
+import { logContactAttempt, whatsappLink, telLink } from "@/lib/contact";
 import { PriceOfferDialog } from "@/components/PriceOfferDialog";
 
-const DEFAULT_PHONE = "97333000000"; // E.164 without +
+const DEFAULT_PHONE = "33982383"; // الرقم المحلي البحريني
 
 export function ListingCard({ item, displayTitle }: { item: Listing; displayTitle?: string }) {
   const { byId } = useSellers();
