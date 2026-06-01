@@ -88,6 +88,15 @@ function LoginPage() {
     }
   };
 
+  const handleApple = async () => {
+    const result = await lovable.auth.signInWithOAuth("apple", {
+      redirect_uri: `${window.location.origin}/account`,
+    });
+    if (result.error) {
+      toast.error("تعذّر تسجيل الدخول عبر آبل");
+    }
+  };
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <Card className="w-full max-w-md p-8">
