@@ -27,18 +27,18 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-navy text-navy-foreground">
       <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3 sm:gap-6 sm:px-6 sm:py-4">
-        <Link to="/" className="flex shrink-0 items-center gap-3 sm:gap-4">
-          <span className="flex h-[80px] w-[80px] items-center justify-center rounded-3xl bg-white p-2 shadow-md">
-            <BrandLogo size={65} />
+        <Link to="/" className="flex shrink-0 items-center gap-2 sm:gap-2.5">
+          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white p-1 shadow-md">
+            <BrandLogo size={32} />
           </span>
 
           <span className="hidden min-w-0 flex-col leading-tight sm:flex">
-            <span className="truncate text-2xl font-extrabold tracking-tight text-white lg:text-3xl">
+            <span className="truncate text-base font-extrabold tracking-tight text-white lg:text-lg">
               السعادة ماركت
               <span className="hidden text-white/80 lg:inline"> | Al Saada Market</span>
             </span>
 
-            <span className="hidden truncate text-sm text-white/70 lg:block">
+            <span className="hidden truncate text-xs text-white/70 lg:block">
               شراء وبيع معدات المطاعم والأثاث والإلكترونيات في البحرين
             </span>
           </span>
