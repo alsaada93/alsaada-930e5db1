@@ -33,17 +33,21 @@ export function useListingTranslations(items: Translatable[]) {
     queryKey: ["listing-translations", lang, ids],
     enabled: items.length > 0,
     staleTime: 1000 * 60 * 30,
-    queryFn: () =>
-      run({
-        data: {
-          lang,
-          items: items.map((i) => ({
-            id: i.id,
-            title: i.title ?? "",
-            description: i.description ?? "",
-          })),
-        },
-      }),
+    queryFn: async () => {
+      const payload = items.map((i) => ({
+        id: i.id,
+        title: i.title ?? "",
+        description: i.description ?? "",
+      }));
+      // Server fn caps batches at 40 items, so chunk larger lists.
+      const merged: Record<string, { title: string; description: string }> = {};
+      for (let i = 0; i < payload.length; i += 40) {
+        const chunk = payload.slice(i, i + 40);
+        const res = await run({ data: { lang, items: chunk } });
+        Object.assign(merged, res);
+      }
+      return merged;
+    },
   });
 
   return {
