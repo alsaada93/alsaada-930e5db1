@@ -42,22 +42,25 @@ const PIE_COLORS = [
   "oklch(0.6 0.03 257)",
 ];
 
-const cards = [
-  { label: "زوار اليوم", value: adminStats.visitorsToday, icon: Eye, suffix: "" },
-  { label: "زوار الشهر", value: adminStats.visitorsMonth, icon: TrendingUp, suffix: "" },
-  { label: "المستخدمون", value: adminStats.users, icon: Users, suffix: "" },
-  { label: "الإعلانات", value: adminStats.listings, icon: FileText, suffix: "" },
-  { label: "المزادات", value: adminStats.auctions, icon: Gavel, suffix: "" },
-  { label: "أنشطة للبيع", value: adminStats.businesses, icon: Store, suffix: "" },
-  { label: "الإيرادات", value: adminStats.revenue, icon: Wallet, suffix: "د.ب" },
-  { label: "العمولات", value: adminStats.commissions, icon: Percent, suffix: "د.ب" },
-];
-
 function AdminDashboard() {
+  const { stats, weekTrend, monthTrend, categoryActivity, loading } = useAdminStats();
+
+  const cards = [
+    { label: "إجمالي المشاهدات", value: stats?.totalViews ?? 0, icon: Eye, suffix: "" },
+    { label: "قيد المراجعة", value: stats?.pending ?? 0, icon: Clock, suffix: "" },
+    { label: "المستخدمون", value: stats?.users ?? 0, icon: Users, suffix: "" },
+    { label: "الإعلانات", value: stats?.listings ?? 0, icon: FileText, suffix: "" },
+    { label: "المزادات", value: stats?.auctions ?? 0, icon: Gavel, suffix: "" },
+    { label: "أنشطة للبيع", value: stats?.businesses ?? 0, icon: Store, suffix: "" },
+    { label: "المفضلة", value: stats?.favorites ?? 0, icon: Heart, suffix: "" },
+    { label: "طلبات المعدات", value: stats?.requests ?? 0, icon: ClipboardList, suffix: "" },
+  ];
+
   return (
     <div>
       <AdminHeader title="لوحة الإحصائيات" subtitle="نظرة عامة مباشرة على أداء المنصة" />
       <div className="space-y-6 p-6">
+        {loading && <p className="text-sm text-muted-foreground">جارٍ تحميل الإحصائيات...</p>}
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
           {cards.map((c) => (
             <div key={c.label} className="rounded-2xl border border-border bg-card p-4 shadow-card">
@@ -81,9 +84,9 @@ function AdminDashboard() {
 
         <div className="grid gap-6 lg:grid-cols-3">
           <div className="rounded-2xl border border-border bg-card p-5 shadow-card lg:col-span-2">
-            <h3 className="mb-4 font-bold text-card-foreground">الزوار والإعلانات (آخر 7 أيام)</h3>
+            <h3 className="mb-4 font-bold text-card-foreground">الإعلانات الجديدة (آخر 7 أيام)</h3>
             <ResponsiveContainer width="100%" height={280}>
-              <AreaChart data={visitorsTrend}>
+              <AreaChart data={weekTrend}>
                 <defs>
                   <linearGradient id="gv" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="oklch(0.7 0.19 41.5)" stopOpacity={0.4} />
@@ -92,9 +95,9 @@ function AdminDashboard() {
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.92 0.01 255)" />
                 <XAxis dataKey="day" tick={{ fontSize: 12 }} reversed />
-                <YAxis tick={{ fontSize: 12 }} orientation="right" />
+                <YAxis tick={{ fontSize: 12 }} orientation="right" allowDecimals={false} />
                 <Tooltip />
-                <Area type="monotone" dataKey="visitors" stroke="oklch(0.7 0.19 41.5)" fill="url(#gv)" strokeWidth={2} />
+                <Area type="monotone" dataKey="listings" stroke="oklch(0.7 0.19 41.5)" fill="url(#gv)" strokeWidth={2} name="إعلانات" />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -126,15 +129,15 @@ function AdminDashboard() {
         </div>
 
         <div className="rounded-2xl border border-border bg-card p-5 shadow-card">
-          <h3 className="mb-4 font-bold text-card-foreground">الإيرادات والعمولات (شهري)</h3>
+          <h3 className="mb-4 font-bold text-card-foreground">الإعلانات والمشاهدات (آخر 6 أشهر)</h3>
           <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={revenueTrend}>
+            <BarChart data={monthTrend}>
               <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.92 0.01 255)" />
               <XAxis dataKey="month" tick={{ fontSize: 12 }} reversed />
-              <YAxis tick={{ fontSize: 12 }} orientation="right" />
+              <YAxis tick={{ fontSize: 12 }} orientation="right" allowDecimals={false} />
               <Tooltip />
-              <Bar dataKey="revenue" fill="oklch(0.7 0.19 41.5)" radius={[6, 6, 0, 0]} name="الإيرادات" />
-              <Bar dataKey="commissions" fill="oklch(0.55 0.12 230)" radius={[6, 6, 0, 0]} name="العمولات" />
+              <Bar dataKey="listings" fill="oklch(0.7 0.19 41.5)" radius={[6, 6, 0, 0]} name="الإعلانات" />
+              <Bar dataKey="views" fill="oklch(0.55 0.12 230)" radius={[6, 6, 0, 0]} name="المشاهدات" />
             </BarChart>
           </ResponsiveContainer>
         </div>
