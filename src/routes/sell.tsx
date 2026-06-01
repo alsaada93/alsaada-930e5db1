@@ -1,18 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { InfoLayout, InfoSection } from "@/components/InfoLayout";
 import { useLanguage } from "@/hooks/useLanguage";
+import { fetchSeoMeta, buildSeoHead } from "@/hooks/useSeoConfig";
 
 export const Route = createFileRoute("/sell")({
-  head: () => ({
-    meta: [
-      { title: "كيف تبيع | السعادة ماركت Al Saada Market" },
-      {
-        name: "description",
-        content: "تعرّف على خطوات إضافة إعلان وبيع معداتك وأثاثك وإلكترونياتك على السعادة ماركت بسهولة.",
-      },
-    ],
-    links: [{ rel: "canonical", href: "https://alsaada.lovable.app/sell" }],
-  }),
+  loader: () => fetchSeoMeta("sell"),
+  head: ({ loaderData }) => buildSeoHead("sell", loaderData),
   component: SellPage,
 });
 
