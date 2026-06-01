@@ -3,7 +3,18 @@ import { Instagram, Phone, MapPin } from "lucide-react";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useSiteIdentity } from "@/hooks/useSiteIdentity";
 
-type FooterLink = { label: string; to?: string; href?: string };
+type FooterTo =
+  | "/about"
+  | "/sell"
+  | "/buy"
+  | "/packages"
+  | "/faq"
+  | "/contact"
+  | "/report"
+  | "/privacy"
+  | "/terms"
+  | "/category/$id";
+type FooterLink = { label: string; to?: FooterTo; href?: string };
 
 export function Footer() {
   const { t, lang } = useLanguage();
