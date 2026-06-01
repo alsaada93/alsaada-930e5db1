@@ -1,15 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { InfoLayout, InfoSection } from "@/components/InfoLayout";
 import { useLanguage } from "@/hooks/useLanguage";
+import { fetchSeoMeta, buildSeoHead } from "@/hooks/useSeoConfig";
 
 export const Route = createFileRoute("/terms")({
-  head: () => ({
-    meta: [
-      { title: "الشروط والأحكام | السعادة ماركت Al Saada Market" },
-      { name: "description", content: "الشروط والأحكام الخاصة باستخدام منصة السعادة ماركت." },
-    ],
-    links: [{ rel: "canonical", href: "https://alsaada.lovable.app/terms" }],
-  }),
+  loader: () => fetchSeoMeta("terms"),
+  head: ({ loaderData }) => buildSeoHead("terms", loaderData),
   component: TermsPage,
 });
 
