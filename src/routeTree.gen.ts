@@ -13,6 +13,7 @@ import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SellRouteImport } from './routes/sell'
 import { Route as SearchRouteImport } from './routes/search'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as ReportRouteImport } from './routes/report'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PackagesRouteImport } from './routes/packages'
@@ -56,6 +57,11 @@ const SellRoute = SellRouteImport.update({
 const SearchRoute = SearchRouteImport.update({
   id: '/search',
   path: '/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ReportRoute = ReportRouteImport.update({
@@ -192,6 +198,7 @@ export interface FileRoutesByFullPath {
   '/packages': typeof PackagesRoute
   '/privacy': typeof PrivacyRoute
   '/report': typeof ReportRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/search': typeof SearchRoute
   '/sell': typeof SellRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -221,6 +228,7 @@ export interface FileRoutesByTo {
   '/packages': typeof PackagesRoute
   '/privacy': typeof PrivacyRoute
   '/report': typeof ReportRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/search': typeof SearchRoute
   '/sell': typeof SellRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -252,6 +260,7 @@ export interface FileRoutesById {
   '/packages': typeof PackagesRoute
   '/privacy': typeof PrivacyRoute
   '/report': typeof ReportRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/search': typeof SearchRoute
   '/sell': typeof SellRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -284,6 +293,7 @@ export interface FileRouteTypes {
     | '/packages'
     | '/privacy'
     | '/report'
+    | '/reset-password'
     | '/search'
     | '/sell'
     | '/sitemap.xml'
@@ -313,6 +323,7 @@ export interface FileRouteTypes {
     | '/packages'
     | '/privacy'
     | '/report'
+    | '/reset-password'
     | '/search'
     | '/sell'
     | '/sitemap.xml'
@@ -343,6 +354,7 @@ export interface FileRouteTypes {
     | '/packages'
     | '/privacy'
     | '/report'
+    | '/reset-password'
     | '/search'
     | '/sell'
     | '/sitemap.xml'
@@ -374,6 +386,7 @@ export interface RootRouteChildren {
   PackagesRoute: typeof PackagesRoute
   PrivacyRoute: typeof PrivacyRoute
   ReportRoute: typeof ReportRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   SearchRoute: typeof SearchRoute
   SellRoute: typeof SellRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
@@ -410,6 +423,13 @@ declare module '@tanstack/react-router' {
       path: '/search'
       fullPath: '/search'
       preLoaderRoute: typeof SearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/report': {
@@ -632,6 +652,7 @@ const rootRouteChildren: RootRouteChildren = {
   PackagesRoute: PackagesRoute,
   PrivacyRoute: PrivacyRoute,
   ReportRoute: ReportRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   SearchRoute: SearchRoute,
   SellRoute: SellRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,

@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import { ShieldCheck } from "lucide-react";
+import googleLogo from "@/assets/google-logo.png";
 
 export const Route = createFileRoute("/login")({
   head: () => ({
@@ -28,7 +29,7 @@ export const Route = createFileRoute("/login")({
 function LoginPage() {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
-  const [mode, setMode] = useState<"login" | "signup">("login");
+  const [mode, setMode] = useState<"login" | "signup" | "forgot">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
@@ -44,7 +45,14 @@ function LoginPage() {
     e.preventDefault();
     setSubmitting(true);
     try {
-      if (mode === "signup") {
+      if (mode === "forgot") {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/reset-password`,
+        });
+        if (error) throw error;
+        toast.success("تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني.");
+        setMode("login");
+      } else if (mode === "signup") {
         const { error } = await supabase.auth.signUp({
           email,
           password,
@@ -92,7 +100,11 @@ function LoginPage() {
           </h1>
           <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
             <ShieldCheck className="h-4 w-4" />
-            {mode === "login" ? "تسجيل دخول الأعضاء" : "إنشاء حساب عضو جديد"}
+            {mode === "login"
+              ? "تسجيل دخول الأعضاء"
+              : mode === "signup"
+                ? "إنشاء حساب عضو جديد"
+                : "استعادة كلمة المرور"}
           </p>
         </div>
 
@@ -118,45 +130,77 @@ function LoginPage() {
               required
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="password">كلمة المرور</Label>
-            <Input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              minLength={6}
-              required
-            />
-          </div>
+          {mode !== "forgot" && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password">كلمة المرور</Label>
+                {mode === "login" && (
+                  <button
+                    type="button"
+                    onClick={() => setMode("forgot")}
+                    className="text-xs font-semibold text-primary hover:underline"
+                  >
+                    نسيت كلمة المرور؟
+                  </button>
+                )}
+              </div>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                minLength={6}
+                required
+              />
+            </div>
+          )}
           <Button type="submit" className="w-full" disabled={submitting}>
             {submitting
               ? "جاري المعالجة..."
               : mode === "login"
                 ? "تسجيل الدخول"
-                : "إنشاء الحساب"}
+                : mode === "signup"
+                  ? "إنشاء الحساب"
+                  : "إرسال رابط الاستعادة"}
           </Button>
         </form>
 
-        <div className="my-4 flex items-center gap-3">
-          <div className="h-px flex-1 bg-border" />
-          <span className="text-xs text-muted-foreground">أو</span>
-          <div className="h-px flex-1 bg-border" />
-        </div>
+        {mode !== "forgot" && (
+          <>
+            <div className="my-4 flex items-center gap-3">
+              <div className="h-px flex-1 bg-border" />
+              <span className="text-xs text-muted-foreground">أو</span>
+              <div className="h-px flex-1 bg-border" />
+            </div>
 
-        <Button variant="outline" className="w-full" onClick={handleGoogle}>
-          المتابعة عبر جوجل
-        </Button>
+            <Button variant="outline" className="w-full gap-2" onClick={handleGoogle}>
+              <img src={googleLogo} alt="" width={20} height={20} className="h-5 w-5" loading="lazy" />
+              المتابعة عبر جوجل
+            </Button>
+          </>
+        )}
 
         <p className="mt-6 text-center text-sm text-muted-foreground">
-          {mode === "login" ? "ليس لديك حساب؟ " : "لديك حساب بالفعل؟ "}
-          <button
-            type="button"
-            onClick={() => setMode(mode === "login" ? "signup" : "login")}
-            className="font-semibold text-primary hover:underline"
-          >
-            {mode === "login" ? "إنشاء حساب" : "تسجيل الدخول"}
-          </button>
+          {mode === "forgot" ? (
+            <button
+              type="button"
+              onClick={() => setMode("login")}
+              className="font-semibold text-primary hover:underline"
+            >
+              العودة لتسجيل الدخول
+            </button>
+          ) : (
+            <>
+              {mode === "login" ? "ليس لديك حساب؟ " : "لديك حساب بالفعل؟ "}
+              <button
+                type="button"
+                onClick={() => setMode(mode === "login" ? "signup" : "login")}
+                className="font-semibold text-primary hover:underline"
+              >
+                {mode === "login" ? "إنشاء حساب" : "تسجيل الدخول"}
+              </button>
+            </>
+          )}
         </p>
 
         <p className="mt-4 text-center">
