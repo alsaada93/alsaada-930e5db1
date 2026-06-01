@@ -1,35 +1,23 @@
 import { Search, Camera, Sparkles, Loader2 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
-import heroImg from "@/assets/hero.jpg";
 import { useLanguage } from "@/hooks/useLanguage";
-import { useHeroSlides } from "@/hooks/useHeroSlides";
+import { useHeroConfig, resolveHeroImage } from "@/hooks/useHeroConfig";
 import { searchByImage } from "@/lib/image-search.functions";
 
 export function Hero() {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [imageName, setImageName] = useState<string | null>(null);
   const [imageSearching, setImageSearching] = useState(false);
   const [query, setQuery] = useState("");
 
+  const { config } = useHeroConfig();
+  const heroImage = resolveHeroImage(config);
+
   const goSearch = () => navigate({ to: "/search", search: { q: query.trim() || undefined } });
-
-  const { slides, intervalMs } = useHeroSlides();
-  const [current, setCurrent] = useState(0);
-
-  // Build the image list: DB slides or fallback to the bundled hero image.
-  const images = slides.length > 0 ? slides.map((s) => s.image_url) : [heroImg];
-
-  useEffect(() => {
-    if (images.length <= 1) return;
-    const id = setInterval(() => {
-      setCurrent((c) => (c + 1) % images.length);
-    }, Math.max(1000, intervalMs));
-    return () => clearInterval(id);
-  }, [images.length, intervalMs]);
 
   const handleImageSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -63,94 +51,84 @@ export function Hero() {
     }
   };
 
-  const activeSlide = slides[current];
+  const title = lang === "ar" ? config.titleAr : config.titleEn;
+  const subtitle = lang === "ar" ? config.subtitleAr : config.subtitleEn;
+  const badge = lang === "ar" ? config.badgeAr : config.badgeEn;
 
   return (
-    <section className="relative overflow-hidden bg-gradient-hero text-navy-foreground">
-      {images.map((src, i) => (
-        <img
-          key={src + i}
-          src={src}
-          alt="Al Saada Market marketplace"
-          width={1536}
-          height={1024}
-          loading={i === 0 ? "eager" : "lazy"}
-          className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-1000 ${
-            i === current ? "opacity-30" : "opacity-0"
-          }`}
-        />
-      ))}
-      <div className="absolute inset-0 bg-gradient-hero opacity-80" />
+    <section className="relative overflow-hidden bg-navy text-navy-foreground">
+      {/* Static hero image */}
+      <img
+        src={heroImage}
+        alt="Al Saada Market marketplace"
+        width={1536}
+        height={1024}
+        loading="eager"
+        className="absolute inset-0 h-full w-full object-cover"
+        style={{ opacity: config.imageOpacity / 100 }}
+      />
+      {/* Color overlay / contrast tint */}
+      <div
+        className="absolute inset-0"
+        style={{ backgroundColor: config.overlayColor, opacity: config.overlayOpacity / 100 }}
+      />
       <div className="relative mx-auto max-w-7xl px-4 py-16 md:py-24">
-        <div className="max-w-2xl">
-          <h1 className="mt-2 text-3xl font-extrabold leading-tight md:text-5xl">
-            <span className="sr-only">السعادة ماركت — سوق بيع وشراء معدات المطاعم والأثاث في البحرين. </span>
-            {activeSlide?.title || t("hero.title1")}
-            <span className="block text-navy-foreground/90">{activeSlide?.subtitle || t("hero.title2")}</span>
-          </h1>
+        <div className="max-w-2xl" style={{ color: config.textColor }}>
+          {config.showName && (
+            <h1 className="mt-2 text-3xl font-extrabold leading-tight md:text-5xl">
+              <span className="sr-only">السعادة ماركت — سوق بيع وشراء معدات المطاعم والأثاث في البحرين. </span>
+              {title}
+              <span className="block opacity-90">{subtitle}</span>
+            </h1>
+          )}
 
-          <p className="mt-4 text-base text-navy-foreground/75 md:text-lg">{t("hero.subtitle")}</p>
+          {config.showBadge && (
+            <span className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-primary/20 px-3 py-1 text-xs font-bold ring-1 ring-white/30">
+              <Sparkles className="h-3.5 w-3.5" /> {badge}
+            </span>
+          )}
 
-          <span className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-primary/20 px-3 py-1 text-xs font-bold text-navy-foreground ring-1 ring-white/30">
-            <Sparkles className="h-3.5 w-3.5" /> {t("hero.badge")}
-          </span>
-
-          <div className="mt-7 rounded-2xl bg-white p-2 shadow-card">
-            <div className="flex items-center gap-2">
-              <Search className="ms-2 h-5 w-5 shrink-0 text-muted-foreground" />
-              <input
-                type="search"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && goSearch()}
-                placeholder={t("hero.searchPlaceholder")}
-                className="h-11 w-full border-0 bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
-              />
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleImageSelected}
-              />
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={imageSearching}
-                className="rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-primary disabled:opacity-60"
-                aria-label={t("hero.imageSearch")}
-              >
-                {imageSearching ? <Loader2 className="h-5 w-5 animate-spin" /> : <Camera className="h-5 w-5" />}
-              </button>
-              <button
-                type="button"
-                onClick={goSearch}
-                className="rounded-xl bg-gradient-primary px-5 py-2.5 text-sm font-bold text-primary-foreground"
-              >
-                {t("hero.search")}
-              </button>
-            </div>
-            {imageName && (
-              <p className="px-2 pt-1 text-xs text-muted-foreground">
-                {t("hero.imageSearchLabel")} {imageName}
-              </p>
-            )}
-          </div>
-
-          {/* Slideshow dots */}
-          {images.length > 1 && (
-            <div className="mt-5 flex gap-2">
-              {images.map((_, i) => (
-                <button
-                  key={i}
-                  type="button"
-                  aria-label={`slide ${i + 1}`}
-                  onClick={() => setCurrent(i)}
-                  className={`h-2 rounded-full transition-all ${
-                    i === current ? "w-6 bg-primary" : "w-2 bg-white/50 hover:bg-white/80"
-                  }`}
+          {config.showSearch && (
+            <div className="mt-7 rounded-2xl bg-white p-2 shadow-card">
+              <div className="flex items-center gap-2">
+                <Search className="ms-2 h-5 w-5 shrink-0 text-muted-foreground" />
+                <input
+                  type="search"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && goSearch()}
+                  placeholder={t("hero.searchPlaceholder")}
+                  className="h-11 w-full border-0 bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
                 />
-              ))}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleImageSelected}
+                />
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={imageSearching}
+                  className="rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-primary disabled:opacity-60"
+                  aria-label={t("hero.imageSearch")}
+                >
+                  {imageSearching ? <Loader2 className="h-5 w-5 animate-spin" /> : <Camera className="h-5 w-5" />}
+                </button>
+                <button
+                  type="button"
+                  onClick={goSearch}
+                  className="rounded-xl bg-gradient-primary px-5 py-2.5 text-sm font-bold text-primary-foreground"
+                >
+                  {t("hero.search")}
+                </button>
+              </div>
+              {imageName && (
+                <p className="px-2 pt-1 text-xs text-muted-foreground">
+                  {t("hero.imageSearchLabel")} {imageName}
+                </p>
+              )}
             </div>
           )}
         </div>
