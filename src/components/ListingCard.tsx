@@ -6,7 +6,6 @@ import { useSellers } from "@/hooks/useSellers";
 import { useLanguage } from "@/hooks/useLanguage";
 import { logContactAttempt } from "@/lib/contact";
 import { PriceOfferDialog } from "@/components/PriceOfferDialog";
-import { ListingHashtags } from "@/components/ListingHashtags";
 
 const DEFAULT_PHONE = "97333000000"; // E.164 without +
 
@@ -117,9 +116,8 @@ export function ListingCard({ item, displayTitle }: { item: Listing; displayTitl
             <Tag className="h-3.5 w-3.5" /> {t("card.offer")}
           </button>
         </div>
-
-        <ListingHashtags tags={[item.category, item.sub, item.city]} className="mt-2.5" />
       </div>
+
 
       {offerOpen && (
         <PriceOfferDialog

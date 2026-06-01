@@ -33,7 +33,8 @@ import { PriceOfferDialog } from "@/components/PriceOfferDialog";
 import { ListingHashtags } from "@/components/ListingHashtags";
 import { ShareButtons } from "@/components/ShareButtons";
 import { useListingTranslations } from "@/hooks/useListingTranslations";
-import { Tag } from "lucide-react";
+import { Tag, Truck, Tag as TagIcon, Globe, Package } from "lucide-react";
+import { countryByName } from "@/data/countries";
 
 const EXPIRY_DAYS = 60;
 
@@ -68,6 +69,9 @@ export const Route = createFileRoute("/listing/$id")({
         sellerId: undefined as string | undefined,
         phone: data.contact_phone ?? undefined,
         description: data.description as string | null,
+        brand: (data.brand as string | null) ?? null,
+        countryOfOrigin: (data.country_of_origin as string | null) ?? null,
+        deliveryAvailable: Boolean(data.delivery_available),
         business:
           data.listing_type === "business"
             ? {
@@ -353,7 +357,6 @@ function ListingPage() {
       : null;
   const publishedAt = item.publishedAt ?? item.createdAt;
   const expired = expiresAt != null && expiresAt < Date.now();
-  const daysLeft = expiresAt != null ? Math.ceil((expiresAt - Date.now()) / 86400_000) : null;
 
   const cat = categories.find((c) => c.id === item.categoryId);
 
@@ -465,6 +468,8 @@ function ListingPage() {
                 </span>
               )}
             </div>
+
+            {/* عنوان الإعلان */}
             <div className="mt-3 flex items-start justify-between gap-3">
               <h1 className="text-2xl font-extrabold">{displayTitle}</h1>
               <button
@@ -479,48 +484,55 @@ function ListingPage() {
                 <Heart className={`h-5 w-5 ${isFav ? "fill-current" : ""}`} />
               </button>
             </div>
-            <div className="mt-2 flex items-baseline gap-1">
+
+            {/* وصف الإعلان مباشرة تحت العنوان */}
+            {displayDescription && (
+              <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+                {displayDescription}
+              </p>
+            )}
+
+            {/* خانات بقرب الوصف: التوصيل، التفاوض، بلد الصنع، الماركة */}
+            <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-2">
+              <div className="flex items-center gap-2 rounded-xl border border-border bg-card p-2.5 text-sm">
+                <Truck className="h-4 w-4 text-primary" />
+                <span className="font-semibold">
+                  {item.deliveryAvailable ? "يوجد توصيل" : "لا يوجد توصيل"}
+                </span>
+              </div>
+              <div className="flex items-center gap-2 rounded-xl border border-border bg-card p-2.5 text-sm">
+                <TagIcon className="h-4 w-4 text-primary" />
+                <span className="font-semibold">
+                  {item.negotiable ? "قابل للتفاوض" : "السعر ثابت"}
+                </span>
+              </div>
+              {item.countryOfOrigin && (
+                <div className="flex items-center gap-2 rounded-xl border border-border bg-card p-2.5 text-sm">
+                  <Globe className="h-4 w-4 text-primary" />
+                  <span className="font-semibold">
+                    {countryByName(item.countryOfOrigin)?.flag ?? ""} بلد الصنع:{" "}
+                    {countryByName(item.countryOfOrigin)?.ar ?? item.countryOfOrigin}
+                  </span>
+                </div>
+              )}
+              {item.brand && (
+                <div className="flex items-center gap-2 rounded-xl border border-border bg-card p-2.5 text-sm">
+                  <Package className="h-4 w-4 text-primary" />
+                  <span className="font-semibold">الماركة: {item.brand}</span>
+                </div>
+              )}
+            </div>
+
+            {/* السعر */}
+            <div className="mt-4 flex items-baseline gap-1">
               <span className="text-3xl font-extrabold text-primary">{item.price.toLocaleString("ar")}</span>
               <span className="text-sm font-semibold text-muted-foreground">د.ب</span>
               {item.negotiable && <span className="text-xs text-muted-foreground">• قابل للتفاوض</span>}
             </div>
 
-            <div className="mt-3 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-              <span className="flex items-center gap-1">
-                <MapPin className="h-4 w-4" /> {item.city}
-              </span>
-              <span className="flex items-center gap-1">
-                <Eye className="h-4 w-4" /> {item.views.toLocaleString("ar")} مشاهدة
-              </span>
+            <div className="mt-2 flex items-center gap-1 text-sm text-muted-foreground">
+              <Eye className="h-4 w-4" /> {item.views.toLocaleString("ar")} مشاهدة
             </div>
-
-            {/* سجل تاريخ ووقت النشر والانتهاء */}
-            {publishedAt && (
-              <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
-                <span className="flex items-center gap-1">
-                  <Clock className="h-3.5 w-3.5" /> نُشر {timeAgo(publishedAt)} —{" "}
-                  {new Date(publishedAt).toLocaleString("ar", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </span>
-                {expiresAt != null && (
-                  <span className="flex items-center gap-1">
-                    <CalendarDays className="h-3.5 w-3.5" />
-                    {expired ? "انتهى في" : "ينتهي في"}{" "}
-                    {new Date(expiresAt).toLocaleString("ar", {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    })}
-                    {!expired && daysLeft != null ? ` (خلال ${daysLeft} يوم)` : ""}
-                  </span>
-                )}
-              </div>
-            )}
 
             {/* مزاد مباشر */}
             {item.listingType === "auction" && (
@@ -531,32 +543,7 @@ function ListingPage() {
               />
             )}
 
-
-            <div className="mt-5 rounded-2xl border border-border bg-card p-4">
-              <div className="flex items-center justify-between">
-                <h2 className="font-bold">{sellerName}</h2>
-                {verified && (
-                  <span className="inline-flex items-center gap-0.5 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
-                    <BadgeCheck className="h-3.5 w-3.5" /> موثق
-                  </span>
-                )}
-              </div>
-              <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
-                <span className="inline-flex items-center gap-0.5 font-semibold text-amber-500">
-                  <Star className="h-4 w-4 fill-amber-500" /> {rating.toLocaleString("ar")}
-                </span>
-                <span className="text-muted-foreground">({reviews.toLocaleString("ar")} تقييم)</span>
-                <span className="text-muted-foreground">• {deals.toLocaleString("ar")} صفقة ناجحة</span>
-              </div>
-              {seller?.member_since && (
-                <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
-                  <CalendarDays className="h-3.5 w-3.5" /> عضو منذ{" "}
-                  {new Date(seller.member_since).toLocaleDateString("ar", { year: "numeric", month: "long" })}
-                </p>
-              )}
-            </div>
-
-            {/* أزرار التواصل */}
+            {/* أيقونات التواصل */}
             <div className="mt-4 grid grid-cols-3 gap-2">
               <a
                 href={waLink}
@@ -597,6 +584,36 @@ function ListingPage() {
               </button>
             </div>
 
+            {/* بيانات البائع ووقت النشر أسفل الصورة المعروضة */}
+            <div className="mt-5 rounded-2xl border border-border bg-card p-4">
+              <div className="flex items-center justify-between">
+                <h2 className="font-bold">{sellerName}</h2>
+                {verified && (
+                  <span className="inline-flex items-center gap-0.5 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
+                    <BadgeCheck className="h-3.5 w-3.5" /> موثق
+                  </span>
+                )}
+              </div>
+              <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+                <span className="inline-flex items-center gap-0.5 font-semibold text-amber-500">
+                  <Star className="h-4 w-4 fill-amber-500" /> {rating.toLocaleString("ar")}
+                </span>
+                <span className="text-muted-foreground">({reviews.toLocaleString("ar")} تقييم)</span>
+                <span className="text-muted-foreground">• {deals.toLocaleString("ar")} صفقة ناجحة</span>
+              </div>
+              {publishedAt && (
+                <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
+                  <Clock className="h-3.5 w-3.5" /> نُشر {timeAgo(publishedAt)}
+                </p>
+              )}
+              {seller?.member_since && (
+                <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
+                  <CalendarDays className="h-3.5 w-3.5" /> عضو منذ{" "}
+                  {new Date(seller.member_since).toLocaleDateString("ar", { year: "numeric", month: "long" })}
+                </p>
+              )}
+            </div>
+
             {/* مشاركة الإعلان على منصات التواصل */}
             <div className="mt-4 rounded-2xl border border-border bg-card p-3">
               <ShareButtons
@@ -605,27 +622,11 @@ function ListingPage() {
                 compact
               />
             </div>
-
-            {/* هاشتاقات تلقائية لزيادة الظهور */}
-            <ListingHashtags
-              tags={[
-                cat?.name,
-                item.groupName,
-                item.itemName,
-                item.city,
-                item.condition,
-              ]}
-              className="mt-3"
-            />
           </div>
         </div>
 
-        {displayDescription && (
-          <div className="mt-8 rounded-2xl border border-border bg-card p-5">
-            <h2 className="mb-2 text-lg font-extrabold">{lang === "ar" ? "الوصف" : "Description"}</h2>
-            <p className="whitespace-pre-line text-sm leading-relaxed text-muted-foreground">{displayDescription}</p>
-          </div>
-        )}
+
+
 
         {item.business && (
           <div className="mt-6 rounded-2xl border border-primary/30 bg-accent/30 p-5">
@@ -643,12 +644,16 @@ function ListingPage() {
           </div>
         )}
 
+        {/* اسم المنطقة فوق الخريطة */}
+        {item.city && (
+          <div className="mt-6 flex items-center gap-1.5 text-lg font-extrabold">
+            <MapPin className="h-5 w-5 text-primary" /> {item.city}
+          </div>
+        )}
+
         {/* خريطة الموقع */}
         {mapSrc && (
-          <div className="mt-6 overflow-hidden rounded-2xl border border-border bg-card">
-            <h2 className="flex items-center gap-1.5 p-4 pb-2 text-lg font-extrabold">
-              <MapPin className="h-5 w-5 text-primary" /> الموقع على الخريطة
-            </h2>
+          <div className="mt-3 overflow-hidden rounded-2xl border border-border bg-card">
             <iframe
               title="خريطة موقع الإعلان"
               src={mapSrc}
@@ -665,6 +670,12 @@ function ListingPage() {
             </a>
           </div>
         )}
+
+        {/* هاشتاقات تلقائية أسفل الخريطة */}
+        <ListingHashtags
+          tags={[cat?.name, item.groupName, item.itemName, item.city, item.condition]}
+          className="mt-4"
+        />
 
         {/* تقييمات البائع */}
         {item.sellerId && (
