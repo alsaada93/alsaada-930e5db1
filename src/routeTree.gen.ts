@@ -16,6 +16,7 @@ import { Route as ReportRouteImport } from './routes/report'
 import { Route as PackagesRouteImport } from './routes/packages'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as FaqRouteImport } from './routes/faq'
+import { Route as ContactRouteImport } from './routes/contact'
 import { Route as BuyRouteImport } from './routes/buy'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AddListingRouteImport } from './routes/add-listing'
@@ -67,6 +68,11 @@ const LoginRoute = LoginRouteImport.update({
 const FaqRoute = FaqRouteImport.update({
   id: '/faq',
   path: '/faq',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BuyRoute = BuyRouteImport.update({
@@ -162,6 +168,7 @@ export interface FileRoutesByFullPath {
   '/add-listing': typeof AddListingRoute
   '/admin': typeof AdminRouteWithChildren
   '/buy': typeof BuyRoute
+  '/contact': typeof ContactRoute
   '/faq': typeof FaqRoute
   '/login': typeof LoginRouteWithChildren
   '/packages': typeof PackagesRoute
@@ -187,6 +194,7 @@ export interface FileRoutesByTo {
   '/account': typeof AccountRoute
   '/add-listing': typeof AddListingRoute
   '/buy': typeof BuyRoute
+  '/contact': typeof ContactRoute
   '/faq': typeof FaqRoute
   '/login': typeof LoginRouteWithChildren
   '/packages': typeof PackagesRoute
@@ -214,6 +222,7 @@ export interface FileRoutesById {
   '/add-listing': typeof AddListingRoute
   '/admin': typeof AdminRouteWithChildren
   '/buy': typeof BuyRoute
+  '/contact': typeof ContactRoute
   '/faq': typeof FaqRoute
   '/login': typeof LoginRouteWithChildren
   '/packages': typeof PackagesRoute
@@ -242,6 +251,7 @@ export interface FileRouteTypes {
     | '/add-listing'
     | '/admin'
     | '/buy'
+    | '/contact'
     | '/faq'
     | '/login'
     | '/packages'
@@ -267,6 +277,7 @@ export interface FileRouteTypes {
     | '/account'
     | '/add-listing'
     | '/buy'
+    | '/contact'
     | '/faq'
     | '/login'
     | '/packages'
@@ -293,6 +304,7 @@ export interface FileRouteTypes {
     | '/add-listing'
     | '/admin'
     | '/buy'
+    | '/contact'
     | '/faq'
     | '/login'
     | '/packages'
@@ -320,6 +332,7 @@ export interface RootRouteChildren {
   AddListingRoute: typeof AddListingRoute
   AdminRoute: typeof AdminRouteWithChildren
   BuyRoute: typeof BuyRoute
+  ContactRoute: typeof ContactRoute
   FaqRoute: typeof FaqRoute
   LoginRoute: typeof LoginRouteWithChildren
   PackagesRoute: typeof PackagesRoute
@@ -380,6 +393,13 @@ declare module '@tanstack/react-router' {
       path: '/faq'
       fullPath: '/faq'
       preLoaderRoute: typeof FaqRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/buy': {
@@ -545,6 +565,7 @@ const rootRouteChildren: RootRouteChildren = {
   AddListingRoute: AddListingRoute,
   AdminRoute: AdminRouteWithChildren,
   BuyRoute: BuyRoute,
+  ContactRoute: ContactRoute,
   FaqRoute: FaqRoute,
   LoginRoute: LoginRouteWithChildren,
   PackagesRoute: PackagesRoute,
