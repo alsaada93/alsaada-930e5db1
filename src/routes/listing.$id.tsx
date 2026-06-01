@@ -33,7 +33,8 @@ import { PriceOfferDialog } from "@/components/PriceOfferDialog";
 import { ListingHashtags } from "@/components/ListingHashtags";
 import { ShareButtons } from "@/components/ShareButtons";
 import { useListingTranslations } from "@/hooks/useListingTranslations";
-import { Tag } from "lucide-react";
+import { Tag, Truck, Tag as TagIcon, Globe, Package } from "lucide-react";
+import { countryByName } from "@/data/countries";
 
 const EXPIRY_DAYS = 60;
 
@@ -68,6 +69,9 @@ export const Route = createFileRoute("/listing/$id")({
         sellerId: undefined as string | undefined,
         phone: data.contact_phone ?? undefined,
         description: data.description as string | null,
+        brand: (data.brand as string | null) ?? null,
+        countryOfOrigin: (data.country_of_origin as string | null) ?? null,
+        deliveryAvailable: Boolean(data.delivery_available),
         business:
           data.listing_type === "business"
             ? {
