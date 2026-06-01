@@ -35,6 +35,8 @@ import { ShareButtons } from "@/components/ShareButtons";
 import { useListingTranslations } from "@/hooks/useListingTranslations";
 import { Tag, Truck, Tag as TagIcon, Globe, Package } from "lucide-react";
 import { countryByName } from "@/data/countries";
+import { cityCenter, osmEmbed } from "@/data/bahrainCities";
+import { brandInfo } from "@/data/brandsCatalog";
 
 const EXPIRY_DAYS = 60;
 
