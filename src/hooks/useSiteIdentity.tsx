@@ -35,7 +35,7 @@ export const DEFAULT_IDENTITY: SiteIdentity = {
   logoBoxHeight: 40,
   logoFontSize: 16,
   instagramUrl: "",
-  contactPhone: "",
+  contactPhone: "36818153",
   locationAr: "مملكة البحرين",
   locationEn: "Kingdom of Bahrain",
 };
