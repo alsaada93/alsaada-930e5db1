@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
-import { ShieldCheck } from "lucide-react";
+import { ShieldCheck, Apple } from "lucide-react";
 import googleLogo from "@/assets/google-logo.png";
 
 export const Route = createFileRoute("/login")({
