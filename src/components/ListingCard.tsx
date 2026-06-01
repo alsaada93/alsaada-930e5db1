@@ -93,7 +93,7 @@ export function ListingCard({ item, displayTitle }: { item: Listing; displayTitl
             <MessageCircle className="h-3.5 w-3.5" /> {t("card.whatsapp")}
           </a>
           <a
-            href={`tel:+${phone}`}
+            href={telLink(phone)}
             onClick={(e) => {
               e.stopPropagation();
               logContactAttempt({ recipientId: item.userId, listingId: item.id, method: "call", listingTitle: item.title });
