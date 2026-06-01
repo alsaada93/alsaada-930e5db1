@@ -25,8 +25,8 @@ export interface SiteIdentity {
 export const DEFAULT_IDENTITY: SiteIdentity = {
   logoUrl: "",
   faviconUrl: "/site-logo.png",
-  nameAr: "السعادة ماركت",
-  nameEn: "Al Saada Market",
+  nameAr: "حراج السعادة",
+  nameEn: "Haraj Al Saada",
   taglineAr: "شراء وبيع معدات المطاعم والأثاث والإلكترونيات في البحرين",
   taglineEn: "Buy & sell restaurant equipment, furniture & electronics in Bahrain",
   showLogo: true,

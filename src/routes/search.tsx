@@ -28,9 +28,9 @@ export const Route = createFileRoute("/search")({
   }),
   head: () => ({
     meta: [
-      { title: "بحث | السعادة ماركت" },
-      { name: "description", content: "ابحث عن معدات المطاعم والأثاث والإلكترونيات في السعادة ماركت." },
-      { property: "og:title", content: "بحث | السعادة ماركت" },
+      { title: "بحث | حراج السعادة" },
+      { name: "description", content: "ابحث عن معدات المطاعم والأثاث والإلكترونيات في حراج السعادة." },
+      { property: "og:title", content: "بحث | حراج السعادة" },
       { property: "og:url", content: "https://alsaada-market.lovable.app/search" },
     ],
     links: [{ rel: "canonical", href: "https://alsaada-market.lovable.app/search" }],

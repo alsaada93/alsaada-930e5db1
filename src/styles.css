@@ -57,7 +57,7 @@
 :root {
   --radius: 0.5rem;
 
-  /* Al Saada Market brand: OLX deep teal + OpenSooq vibrant orange/red */
+  /* Haraj Al Saada brand: OLX deep teal + OpenSooq vibrant orange/red */
   --background: oklch(0.985 0.004 200);
   --foreground: oklch(0.22 0.03 200);
 

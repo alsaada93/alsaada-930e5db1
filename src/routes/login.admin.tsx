@@ -12,7 +12,7 @@ import { ShieldCheck } from "lucide-react";
 export const Route = createFileRoute("/login/admin")({
   head: () => ({
     meta: [
-      { title: "تسجيل دخول الإدارة | السعادة ماركت" },
+      { title: "تسجيل دخول الإدارة | حراج السعادة" },
       { name: "robots", content: "noindex" },
     ],
   }),

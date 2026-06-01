@@ -420,7 +420,7 @@ function AppearancePage() {
           <h3 className="mb-4 font-bold text-card-foreground">معاينة مباشرة</h3>
           <div className="space-y-3">
             <div className="rounded-xl bg-navy p-4 text-navy-foreground">
-              <span className="font-extrabold">السعادة ماركت</span> — ترويسة الموقع
+              <span className="font-extrabold">حراج السعادة</span> — ترويسة الموقع
             </div>
             <div className="flex flex-wrap items-center gap-3">
               <button className="rounded-full bg-primary px-5 py-2 font-bold text-primary-foreground">

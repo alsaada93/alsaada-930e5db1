@@ -7,12 +7,12 @@ import { useLanguage } from "@/hooks/useLanguage";
 export const Route = createFileRoute("/packages")({
   head: () => ({
     meta: [
-      { title: "الباقات والأسعار | السعادة ماركت Al Saada Market" },
+      { title: "الباقات والأسعار | حراج السعادة Haraj Al Saada" },
       {
         name: "description",
-        content: "اختر باقة الاشتراك المناسبة لعرض إعلاناتك على السعادة ماركت — مجاني، احترافي وتاجر.",
+        content: "اختر باقة الاشتراك المناسبة لعرض إعلاناتك على حراج السعادة — مجاني، احترافي وتاجر.",
       },
-      { property: "og:title", content: "الباقات والأسعار | السعادة ماركت Al Saada Market" },
+      { property: "og:title", content: "الباقات والأسعار | حراج السعادة Haraj Al Saada" },
       { property: "og:description", content: "باقات اشتراك مرنة لبيع معدات المطاعم والأثاث والإلكترونيات." },
       { property: "og:url", content: "https://alsaada-market.lovable.app/packages" },
     ],
@@ -136,8 +136,8 @@ function PackagesPage() {
                   <a
                     href={`https://wa.me/97336818153?text=${encodeURIComponent(
                       ar
-                        ? `مرحباً، أرغب في الاشتراك في باقة ${p.name.ar} على السعادة ماركت.`
-                        : `Hello, I'd like to subscribe to the ${p.name.en} plan on Al Saada Market.`,
+                        ? `مرحباً، أرغب في الاشتراك في باقة ${p.name.ar} على حراج السعادة.`
+                        : `Hello, I'd like to subscribe to the ${p.name.en} plan on Haraj Al Saada.`,
                     )}`}
                     target="_blank"
                     rel="noopener noreferrer"

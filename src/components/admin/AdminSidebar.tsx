@@ -32,7 +32,7 @@ export function AdminSidebar() {
         </span>
         {!collapsed && (
           <span className="hidden whitespace-nowrap text-sm font-extrabold md:block">
-            السعادة ماركت
+            حراج السعادة
           </span>
         )}
       </div>

@@ -42,10 +42,10 @@ export const Route = createFileRoute("/add-listing")({
   }),
   head: () => ({
     meta: [
-      { title: "أضف إعلان | السعادة ماركت Al Saada Market" },
-      { name: "description", content: "أضف إعلانك لبيع معدات المطاعم والفنادق والإلكترونيات على السعادة ماركت." },
-      { property: "og:title", content: "أضف إعلان | السعادة ماركت Al Saada Market" },
-      { property: "og:description", content: "أنشئ إعلانًا جديدًا مع تسعير ذكي بالذكاء الاصطناعي على السعادة ماركت." },
+      { title: "أضف إعلان | حراج السعادة Haraj Al Saada" },
+      { name: "description", content: "أضف إعلانك لبيع معدات المطاعم والفنادق والإلكترونيات على حراج السعادة." },
+      { property: "og:title", content: "أضف إعلان | حراج السعادة Haraj Al Saada" },
+      { property: "og:description", content: "أنشئ إعلانًا جديدًا مع تسعير ذكي بالذكاء الاصطناعي على حراج السعادة." },
       { property: "og:url", content: "https://alsaada-market.lovable.app/add-listing" },
     ],
     links: [{ rel: "canonical", href: "https://alsaada-market.lovable.app/add-listing" }],
@@ -1139,6 +1139,13 @@ function AddListingPage() {
       <ImageEditor
         open={editingIndex !== null}
         file={editingIndex !== null ? media[editingIndex]?.file ?? null : null}
+        isCover={editingIndex === 0}
+        onMakeCover={() => {
+          if (editingIndex !== null && editingIndex !== 0) {
+            moveMedia(editingIndex, 0);
+            setEditingIndex(0);
+          }
+        }}
         onClose={() => setEditingIndex(null)}
         onApply={(edited) => {
           setMedia((prev) =>

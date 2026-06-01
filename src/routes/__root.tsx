@@ -83,16 +83,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "السعادة ماركت — بيع وشراء معدات المطاعم والأثاث" },
-      { name: "description", content: "السعادة ماركت منصة بيع وشراء ومزاد معدات المطاعم والأثاث والإلكترونيات في مملكة البحرين." },
-      { name: "author", content: "السعادة ماركت" },
-      { property: "og:title", content: "السعادة ماركت — بيع وشراء معدات المطاعم والأثاث في البحرين" },
-      { property: "og:description", content: "السعادة ماركت منصة بيع وشراء ومزاد معدات المطاعم والأثاث والإلكترونيات في مملكة البحرين." },
+      { title: "حراج السعادة — بيع وشراء معدات المطاعم والأثاث" },
+      { name: "description", content: "حراج السعادة منصة بيع وشراء ومزاد معدات المطاعم والأثاث والإلكترونيات في مملكة البحرين." },
+      { name: "author", content: "حراج السعادة" },
+      { property: "og:title", content: "حراج السعادة — بيع وشراء معدات المطاعم والأثاث في البحرين" },
+      { property: "og:description", content: "حراج السعادة منصة بيع وشراء ومزاد معدات المطاعم والأثاث والإلكترونيات في مملكة البحرين." },
       { property: "og:type", content: "website" },
-      { property: "og:site_name", content: "السعادة ماركت" },
+      { property: "og:site_name", content: "حراج السعادة" },
       { name: "twitter:card", content: "summary" },
-      { name: "twitter:title", content: "السعادة ماركت — بيع وشراء معدات المطاعم والأثاث" },
-      { name: "twitter:description", content: "السعادة ماركت منصة بيع وشراء ومزاد معدات المطاعم والأثاث والإلكترونيات في مملكة البحرين." },
+      { name: "twitter:title", content: "حراج السعادة — بيع وشراء معدات المطاعم والأثاث" },
+      { name: "twitter:description", content: "حراج السعادة منصة بيع وشراء ومزاد معدات المطاعم والأثاث والإلكترونيات في مملكة البحرين." },
       { name: "google-site-verification", content: "LcFK1WJ9S9-zthpcsGa5rr26P1h1pehsKPPjp0CosAo" },
 
 
@@ -113,7 +113,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         children: JSON.stringify({
           "@context": "https://schema.org",
           "@type": "Organization",
-          name: "السعادة ماركت",
+          name: "حراج السعادة",
           url: "https://alsaada.lovable.app",
 
         }),
@@ -123,7 +123,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         children: JSON.stringify({
           "@context": "https://schema.org",
           "@type": "WebSite",
-          name: "السعادة ماركت",
+          name: "حراج السعادة",
           url: "https://soogo-hub.lovable.app",
         }),
       },

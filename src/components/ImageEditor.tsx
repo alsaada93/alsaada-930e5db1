@@ -1,9 +1,6 @@
-import { useCallback, useEffect, useState } from "react";
-import Cropper from "react-easy-crop";
-import type { Area } from "react-easy-crop";
-import { Loader2, RotateCcw, RotateCw, Sparkles, Check, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Loader2, RotateCcw, RotateCw, Sparkles, Check, X, Star } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/hooks/useLanguage";
 
@@ -14,15 +11,14 @@ interface ImageEditorProps {
   onClose: () => void;
   /** Called with the edited file when the user applies their changes. */
   onApply: (file: File) => void;
+  /** When provided, shows a "make cover" action. */
+  onMakeCover?: () => void;
+  /** Whether the current image is already the cover. */
+  isCover?: boolean;
 }
 
-/** Render a cropped + rotated region of an image to a new File. */
-async function getCroppedFile(
-  src: string,
-  crop: Area,
-  rotation: number,
-  fileName: string,
-): Promise<File> {
+/** Render a rotated copy of the full image to a new File (no cropping). */
+async function getRotatedFile(src: string, rotation: number, fileName: string): Promise<File> {
   const image = await new Promise<HTMLImageElement>((resolve, reject) => {
     const img = new Image();
     img.crossOrigin = "anonymous";
@@ -32,45 +28,33 @@ async function getCroppedFile(
   });
 
   const rad = (rotation * Math.PI) / 180;
-  // Bounding box of the rotated image
   const bBoxW = Math.abs(Math.cos(rad) * image.width) + Math.abs(Math.sin(rad) * image.height);
   const bBoxH = Math.abs(Math.sin(rad) * image.width) + Math.abs(Math.cos(rad) * image.height);
 
-  const tmp = document.createElement("canvas");
-  tmp.width = bBoxW;
-  tmp.height = bBoxH;
-  const tctx = tmp.getContext("2d")!;
-  tctx.translate(bBoxW / 2, bBoxH / 2);
-  tctx.rotate(rad);
-  tctx.drawImage(image, -image.width / 2, -image.height / 2);
-
   const canvas = document.createElement("canvas");
-  canvas.width = crop.width;
-  canvas.height = crop.height;
+  canvas.width = bBoxW;
+  canvas.height = bBoxH;
   const ctx = canvas.getContext("2d")!;
-  ctx.drawImage(tmp, crop.x, crop.y, crop.width, crop.height, 0, 0, crop.width, crop.height);
+  ctx.translate(bBoxW / 2, bBoxH / 2);
+  ctx.rotate(rad);
+  ctx.drawImage(image, -image.width / 2, -image.height / 2);
 
   const isPng = fileName.toLowerCase().endsWith(".png");
   const type = isPng ? "image/png" : "image/jpeg";
-  const blob = await new Promise<Blob>((resolve) =>
-    canvas.toBlob((b) => resolve(b!), type, 0.92),
-  );
+  const blob = await new Promise<Blob>((resolve) => canvas.toBlob((b) => resolve(b!), type, 0.92));
   const newName = fileName.replace(/\.[^.]+$/, "") + (isPng ? ".png" : ".jpg");
   return new File([blob], newName, { type });
 }
 
-export default function ImageEditor({ file, open, onClose, onApply }: ImageEditorProps) {
+export default function ImageEditor({ file, open, onClose, onApply, onMakeCover, isCover }: ImageEditorProps) {
   const { lang } = useLanguage();
   const ar = lang === "ar";
   const [src, setSrc] = useState<string>("");
-  const [crop, setCrop] = useState({ x: 0, y: 0 });
-  const [zoom, setZoom] = useState(1);
   const [rotation, setRotation] = useState(0);
-  const [areaPixels, setAreaPixels] = useState<Area | null>(null);
   const [working, setWorking] = useState(false);
   const [removingBg, setRemovingBg] = useState(false);
+  const [bgRemoved, setBgRemoved] = useState(false);
 
-  // Build an object URL for the source file.
   useEffect(() => {
     if (!file) {
       setSrc("");
@@ -78,25 +62,20 @@ export default function ImageEditor({ file, open, onClose, onApply }: ImageEdito
     }
     const url = URL.createObjectURL(file);
     setSrc(url);
-    setCrop({ x: 0, y: 0 });
-    setZoom(1);
     setRotation(0);
+    setBgRemoved(false);
     return () => URL.revokeObjectURL(url);
   }, [file]);
-
-  const onCropComplete = useCallback((_: Area, pixels: Area) => {
-    setAreaPixels(pixels);
-  }, []);
 
   const handleRemoveBg = async () => {
     if (!file) return;
     setRemovingBg(true);
     try {
       const { removeBackground } = await import("@imgly/background-removal");
-      // Apply current crop/rotation first so removal acts on the visible image.
+      // Apply current rotation first so removal acts on the visible image.
       let input: Blob = file;
-      if (areaPixels && (rotation !== 0 || zoom !== 1)) {
-        input = await getCroppedFile(src, areaPixels, rotation, file.name);
+      if (rotation !== 0) {
+        input = await getRotatedFile(src, rotation, file.name);
       }
       const blob = await removeBackground(input);
       const url = URL.createObjectURL(blob);
@@ -104,9 +83,8 @@ export default function ImageEditor({ file, open, onClose, onApply }: ImageEdito
         if (prev) URL.revokeObjectURL(prev);
         return url;
       });
-      setCrop({ x: 0, y: 0 });
-      setZoom(1);
       setRotation(0);
+      setBgRemoved(true);
     } catch (e) {
       console.error("background removal failed", e);
     } finally {
@@ -115,12 +93,11 @@ export default function ImageEditor({ file, open, onClose, onApply }: ImageEdito
   };
 
   const handleApply = async () => {
-    if (!file || !areaPixels) return;
+    if (!file) return;
     setWorking(true);
     try {
-      // PNG keeps transparency from background removal.
-      const name = src.startsWith("blob:") && removingBg ? file.name.replace(/\.[^.]+$/, ".png") : file.name;
-      const result = await getCroppedFile(src, areaPixels, rotation, name);
+      const name = bgRemoved ? file.name.replace(/\.[^.]+$/, ".png") : file.name;
+      const result = await getRotatedFile(src, rotation, name);
       onApply(result);
       onClose();
     } catch (e) {
@@ -137,19 +114,13 @@ export default function ImageEditor({ file, open, onClose, onApply }: ImageEdito
           <DialogTitle>{ar ? "تعديل الصورة" : "Edit image"}</DialogTitle>
         </DialogHeader>
 
-        <div className="relative h-80 w-full overflow-hidden rounded-lg bg-muted">
+        <div className="relative flex h-80 w-full items-center justify-center overflow-hidden rounded-lg bg-muted">
           {src && (
-            <Cropper
-              image={src}
-              crop={crop}
-              zoom={zoom}
-              rotation={rotation}
-              aspect={1}
-              onCropChange={setCrop}
-              onZoomChange={setZoom}
-              onRotationChange={setRotation}
-              onCropComplete={onCropComplete}
-              restrictPosition={false}
+            <img
+              src={src}
+              alt=""
+              className="max-h-full max-w-full object-contain transition-transform"
+              style={{ transform: `rotate(${rotation}deg)` }}
             />
           )}
           {(removingBg || working) && (
@@ -159,44 +130,47 @@ export default function ImageEditor({ file, open, onClose, onApply }: ImageEdito
           )}
         </div>
 
-        <div className="space-y-4">
-          <div>
-            <label className="mb-1 block text-xs font-semibold text-muted-foreground">
-              {ar ? "تكبير" : "Zoom"}
-            </label>
-            <Slider value={[zoom]} min={1} max={3} step={0.01} onValueChange={(v) => setZoom(v[0])} />
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2">
-            <Button type="button" variant="outline" size="sm" onClick={() => setRotation((r) => r - 90)}>
-              <RotateCcw className="h-4 w-4" /> {ar ? "تدوير" : "Rotate"}
-            </Button>
-            <Button type="button" variant="outline" size="sm" onClick={() => setRotation((r) => r + 90)}>
-              <RotateCw className="h-4 w-4" /> {ar ? "تدوير" : "Rotate"}
-            </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button type="button" variant="outline" size="sm" onClick={() => setRotation((r) => r - 90)}>
+            <RotateCcw className="h-4 w-4" /> {ar ? "تدوير" : "Rotate"}
+          </Button>
+          <Button type="button" variant="outline" size="sm" onClick={() => setRotation((r) => r + 90)}>
+            <RotateCw className="h-4 w-4" /> {ar ? "تدوير" : "Rotate"}
+          </Button>
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            onClick={handleRemoveBg}
+            disabled={removingBg || working}
+          >
+            {removingBg ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+            {ar ? "إزالة الخلفية بالذكاء الاصطناعي" : "Remove background (AI)"}
+          </Button>
+          {onMakeCover && (
             <Button
               type="button"
-              variant="secondary"
+              variant={isCover ? "default" : "outline"}
               size="sm"
-              onClick={handleRemoveBg}
-              disabled={removingBg || working}
+              onClick={onMakeCover}
+              disabled={isCover}
             >
-              {removingBg ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-              {ar ? "إزالة الخلفية بالذكاء الاصطناعي" : "Remove background (AI)"}
+              <Star className="h-4 w-4" />
+              {isCover ? (ar ? "صورة الغلاف" : "Cover image") : ar ? "اجعلها صورة الغلاف" : "Make cover"}
             </Button>
-          </div>
-          {removingBg && (
-            <p className="text-xs text-muted-foreground">
-              {ar ? "قد تستغرق إزالة الخلفية بضع ثوانٍ..." : "Background removal may take a few seconds..."}
-            </p>
           )}
         </div>
+        {removingBg && (
+          <p className="text-xs text-muted-foreground">
+            {ar ? "قد تستغرق إزالة الخلفية بضع ثوانٍ..." : "Background removal may take a few seconds..."}
+          </p>
+        )}
 
         <DialogFooter className="gap-2">
           <Button type="button" variant="ghost" onClick={onClose} disabled={working || removingBg}>
             <X className="h-4 w-4" /> {ar ? "إلغاء" : "Cancel"}
           </Button>
-          <Button type="button" onClick={handleApply} disabled={working || removingBg || !areaPixels}>
+          <Button type="button" onClick={handleApply} disabled={working || removingBg}>
             {working ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
             {ar ? "حفظ التعديل" : "Apply"}
           </Button>

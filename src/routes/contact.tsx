@@ -6,10 +6,10 @@ import { useLanguage } from "@/hooks/useLanguage";
 export const Route = createFileRoute("/contact")({
   head: () => ({
     meta: [
-      { title: "تواصل معنا | السعادة ماركت Al Saada Market" },
+      { title: "تواصل معنا | حراج السعادة Haraj Al Saada" },
       {
         name: "description",
-        content: "تواصل مع السعادة ماركت في البحرين عبر الهاتف أو واتساب أو انستقرام لتجهيز معدات المطاعم والأثاث.",
+        content: "تواصل مع حراج السعادة في البحرين عبر الهاتف أو واتساب أو انستقرام لتجهيز معدات المطاعم والأثاث.",
       },
     ],
     links: [{ rel: "canonical", href: "https://alsaada.lovable.app/contact" }],
