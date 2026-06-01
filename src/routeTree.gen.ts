@@ -14,6 +14,7 @@ import { Route as SellRouteImport } from './routes/sell'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as PackagesRouteImport } from './routes/packages'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as BuyRouteImport } from './routes/buy'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AddListingRouteImport } from './routes/add-listing'
 import { Route as AccountRouteImport } from './routes/account'
@@ -54,6 +55,11 @@ const PackagesRoute = PackagesRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BuyRoute = BuyRouteImport.update({
+  id: '/buy',
+  path: '/buy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRoute = AdminRouteImport.update({
@@ -143,6 +149,7 @@ export interface FileRoutesByFullPath {
   '/account': typeof AccountRoute
   '/add-listing': typeof AddListingRoute
   '/admin': typeof AdminRouteWithChildren
+  '/buy': typeof BuyRoute
   '/login': typeof LoginRouteWithChildren
   '/packages': typeof PackagesRoute
   '/search': typeof SearchRoute
@@ -165,6 +172,7 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/account': typeof AccountRoute
   '/add-listing': typeof AddListingRoute
+  '/buy': typeof BuyRoute
   '/login': typeof LoginRouteWithChildren
   '/packages': typeof PackagesRoute
   '/search': typeof SearchRoute
@@ -189,6 +197,7 @@ export interface FileRoutesById {
   '/account': typeof AccountRoute
   '/add-listing': typeof AddListingRoute
   '/admin': typeof AdminRouteWithChildren
+  '/buy': typeof BuyRoute
   '/login': typeof LoginRouteWithChildren
   '/packages': typeof PackagesRoute
   '/search': typeof SearchRoute
@@ -214,6 +223,7 @@ export interface FileRouteTypes {
     | '/account'
     | '/add-listing'
     | '/admin'
+    | '/buy'
     | '/login'
     | '/packages'
     | '/search'
@@ -236,6 +246,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/account'
     | '/add-listing'
+    | '/buy'
     | '/login'
     | '/packages'
     | '/search'
@@ -259,6 +270,7 @@ export interface FileRouteTypes {
     | '/account'
     | '/add-listing'
     | '/admin'
+    | '/buy'
     | '/login'
     | '/packages'
     | '/search'
@@ -283,6 +295,7 @@ export interface RootRouteChildren {
   AccountRoute: typeof AccountRoute
   AddListingRoute: typeof AddListingRoute
   AdminRoute: typeof AdminRouteWithChildren
+  BuyRoute: typeof BuyRoute
   LoginRoute: typeof LoginRouteWithChildren
   PackagesRoute: typeof PackagesRoute
   SearchRoute: typeof SearchRoute
@@ -327,6 +340,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/buy': {
+      id: '/buy'
+      path: '/buy'
+      fullPath: '/buy'
+      preLoaderRoute: typeof BuyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -484,6 +504,7 @@ const rootRouteChildren: RootRouteChildren = {
   AccountRoute: AccountRoute,
   AddListingRoute: AddListingRoute,
   AdminRoute: AdminRouteWithChildren,
+  BuyRoute: BuyRoute,
   LoginRoute: LoginRouteWithChildren,
   PackagesRoute: PackagesRoute,
   SearchRoute: SearchRoute,
