@@ -627,12 +627,7 @@ function ListingPage() {
         </div>
 
 
-        {displayDescription && (
-          <div className="mt-8 rounded-2xl border border-border bg-card p-5">
-            <h2 className="mb-2 text-lg font-extrabold">{lang === "ar" ? "الوصف" : "Description"}</h2>
-            <p className="whitespace-pre-line text-sm leading-relaxed text-muted-foreground">{displayDescription}</p>
-          </div>
-        )}
+
 
         {item.business && (
           <div className="mt-6 rounded-2xl border border-primary/30 bg-accent/30 p-5">
