@@ -354,6 +354,9 @@ function LoginPage() {
                   : "إرسال رابط الاستعادة"}
           </Button>
         </form>
+        )}
+
+
 
         {mode !== "forgot" && (
           <>
