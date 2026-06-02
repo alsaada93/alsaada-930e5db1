@@ -2,14 +2,33 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState, type FormEvent } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
+import { useServerFn } from "@tanstack/react-start";
 import { useAuth } from "@/hooks/useAuth";
+import { requestPhoneOtp, verifyPhoneOtp } from "@/lib/phone-auth.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "sonner";
-import { ShieldCheck, Apple } from "lucide-react";
+import { ShieldCheck, Apple, MessageCircle, Mail } from "lucide-react";
 import googleLogo from "@/assets/google-logo.png";
+
+const COUNTRY_CODES = [
+  { code: "973", label: "البحرين +973" },
+  { code: "966", label: "السعودية +966" },
+  { code: "971", label: "الإمارات +971" },
+  { code: "965", label: "الكويت +965" },
+  { code: "974", label: "قطر +974" },
+  { code: "968", label: "عُمان +968" },
+];
+
 
 export const Route = createFileRoute("/login")({
   head: () => ({
@@ -29,11 +48,64 @@ export const Route = createFileRoute("/login")({
 function LoginPage() {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
+  const [authMethod, setAuthMethod] = useState<"email" | "phone">("phone");
   const [mode, setMode] = useState<"login" | "signup" | "forgot">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  // Phone (WhatsApp) OTP state
+  const requestOtpFn = useServerFn(requestPhoneOtp);
+  const verifyOtpFn = useServerFn(verifyPhoneOtp);
+  const [dialCode, setDialCode] = useState("973");
+  const [phoneLocal, setPhoneLocal] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpCode, setOtpCode] = useState("");
+  const [phoneSubmitting, setPhoneSubmitting] = useState(false);
+
+  const fullPhone = `${dialCode}${phoneLocal.replace(/\D/g, "")}`;
+
+  const handleSendOtp = async () => {
+    if (phoneLocal.replace(/\D/g, "").length < 6) {
+      toast.error("أدخل رقم هاتف صحيح");
+      return;
+    }
+    setPhoneSubmitting(true);
+    try {
+      await requestOtpFn({ data: { phone: fullPhone } });
+      setOtpSent(true);
+      toast.success("تم إرسال رمز التحقق عبر واتساب");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "تعذّر إرسال الرمز");
+    } finally {
+      setPhoneSubmitting(false);
+    }
+  };
+
+  const handleVerifyOtp = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!/^\d{6}$/.test(otpCode)) {
+      toast.error("الرمز يجب أن يكون 6 أرقام");
+      return;
+    }
+    setPhoneSubmitting(true);
+    try {
+      const creds = await verifyOtpFn({ data: { phone: fullPhone, code: otpCode } });
+      const { error } = await supabase.auth.signInWithPassword({
+        email: creds.email,
+        password: creds.password,
+      });
+      if (error) throw error;
+      toast.success("تم تسجيل الدخول بنجاح");
+      navigate({ to: "/account" });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "فشل التحقق من الرمز");
+    } finally {
+      setPhoneSubmitting(false);
+    }
+  };
+
 
   useEffect(() => {
     if (!loading && user) {
@@ -117,7 +189,116 @@ function LoginPage() {
           </p>
         </div>
 
+        <div className="mb-5 grid grid-cols-2 gap-2 rounded-lg bg-muted p-1">
+          <button
+            type="button"
+            onClick={() => setAuthMethod("phone")}
+            className={`flex items-center justify-center gap-1.5 rounded-md px-3 py-2 text-sm font-bold transition-colors ${
+              authMethod === "phone"
+                ? "bg-background text-foreground shadow"
+                : "text-muted-foreground"
+            }`}
+          >
+            <MessageCircle className="h-4 w-4" />
+            واتساب
+          </button>
+          <button
+            type="button"
+            onClick={() => setAuthMethod("email")}
+            className={`flex items-center justify-center gap-1.5 rounded-md px-3 py-2 text-sm font-bold transition-colors ${
+              authMethod === "email"
+                ? "bg-background text-foreground shadow"
+                : "text-muted-foreground"
+            }`}
+          >
+            <Mail className="h-4 w-4" />
+            البريد
+          </button>
+        </div>
+
+        {authMethod === "phone" ? (
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>رقم الهاتف (واتساب)</Label>
+              <div className="flex gap-2">
+                <Select value={dialCode} onValueChange={setDialCode}>
+                  <SelectTrigger className="w-32 shrink-0">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {COUNTRY_CODES.map((c) => (
+                      <SelectItem key={c.code} value={c.code}>
+                        {c.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Input
+                  type="tel"
+                  inputMode="numeric"
+                  dir="ltr"
+                  placeholder="3300 0000"
+                  value={phoneLocal}
+                  onChange={(e) => setPhoneLocal(e.target.value)}
+                  disabled={otpSent}
+                />
+              </div>
+            </div>
+
+            {!otpSent ? (
+              <Button
+                type="button"
+                className="w-full"
+                disabled={phoneSubmitting}
+                onClick={handleSendOtp}
+              >
+                {phoneSubmitting ? "جاري الإرسال..." : "إرسال رمز التحقق"}
+              </Button>
+            ) : (
+              <form onSubmit={handleVerifyOtp} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="otp">رمز التحقق (6 أرقام)</Label>
+                  <Input
+                    id="otp"
+                    type="text"
+                    inputMode="numeric"
+                    dir="ltr"
+                    maxLength={6}
+                    placeholder="------"
+                    className="text-center text-lg tracking-[0.5em]"
+                    value={otpCode}
+                    onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ""))}
+                  />
+                </div>
+                <Button type="submit" className="w-full" disabled={phoneSubmitting}>
+                  {phoneSubmitting ? "جاري التحقق..." : "تأكيد الدخول"}
+                </Button>
+                <div className="flex items-center justify-between text-xs">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setOtpSent(false);
+                      setOtpCode("");
+                    }}
+                    className="font-semibold text-muted-foreground hover:underline"
+                  >
+                    تغيير الرقم
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSendOtp}
+                    disabled={phoneSubmitting}
+                    className="font-semibold text-primary hover:underline"
+                  >
+                    إعادة إرسال الرمز
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        ) : (
         <form onSubmit={handleSubmit} className="space-y-4">
+
           {mode === "signup" && (
             <div className="space-y-2">
               <Label htmlFor="fullName">الاسم الكامل</Label>
@@ -173,6 +354,9 @@ function LoginPage() {
                   : "إرسال رابط الاستعادة"}
           </Button>
         </form>
+        )}
+
+
 
         {mode !== "forgot" && (
           <>
@@ -195,28 +379,31 @@ function LoginPage() {
           </>
         )}
 
-        <p className="mt-6 text-center text-sm text-muted-foreground">
-          {mode === "forgot" ? (
-            <button
-              type="button"
-              onClick={() => setMode("login")}
-              className="font-semibold text-primary hover:underline"
-            >
-              العودة لتسجيل الدخول
-            </button>
-          ) : (
-            <>
-              {mode === "login" ? "ليس لديك حساب؟ " : "لديك حساب بالفعل؟ "}
+        {authMethod === "email" && (
+          <p className="mt-6 text-center text-sm text-muted-foreground">
+            {mode === "forgot" ? (
               <button
                 type="button"
-                onClick={() => setMode(mode === "login" ? "signup" : "login")}
+                onClick={() => setMode("login")}
                 className="font-semibold text-primary hover:underline"
               >
-                {mode === "login" ? "إنشاء حساب" : "تسجيل الدخول"}
+                العودة لتسجيل الدخول
               </button>
-            </>
-          )}
-        </p>
+            ) : (
+              <>
+                {mode === "login" ? "ليس لديك حساب؟ " : "لديك حساب بالفعل؟ "}
+                <button
+                  type="button"
+                  onClick={() => setMode(mode === "login" ? "signup" : "login")}
+                  className="font-semibold text-primary hover:underline"
+                >
+                  {mode === "login" ? "إنشاء حساب" : "تسجيل الدخول"}
+                </button>
+              </>
+            )}
+          </p>
+        )}
+
 
         <p className="mt-4 text-center">
           <Link to="/" className="text-xs text-muted-foreground hover:underline">
