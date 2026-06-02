@@ -48,11 +48,64 @@ export const Route = createFileRoute("/login")({
 function LoginPage() {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
+  const [authMethod, setAuthMethod] = useState<"email" | "phone">("phone");
   const [mode, setMode] = useState<"login" | "signup" | "forgot">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  // Phone (WhatsApp) OTP state
+  const requestOtpFn = useServerFn(requestPhoneOtp);
+  const verifyOtpFn = useServerFn(verifyPhoneOtp);
+  const [dialCode, setDialCode] = useState("973");
+  const [phoneLocal, setPhoneLocal] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpCode, setOtpCode] = useState("");
+  const [phoneSubmitting, setPhoneSubmitting] = useState(false);
+
+  const fullPhone = `${dialCode}${phoneLocal.replace(/\D/g, "")}`;
+
+  const handleSendOtp = async () => {
+    if (phoneLocal.replace(/\D/g, "").length < 6) {
+      toast.error("أدخل رقم هاتف صحيح");
+      return;
+    }
+    setPhoneSubmitting(true);
+    try {
+      await requestOtpFn({ data: { phone: fullPhone } });
+      setOtpSent(true);
+      toast.success("تم إرسال رمز التحقق عبر واتساب");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "تعذّر إرسال الرمز");
+    } finally {
+      setPhoneSubmitting(false);
+    }
+  };
+
+  const handleVerifyOtp = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!/^\d{6}$/.test(otpCode)) {
+      toast.error("الرمز يجب أن يكون 6 أرقام");
+      return;
+    }
+    setPhoneSubmitting(true);
+    try {
+      const creds = await verifyOtpFn({ data: { phone: fullPhone, code: otpCode } });
+      const { error } = await supabase.auth.signInWithPassword({
+        email: creds.email,
+        password: creds.password,
+      });
+      if (error) throw error;
+      toast.success("تم تسجيل الدخول بنجاح");
+      navigate({ to: "/account" });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "فشل التحقق من الرمز");
+    } finally {
+      setPhoneSubmitting(false);
+    }
+  };
+
 
   useEffect(() => {
     if (!loading && user) {
