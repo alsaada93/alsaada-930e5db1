@@ -379,28 +379,31 @@ function LoginPage() {
           </>
         )}
 
-        <p className="mt-6 text-center text-sm text-muted-foreground">
-          {mode === "forgot" ? (
-            <button
-              type="button"
-              onClick={() => setMode("login")}
-              className="font-semibold text-primary hover:underline"
-            >
-              العودة لتسجيل الدخول
-            </button>
-          ) : (
-            <>
-              {mode === "login" ? "ليس لديك حساب؟ " : "لديك حساب بالفعل؟ "}
+        {authMethod === "email" && (
+          <p className="mt-6 text-center text-sm text-muted-foreground">
+            {mode === "forgot" ? (
               <button
                 type="button"
-                onClick={() => setMode(mode === "login" ? "signup" : "login")}
+                onClick={() => setMode("login")}
                 className="font-semibold text-primary hover:underline"
               >
-                {mode === "login" ? "إنشاء حساب" : "تسجيل الدخول"}
+                العودة لتسجيل الدخول
               </button>
-            </>
-          )}
-        </p>
+            ) : (
+              <>
+                {mode === "login" ? "ليس لديك حساب؟ " : "لديك حساب بالفعل؟ "}
+                <button
+                  type="button"
+                  onClick={() => setMode(mode === "login" ? "signup" : "login")}
+                  className="font-semibold text-primary hover:underline"
+                >
+                  {mode === "login" ? "إنشاء حساب" : "تسجيل الدخول"}
+                </button>
+              </>
+            )}
+          </p>
+        )}
+
 
         <p className="mt-4 text-center">
           <Link to="/" className="text-xs text-muted-foreground hover:underline">
