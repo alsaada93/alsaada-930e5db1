@@ -400,6 +400,36 @@ export type Database = {
         }
         Relationships: []
       }
+      phone_otps: {
+        Row: {
+          attempts: number
+          code_hash: string
+          consumed: boolean
+          created_at: string
+          expires_at: string
+          id: string
+          phone: string
+        }
+        Insert: {
+          attempts?: number
+          code_hash: string
+          consumed?: boolean
+          created_at?: string
+          expires_at: string
+          id?: string
+          phone: string
+        }
+        Update: {
+          attempts?: number
+          code_hash?: string
+          consumed?: boolean
+          created_at?: string
+          expires_at?: string
+          id?: string
+          phone?: string
+        }
+        Relationships: []
+      }
       price_offers: {
         Row: {
           amount: number
