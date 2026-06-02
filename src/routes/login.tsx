@@ -189,7 +189,116 @@ function LoginPage() {
           </p>
         </div>
 
+        <div className="mb-5 grid grid-cols-2 gap-2 rounded-lg bg-muted p-1">
+          <button
+            type="button"
+            onClick={() => setAuthMethod("phone")}
+            className={`flex items-center justify-center gap-1.5 rounded-md px-3 py-2 text-sm font-bold transition-colors ${
+              authMethod === "phone"
+                ? "bg-background text-foreground shadow"
+                : "text-muted-foreground"
+            }`}
+          >
+            <MessageCircle className="h-4 w-4" />
+            واتساب
+          </button>
+          <button
+            type="button"
+            onClick={() => setAuthMethod("email")}
+            className={`flex items-center justify-center gap-1.5 rounded-md px-3 py-2 text-sm font-bold transition-colors ${
+              authMethod === "email"
+                ? "bg-background text-foreground shadow"
+                : "text-muted-foreground"
+            }`}
+          >
+            <Mail className="h-4 w-4" />
+            البريد
+          </button>
+        </div>
+
+        {authMethod === "phone" ? (
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>رقم الهاتف (واتساب)</Label>
+              <div className="flex gap-2">
+                <Select value={dialCode} onValueChange={setDialCode}>
+                  <SelectTrigger className="w-32 shrink-0">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {COUNTRY_CODES.map((c) => (
+                      <SelectItem key={c.code} value={c.code}>
+                        {c.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Input
+                  type="tel"
+                  inputMode="numeric"
+                  dir="ltr"
+                  placeholder="3300 0000"
+                  value={phoneLocal}
+                  onChange={(e) => setPhoneLocal(e.target.value)}
+                  disabled={otpSent}
+                />
+              </div>
+            </div>
+
+            {!otpSent ? (
+              <Button
+                type="button"
+                className="w-full"
+                disabled={phoneSubmitting}
+                onClick={handleSendOtp}
+              >
+                {phoneSubmitting ? "جاري الإرسال..." : "إرسال رمز التحقق"}
+              </Button>
+            ) : (
+              <form onSubmit={handleVerifyOtp} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="otp">رمز التحقق (6 أرقام)</Label>
+                  <Input
+                    id="otp"
+                    type="text"
+                    inputMode="numeric"
+                    dir="ltr"
+                    maxLength={6}
+                    placeholder="------"
+                    className="text-center text-lg tracking-[0.5em]"
+                    value={otpCode}
+                    onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ""))}
+                  />
+                </div>
+                <Button type="submit" className="w-full" disabled={phoneSubmitting}>
+                  {phoneSubmitting ? "جاري التحقق..." : "تأكيد الدخول"}
+                </Button>
+                <div className="flex items-center justify-between text-xs">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setOtpSent(false);
+                      setOtpCode("");
+                    }}
+                    className="font-semibold text-muted-foreground hover:underline"
+                  >
+                    تغيير الرقم
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSendOtp}
+                    disabled={phoneSubmitting}
+                    className="font-semibold text-primary hover:underline"
+                  >
+                    إعادة إرسال الرمز
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        ) : (
         <form onSubmit={handleSubmit} className="space-y-4">
+
           {mode === "signup" && (
             <div className="space-y-2">
               <Label htmlFor="fullName">الاسم الكامل</Label>
