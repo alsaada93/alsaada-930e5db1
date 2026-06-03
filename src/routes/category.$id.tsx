@@ -339,6 +339,7 @@ function CategoryPage() {
               </div>
             </div>
           </div>
+          )}
         </section>
 
         <section className="mx-auto max-w-7xl px-4 py-8 pb-16">
