@@ -242,6 +242,86 @@ function AddListingPage() {
   const [estimating, setEstimating] = useState(false);
   const [saving, setSaving] = useState(false);
 
+  // Detect a previously saved draft on mount (only for new listings)
+  useEffect(() => {
+    if (editId) {
+      draftReady.current = true;
+      return;
+    }
+    try {
+      const raw = localStorage.getItem(DRAFT_KEY);
+      if (raw) {
+        const d = JSON.parse(raw);
+        if (d && (d.titleText || d.descText || d.categoryId || d.price)) {
+          setShowResume(true);
+          return;
+        }
+      }
+    } catch {
+      /* ignore */
+    }
+    draftReady.current = true;
+  }, [editId]);
+
+  // Persist the draft as the user fills the form
+  useEffect(() => {
+    if (!draftReady.current || editId || submitted) return;
+    const draft = {
+      listingType, step, titleText, descText, categoryId, groupName, itemName,
+      brand, region, price, condition, negotiable, delivery, biz, auctionDuration,
+      guestName, guestPhone,
+    };
+    try {
+      localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+    } catch {
+      /* ignore */
+    }
+  }, [
+    editId, submitted, listingType, step, titleText, descText, categoryId, groupName,
+    itemName, brand, region, price, condition, negotiable, delivery, biz, auctionDuration,
+    guestName, guestPhone,
+  ]);
+
+  const restoreDraft = () => {
+    try {
+      const raw = localStorage.getItem(DRAFT_KEY);
+      if (raw) {
+        const d = JSON.parse(raw);
+        setListingType(d.listingType ?? null);
+        setTitleText(d.titleText ?? "");
+        setDescText(d.descText ?? "");
+        setCategoryId(d.categoryId ?? "");
+        setGroupName(d.groupName ?? "");
+        setItemName(d.itemName ?? "");
+        setBrand(d.brand ?? "");
+        setRegion(d.region ?? "");
+        setPrice(d.price ?? "");
+        setCondition(d.condition ?? "مستعمل");
+        setNegotiable(Boolean(d.negotiable));
+        setDelivery(Boolean(d.delivery));
+        if (d.biz) setBiz((p) => ({ ...p, ...d.biz }));
+        setAuctionDuration(d.auctionDuration ?? "24");
+        setGuestName(d.guestName ?? "");
+        setGuestPhone(d.guestPhone ?? "");
+        setStep(d.step ?? 1);
+      }
+    } catch {
+      /* ignore */
+    }
+    setShowResume(false);
+    draftReady.current = true;
+  };
+
+  const discardDraft = () => {
+    try {
+      localStorage.removeItem(DRAFT_KEY);
+    } catch {
+      /* ignore */
+    }
+    setShowResume(false);
+    draftReady.current = true;
+  };
+
   // Auto-suggested titles based on the chosen category/kind/brand to speed up posting.
   const titleSuggestions = useMemo(() => {
     if (!activeCategory) return [];
