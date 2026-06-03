@@ -14,9 +14,9 @@ export const Route = createFileRoute("/packages")({
       },
       { property: "og:title", content: "الباقات والأسعار | حراج السعادة Haraj Al Saada" },
       { property: "og:description", content: "باقات اشتراك مرنة لبيع معدات المطاعم والأثاث والإلكترونيات." },
-      { property: "og:url", content: "https://alsaada-market.lovable.app/packages" },
+      { property: "og:url", content: "https://www.alsaada.sale/packages" },
     ],
-    links: [{ rel: "canonical", href: "https://alsaada-market.lovable.app/packages" }],
+    links: [{ rel: "canonical", href: "https://www.alsaada.sale/packages" }],
   }),
   component: PackagesPage,
 });

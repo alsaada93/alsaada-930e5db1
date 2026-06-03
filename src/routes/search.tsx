@@ -31,9 +31,9 @@ export const Route = createFileRoute("/search")({
       { title: "بحث | حراج السعادة" },
       { name: "description", content: "ابحث عن معدات المطاعم والأثاث والإلكترونيات في حراج السعادة." },
       { property: "og:title", content: "بحث | حراج السعادة" },
-      { property: "og:url", content: "https://alsaada-market.lovable.app/search" },
+      { property: "og:url", content: "https://www.alsaada.sale/search" },
     ],
-    links: [{ rel: "canonical", href: "https://alsaada-market.lovable.app/search" }],
+    links: [{ rel: "canonical", href: "https://www.alsaada.sale/search" }],
   }),
   component: SearchPage,
 });
