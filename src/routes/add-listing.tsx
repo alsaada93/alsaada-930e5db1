@@ -532,6 +532,7 @@ function AddListingPage() {
       if (error) throw error;
       setNewId(data?.id ?? null);
       setSubmitted(true);
+      try { localStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ }
     } catch (err) {
       console.error(err);
       toast.error(ar ? "تعذّر نشر الإعلان، حاول مرة أخرى" : "Could not publish, try again");
