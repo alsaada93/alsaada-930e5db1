@@ -560,6 +560,45 @@ function AddListingPage() {
     }
   };
 
+  // ---- Resume draft prompt ----
+  if (showResume) {
+    return (
+      <div className="flex min-h-screen flex-col">
+        <Header />
+        <main className="mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center px-4 py-16 text-center">
+          <div className="w-full rounded-2xl border border-border bg-card p-6 shadow-card">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-accent">
+              <Pencil className="h-7 w-7 text-primary" />
+            </div>
+            <h1 className="text-xl font-extrabold">
+              {ar ? "لديك إعلان لم يكتمل" : "You have an unfinished listing"}
+            </h1>
+            <p className="mt-2 text-sm text-muted-foreground">
+              {ar
+                ? "وجدنا مسودة إعلان سابقة. هل تريد متابعة النشر من حيث توقفت أم البدء من جديد؟"
+                : "We found a previous draft. Continue where you left off or start over?"}
+            </p>
+            <div className="mt-6 flex flex-col gap-2">
+              <button
+                onClick={restoreDraft}
+                className="rounded-xl bg-primary px-5 py-3 font-bold text-primary-foreground transition-transform hover:scale-[1.02]"
+              >
+                {ar ? "متابعة نشر الإعلان السابق" : "Continue previous listing"}
+              </button>
+              <button
+                onClick={discardDraft}
+                className="rounded-xl border border-border px-5 py-3 font-bold hover:bg-muted"
+              >
+                {ar ? "البدء من جديد" : "Start over"}
+              </button>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
   // ---- Success screen (with post-publish video option) ----
   if (submitted) {
     return (
