@@ -12,7 +12,7 @@ export const Route = createFileRoute("/contact")({
         content: "تواصل مع حراج السعادة في البحرين عبر الهاتف أو واتساب أو انستقرام لتجهيز معدات المطاعم والأثاث.",
       },
     ],
-    links: [{ rel: "canonical", href: "https://alsaada.lovable.app/contact" }],
+    links: [{ rel: "canonical", href: "https://www.alsaada.sale/contact" }],
   }),
   component: ContactPage,
 });

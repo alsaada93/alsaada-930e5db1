@@ -92,7 +92,7 @@ export const Route = createFileRoute("/listing/$id")({
   },
   head: ({ loaderData, params }) => {
     const t = loaderData?.item.title ?? "إعلان";
-    const url = `https://alsaada.lovable.app/listing/${params.id}`;
+    const url = `https://www.alsaada.sale/listing/${params.id}`;
     const image = loaderData?.item.images?.[0] ?? "";
     return {
       meta: [
@@ -639,7 +639,7 @@ function ListingPage() {
             {/* مشاركة الإعلان على منصات التواصل */}
             <div className="mt-4 rounded-2xl border border-border bg-card p-3">
               <ShareButtons
-                url={`https://alsaada.lovable.app/listing/${item.id}`}
+                url={`https://www.alsaada.sale/listing/${item.id}`}
                 title={displayTitle}
                 compact
               />

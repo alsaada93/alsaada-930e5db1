@@ -21,9 +21,9 @@ export const Route = createFileRoute("/tips/$slug")({
         { property: "og:title", content: a.title },
         { property: "og:description", content: a.excerpt },
         { property: "og:type", content: "article" },
-        { property: "og:url", content: `https://alsaada.lovable.app/tips/${params.slug}` },
+        { property: "og:url", content: `https://www.alsaada.sale/tips/${params.slug}` },
       ],
-      links: [{ rel: "canonical", href: `https://alsaada.lovable.app/tips/${params.slug}` }],
+      links: [{ rel: "canonical", href: `https://www.alsaada.sale/tips/${params.slug}` }],
       scripts: [
         {
           type: "application/ld+json",

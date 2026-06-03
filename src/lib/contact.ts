@@ -32,7 +32,7 @@ export function whatsappLink(opts: {
   listingId: string;
 }): string {
   const intl = normalizePhone(opts.phone);
-  const url = `https://alsaada.lovable.app/listing/${opts.listingId}`;
+  const url = `https://www.alsaada.sale/listing/${opts.listingId}`;
   const text = `مرحباً، أنا مهتم بإعلان "${opts.listingTitle}" المعروض على حراج السعادة.\n${url}`;
   return `https://wa.me/${intl}?text=${encodeURIComponent(text)}`;
 }
