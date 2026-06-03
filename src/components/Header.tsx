@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Globe, Heart, Bell, User, Plus, LogOut, LayoutDashboard, UserCircle } from "lucide-react";
+import { Globe, Heart, Bell, User, Camera, LogOut, LayoutDashboard, UserCircle } from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useAuth } from "@/hooks/useAuth";
@@ -141,10 +141,13 @@ export function Header() {
 
           <Link
             to="/add-listing"
-            className="flex items-center gap-1.5 rounded-lg bg-gradient-primary px-3 py-2 text-sm font-bold text-primary-foreground shadow-glow transition-transform hover:scale-[1.03] sm:px-4"
+            className="group relative flex items-center gap-1.5 overflow-hidden rounded-full bg-gradient-primary px-3 py-2 text-sm font-bold text-primary-foreground shadow-glow ring-2 ring-white/30 transition-transform hover:scale-[1.05] sm:px-5"
           >
-            <Plus className="h-4 w-4" />
-            <span className="hidden sm:inline">{t("header.addListing")}</span>
+            <span className="absolute inset-0 -translate-x-full bg-white/20 transition-transform duration-700 group-hover:translate-x-full" />
+            <span className="relative flex h-6 w-6 items-center justify-center rounded-full bg-white/25">
+              <Camera className="h-4 w-4" strokeWidth={2.25} />
+            </span>
+            <span className="relative hidden sm:inline">{t("header.addListing")}</span>
           </Link>
         </nav>
       </div>
