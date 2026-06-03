@@ -79,6 +79,8 @@ function AddListingPage() {
   const [submitted, setSubmitted] = useState(false);
   const [step, setStep] = useState(1);
   const [showPreview, setShowPreview] = useState(false);
+  const [showResume, setShowResume] = useState(false);
+  const draftReady = useRef(false);
   // Unified, reorderable media (existing URLs in edit mode + newly added files)
   const [media, setMedia] = useState<{ id: string; url: string; file?: File }[]>([]);
   // Existing video (edit mode) — can be removed
