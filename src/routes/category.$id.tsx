@@ -103,6 +103,7 @@ function CategoryPage() {
   const { t, lang } = useLanguage();
   const { listings } = useListings();
   const [regionQuery, setRegionQuery] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
 
   const items = useMemo(
     () => listings.filter((l) => l.category === category.name),
