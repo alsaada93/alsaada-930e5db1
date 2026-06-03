@@ -48,9 +48,9 @@ export const Route = createFileRoute("/add-listing")({
       { name: "description", content: "أضف إعلانك لبيع معدات المطاعم والفنادق والإلكترونيات على حراج السعادة." },
       { property: "og:title", content: "أضف إعلان | حراج السعادة Haraj Al Saada" },
       { property: "og:description", content: "أنشئ إعلانًا جديدًا مع تسعير ذكي بالذكاء الاصطناعي على حراج السعادة." },
-      { property: "og:url", content: "https://alsaada-market.lovable.app/add-listing" },
+      { property: "og:url", content: "https://www.alsaada.sale/add-listing" },
     ],
-    links: [{ rel: "canonical", href: "https://alsaada-market.lovable.app/add-listing" }],
+    links: [{ rel: "canonical", href: "https://www.alsaada.sale/add-listing" }],
   }),
   component: AddListingPage,
 });
