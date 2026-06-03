@@ -56,6 +56,7 @@ export const Route = createFileRoute("/add-listing")({
 });
 
 const MAX_IMAGES = 30;
+const DRAFT_KEY = "alsaada_listing_draft";
 
 type ListingType = "normal" | "auction" | "business";
 
