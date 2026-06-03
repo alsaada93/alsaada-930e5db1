@@ -112,9 +112,6 @@ export function Footer() {
 
       <div className="flex flex-col items-center justify-center gap-1 border-t border-sidebar-border py-4 text-center text-xs text-navy-foreground/50 sm:flex-row sm:gap-3">
         <span>© {new Date().getFullYear()} حراج السعادة Haraj Al Saada — {t("footer.rights")}</span>
-        <Link to="/admin" className="font-semibold text-navy-foreground/80 hover:underline">
-          {t("footer.admin")}
-        </Link>
       </div>
     </footer>
   );

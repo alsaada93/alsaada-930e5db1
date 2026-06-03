@@ -19,9 +19,9 @@ export const Route = createFileRoute("/tips/")({
         content:
           "مقالات ونصائح عن تجهيز المطاعم، شراء وصيانة المعدات، والأسعار في البحرين.",
       },
-      { property: "og:url", content: "https://alsaada.lovable.app/tips" },
+      { property: "og:url", content: "https://www.alsaada.sale/tips" },
     ],
-    links: [{ rel: "canonical", href: "https://alsaada.lovable.app/tips" }],
+    links: [{ rel: "canonical", href: "https://www.alsaada.sale/tips" }],
   }),
   component: TipsPage,
 });

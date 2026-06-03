@@ -34,7 +34,7 @@ export const Route = createFileRoute("/category/$id")({
   },
   head: ({ loaderData, params }) => {
     const name = loaderData?.category.name ?? "التصنيفات";
-    const url = `https://alsaada.lovable.app/category/${params.id}`;
+    const url = `https://www.alsaada.sale/category/${params.id}`;
     return {
       meta: [
         { title: `${name} | حراج السعادة Haraj Al Saada` },
@@ -103,6 +103,7 @@ function CategoryPage() {
   const { t, lang } = useLanguage();
   const { listings } = useListings();
   const [regionQuery, setRegionQuery] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
 
   const items = useMemo(
     () => listings.filter((l) => l.category === category.name),
@@ -218,9 +219,17 @@ function CategoryPage() {
           )}
         </section>
 
-        {/* Advanced filters */}
+        {/* Advanced filters (hidden until toggled) */}
         <section className="mx-auto max-w-7xl px-4">
-          <div className="rounded-2xl border border-border bg-card p-4 shadow-card">
+          <button
+            onClick={() => setShowFilters((v) => !v)}
+            className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-card px-4 py-2 text-sm font-bold text-primary shadow-card transition-colors hover:bg-accent"
+          >
+            <SlidersHorizontal className="h-4 w-4" />
+            {lang === "ar" ? "بحث متقدم" : "Advanced filters"}
+          </button>
+          {showFilters && (
+          <div className="mt-3 rounded-2xl border border-border bg-card p-4 shadow-card">
             <div className="mb-3 flex items-center justify-between">
               <span className="inline-flex items-center gap-1.5 text-sm font-extrabold">
                 <SlidersHorizontal className="h-4 w-4 text-primary" />
@@ -330,6 +339,7 @@ function CategoryPage() {
               </div>
             </div>
           </div>
+          )}
         </section>
 
         <section className="mx-auto max-w-7xl px-4 py-8 pb-16">

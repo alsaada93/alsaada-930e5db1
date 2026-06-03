@@ -219,21 +219,21 @@ export interface Business {
   image: string;
 }
 
-const electricEquip: SubCategory = {
-  name: "معدات كهربائية",
-  items: ["أفران كهربائية", "ثلاجات", "فريزرات", "خلاطات", "مكائن قهوة", "غسالات صحون", "مايكروويف"],
+const restaurantEquip: SubCategory = {
+  name: "معدات مطاعم",
+  items: ["أفران", "شوايات", "قلايات", "طباخات", "طاولات تحضير", "ثلاجات تحضير", "مغاسل ستانلس"],
 };
-const gasEquip: SubCategory = {
-  name: "معدات غاز",
-  items: ["أفران غاز", "شوايات غاز", "طباخات غاز", "قلايات غاز", "صفائح غاز"],
+const cafeEquip: SubCategory = {
+  name: "معدات كافيهات ومشروبات",
+  items: ["مكائن قهوة", "مطاحن قهوة", "ثلاجات عرض مشروبات", "صانعات عصير", "غلايات", "بلندرات"],
 };
-const prepEquip: SubCategory = {
-  name: "معدات تحضير",
-  items: ["طاولات تحضير", "خلاطات تحضير", "فرّامات", "عجانات", "موازين", "أدوات تقطيع"],
+const coolingEquip: SubCategory = {
+  name: "معدات تبريد وتجميد",
+  items: ["ثلاجات", "فريزرات", "ثلاجات عرض", "غرف تبريد", "مجمدات أفقية", "ثلاجات تحت الطاولة"],
 };
-const tablesSinks: SubCategory = {
-  name: "طاولات ومغاسل",
-  items: ["طاولات تجهيز ستانلس", "طاولات تقديم", "مغاسل ستانلس", "أرفف", "عربات نقل"],
+const otherEquip: SubCategory = {
+  name: "معدات أخرى",
+  items: ["غسالات صحون", "أرفف ستانلس", "عربات نقل", "أدوات مطبخ", "معدات متنوعة"],
 };
 
 export const categories: Category[] = [
@@ -243,10 +243,10 @@ export const categories: Category[] = [
     nameEn: "Restaurants",
     icon: "🍽️",
     count: 0,
-    description: "مخابز، كوفي شوب ومعدات المطاعم الكاملة",
-    descriptionEn: "Bakeries, coffee shops and full restaurant equipment",
-    sub: ["مخابز", "كوفي شوب", "معدات كهربائية", "معدات غاز", "معدات تحضير", "طاولات ومغاسل"],
-    groups: [electricEquip, gasEquip, prepEquip, tablesSinks],
+    description: "معدات المطاعم والكافيهات والتبريد",
+    descriptionEn: "Restaurant, cafe and cooling equipment",
+    sub: ["معدات مطاعم", "معدات كافيهات ومشروبات", "معدات تبريد وتجميد", "معدات أخرى"],
+    groups: [restaurantEquip, cafeEquip, coolingEquip, otherEquip],
     brands: commonBrands.restaurant,
   },
   {
@@ -260,8 +260,8 @@ export const categories: Category[] = [
     sub: ["أثاث فنادق", "معدات كهربائية", "معدات تحضير", "غسيل وتنظيف"],
     groups: [
       { name: "أثاث الفنادق", items: ["غرف نوم", "أثاث استقبال", "أثاث مطاعم الفندق", "ستائر وسجاد"] },
-      electricEquip,
-      prepEquip,
+      { name: "معدات كهربائية", items: ["أفران كهربائية", "ثلاجات", "فريزرات", "خلاطات", "مكائن قهوة", "غسالات صحون", "مايكروويف"] },
+      { name: "معدات تحضير", items: ["طاولات تحضير", "خلاطات تحضير", "فرّامات", "عجانات", "موازين", "أدوات تقطيع"] },
       { name: "غسيل وتنظيف", items: ["غسالات صناعية", "مجففات", "معدات تنظيف"] },
     ],
     brands: commonBrands.hotels,

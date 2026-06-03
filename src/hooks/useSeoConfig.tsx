@@ -68,7 +68,7 @@ export const DEFAULT_SEO_CONFIG: SeoConfig = {
 };
 
 export const SEO_CONFIG_KEY = "seoPages";
-export const SITE_ORIGIN = "https://alsaada.lovable.app";
+export const SITE_ORIGIN = "https://www.alsaada.sale";
 
 export function mergeSeoConfig(v: Partial<SeoConfig> | null | undefined): SeoConfig {
   const incoming = v ?? {};

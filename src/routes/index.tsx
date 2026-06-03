@@ -29,11 +29,11 @@ export const Route = createFileRoute("/")({
         property: "og:description",
         content: "شراء وبيع معدات المطاعم والأثاث والإلكترونيات في البحرين — نشتري مباشرة وتثمين مجاني.",
       },
-      { property: "og:url", content: "https://alsaada.lovable.app/" },
-      { property: "og:image", content: "https://alsaada.lovable.app/site-logo.png" },
-      { name: "twitter:image", content: "https://alsaada.lovable.app/site-logo.png" },
+      { property: "og:url", content: "https://www.alsaada.sale/" },
+      { property: "og:image", content: "https://www.alsaada.sale/site-logo.png" },
+      { name: "twitter:image", content: "https://www.alsaada.sale/site-logo.png" },
     ],
-    links: [{ rel: "canonical", href: "https://alsaada.lovable.app/" }],
+    links: [{ rel: "canonical", href: "https://www.alsaada.sale/" }],
 
   }),
 

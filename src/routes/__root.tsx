@@ -114,7 +114,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "@context": "https://schema.org",
           "@type": "Organization",
           name: "حراج السعادة",
-          url: "https://alsaada.lovable.app",
+          url: "https://www.alsaada.sale",
 
         }),
       },
@@ -124,7 +124,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "@context": "https://schema.org",
           "@type": "WebSite",
           name: "حراج السعادة",
-          url: "https://alsaada.lovable.app",
+          url: "https://www.alsaada.sale",
         }),
       },
     ],

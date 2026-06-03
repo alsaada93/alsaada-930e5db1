@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://alsaada.lovable.app/sitemap.xml
+Sitemap: https://www.alsaada.sale/sitemap.xml

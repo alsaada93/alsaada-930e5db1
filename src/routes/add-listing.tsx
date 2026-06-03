@@ -48,14 +48,15 @@ export const Route = createFileRoute("/add-listing")({
       { name: "description", content: "أضف إعلانك لبيع معدات المطاعم والفنادق والإلكترونيات على حراج السعادة." },
       { property: "og:title", content: "أضف إعلان | حراج السعادة Haraj Al Saada" },
       { property: "og:description", content: "أنشئ إعلانًا جديدًا مع تسعير ذكي بالذكاء الاصطناعي على حراج السعادة." },
-      { property: "og:url", content: "https://alsaada-market.lovable.app/add-listing" },
+      { property: "og:url", content: "https://www.alsaada.sale/add-listing" },
     ],
-    links: [{ rel: "canonical", href: "https://alsaada-market.lovable.app/add-listing" }],
+    links: [{ rel: "canonical", href: "https://www.alsaada.sale/add-listing" }],
   }),
   component: AddListingPage,
 });
 
 const MAX_IMAGES = 30;
+const DRAFT_KEY = "alsaada_listing_draft";
 
 type ListingType = "normal" | "auction" | "business";
 
@@ -78,6 +79,8 @@ function AddListingPage() {
   const [submitted, setSubmitted] = useState(false);
   const [step, setStep] = useState(1);
   const [showPreview, setShowPreview] = useState(false);
+  const [showResume, setShowResume] = useState(false);
+  const draftReady = useRef(false);
   // Unified, reorderable media (existing URLs in edit mode + newly added files)
   const [media, setMedia] = useState<{ id: string; url: string; file?: File }[]>([]);
   // Existing video (edit mode) — can be removed
@@ -205,6 +208,7 @@ function AddListingPage() {
       });
   }, [editId]);
 
+
   const brandOptions = useMemo(() => {
     if (!categoryId) return [];
     const base = brandsFor(categoryId, itemName || undefined);
@@ -237,6 +241,86 @@ function AddListingPage() {
   const [estimate, setEstimate] = useState<AiEstimate | null>(null);
   const [estimating, setEstimating] = useState(false);
   const [saving, setSaving] = useState(false);
+
+  // Detect a previously saved draft on mount (only for new listings)
+  useEffect(() => {
+    if (editId) {
+      draftReady.current = true;
+      return;
+    }
+    try {
+      const raw = localStorage.getItem(DRAFT_KEY);
+      if (raw) {
+        const d = JSON.parse(raw);
+        if (d && (d.titleText || d.descText || d.categoryId || d.price)) {
+          setShowResume(true);
+          return;
+        }
+      }
+    } catch {
+      /* ignore */
+    }
+    draftReady.current = true;
+  }, [editId]);
+
+  // Persist the draft as the user fills the form
+  useEffect(() => {
+    if (!draftReady.current || editId || submitted) return;
+    const draft = {
+      listingType, step, titleText, descText, categoryId, groupName, itemName,
+      brand, region, price, condition, negotiable, delivery, biz, auctionDuration,
+      guestName, guestPhone,
+    };
+    try {
+      localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+    } catch {
+      /* ignore */
+    }
+  }, [
+    editId, submitted, listingType, step, titleText, descText, categoryId, groupName,
+    itemName, brand, region, price, condition, negotiable, delivery, biz, auctionDuration,
+    guestName, guestPhone,
+  ]);
+
+  const restoreDraft = () => {
+    try {
+      const raw = localStorage.getItem(DRAFT_KEY);
+      if (raw) {
+        const d = JSON.parse(raw);
+        setListingType(d.listingType ?? null);
+        setTitleText(d.titleText ?? "");
+        setDescText(d.descText ?? "");
+        setCategoryId(d.categoryId ?? "");
+        setGroupName(d.groupName ?? "");
+        setItemName(d.itemName ?? "");
+        setBrand(d.brand ?? "");
+        setRegion(d.region ?? "");
+        setPrice(d.price ?? "");
+        setCondition(d.condition ?? "مستعمل");
+        setNegotiable(Boolean(d.negotiable));
+        setDelivery(Boolean(d.delivery));
+        if (d.biz) setBiz((p) => ({ ...p, ...d.biz }));
+        setAuctionDuration(d.auctionDuration ?? "24");
+        setGuestName(d.guestName ?? "");
+        setGuestPhone(d.guestPhone ?? "");
+        setStep(d.step ?? 1);
+      }
+    } catch {
+      /* ignore */
+    }
+    setShowResume(false);
+    draftReady.current = true;
+  };
+
+  const discardDraft = () => {
+    try {
+      localStorage.removeItem(DRAFT_KEY);
+    } catch {
+      /* ignore */
+    }
+    setShowResume(false);
+    draftReady.current = true;
+  };
 
   // Auto-suggested titles based on the chosen category/kind/brand to speed up posting.
   const titleSuggestions = useMemo(() => {
@@ -448,6 +532,7 @@ function AddListingPage() {
       if (error) throw error;
       setNewId(data?.id ?? null);
       setSubmitted(true);
+      try { localStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ }
     } catch (err) {
       console.error(err);
       toast.error(ar ? "تعذّر نشر الإعلان، حاول مرة أخرى" : "Could not publish, try again");
@@ -474,6 +559,45 @@ function AddListingPage() {
       setVideoSaving(false);
     }
   };
+
+  // ---- Resume draft prompt ----
+  if (showResume) {
+    return (
+      <div className="flex min-h-screen flex-col">
+        <Header />
+        <main className="mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center px-4 py-16 text-center">
+          <div className="w-full rounded-2xl border border-border bg-card p-6 shadow-card">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-accent">
+              <Pencil className="h-7 w-7 text-primary" />
+            </div>
+            <h1 className="text-xl font-extrabold">
+              {ar ? "لديك إعلان لم يكتمل" : "You have an unfinished listing"}
+            </h1>
+            <p className="mt-2 text-sm text-muted-foreground">
+              {ar
+                ? "وجدنا مسودة إعلان سابقة. هل تريد متابعة النشر من حيث توقفت أم البدء من جديد؟"
+                : "We found a previous draft. Continue where you left off or start over?"}
+            </p>
+            <div className="mt-6 flex flex-col gap-2">
+              <button
+                onClick={restoreDraft}
+                className="rounded-xl bg-primary px-5 py-3 font-bold text-primary-foreground transition-transform hover:scale-[1.02]"
+              >
+                {ar ? "متابعة نشر الإعلان السابق" : "Continue previous listing"}
+              </button>
+              <button
+                onClick={discardDraft}
+                className="rounded-xl border border-border px-5 py-3 font-bold hover:bg-muted"
+              >
+                {ar ? "البدء من جديد" : "Start over"}
+              </button>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   // ---- Success screen (with post-publish video option) ----
   if (submitted) {
