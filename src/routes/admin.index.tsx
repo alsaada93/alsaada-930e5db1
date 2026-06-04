@@ -110,6 +110,8 @@ function AdminDashboard() {
           ))}
         </div>
 
+        <VisitorAnalytics />
+
         <DeletionStats />
 
 
