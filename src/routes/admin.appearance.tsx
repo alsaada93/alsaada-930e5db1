@@ -328,7 +328,7 @@ function BannersSection() {
 
 function ViewBoostSection() {
   const { boost, save } = useViewBoost();
-  const [draft, setDraft] = useState(boost);
+  const [draft, setDraft] = useState<ViewBoost>(boost);
   const [saving, setSaving] = useState(false);
   useEffect(() => setDraft(boost), [boost]);
 
