@@ -366,6 +366,9 @@ function AppearancePage() {
         {/* Site identity */}
         <IdentitySection />
 
+        {/* Fake views boost */}
+        <ViewBoostSection />
+
         {/* Home page banners */}
         <BannersSection />
 
