@@ -711,6 +711,30 @@ export type Database = {
         }
         Relationships: []
       }
+      site_visits: {
+        Row: {
+          browser: string | null
+          country: string | null
+          created_at: string
+          id: string
+          path: string | null
+        }
+        Insert: {
+          browser?: string | null
+          country?: string | null
+          created_at?: string
+          id?: string
+          path?: string | null
+        }
+        Update: {
+          browser?: string | null
+          country?: string | null
+          created_at?: string
+          id?: string
+          path?: string | null
+        }
+        Relationships: []
+      }
       suppressed_emails: {
         Row: {
           created_at: string

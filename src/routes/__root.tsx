@@ -11,6 +11,7 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { recordVisit } from "@/lib/visits.functions";
 import { AuthProvider } from "@/hooks/useAuth";
 import { LanguageProvider } from "@/hooks/useLanguage";
 import { ThemeProvider } from "@/hooks/useTheme";
@@ -151,6 +152,15 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (sessionStorage.getItem("visit_recorded")) return;
+    sessionStorage.setItem("visit_recorded", "1");
+    recordVisit({ data: { path: window.location.pathname } }).catch(() => {});
+  }, []);
+
+
 
   return (
     <QueryClientProvider client={queryClient}>

@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Area,
@@ -24,10 +26,40 @@ import {
   ClipboardList,
   Clock,
   Eye,
+  Globe,
+  MonitorSmartphone,
 } from "lucide-react";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import { DELETE_REASONS } from "@/components/DeleteListingDialog";
 import { useAdminStats } from "@/hooks/useAdminStats";
+import { getVisitorStats } from "@/lib/visits.functions";
+
+const COUNTRY_NAMES: Record<string, string> = {
+  BH: "البحرين",
+  SA: "السعودية",
+  AE: "الإمارات",
+  KW: "الكويت",
+  QA: "قطر",
+  OM: "عُمان",
+  EG: "مصر",
+  JO: "الأردن",
+  IQ: "العراق",
+  YE: "اليمن",
+  LB: "لبنان",
+  SY: "سوريا",
+  US: "أمريكا",
+  GB: "بريطانيا",
+  IN: "الهند",
+  PK: "باكستان",
+  PH: "الفلبين",
+  BD: "بنغلاديش",
+};
+
+function countryLabel(code: string): string {
+  if (code === "غير معروف") return code;
+  return COUNTRY_NAMES[code] ?? code;
+}
+
 
 export const Route = createFileRoute("/admin/")({
   component: AdminDashboard,
@@ -77,6 +109,8 @@ function AdminDashboard() {
             </div>
           ))}
         </div>
+
+        <VisitorAnalytics />
 
         <DeletionStats />
 
@@ -210,4 +244,82 @@ function DeletionStats() {
     </div>
   );
 }
+
+function VisitorAnalytics() {
+  const fetchStats = useServerFn(getVisitorStats);
+  const { data, isLoading } = useQuery({
+    queryKey: ["visitor-stats"],
+    queryFn: () => fetchStats(),
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const totalVisits = data?.totalVisits ?? 0;
+  const countries = data?.countries ?? [];
+  const browsers = data?.browsers ?? [];
+  const maxCountry = countries[0]?.value ?? 1;
+  const maxBrowser = browsers[0]?.value ?? 1;
+
+  return (
+    <div className="grid gap-6 lg:grid-cols-2">
+      <div className="rounded-2xl border border-border bg-card p-5 shadow-card">
+        <h3 className="mb-4 flex items-center gap-2 font-bold text-card-foreground">
+          <Globe className="h-4 w-4 text-primary" />
+          الزوار حسب الدولة ({totalVisits.toLocaleString("ar")} زيارة)
+        </h3>
+        {isLoading ? (
+          <p className="text-sm text-muted-foreground">جارٍ التحميل...</p>
+        ) : countries.length === 0 ? (
+          <p className="text-sm text-muted-foreground">لا توجد بيانات زيارات بعد.</p>
+        ) : (
+          <div className="space-y-2">
+            {countries.slice(0, 10).map((c) => (
+              <div key={c.name}>
+                <div className="flex items-center justify-between text-sm font-semibold">
+                  <span>{countryLabel(c.name)}</span>
+                  <span className="text-primary">{c.value.toLocaleString("ar")}</span>
+                </div>
+                <div className="mt-1 h-2 overflow-hidden rounded-full bg-muted">
+                  <div
+                    className="h-full rounded-full bg-gradient-primary"
+                    style={{ width: `${Math.round((c.value / maxCountry) * 100)}%` }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="rounded-2xl border border-border bg-card p-5 shadow-card">
+        <h3 className="mb-4 flex items-center gap-2 font-bold text-card-foreground">
+          <MonitorSmartphone className="h-4 w-4 text-primary" />
+          الزوار حسب المتصفح
+        </h3>
+        {isLoading ? (
+          <p className="text-sm text-muted-foreground">جارٍ التحميل...</p>
+        ) : browsers.length === 0 ? (
+          <p className="text-sm text-muted-foreground">لا توجد بيانات زيارات بعد.</p>
+        ) : (
+          <div className="space-y-2">
+            {browsers.map((b) => (
+              <div key={b.name}>
+                <div className="flex items-center justify-between text-sm font-semibold">
+                  <span>{b.name}</span>
+                  <span className="text-primary">{b.value.toLocaleString("ar")}</span>
+                </div>
+                <div className="mt-1 h-2 overflow-hidden rounded-full bg-muted">
+                  <div
+                    className="h-full rounded-full bg-gradient-primary"
+                    style={{ width: `${Math.round((b.value / maxBrowser) * 100)}%` }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 
