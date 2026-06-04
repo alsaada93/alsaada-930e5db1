@@ -265,6 +265,7 @@ function ListingPage() {
   const { item } = Route.useLoaderData();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { boost } = useViewBoost();
   const { data: seller } = useSeller(item.sellerId);
   const [reposting, setReposting] = useState(false);
   const [isFav, setIsFav] = useState(false);
