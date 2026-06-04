@@ -153,6 +153,15 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (sessionStorage.getItem("visit_recorded")) return;
+    sessionStorage.setItem("visit_recorded", "1");
+    recordVisit({ data: { path: window.location.pathname } }).catch(() => {});
+  }, []);
+
+
+
   return (
     <QueryClientProvider client={queryClient}>
       <LanguageProvider>
