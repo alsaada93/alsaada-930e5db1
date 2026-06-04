@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Area,
@@ -24,10 +26,40 @@ import {
   ClipboardList,
   Clock,
   Eye,
+  Globe,
+  MonitorSmartphone,
 } from "lucide-react";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import { DELETE_REASONS } from "@/components/DeleteListingDialog";
 import { useAdminStats } from "@/hooks/useAdminStats";
+import { getVisitorStats } from "@/lib/visits.functions";
+
+const COUNTRY_NAMES: Record<string, string> = {
+  BH: "البحرين",
+  SA: "السعودية",
+  AE: "الإمارات",
+  KW: "الكويت",
+  QA: "قطر",
+  OM: "عُمان",
+  EG: "مصر",
+  JO: "الأردن",
+  IQ: "العراق",
+  YE: "اليمن",
+  LB: "لبنان",
+  SY: "سوريا",
+  US: "أمريكا",
+  GB: "بريطانيا",
+  IN: "الهند",
+  PK: "باكستان",
+  PH: "الفلبين",
+  BD: "بنغلاديش",
+};
+
+function countryLabel(code: string): string {
+  if (code === "غير معروف") return code;
+  return COUNTRY_NAMES[code] ?? code;
+}
+
 
 export const Route = createFileRoute("/admin/")({
   component: AdminDashboard,
