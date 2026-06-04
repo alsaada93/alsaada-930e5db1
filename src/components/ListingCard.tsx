@@ -13,6 +13,7 @@ const DEFAULT_PHONE = "33982383"; // الرقم المحلي البحريني
 export function ListingCard({ item, displayTitle }: { item: Listing; displayTitle?: string }) {
   const { byId } = useSellers();
   const { t, lang } = useLanguage();
+  const { boost } = useViewBoost();
   const seller = item.sellerId ? byId.get(item.sellerId) : undefined;
   const [offerOpen, setOfferOpen] = useState(false);
 
