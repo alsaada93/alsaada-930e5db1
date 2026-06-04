@@ -34,6 +34,7 @@ import { ListingHashtags } from "@/components/ListingHashtags";
 import { ShareButtons } from "@/components/ShareButtons";
 import { useListingTranslations } from "@/hooks/useListingTranslations";
 import { Tag, Truck, Tag as TagIcon, Globe, Package } from "lucide-react";
+import { useViewBoost, boostViews } from "@/hooks/useViewBoost";
 import { countryByName } from "@/data/countries";
 import { cityCenter, osmEmbed } from "@/data/bahrainCities";
 import { brandInfo } from "@/data/brandsCatalog";
@@ -264,6 +265,7 @@ function ListingPage() {
   const { item } = Route.useLoaderData();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { boost } = useViewBoost();
   const { data: seller } = useSeller(item.sellerId);
   const [reposting, setReposting] = useState(false);
   const [isFav, setIsFav] = useState(false);
@@ -553,7 +555,7 @@ function ListingPage() {
             </div>
 
             <div className="mt-2 flex items-center gap-1 text-sm text-muted-foreground">
-              <Eye className="h-4 w-4" /> {item.views.toLocaleString("ar")} مشاهدة
+              <Eye className="h-4 w-4" /> {boostViews(item.views, boost).toLocaleString("ar")} مشاهدة
             </div>
 
             {/* مزاد مباشر */}

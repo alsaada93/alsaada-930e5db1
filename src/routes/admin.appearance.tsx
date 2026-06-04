@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useViewBoost, type ViewBoost } from "@/hooks/useViewBoost";
 import { toast } from "sonner";
 import { Loader2, RotateCcw, Save, Upload } from "lucide-react";
 import { AdminHeader } from "@/components/admin/AdminHeader";
@@ -325,6 +326,59 @@ function BannersSection() {
 
 
 
+function ViewBoostSection() {
+  const { boost, save } = useViewBoost();
+  const [draft, setDraft] = useState<ViewBoost>(boost);
+  const [saving, setSaving] = useState(false);
+  useEffect(() => setDraft(boost), [boost]);
+
+  const onSave = async () => {
+    setSaving(true);
+    try {
+      await save(draft);
+      toast.success("تم حفظ إعدادات المشاهدات");
+    } catch {
+      toast.error("تعذّر الحفظ");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="rounded-2xl border border-border bg-card p-5 shadow-card">
+      <h3 className="mb-4 font-bold text-card-foreground">عدد المشاهدات الوهمي</h3>
+      <div className="flex flex-wrap items-end gap-4">
+        <label className="flex items-center gap-2 text-sm font-semibold">
+          <input
+            type="checkbox"
+            checked={draft.enabled}
+            onChange={(e) => setDraft((d) => ({ ...d, enabled: e.target.checked }))}
+            className="h-4 w-4"
+          />
+          إظهار المشاهدات الوهمية
+        </label>
+        <div>
+          <span className="mb-1 block text-xs text-muted-foreground">العدد المضاف فوق المشاهدات الحقيقية</span>
+          <input
+            type="number"
+            min={0}
+            value={draft.base}
+            onChange={(e) => setDraft((d) => ({ ...d, base: Math.max(0, Number(e.target.value) || 0) }))}
+            className="h-9 w-32 rounded-lg border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+          />
+        </div>
+        <button
+          onClick={onSave}
+          disabled={saving}
+          className="flex h-9 items-center gap-1.5 rounded-lg bg-gradient-primary px-4 text-sm font-semibold text-primary-foreground shadow-glow disabled:opacity-50"
+        >
+          {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} حفظ
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function AppearancePage() {
   const { theme, preview, save } = useTheme();
   const [draft, setDraft] = useState<ThemeSettings>(theme);
@@ -365,6 +419,9 @@ function AppearancePage() {
       <div className="space-y-6 p-6">
         {/* Site identity */}
         <IdentitySection />
+
+        {/* Fake views boost */}
+        <ViewBoostSection />
 
         {/* Home page banners */}
         <BannersSection />

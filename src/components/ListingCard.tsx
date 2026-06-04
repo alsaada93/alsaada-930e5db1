@@ -6,12 +6,14 @@ import { useSellers } from "@/hooks/useSellers";
 import { useLanguage } from "@/hooks/useLanguage";
 import { logContactAttempt, whatsappLink, telLink } from "@/lib/contact";
 import { PriceOfferDialog } from "@/components/PriceOfferDialog";
+import { useViewBoost, boostViews } from "@/hooks/useViewBoost";
 
 const DEFAULT_PHONE = "33982383"; // الرقم المحلي البحريني
 
 export function ListingCard({ item, displayTitle }: { item: Listing; displayTitle?: string }) {
   const { byId } = useSellers();
   const { t, lang } = useLanguage();
+  const { boost } = useViewBoost();
   const seller = item.sellerId ? byId.get(item.sellerId) : undefined;
   const [offerOpen, setOfferOpen] = useState(false);
 
@@ -74,7 +76,7 @@ export function ListingCard({ item, displayTitle }: { item: Listing; displayTitl
             <MapPin className="h-3.5 w-3.5" /> {item.city}
           </span>
           <span className="flex items-center gap-1">
-            <Eye className="h-3.5 w-3.5" /> {item.views.toLocaleString("ar")}
+            <Eye className="h-3.5 w-3.5" /> {boostViews(item.views, boost).toLocaleString("ar")}
           </span>
         </div>
 
