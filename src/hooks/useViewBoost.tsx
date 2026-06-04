@@ -42,7 +42,9 @@ export function useViewBoost() {
 
   const save = async (next: ViewBoost) => {
     setBoost(next);
-    await supabase.from("site_settings").upsert({ key: SETTINGS_KEY, value: next });
+    await supabase
+      .from("site_settings")
+      .upsert({ key: SETTINGS_KEY, value: next as unknown as Record<string, number | boolean> });
   };
 
   return { boost, loading, save };
