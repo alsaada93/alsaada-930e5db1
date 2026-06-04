@@ -245,3 +245,81 @@ function DeletionStats() {
   );
 }
 
+function VisitorAnalytics() {
+  const fetchStats = useServerFn(getVisitorStats);
+  const { data, isLoading } = useQuery({
+    queryKey: ["visitor-stats"],
+    queryFn: () => fetchStats(),
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const totalVisits = data?.totalVisits ?? 0;
+  const countries = data?.countries ?? [];
+  const browsers = data?.browsers ?? [];
+  const maxCountry = countries[0]?.value ?? 1;
+  const maxBrowser = browsers[0]?.value ?? 1;
+
+  return (
+    <div className="grid gap-6 lg:grid-cols-2">
+      <div className="rounded-2xl border border-border bg-card p-5 shadow-card">
+        <h3 className="mb-4 flex items-center gap-2 font-bold text-card-foreground">
+          <Globe className="h-4 w-4 text-primary" />
+          الزوار حسب الدولة ({totalVisits.toLocaleString("ar")} زيارة)
+        </h3>
+        {isLoading ? (
+          <p className="text-sm text-muted-foreground">جارٍ التحميل...</p>
+        ) : countries.length === 0 ? (
+          <p className="text-sm text-muted-foreground">لا توجد بيانات زيارات بعد.</p>
+        ) : (
+          <div className="space-y-2">
+            {countries.slice(0, 10).map((c) => (
+              <div key={c.name}>
+                <div className="flex items-center justify-between text-sm font-semibold">
+                  <span>{countryLabel(c.name)}</span>
+                  <span className="text-primary">{c.value.toLocaleString("ar")}</span>
+                </div>
+                <div className="mt-1 h-2 overflow-hidden rounded-full bg-muted">
+                  <div
+                    className="h-full rounded-full bg-gradient-primary"
+                    style={{ width: `${Math.round((c.value / maxCountry) * 100)}%` }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="rounded-2xl border border-border bg-card p-5 shadow-card">
+        <h3 className="mb-4 flex items-center gap-2 font-bold text-card-foreground">
+          <MonitorSmartphone className="h-4 w-4 text-primary" />
+          الزوار حسب المتصفح
+        </h3>
+        {isLoading ? (
+          <p className="text-sm text-muted-foreground">جارٍ التحميل...</p>
+        ) : browsers.length === 0 ? (
+          <p className="text-sm text-muted-foreground">لا توجد بيانات زيارات بعد.</p>
+        ) : (
+          <div className="space-y-2">
+            {browsers.map((b) => (
+              <div key={b.name}>
+                <div className="flex items-center justify-between text-sm font-semibold">
+                  <span>{b.name}</span>
+                  <span className="text-primary">{b.value.toLocaleString("ar")}</span>
+                </div>
+                <div className="mt-1 h-2 overflow-hidden rounded-full bg-muted">
+                  <div
+                    className="h-full rounded-full bg-gradient-primary"
+                    style={{ width: `${Math.round((b.value / maxBrowser) * 100)}%` }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+
