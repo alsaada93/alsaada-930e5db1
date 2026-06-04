@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useViewBoost, type ViewBoost } from "@/hooks/useViewBoost";
 import { toast } from "sonner";
 import { Loader2, RotateCcw, Save, Upload } from "lucide-react";
 import { AdminHeader } from "@/components/admin/AdminHeader";
