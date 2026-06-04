@@ -74,7 +74,7 @@ export function ListingCard({ item, displayTitle }: { item: Listing; displayTitl
             <MapPin className="h-3.5 w-3.5" /> {item.city}
           </span>
           <span className="flex items-center gap-1">
-            <Eye className="h-3.5 w-3.5" /> {item.views.toLocaleString("ar")}
+            <Eye className="h-3.5 w-3.5" /> {boostViews(item.views, boost).toLocaleString("ar")}
           </span>
         </div>
 
