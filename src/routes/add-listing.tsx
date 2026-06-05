@@ -33,6 +33,8 @@ import { countries, type Country } from "@/data/countries";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/hooks/useLanguage";
 import { supabase } from "@/integrations/supabase/client";
+import { compressImage } from "@/lib/image-compress";
+import { matchesAr } from "@/lib/text";
 
 interface AddListingSearch {
   edit?: string;
@@ -123,7 +125,7 @@ function AddListingPage() {
   const filteredRegions = useMemo(() => {
     const q = regionQuery.trim();
     if (!q) return bahrainRegions.slice(0, 12);
-    return bahrainRegions.filter((r) => r.includes(q)).slice(0, 12);
+    return bahrainRegions.filter((r) => matchesAr(r, q)).slice(0, 12);
   }, [regionQuery]);
 
   // Map location
@@ -220,19 +222,17 @@ function AddListingPage() {
   }, [categoryId, itemName, dbBrands]);
 
   const filteredBrands = useMemo(() => {
-    const q = brandQuery.trim().toLowerCase();
+    const q = brandQuery.trim();
     if (!q) return brandOptions;
     return brandOptions.filter(
-      (b) => b.toLowerCase().includes(q) || brandLabel(b, "ar").includes(brandQuery.trim()),
+      (b) => matchesAr(b, q) || matchesAr(brandLabel(b, "ar"), q) || matchesAr(brandLabel(b, "en"), q),
     );
   }, [brandOptions, brandQuery]);
 
   const filteredCountries = useMemo(() => {
-    const q = countryQuery.trim().toLowerCase();
+    const q = countryQuery.trim();
     if (!q) return countries;
-    return countries.filter(
-      (c) => c.en.toLowerCase().includes(q) || c.ar.includes(countryQuery.trim()),
-    );
+    return countries.filter((c) => matchesAr(c.en, q) || matchesAr(c.ar, q));
   }, [countryQuery]);
 
   // Price + AI
@@ -339,16 +339,24 @@ function AddListingPage() {
 
 
 
-  const handleImages = (files: FileList | null) => {
+  const handleImages = async (files: FileList | null) => {
     if (!files) return;
     const remaining = MAX_IMAGES - media.length;
     if (remaining <= 0) {
       toast.error(t("toast.maxImages"));
       return;
     }
-    const next = Array.from(files)
-      .slice(0, remaining)
-      .map((f) => ({ id: `${Date.now()}-${Math.random().toString(36).slice(2)}`, url: URL.createObjectURL(f), file: f }));
+    const picked = Array.from(files).slice(0, remaining);
+    const next = await Promise.all(
+      picked.map(async (f) => {
+        const compressed = await compressImage(f);
+        return {
+          id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+          url: URL.createObjectURL(compressed),
+          file: compressed,
+        };
+      }),
+    );
     setMedia((p) => [...p, ...next]);
   };
 
