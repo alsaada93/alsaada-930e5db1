@@ -62,6 +62,7 @@ export const Route = createFileRoute("/listing/$id")({
         lng: data.lng != null ? Number(data.lng) : null,
         featured: data.featured,
         views: data.views,
+        status: (data.status as string | null) ?? "approved",
         listingType: (data.listing_type as string | null) ?? "normal",
         startPrice: data.start_price != null ? Number(data.start_price) : null,
         auctionEndsAt: (data.auction_ends_at as string | null) ?? null,
