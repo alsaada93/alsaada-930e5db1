@@ -125,7 +125,7 @@ function AddListingPage() {
   const filteredRegions = useMemo(() => {
     const q = regionQuery.trim();
     if (!q) return bahrainRegions.slice(0, 12);
-    return bahrainRegions.filter((r) => r.includes(q)).slice(0, 12);
+    return bahrainRegions.filter((r) => matchesAr(r, q)).slice(0, 12);
   }, [regionQuery]);
 
   // Map location
