@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import type {} from "@tanstack/react-start";
 import { articles } from "@/data/articles";
+import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 const BASE_URL = "https://www.alsaada.sale";
 
