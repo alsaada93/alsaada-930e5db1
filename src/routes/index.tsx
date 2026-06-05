@@ -45,7 +45,16 @@ function Index() {
   const { listings } = useListings();
   const normal = listings.filter((l) => (l.listingType ?? "normal") === "normal");
   const featured = normal.filter((l) => l.featured);
-  const latest = normal;
+  const latest = normal.slice(0, 12);
+  const rest = normal.slice(12);
+
+  // ترتيب باقي الإعلانات تحت تصنيفاتها بنفس ترتيب التصنيفات
+  const restByCategory = categories
+    .map((cat) => ({ cat, items: rest.filter((l) => l.category === cat.name) }))
+    .filter((g) => g.items.length > 0);
+  // أي إعلانات بلا تصنيف معروف
+  const known = new Set(categories.map((c) => c.name));
+  const uncategorized = rest.filter((l) => !known.has(l.category));
 
   return (
     <div className="min-h-screen bg-background">
@@ -62,6 +71,12 @@ function Index() {
           {featured.length > 0 && (
             <ListingsSection title={t("sec.featured")} subtitle={t("sec.featuredSub")} items={featured} />
           )}
+          {restByCategory.map(({ cat, items }) => (
+            <ListingsSection key={cat.id} title={cat.name} items={items} />
+          ))}
+          {uncategorized.length > 0 && (
+            <ListingsSection title="إعلانات أخرى" items={uncategorized} />
+          )}
           <AuctionsSection />
           <Testimonials />
           <BusinessSection />
@@ -72,6 +87,5 @@ function Index() {
       <Footer />
       <WhatsAppButton />
     </div>
-
   );
 }
