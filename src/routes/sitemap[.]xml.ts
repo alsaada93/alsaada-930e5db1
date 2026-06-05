@@ -62,6 +62,7 @@ export const Route = createFileRoute("/sitemap.xml")({
           [
             `  <url>`,
             `    <loc>${encodeURI(`${BASE_URL}${e.path}`)}</loc>`,
+            e.lastmod ? `    <lastmod>${String(e.lastmod).slice(0, 10)}</lastmod>` : null,
             e.changefreq ? `    <changefreq>${e.changefreq}</changefreq>` : null,
             e.priority ? `    <priority>${e.priority}</priority>` : null,
             `  </url>`,
