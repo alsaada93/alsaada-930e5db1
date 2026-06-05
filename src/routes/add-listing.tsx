@@ -33,6 +33,8 @@ import { countries, type Country } from "@/data/countries";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/hooks/useLanguage";
 import { supabase } from "@/integrations/supabase/client";
+import { compressImage } from "@/lib/image-compress";
+import { normalizeAr, matchesAr } from "@/lib/text";
 
 interface AddListingSearch {
   edit?: string;
