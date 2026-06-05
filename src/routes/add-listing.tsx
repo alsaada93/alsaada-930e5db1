@@ -222,19 +222,17 @@ function AddListingPage() {
   }, [categoryId, itemName, dbBrands]);
 
   const filteredBrands = useMemo(() => {
-    const q = brandQuery.trim().toLowerCase();
+    const q = brandQuery.trim();
     if (!q) return brandOptions;
     return brandOptions.filter(
-      (b) => b.toLowerCase().includes(q) || brandLabel(b, "ar").includes(brandQuery.trim()),
+      (b) => matchesAr(b, q) || matchesAr(brandLabel(b, "ar"), q) || matchesAr(brandLabel(b, "en"), q),
     );
   }, [brandOptions, brandQuery]);
 
   const filteredCountries = useMemo(() => {
-    const q = countryQuery.trim().toLowerCase();
+    const q = countryQuery.trim();
     if (!q) return countries;
-    return countries.filter(
-      (c) => c.en.toLowerCase().includes(q) || c.ar.includes(countryQuery.trim()),
-    );
+    return countries.filter((c) => matchesAr(c.en, q) || matchesAr(c.ar, q));
   }, [countryQuery]);
 
   // Price + AI
