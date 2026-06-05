@@ -339,16 +339,24 @@ function AddListingPage() {
 
 
 
-  const handleImages = (files: FileList | null) => {
+  const handleImages = async (files: FileList | null) => {
     if (!files) return;
     const remaining = MAX_IMAGES - media.length;
     if (remaining <= 0) {
       toast.error(t("toast.maxImages"));
       return;
     }
-    const next = Array.from(files)
-      .slice(0, remaining)
-      .map((f) => ({ id: `${Date.now()}-${Math.random().toString(36).slice(2)}`, url: URL.createObjectURL(f), file: f }));
+    const picked = Array.from(files).slice(0, remaining);
+    const next = await Promise.all(
+      picked.map(async (f) => {
+        const compressed = await compressImage(f);
+        return {
+          id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+          url: URL.createObjectURL(compressed),
+          file: compressed,
+        };
+      }),
+    );
     setMedia((p) => [...p, ...next]);
   };
 
