@@ -38,6 +38,26 @@ export const Route = createFileRoute("/sitemap.xml")({
           })),
         ];
 
+        // أضف كل إعلان معتمد ديناميكياً ليراه جوجل فور نشره
+        try {
+          const { data: listings } = await supabaseAdmin
+            .from("listings")
+            .select("id, updated_at, published_at")
+            .eq("status", "approved")
+            .order("published_at", { ascending: false })
+            .limit(5000);
+          for (const l of listings ?? []) {
+            entries.push({
+              path: `/listing/${l.id}`,
+              lastmod: (l.updated_at ?? l.published_at ?? undefined) as string | undefined,
+              changefreq: "daily",
+              priority: "0.9",
+            });
+          }
+        } catch {
+          /* تجاهل أي خطأ حتى تبقى خريطة الموقع متاحة */
+        }
+
         const urls = entries.map((e) =>
           [
             `  <url>`,
