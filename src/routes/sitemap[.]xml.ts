@@ -1,11 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import type {} from "@tanstack/react-start";
 import { articles } from "@/data/articles";
+import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 const BASE_URL = "https://www.alsaada.sale";
 
 interface SitemapEntry {
   path: string;
+  lastmod?: string;
   changefreq?: "always" | "hourly" | "daily" | "weekly" | "monthly" | "yearly" | "never";
   priority?: string;
 }
@@ -36,10 +38,31 @@ export const Route = createFileRoute("/sitemap.xml")({
           })),
         ];
 
+        // أضف كل إعلان معتمد ديناميكياً ليراه جوجل فور نشره
+        try {
+          const { data: listings } = await supabaseAdmin
+            .from("listings")
+            .select("id, updated_at, published_at")
+            .eq("status", "approved")
+            .order("published_at", { ascending: false })
+            .limit(5000);
+          for (const l of listings ?? []) {
+            entries.push({
+              path: `/listing/${l.id}`,
+              lastmod: (l.updated_at ?? l.published_at ?? undefined) as string | undefined,
+              changefreq: "daily",
+              priority: "0.9",
+            });
+          }
+        } catch {
+          /* تجاهل أي خطأ حتى تبقى خريطة الموقع متاحة */
+        }
+
         const urls = entries.map((e) =>
           [
             `  <url>`,
             `    <loc>${encodeURI(`${BASE_URL}${e.path}`)}</loc>`,
+            e.lastmod ? `    <lastmod>${String(e.lastmod).slice(0, 10)}</lastmod>` : null,
             e.changefreq ? `    <changefreq>${e.changefreq}</changefreq>` : null,
             e.priority ? `    <priority>${e.priority}</priority>` : null,
             `  </url>`,
