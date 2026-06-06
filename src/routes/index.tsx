@@ -47,15 +47,7 @@ function Index() {
   const normal = listings.filter((l) => (l.listingType ?? "normal") === "normal");
   const featured = normal.filter((l) => l.featured);
   const latest = normal.slice(0, 12);
-  const rest = normal.slice(12);
-
-  // ترتيب باقي الإعلانات تحت تصنيفاتها بنفس ترتيب التصنيفات
-  const restByCategory = categories
-    .map((cat) => ({ cat, items: rest.filter((l) => l.category === cat.name) }))
-    .filter((g) => g.items.length > 0);
-  // أي إعلانات بلا تصنيف معروف
-  const known = new Set(categories.map((c) => c.name));
-  const uncategorized = rest.filter((l) => !known.has(l.category));
+  const hasMore = normal.length > 12;
 
   return (
     <div className="min-h-screen bg-background">
