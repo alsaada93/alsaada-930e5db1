@@ -61,14 +61,18 @@ function Index() {
           <CategoryGrid />
           <WeBuyBanner />
           <ListingsSection title={t("sec.latest")} subtitle={t("sec.latestSub")} items={latest} />
+          {hasMore && (
+            <div className="mx-auto max-w-7xl px-4 pb-4 text-center">
+              <Link
+                to="/search"
+                className="inline-flex items-center justify-center rounded-full bg-gradient-primary px-8 py-3 text-sm font-bold text-primary-foreground shadow-glow transition-opacity hover:opacity-90"
+              >
+                {t("sec.more") || "عرض المزيد"}
+              </Link>
+            </div>
+          )}
           {featured.length > 0 && (
             <ListingsSection title={t("sec.featured")} subtitle={t("sec.featuredSub")} items={featured} />
-          )}
-          {restByCategory.map(({ cat, items }) => (
-            <ListingsSection key={cat.id} title={cat.name} items={items} />
-          ))}
-          {uncategorized.length > 0 && (
-            <ListingsSection title="إعلانات أخرى" items={uncategorized} />
           )}
           <AuctionsSection />
           <Testimonials />
