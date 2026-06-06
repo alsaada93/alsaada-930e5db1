@@ -14,7 +14,7 @@ import { Testimonials } from "@/components/Testimonials";
 import { Footer } from "@/components/Footer";
 import { useListings } from "@/hooks/useListings";
 import { useLanguage } from "@/hooks/useLanguage";
-import { categories } from "@/data/marketplace";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
