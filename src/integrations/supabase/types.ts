@@ -350,6 +350,7 @@ export type Database = {
           monthly_revenue: number | null
           negotiable: boolean
           negotiable_flag: boolean | null
+          old_price: number | null
           operating_cost: number | null
           outlets: number | null
           price: number
@@ -392,6 +393,7 @@ export type Database = {
           monthly_revenue?: number | null
           negotiable?: boolean
           negotiable_flag?: boolean | null
+          old_price?: number | null
           operating_cost?: number | null
           outlets?: number | null
           price?: number
@@ -434,6 +436,7 @@ export type Database = {
           monthly_revenue?: number | null
           negotiable?: boolean
           negotiable_flag?: boolean | null
+          old_price?: number | null
           operating_cost?: number | null
           outlets?: number | null
           price?: number
