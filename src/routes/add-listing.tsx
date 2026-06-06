@@ -529,7 +529,8 @@ function AddListingPage() {
       };
 
       if (isEdit && editId) {
-        const { error } = await supabase.from("listings").update({ ...payload, video: existingVideo }).eq("id", editId);
+        const { status: _ignoreStatus, ...editPayload } = payload;
+        const { error } = await supabase.from("listings").update({ ...editPayload, video: existingVideo }).eq("id", editId);
         if (error) throw error;
         toast.success(ar ? "تم تحديث الإعلان" : "Listing updated");
         navigate({ to: "/listing/$id", params: { id: editId } });
