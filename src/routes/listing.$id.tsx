@@ -583,9 +583,19 @@ function ListingPage() {
             )}
 
             {/* السعر */}
-            <div className="mt-4 flex items-baseline gap-1">
+            <div className="mt-4 flex flex-wrap items-baseline gap-2">
               <span className="text-3xl font-extrabold text-primary">{item.price.toLocaleString("ar")}</span>
               <span className="text-sm font-semibold text-muted-foreground">د.ب</span>
+              {item.oldPrice != null && item.oldPrice > item.price && (
+                <>
+                  <span className="text-lg font-semibold text-muted-foreground line-through">
+                    {item.oldPrice.toLocaleString("ar")}
+                  </span>
+                  <span className="rounded-full bg-destructive/15 px-2 py-0.5 text-xs font-bold text-destructive">
+                    خصم {Math.round(((item.oldPrice - item.price) / item.oldPrice) * 100)}%
+                  </span>
+                </>
+              )}
               {item.negotiable && <span className="text-xs text-muted-foreground">• قابل للتفاوض</span>}
             </div>
 
