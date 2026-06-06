@@ -107,7 +107,7 @@ export const adminUpdateListing = createServerFn({ method: "POST" })
       if (v !== undefined) patch[k] = v;
     }
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin.from("listings").update(patch).eq("id", id);
+    const { error } = await supabaseAdmin.from("listings").update(patch as never).eq("id", id);
     if (error) throw error;
     return { ok: true };
   });
