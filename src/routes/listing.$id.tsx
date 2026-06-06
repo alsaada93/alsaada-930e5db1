@@ -50,6 +50,7 @@ export const Route = createFileRoute("/listing/$id")({
         id: data.id,
         title: data.title,
         price: Number(data.price),
+        oldPrice: data.old_price != null ? Number(data.old_price) : null,
         negotiable: data.negotiable,
         condition: data.condition,
         city: data.city ?? "",
