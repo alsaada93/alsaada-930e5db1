@@ -117,14 +117,16 @@ export async function verifyOtpAndSignIn(
   const email = `wa${phoneE164}@phone.alsaada.sale`;
   const password = randomBytes(24).toString("base64url");
 
-  // Look up an existing account via the profiles table (id = auth user id)
-  const { data: existingProfile } = await supabaseAdmin
-    .from("profiles")
-    .select("id")
+  // Look up an existing account via the service-role-only phone_accounts map.
+  // SECURITY: never trust the user-editable profiles.phone field for auth routing,
+  // otherwise an attacker could squat a victim's number and hijack their sign-in.
+  const { data: mapping } = await supabaseAdmin
+    .from("phone_accounts")
+    .select("user_id")
     .eq("phone", phoneE164)
     .maybeSingle();
 
-  let userId = existingProfile?.id as string | undefined;
+  let userId = mapping?.user_id as string | undefined;
 
   if (userId) {
     const { error: updErr } = await supabaseAdmin.auth.admin.updateUserById(userId, {
@@ -142,6 +144,11 @@ export async function verifyOtpAndSignIn(
       throw new Error(createErr?.message || "تعذّر إنشاء الحساب.");
     }
     userId = created.user.id;
+
+    // Record the verified phone -> account mapping (service-role only).
+    await supabaseAdmin
+      .from("phone_accounts")
+      .upsert({ phone: phoneE164, user_id: userId }, { onConflict: "phone" });
   }
 
   // Ensure profile holds the verified phone/whatsapp

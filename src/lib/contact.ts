@@ -61,7 +61,7 @@ export async function logContactAttempt(opts: {
       message: `حاول أحد المهتمين التواصل معك عبر ${methodAr}${
         opts.listingTitle ? ` بخصوص إعلان "${opts.listingTitle}"` : ""
       }.`,
-      sender_name: me?.email ?? null,
+      sender_name: (me?.user_metadata?.full_name as string | undefined) ?? "زائر",
     });
   } catch {
     /* ignore */
