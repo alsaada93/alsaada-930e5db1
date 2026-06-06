@@ -39,6 +39,12 @@ export function PriceOfferDialog({
     try {
       const { data: auth } = await supabase.auth.getUser();
       const senderId = auth.user?.id ?? null;
+      // SECURITY: never fall back to the user's email (it can expose phone-based
+      // shadow emails). Use a safe display name instead.
+      const safeName =
+        name.trim() ||
+        (auth.user?.user_metadata?.full_name as string | undefined) ||
+        "زائر";
       const db = supabase as any;
       const { error } = await db.from("price_offers").insert({
         listing_id: listingId,
@@ -46,7 +52,7 @@ export function PriceOfferDialog({
         sender_id: senderId,
         amount: value,
         message: message.trim() || null,
-        sender_name: name.trim() || auth.user?.email || null,
+        sender_name: safeName,
         sender_phone: phone.trim() || null,
       });
       if (error) throw error;
@@ -57,7 +63,7 @@ export function PriceOfferDialog({
         message: `عرض سعر جديد بقيمة ${value.toLocaleString("ar")} د.ب على إعلان "${listingTitle}".${
           message.trim() ? ` ملاحظة: ${message.trim()}` : ""
         }`,
-        sender_name: name.trim() || auth.user?.email || null,
+        sender_name: safeName,
         sender_phone: phone.trim() || null,
       });
       toast.success(ar ? "تم إرسال عرض السعر للمعلن" : "Your offer was sent to the seller");
