@@ -127,6 +127,16 @@ export const Route = createFileRoute("/listing/$id")({
               price: loaderData?.item.price ?? 0,
               priceCurrency: "BHD",
               url,
+              ...(loaderData?.item.oldPrice && loaderData.item.oldPrice > (loaderData.item.price ?? 0)
+                ? {
+                    priceSpecification: {
+                      "@type": "UnitPriceSpecification",
+                      priceType: "https://schema.org/ListPrice",
+                      price: loaderData.item.oldPrice,
+                      priceCurrency: "BHD",
+                    },
+                  }
+                : {}),
               itemCondition:
                 loaderData?.item.condition === "جديد"
                   ? "https://schema.org/NewCondition"
