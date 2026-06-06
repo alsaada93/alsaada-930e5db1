@@ -512,7 +512,7 @@ function AddListingPage() {
           ? ((user.user_metadata?.full_name as string | undefined)?.trim() || null)
           : guestName.trim(),
         contact_phone: user ? null : guestPhone.trim(),
-        status: "approved",
+        status: "pending",
         start_price: isAuction ? Number(price) || 0 : null,
         auction_ends_at: isAuction ? new Date(Date.now() + auctionHours * 3600_000).toISOString() : null,
         rent: isBusiness ? num(biz.rent) : null,
@@ -529,7 +529,8 @@ function AddListingPage() {
       };
 
       if (isEdit && editId) {
-        const { error } = await supabase.from("listings").update({ ...payload, video: existingVideo }).eq("id", editId);
+        const { status: _ignoreStatus, ...editPayload } = payload;
+        const { error } = await supabase.from("listings").update({ ...editPayload, video: existingVideo }).eq("id", editId);
         if (error) throw error;
         toast.success(ar ? "تم تحديث الإعلان" : "Listing updated");
         navigate({ to: "/listing/$id", params: { id: editId } });
