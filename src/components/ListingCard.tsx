@@ -36,8 +36,10 @@ export function ListingCard({ item, displayTitle }: { item: Listing; displayTitl
             src={item.image}
             alt={title}
             loading="lazy"
+            decoding="async"
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
+
           {item.featured && (
             <span className="absolute right-2 top-2 rounded-full bg-gradient-primary px-2 py-0.5 text-[11px] font-bold text-primary-foreground shadow-glow">
               {t("card.featured")}
