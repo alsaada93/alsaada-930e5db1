@@ -136,10 +136,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   errorComponent: ErrorComponent,
 });
 
+const THEME_BOOT_SCRIPT = `(function(){try{var t=localStorage.getItem('alsaada_theme');if(!t)return;var d=JSON.parse(t);var r=document.documentElement;if(d&&d.colors){for(var k in d.colors){if(d.colors[k])r.style.setProperty('--'+k,d.colors[k]);}}if(d&&d.font){var s='"'+d.font+'", system-ui, sans-serif';r.style.setProperty('--font-sans',s);r.style.setProperty('--font-display',s);}}catch(e){}})();`;
+
 function RootShell({ children }: { children: ReactNode }) {
   return (
     <html lang="ar" dir="rtl">
       <head>
+        {/* Apply the saved theme before first paint to prevent a design flicker */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_BOOT_SCRIPT }} />
         <HeadContent />
       </head>
       <body>
