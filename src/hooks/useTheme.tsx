@@ -101,8 +101,27 @@ interface ThemeContextValue {
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
+const THEME_CACHE_KEY = "alsaada_theme";
+
+function readCachedTheme(): ThemeSettings {
+  if (typeof window === "undefined") return DEFAULT_THEME;
+  try {
+    const raw = localStorage.getItem(THEME_CACHE_KEY);
+    if (!raw) return DEFAULT_THEME;
+    const v = JSON.parse(raw) as ThemeSettings;
+    return {
+      colors: { ...DEFAULT_THEME.colors, ...v.colors },
+      font: v.font || DEFAULT_THEME.font,
+    };
+  } catch {
+    return DEFAULT_THEME;
+  }
+}
+
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setTheme] = useState<ThemeSettings>(DEFAULT_THEME);
+  // Initialise from the cached theme so the client matches what the
+  // pre-paint inline script already applied — prevents a design flicker.
+  const [theme, setTheme] = useState<ThemeSettings>(readCachedTheme);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -120,6 +139,18 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
           };
           setTheme(merged);
           applyTheme(merged);
+          try {
+            localStorage.setItem(THEME_CACHE_KEY, JSON.stringify(merged));
+          } catch {
+            /* ignore quota / privacy errors */
+          }
+        } else {
+          // No custom theme saved — clear any stale cache so defaults win.
+          try {
+            localStorage.removeItem(THEME_CACHE_KEY);
+          } catch {
+            /* ignore */
+          }
         }
         setLoading(false);
       });
