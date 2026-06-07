@@ -163,6 +163,11 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   const save = async (next: ThemeSettings) => {
     preview(next);
+    try {
+      localStorage.setItem(THEME_CACHE_KEY, JSON.stringify(next));
+    } catch {
+      /* ignore */
+    }
     const { error } = await supabase
       .from("site_settings")
       .upsert({ key: "theme", value: JSON.parse(JSON.stringify(next)) }, { onConflict: "key" });
