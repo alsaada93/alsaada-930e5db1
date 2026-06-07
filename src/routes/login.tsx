@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { useServerFn } from "@tanstack/react-start";
 import { useAuth } from "@/hooks/useAuth";
+import { useAuthMethods } from "@/hooks/useAuthMethods";
 import { requestPhoneOtp, verifyPhoneOtp } from "@/lib/phone-auth.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -48,7 +49,14 @@ export const Route = createFileRoute("/login")({
 function LoginPage() {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
+  const { methods } = useAuthMethods();
   const [authMethod, setAuthMethod] = useState<"email" | "phone">("phone");
+
+  // Keep the selected tab on an enabled method.
+  useEffect(() => {
+    if (authMethod === "phone" && !methods.whatsapp && methods.email) setAuthMethod("email");
+    if (authMethod === "email" && !methods.email && methods.whatsapp) setAuthMethod("phone");
+  }, [methods, authMethod]);
   const [mode, setMode] = useState<"login" | "signup" | "forgot">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

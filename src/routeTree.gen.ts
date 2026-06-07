@@ -34,12 +34,14 @@ import { Route as ListingIdRouteImport } from './routes/listing.$id'
 import { Route as CategoryIdRouteImport } from './routes/category.$id'
 import { Route as AdminSlidesRouteImport } from './routes/admin.slides'
 import { Route as AdminSeoRouteImport } from './routes/admin.seo'
+import { Route as AdminMembersRouteImport } from './routes/admin.members'
 import { Route as AdminListingsRouteImport } from './routes/admin.listings'
 import { Route as AdminHeroRouteImport } from './routes/admin.hero'
 import { Route as AdminCategoriesRouteImport } from './routes/admin.categories'
 import { Route as AdminBrandsRouteImport } from './routes/admin.brands'
 import { Route as AdminAuctionsRouteImport } from './routes/admin.auctions'
 import { Route as AdminAppearanceRouteImport } from './routes/admin.appearance'
+import { Route as AdminAccessRouteImport } from './routes/admin.access'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 
 const TermsRoute = TermsRouteImport.update({
@@ -167,6 +169,11 @@ const AdminSeoRoute = AdminSeoRouteImport.update({
   path: '/seo',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminMembersRoute = AdminMembersRouteImport.update({
+  id: '/members',
+  path: '/members',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminListingsRoute = AdminListingsRouteImport.update({
   id: '/listings',
   path: '/listings',
@@ -197,6 +204,11 @@ const AdminAppearanceRoute = AdminAppearanceRouteImport.update({
   path: '/appearance',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminAccessRoute = AdminAccessRouteImport.update({
+  id: '/access',
+  path: '/access',
+  getParentRoute: () => AdminRoute,
+} as any)
 const LovableEmailQueueProcessRoute =
   LovableEmailQueueProcessRouteImport.update({
     id: '/lovable/email/queue/process',
@@ -222,12 +234,14 @@ export interface FileRoutesByFullPath {
   '/sell': typeof SellRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
+  '/admin/access': typeof AdminAccessRoute
   '/admin/appearance': typeof AdminAppearanceRoute
   '/admin/auctions': typeof AdminAuctionsRoute
   '/admin/brands': typeof AdminBrandsRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/hero': typeof AdminHeroRoute
   '/admin/listings': typeof AdminListingsRoute
+  '/admin/members': typeof AdminMembersRoute
   '/admin/seo': typeof AdminSeoRoute
   '/admin/slides': typeof AdminSlidesRoute
   '/category/$id': typeof CategoryIdRoute
@@ -255,12 +269,14 @@ export interface FileRoutesByTo {
   '/sell': typeof SellRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
+  '/admin/access': typeof AdminAccessRoute
   '/admin/appearance': typeof AdminAppearanceRoute
   '/admin/auctions': typeof AdminAuctionsRoute
   '/admin/brands': typeof AdminBrandsRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/hero': typeof AdminHeroRoute
   '/admin/listings': typeof AdminListingsRoute
+  '/admin/members': typeof AdminMembersRoute
   '/admin/seo': typeof AdminSeoRoute
   '/admin/slides': typeof AdminSlidesRoute
   '/category/$id': typeof CategoryIdRoute
@@ -290,12 +306,14 @@ export interface FileRoutesById {
   '/sell': typeof SellRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
+  '/admin/access': typeof AdminAccessRoute
   '/admin/appearance': typeof AdminAppearanceRoute
   '/admin/auctions': typeof AdminAuctionsRoute
   '/admin/brands': typeof AdminBrandsRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/hero': typeof AdminHeroRoute
   '/admin/listings': typeof AdminListingsRoute
+  '/admin/members': typeof AdminMembersRoute
   '/admin/seo': typeof AdminSeoRoute
   '/admin/slides': typeof AdminSlidesRoute
   '/category/$id': typeof CategoryIdRoute
@@ -326,12 +344,14 @@ export interface FileRouteTypes {
     | '/sell'
     | '/sitemap.xml'
     | '/terms'
+    | '/admin/access'
     | '/admin/appearance'
     | '/admin/auctions'
     | '/admin/brands'
     | '/admin/categories'
     | '/admin/hero'
     | '/admin/listings'
+    | '/admin/members'
     | '/admin/seo'
     | '/admin/slides'
     | '/category/$id'
@@ -359,12 +379,14 @@ export interface FileRouteTypes {
     | '/sell'
     | '/sitemap.xml'
     | '/terms'
+    | '/admin/access'
     | '/admin/appearance'
     | '/admin/auctions'
     | '/admin/brands'
     | '/admin/categories'
     | '/admin/hero'
     | '/admin/listings'
+    | '/admin/members'
     | '/admin/seo'
     | '/admin/slides'
     | '/category/$id'
@@ -393,12 +415,14 @@ export interface FileRouteTypes {
     | '/sell'
     | '/sitemap.xml'
     | '/terms'
+    | '/admin/access'
     | '/admin/appearance'
     | '/admin/auctions'
     | '/admin/brands'
     | '/admin/categories'
     | '/admin/hero'
     | '/admin/listings'
+    | '/admin/members'
     | '/admin/seo'
     | '/admin/slides'
     | '/category/$id'
@@ -612,6 +636,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminSeoRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/members': {
+      id: '/admin/members'
+      path: '/members'
+      fullPath: '/admin/members'
+      preLoaderRoute: typeof AdminMembersRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/listings': {
       id: '/admin/listings'
       path: '/listings'
@@ -654,6 +685,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAppearanceRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/access': {
+      id: '/admin/access'
+      path: '/access'
+      fullPath: '/admin/access'
+      preLoaderRoute: typeof AdminAccessRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/lovable/email/queue/process': {
       id: '/lovable/email/queue/process'
       path: '/lovable/email/queue/process'
@@ -665,24 +703,28 @@ declare module '@tanstack/react-router' {
 }
 
 interface AdminRouteChildren {
+  AdminAccessRoute: typeof AdminAccessRoute
   AdminAppearanceRoute: typeof AdminAppearanceRoute
   AdminAuctionsRoute: typeof AdminAuctionsRoute
   AdminBrandsRoute: typeof AdminBrandsRoute
   AdminCategoriesRoute: typeof AdminCategoriesRoute
   AdminHeroRoute: typeof AdminHeroRoute
   AdminListingsRoute: typeof AdminListingsRoute
+  AdminMembersRoute: typeof AdminMembersRoute
   AdminSeoRoute: typeof AdminSeoRoute
   AdminSlidesRoute: typeof AdminSlidesRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminAccessRoute: AdminAccessRoute,
   AdminAppearanceRoute: AdminAppearanceRoute,
   AdminAuctionsRoute: AdminAuctionsRoute,
   AdminBrandsRoute: AdminBrandsRoute,
   AdminCategoriesRoute: AdminCategoriesRoute,
   AdminHeroRoute: AdminHeroRoute,
   AdminListingsRoute: AdminListingsRoute,
+  AdminMembersRoute: AdminMembersRoute,
   AdminSeoRoute: AdminSeoRoute,
   AdminSlidesRoute: AdminSlidesRoute,
   AdminIndexRoute: AdminIndexRoute,

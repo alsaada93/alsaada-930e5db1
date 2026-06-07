@@ -126,3 +126,125 @@ export const adminDeleteListing = createServerFn({ method: "POST" })
     if (error) throw error;
     return { ok: true };
   });
+
+/* =========================================================================
+ * Members & permissions management
+ * ========================================================================= */
+
+export type AppRole = "admin" | "moderator" | "user";
+
+export interface AdminMemberRow {
+  id: string;
+  full_name: string | null;
+  phone: string | null;
+  email: string | null;
+  verified: boolean;
+  created_at: string;
+  roles: AppRole[];
+}
+
+/** Lists every member with their profile data and assigned roles. */
+export const adminListMembers = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<AdminMemberRow[]> => {
+    const { supabase, userId } = context;
+    await assertAdmin(supabase, userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const [{ data: profiles }, { data: roles }, authList] = await Promise.all([
+      supabaseAdmin
+        .from("profiles")
+        .select("id,full_name,phone,verified,created_at")
+        .order("created_at", { ascending: false })
+        .limit(1000),
+      supabaseAdmin.from("user_roles").select("user_id,role").limit(5000),
+      supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 1000 }),
+    ]);
+
+    const roleMap = new Map<string, AppRole[]>();
+    for (const r of roles ?? []) {
+      const arr = roleMap.get(r.user_id as string) ?? [];
+      arr.push(r.role as AppRole);
+      roleMap.set(r.user_id as string, arr);
+    }
+    const emailMap = new Map<string, string>();
+    for (const u of authList?.data?.users ?? []) {
+      if (u.email) emailMap.set(u.id, u.email);
+    }
+
+    return (profiles ?? []).map((p: any) => ({
+      id: String(p.id),
+      full_name: p.full_name ?? null,
+      phone: p.phone ?? null,
+      email: emailMap.get(String(p.id)) ?? null,
+      verified: Boolean(p.verified),
+      created_at: String(p.created_at ?? ""),
+      roles: roleMap.get(String(p.id)) ?? [],
+    }));
+  });
+
+/** Grants or revokes a role for a member. */
+export const adminSetMemberRole = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z
+      .object({
+        userId: z.string().uuid(),
+        role: z.enum(["admin", "moderator", "user"]),
+        grant: z.boolean(),
+      })
+      .parse(input),
+  )
+  .handler(async ({ context, data }) => {
+    const { supabase, userId } = context;
+    await assertAdmin(supabase, userId);
+    // Prevent an admin from removing their own admin role (avoid lock-out).
+    if (data.role === "admin" && !data.grant && data.userId === userId) {
+      throw new Error("لا يمكنك إزالة صلاحية الأدمن عن نفسك");
+    }
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    if (data.grant) {
+      const { error } = await supabaseAdmin
+        .from("user_roles")
+        .upsert({ user_id: data.userId, role: data.role }, { onConflict: "user_id,role" });
+      if (error) throw error;
+    } else {
+      const { error } = await supabaseAdmin
+        .from("user_roles")
+        .delete()
+        .eq("user_id", data.userId)
+        .eq("role", data.role);
+      if (error) throw error;
+    }
+    return { ok: true };
+  });
+
+/* =========================================================================
+ * Registration / sign-in method toggles (stored in site_settings)
+ * ========================================================================= */
+
+const AUTH_METHODS_KEY = "authMethods";
+
+/** Saves which sign-in methods are enabled (email / google / apple / whatsapp). */
+export const adminSetAuthMethods = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z
+      .object({
+        email: z.boolean(),
+        google: z.boolean(),
+        apple: z.boolean(),
+        whatsapp: z.boolean(),
+      })
+      .parse(input),
+  )
+  .handler(async ({ context, data }) => {
+    const { supabase, userId } = context;
+    await assertAdmin(supabase, userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin
+      .from("site_settings")
+      .upsert({ key: AUTH_METHODS_KEY, value: data as never }, { onConflict: "key" });
+    if (error) throw error;
+    return { ok: true };
+  });
