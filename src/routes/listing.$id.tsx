@@ -235,6 +235,9 @@ function Gallery({ images, video, title }: { images: string[]; video: string | n
             src={active.url}
             alt={title}
             onClick={() => setLightbox(true)}
+            loading="eager"
+            fetchPriority="high"
+            decoding="async"
             className="aspect-[4/3] w-full cursor-zoom-in object-cover"
           />
         ) : (
@@ -278,7 +281,7 @@ function Gallery({ images, video, title }: { images: string[]; video: string | n
               }`}
             >
               {s.type === "image" ? (
-                <img src={s.url} alt="" className="h-full w-full object-cover" />
+                <img src={s.url} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />
               ) : (
                 <span className="flex h-full w-full items-center justify-center bg-black text-white">
                   <Play className="h-5 w-5" />
