@@ -1,10 +1,12 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, ClipboardCheck, FolderTree, Tags, Gavel, Images, Palette, ExternalLink, ShoppingCart, MonitorPlay, Search } from "lucide-react";
+import { LayoutDashboard, ClipboardCheck, FolderTree, Tags, Gavel, Images, Palette, ExternalLink, ShoppingCart, MonitorPlay, Search, Users, KeyRound } from "lucide-react";
 import { useAdminLayout } from "./AdminLayoutContext";
 
 const items = [
   { title: "الإحصائيات", url: "/admin", icon: LayoutDashboard, exact: true },
   { title: "مراجعة الإعلانات", url: "/admin/listings", icon: ClipboardCheck },
+  { title: "الأعضاء والصلاحيات", url: "/admin/members", icon: Users },
+  { title: "طرق التسجيل", url: "/admin/access", icon: KeyRound },
   { title: "التصنيفات", url: "/admin/categories", icon: FolderTree },
   { title: "الماركات", url: "/admin/brands", icon: Tags },
   { title: "المزادات", url: "/admin/auctions", icon: Gavel },
