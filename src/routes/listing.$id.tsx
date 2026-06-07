@@ -148,6 +148,11 @@ export const Route = createFileRoute("/listing/$id")({
               ...(loaderData?.item.expiresAt
                 ? { priceValidUntil: String(loaderData.item.expiresAt).slice(0, 10) }
                 : {}),
+              seller: {
+                "@type": "Organization",
+                name: "حراج السعادة",
+                telephone: "+97333982383",
+              },
             },
             aggregateRating: {
               "@type": "AggregateRating",
