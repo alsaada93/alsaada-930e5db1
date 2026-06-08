@@ -13,6 +13,7 @@ import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SellRouteImport } from './routes/sell'
 import { Route as SearchRouteImport } from './routes/search'
+import { Route as RestaurantRouteImport } from './routes/restaurant'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as ReportRouteImport } from './routes/report'
 import { Route as PrivacyRouteImport } from './routes/privacy'
@@ -34,6 +35,7 @@ import { Route as ListingIdRouteImport } from './routes/listing.$id'
 import { Route as CategoryIdRouteImport } from './routes/category.$id'
 import { Route as AdminSlidesRouteImport } from './routes/admin.slides'
 import { Route as AdminSeoRouteImport } from './routes/admin.seo'
+import { Route as AdminRestaurantRouteImport } from './routes/admin.restaurant'
 import { Route as AdminMembersRouteImport } from './routes/admin.members'
 import { Route as AdminListingsRouteImport } from './routes/admin.listings'
 import { Route as AdminHeroRouteImport } from './routes/admin.hero'
@@ -62,6 +64,11 @@ const SellRoute = SellRouteImport.update({
 const SearchRoute = SearchRouteImport.update({
   id: '/search',
   path: '/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RestaurantRoute = RestaurantRouteImport.update({
+  id: '/restaurant',
+  path: '/restaurant',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
@@ -169,6 +176,11 @@ const AdminSeoRoute = AdminSeoRouteImport.update({
   path: '/seo',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminRestaurantRoute = AdminRestaurantRouteImport.update({
+  id: '/restaurant',
+  path: '/restaurant',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminMembersRoute = AdminMembersRouteImport.update({
   id: '/members',
   path: '/members',
@@ -230,6 +242,7 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/report': typeof ReportRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/restaurant': typeof RestaurantRoute
   '/search': typeof SearchRoute
   '/sell': typeof SellRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -242,6 +255,7 @@ export interface FileRoutesByFullPath {
   '/admin/hero': typeof AdminHeroRoute
   '/admin/listings': typeof AdminListingsRoute
   '/admin/members': typeof AdminMembersRoute
+  '/admin/restaurant': typeof AdminRestaurantRoute
   '/admin/seo': typeof AdminSeoRoute
   '/admin/slides': typeof AdminSlidesRoute
   '/category/$id': typeof CategoryIdRoute
@@ -265,6 +279,7 @@ export interface FileRoutesByTo {
   '/privacy': typeof PrivacyRoute
   '/report': typeof ReportRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/restaurant': typeof RestaurantRoute
   '/search': typeof SearchRoute
   '/sell': typeof SellRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -277,6 +292,7 @@ export interface FileRoutesByTo {
   '/admin/hero': typeof AdminHeroRoute
   '/admin/listings': typeof AdminListingsRoute
   '/admin/members': typeof AdminMembersRoute
+  '/admin/restaurant': typeof AdminRestaurantRoute
   '/admin/seo': typeof AdminSeoRoute
   '/admin/slides': typeof AdminSlidesRoute
   '/category/$id': typeof CategoryIdRoute
@@ -302,6 +318,7 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/report': typeof ReportRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/restaurant': typeof RestaurantRoute
   '/search': typeof SearchRoute
   '/sell': typeof SellRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -314,6 +331,7 @@ export interface FileRoutesById {
   '/admin/hero': typeof AdminHeroRoute
   '/admin/listings': typeof AdminListingsRoute
   '/admin/members': typeof AdminMembersRoute
+  '/admin/restaurant': typeof AdminRestaurantRoute
   '/admin/seo': typeof AdminSeoRoute
   '/admin/slides': typeof AdminSlidesRoute
   '/category/$id': typeof CategoryIdRoute
@@ -340,6 +358,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/report'
     | '/reset-password'
+    | '/restaurant'
     | '/search'
     | '/sell'
     | '/sitemap.xml'
@@ -352,6 +371,7 @@ export interface FileRouteTypes {
     | '/admin/hero'
     | '/admin/listings'
     | '/admin/members'
+    | '/admin/restaurant'
     | '/admin/seo'
     | '/admin/slides'
     | '/category/$id'
@@ -375,6 +395,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/report'
     | '/reset-password'
+    | '/restaurant'
     | '/search'
     | '/sell'
     | '/sitemap.xml'
@@ -387,6 +408,7 @@ export interface FileRouteTypes {
     | '/admin/hero'
     | '/admin/listings'
     | '/admin/members'
+    | '/admin/restaurant'
     | '/admin/seo'
     | '/admin/slides'
     | '/category/$id'
@@ -411,6 +433,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/report'
     | '/reset-password'
+    | '/restaurant'
     | '/search'
     | '/sell'
     | '/sitemap.xml'
@@ -423,6 +446,7 @@ export interface FileRouteTypes {
     | '/admin/hero'
     | '/admin/listings'
     | '/admin/members'
+    | '/admin/restaurant'
     | '/admin/seo'
     | '/admin/slides'
     | '/category/$id'
@@ -448,6 +472,7 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   ReportRoute: typeof ReportRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  RestaurantRoute: typeof RestaurantRoute
   SearchRoute: typeof SearchRoute
   SellRoute: typeof SellRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
@@ -487,6 +512,13 @@ declare module '@tanstack/react-router' {
       path: '/search'
       fullPath: '/search'
       preLoaderRoute: typeof SearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/restaurant': {
+      id: '/restaurant'
+      path: '/restaurant'
+      fullPath: '/restaurant'
+      preLoaderRoute: typeof RestaurantRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reset-password': {
@@ -636,6 +668,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminSeoRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/restaurant': {
+      id: '/admin/restaurant'
+      path: '/restaurant'
+      fullPath: '/admin/restaurant'
+      preLoaderRoute: typeof AdminRestaurantRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/members': {
       id: '/admin/members'
       path: '/members'
@@ -711,6 +750,7 @@ interface AdminRouteChildren {
   AdminHeroRoute: typeof AdminHeroRoute
   AdminListingsRoute: typeof AdminListingsRoute
   AdminMembersRoute: typeof AdminMembersRoute
+  AdminRestaurantRoute: typeof AdminRestaurantRoute
   AdminSeoRoute: typeof AdminSeoRoute
   AdminSlidesRoute: typeof AdminSlidesRoute
   AdminIndexRoute: typeof AdminIndexRoute
@@ -725,6 +765,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminHeroRoute: AdminHeroRoute,
   AdminListingsRoute: AdminListingsRoute,
   AdminMembersRoute: AdminMembersRoute,
+  AdminRestaurantRoute: AdminRestaurantRoute,
   AdminSeoRoute: AdminSeoRoute,
   AdminSlidesRoute: AdminSlidesRoute,
   AdminIndexRoute: AdminIndexRoute,
@@ -756,6 +797,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   ReportRoute: ReportRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  RestaurantRoute: RestaurantRoute,
   SearchRoute: SearchRoute,
   SellRoute: SellRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,

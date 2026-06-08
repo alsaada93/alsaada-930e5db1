@@ -72,6 +72,14 @@ export function Header() {
           </button>
 
           <Link
+            to="/restaurant"
+            className="hidden rounded-lg px-3 py-2 text-sm font-bold hover:bg-white/10 sm:block"
+          >
+            {lang === "ar" ? "حاسبة المطاعم" : "Restaurant Cost"}
+          </Link>
+
+
+          <Link
             to="/account"
             className="hidden rounded-lg p-2 hover:bg-white/10 sm:block"
             aria-label={lang === "ar" ? "المفضلة" : "Favorites"}
