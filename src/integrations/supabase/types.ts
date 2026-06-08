@@ -616,6 +616,138 @@ export type Database = {
         }
         Relationships: []
       }
+      restaurant_calc_settings: {
+        Row: {
+          key: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          value?: Json
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          value?: Json
+        }
+        Relationships: []
+      }
+      restaurant_equipment: {
+        Row: {
+          active: boolean
+          category: string | null
+          country_of_origin: string | null
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          manufacturer: string | null
+          name: string
+          price_new: number
+          price_used: number
+          project_type_slugs: string[]
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          category?: string | null
+          country_of_origin?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          manufacturer?: string | null
+          name: string
+          price_new?: number
+          price_used?: number
+          project_type_slugs?: string[]
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          category?: string | null
+          country_of_origin?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          manufacturer?: string | null
+          name?: string
+          price_new?: number
+          price_used?: number
+          project_type_slugs?: string[]
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      restaurant_project_types: {
+        Row: {
+          active: boolean
+          created_at: string
+          icon: string | null
+          id: string
+          name: string
+          slug: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          icon?: string | null
+          id?: string
+          name: string
+          slug: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          icon?: string | null
+          id?: string
+          name?: string
+          slug?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      saved_restaurant_projects: {
+        Row: {
+          created_at: string
+          data: Json
+          id: string
+          name: string
+          total: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          data?: Json
+          id?: string
+          name?: string
+          total?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          data?: Json
+          id?: string
+          name?: string
+          total?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       saved_searches: {
         Row: {
           created_at: string
