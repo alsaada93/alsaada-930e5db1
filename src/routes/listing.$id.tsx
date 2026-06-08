@@ -45,7 +45,23 @@ export const Route = createFileRoute("/listing/$id")({
   loader: async ({ params }) => {
     const { data } = await supabase.from("listings").select("*").eq("id", params.id).maybeSingle();
     if (!data) throw notFound();
+
+    // تقييم حقيقي للبائع المرتبط بالإعلان (لا تُختلق التقييمات لمحركات البحث)
+    let rating: { value: number; count: number } | null = null;
+    const sellerKey = (data.user_id as string | null) ?? null;
+    if (sellerKey) {
+      const { data: revs } = await supabase
+        .from("seller_reviews")
+        .select("rating")
+        .eq("seller_id", sellerKey);
+      if (revs && revs.length > 0) {
+        const sum = revs.reduce((a, r) => a + Number((r as { rating: number }).rating), 0);
+        rating = { value: Math.round((sum / revs.length) * 10) / 10, count: revs.length };
+      }
+    }
+
     return {
+      rating,
       item: {
         id: data.id,
         title: data.title,
