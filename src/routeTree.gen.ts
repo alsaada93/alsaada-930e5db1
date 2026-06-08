@@ -35,6 +35,7 @@ import { Route as ListingIdRouteImport } from './routes/listing.$id'
 import { Route as CategoryIdRouteImport } from './routes/category.$id'
 import { Route as AdminSlidesRouteImport } from './routes/admin.slides'
 import { Route as AdminSeoRouteImport } from './routes/admin.seo'
+import { Route as AdminRestaurantRouteImport } from './routes/admin.restaurant'
 import { Route as AdminMembersRouteImport } from './routes/admin.members'
 import { Route as AdminListingsRouteImport } from './routes/admin.listings'
 import { Route as AdminHeroRouteImport } from './routes/admin.hero'
@@ -175,6 +176,11 @@ const AdminSeoRoute = AdminSeoRouteImport.update({
   path: '/seo',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminRestaurantRoute = AdminRestaurantRouteImport.update({
+  id: '/restaurant',
+  path: '/restaurant',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminMembersRoute = AdminMembersRouteImport.update({
   id: '/members',
   path: '/members',
@@ -249,6 +255,7 @@ export interface FileRoutesByFullPath {
   '/admin/hero': typeof AdminHeroRoute
   '/admin/listings': typeof AdminListingsRoute
   '/admin/members': typeof AdminMembersRoute
+  '/admin/restaurant': typeof AdminRestaurantRoute
   '/admin/seo': typeof AdminSeoRoute
   '/admin/slides': typeof AdminSlidesRoute
   '/category/$id': typeof CategoryIdRoute
@@ -285,6 +292,7 @@ export interface FileRoutesByTo {
   '/admin/hero': typeof AdminHeroRoute
   '/admin/listings': typeof AdminListingsRoute
   '/admin/members': typeof AdminMembersRoute
+  '/admin/restaurant': typeof AdminRestaurantRoute
   '/admin/seo': typeof AdminSeoRoute
   '/admin/slides': typeof AdminSlidesRoute
   '/category/$id': typeof CategoryIdRoute
@@ -323,6 +331,7 @@ export interface FileRoutesById {
   '/admin/hero': typeof AdminHeroRoute
   '/admin/listings': typeof AdminListingsRoute
   '/admin/members': typeof AdminMembersRoute
+  '/admin/restaurant': typeof AdminRestaurantRoute
   '/admin/seo': typeof AdminSeoRoute
   '/admin/slides': typeof AdminSlidesRoute
   '/category/$id': typeof CategoryIdRoute
@@ -362,6 +371,7 @@ export interface FileRouteTypes {
     | '/admin/hero'
     | '/admin/listings'
     | '/admin/members'
+    | '/admin/restaurant'
     | '/admin/seo'
     | '/admin/slides'
     | '/category/$id'
@@ -398,6 +408,7 @@ export interface FileRouteTypes {
     | '/admin/hero'
     | '/admin/listings'
     | '/admin/members'
+    | '/admin/restaurant'
     | '/admin/seo'
     | '/admin/slides'
     | '/category/$id'
@@ -435,6 +446,7 @@ export interface FileRouteTypes {
     | '/admin/hero'
     | '/admin/listings'
     | '/admin/members'
+    | '/admin/restaurant'
     | '/admin/seo'
     | '/admin/slides'
     | '/category/$id'
@@ -656,6 +668,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminSeoRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/restaurant': {
+      id: '/admin/restaurant'
+      path: '/restaurant'
+      fullPath: '/admin/restaurant'
+      preLoaderRoute: typeof AdminRestaurantRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/members': {
       id: '/admin/members'
       path: '/members'
@@ -731,6 +750,7 @@ interface AdminRouteChildren {
   AdminHeroRoute: typeof AdminHeroRoute
   AdminListingsRoute: typeof AdminListingsRoute
   AdminMembersRoute: typeof AdminMembersRoute
+  AdminRestaurantRoute: typeof AdminRestaurantRoute
   AdminSeoRoute: typeof AdminSeoRoute
   AdminSlidesRoute: typeof AdminSlidesRoute
   AdminIndexRoute: typeof AdminIndexRoute
@@ -745,6 +765,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminHeroRoute: AdminHeroRoute,
   AdminListingsRoute: AdminListingsRoute,
   AdminMembersRoute: AdminMembersRoute,
+  AdminRestaurantRoute: AdminRestaurantRoute,
   AdminSeoRoute: AdminSeoRoute,
   AdminSlidesRoute: AdminSlidesRoute,
   AdminIndexRoute: AdminIndexRoute,
