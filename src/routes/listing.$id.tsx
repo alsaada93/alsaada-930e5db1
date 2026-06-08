@@ -170,13 +170,17 @@ export const Route = createFileRoute("/listing/$id")({
                 telephone: "+97333982383",
               },
             },
-            aggregateRating: {
-              "@type": "AggregateRating",
-              ratingValue: "4.8",
-              reviewCount: "356",
-              bestRating: "5",
-              worstRating: "1",
-            },
+            ...(loaderData?.rating
+              ? {
+                  aggregateRating: {
+                    "@type": "AggregateRating",
+                    ratingValue: String(loaderData.rating.value),
+                    reviewCount: String(loaderData.rating.count),
+                    bestRating: "5",
+                    worstRating: "1",
+                  },
+                }
+              : {}),
           }),
         },
       ],
