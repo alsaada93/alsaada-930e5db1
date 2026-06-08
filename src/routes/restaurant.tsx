@@ -601,7 +601,7 @@ function SinkCalculator({
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div>
       <div className="mb-1.5 flex items-center gap-1 text-sm font-bold">
