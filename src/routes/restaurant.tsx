@@ -120,19 +120,16 @@ function RestaurantPage() {
   const { steel, sink, shelf } = useCalcSettings();
 
   const [activeType, setActiveType] = useState<string | null>(null);
-
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [deliveryDate, setDeliveryDate] = useState("");
   const [notes, setNotes] = useState("");
   const [discount, setDiscount] = useState<number>(0);
-
   const [selected, setSelected] = useState<Record<string, Selection>>({});
   const [tables, setTables] = useState<TableItem[]>([]);
   const [sinks, setSinks] = useState<SinkItem[]>([]);
   const [shelves, setShelves] = useState<ShelfItem[]>([]);
   const [saving, setSaving] = useState(false);
-
   const [editTable, setEditTable] = useState<TableItem | null>(null);
   const [editSink, setEditSink] = useState<SinkItem | null>(null);
   const [editShelf, setEditShelf] = useState<ShelfItem | null>(null);
@@ -156,8 +153,8 @@ function RestaurantPage() {
         setShelves(parsed.shelves || []);
         toast.info("تم استعادة مسودة مشروعك السابقة");
       }
-    } catch (e) {
-      console.error("خطأ في استرجاع المسودة:", e);
+    } catch {
+      // استرجاع المسودة فشل بصمت
     }
   }, []);
 
@@ -193,6 +190,7 @@ function RestaurantPage() {
   const setCond = (id: string, condition: Cond) => setSelected((s) => ({ ...s, [id]: { condition } }));
 
   const equipMap = useMemo(() => new Map(equipment.map((e) => [e.id, e])), [equipment]);
+
   const chosen = Object.entries(selected)
     .map(([id, sel]) => ({ e: equipMap.get(id), sel }))
     .filter((x) => x.e) as { e: Equipment; sel: Selection }[];
@@ -261,15 +259,15 @@ function RestaurantPage() {
     }> = [];
 
     chosen.forEach(({ e, sel }) => {
-      const price = sel.condition === "new" ? e.price_new : e.price_used;
+      const unitPrice = sel.condition === "new" ? e.price_new : e.price_used;
       items.push({
         id: index++,
         img: e.image_url || "/placeholder.svg",
         title: e.name,
         desc: `الحالة: ${sel.condition === "new" ? "جديد" : "مستعمل"} | ${[e.manufacturer, e.country_of_origin].filter(Boolean).join(" - ")}`,
         qty: 1,
-        unitPrice: price,
-        total: price,
+        unitPrice,
+        total: unitPrice,
       });
     });
 
@@ -1002,6 +1000,43 @@ function CountField({ value, onChange }: { value: number; onChange: (n: number) 
   );
 }
 
+function Field({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div>
+      <div className="mb-2 flex items-center gap-1.5 text-sm font-bold text-gray-700">
+        <Ruler className="h-4 w-4 text-primary/70" />
+        {label}
+      </div>
+      {children}
+    </div>
+  );
+}
+
+function NumInput({ value, onChange }: { value: NumOrEmpty; onChange: (n: NumOrEmpty) => void }) {
+  return (
+    <input
+      type="number"
+      value={value === "" ? "" : value}
+      min={SIZE_MIN}
+      max={SIZE_MAX}
+      placeholder="0"
+      onChange={(e) => {
+        const val = e.target.value;
+        if (val === "") return onChange("");
+        const n = Number(val);
+        if (Number.isNaN(n)) return onChange("");
+        onChange(n);
+      }}
+      onBlur={() => {
+        if (value !== "") {
+          onChange(Math.min(SIZE_MAX, Math.max(SIZE_MIN, Number(value))));
+        }
+      }}
+      className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 font-bold"
+    />
+  );
+}
+
 function SteelTableCalculator({
   settings,
   onAdd,
@@ -1019,7 +1054,6 @@ function SteelTableCalculator({
   const [count, setCount] = useState(1);
 
   const isValid = length !== "" && width !== "";
-
   const rawPrice = isValid
     ? steelTablePrice({ grade, length: Number(length), width: Number(width), midShelf }, settings)
     : 0;
@@ -1509,7 +1543,9 @@ function EditTableDialog({
               key={g}
               type="button"
               onClick={() => setGrade(g)}
-              className={`flex-1 rounded-lg border p-2 font-bold ${grade === g ? "border-primary bg-primary/10 text-primary" : "border-border"}`}
+              className={`flex-1 rounded-lg border p-2 font-bold ${
+                grade === g ? "border-primary bg-primary/10 text-primary" : "border-border"
+              }`}
             >
               استيل {g}
             </button>
@@ -1661,7 +1697,9 @@ function EditSinkDialog({
               key={d}
               type="button"
               onClick={() => setBowlDepth(d)}
-              className={`rounded-lg border px-3 py-1.5 text-sm font-bold ${bowlDepth === d ? "border-primary bg-primary/10 text-primary" : "border-border"}`}
+              className={`rounded-lg border px-3 py-1.5 text-sm font-bold ${
+                bowlDepth === d ? "border-primary bg-primary/10 text-primary" : "border-border"
+              }`}
             >
               {d}
             </button>
@@ -1768,43 +1806,6 @@ function EditShelfDialog({
   );
 }
 
-function Field({ label, children }: { label: string; children: ReactNode }) {
-  return (
-    <div>
-      <div className="mb-2 flex items-center gap-1.5 text-sm font-bold text-gray-700">
-        <Ruler className="h-4 w-4 text-primary/70" />
-        {label}
-      </div>
-      {children}
-    </div>
-  );
-}
-
-function NumInput({ value, onChange }: { value: NumOrEmpty; onChange: (n: NumOrEmpty) => void }) {
-  return (
-    <input
-      type="number"
-      value={value === "" ? "" : value}
-      min={SIZE_MIN}
-      max={SIZE_MAX}
-      placeholder="0"
-      onChange={(e) => {
-        const val = e.target.value;
-        if (val === "") return onChange("");
-        const n = Number(val);
-        if (Number.isNaN(n)) return onChange("");
-        onChange(n);
-      }}
-      onBlur={(e) => {
-        if (value !== "") {
-          onChange(Math.min(SIZE_MAX, Math.max(SIZE_MIN, Number(value))));
-        }
-      }}
-      className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 font-bold"
-    />
-  );
-}
-
 function TableDrawing({
   length,
   width,
@@ -1844,6 +1845,8 @@ function TableDrawing({
   const topFace = `${pA.x},${pA.y} ${pB.x},${pB.y} ${pC.x},${pC.y} ${pD.x},${pD.y}`;
   const midFace = `${pA.x},${pA.y + h / 2} ${pB.x},${pB.y + h / 2} ${pC.x},${pC.y + h / 2} ${pD.x},${pD.y + h / 2}`;
   const bottomFace = `${pA.x},${pA.y + h} ${pB.x},${pB.y + h} ${pC.x},${pC.y + h} ${pD.x},${pD.y + h}`;
+
+  void grade;
 
   return (
     <svg viewBox="0 0 250 180" className="h-44 w-full max-w-[280px] drop-shadow-md">
