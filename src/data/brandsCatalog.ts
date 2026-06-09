@@ -123,7 +123,7 @@ export const brandsCatalog: BrandInfo[] = [
     country: "هولندا",
     type: "معدات متنوعة (اخرى)",
     description: "حلول وهندسة متكاملة للمخابز الصناعية الكبرى حول العالم.",
-  </td>
+  },
   {
     name: "B.PRO",
     country: "أرفف ستانلس",
