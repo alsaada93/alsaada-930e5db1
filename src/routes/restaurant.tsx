@@ -29,6 +29,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
+// تم فصل استيراد الدوال عن الأنواع
 import { useProjectTypes, useEquipment, useCalcSettings } from "@/hooks/useRestaurant";
 import type { Equipment } from "@/hooks/useRestaurant";
 
@@ -108,8 +109,8 @@ const newUid = () =>
 // دالة ذكية لتطبيق خصم 10% ثم جبر الكسور وحذف الآحاد (مثلاً 157 تصبح 150)
 const calculateFinalPrice = (rawPrice: number) => {
   if (rawPrice <= 0) return 0;
-  const afterDiscount = rawPrice * 0.9;
-  return Math.floor(afterDiscount / 10) * 10;
+  const afterDiscount = rawPrice * 0.9; // تطبيق خصم 10%
+  return Math.floor(afterDiscount / 10) * 10; // التقريب للأسفل لأقرب عشرة لضمان حذف رقم الآحاد
 };
 
 function RestaurantPage() {
@@ -120,6 +121,7 @@ function RestaurantPage() {
 
   const [activeType, setActiveType] = useState<string | null>(null);
 
+  // بيانات العميل والمالية
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [deliveryDate, setDeliveryDate] = useState("");
@@ -136,6 +138,7 @@ function RestaurantPage() {
   const [editSink, setEditSink] = useState<SinkItem | null>(null);
   const [editShelf, setEditShelf] = useState<ShelfItem | null>(null);
 
+  // نظام الحفظ التلقائي (Drafting)
   const draftKey = "alsaada_project_draft";
 
   useEffect(() => {
@@ -1017,7 +1020,7 @@ function SteelTableCalculator({
   const [count, setCount] = useState(1);
 
   const isValid = length !== "" && width !== "";
-
+  // استخدام الدالة الجديدة لتطبيق الخصم وحذف الآحاد
   const rawPrice = isValid
     ? steelTablePrice({ grade, length: Number(length), width: Number(width), midShelf }, settings)
     : 0;
@@ -1170,6 +1173,7 @@ function SinkCalculator({
   const [count, setCount] = useState(1);
 
   const isValid = length !== "" && width !== "";
+  // استخدام الدالة الجديدة لتطبيق الخصم وحذف الآحاد
   const rawPrice = isValid
     ? sinkPrice({ length: Number(length), width: Number(width), bowls, bottomShelf, bowlDepth }, settings)
     : 0;
@@ -1342,6 +1346,7 @@ function ShelfCalculator({
   const [count, setCount] = useState(1);
 
   const isValid = length !== "" && width !== "";
+  // استخدام الدالة الجديدة لتطبيق الخصم وحذف الآحاد
   const rawPrice = isValid ? shelfPrice({ length: Number(length), width: Number(width) }, settings) : 0;
   const price = calculateFinalPrice(rawPrice);
 
@@ -1801,6 +1806,8 @@ function NumInput({ value, onChange }: { value: NumOrEmpty; onChange: (n: NumOrE
     />
   );
 }
+
+/* ================== رسومات SVG ديناميكية واحترافية ================== */
 
 function TableDrawing({
   length,
