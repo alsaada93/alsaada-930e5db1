@@ -107,7 +107,6 @@ const newUid = () =>
     ? crypto.randomUUID()
     : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
-// دالة ذكية لتطبيق خصم 10% ثم جبر الكسور وحذف الآحاد (مثلاً 157 تصبح 150)
 const calculateFinalPrice = (rawPrice: number): number => {
   if (rawPrice <= 0) return 0;
   const afterDiscount = rawPrice * 0.9;
