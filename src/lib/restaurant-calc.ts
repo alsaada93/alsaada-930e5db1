@@ -1,4 +1,8 @@
-// حسابات حاسبتي الطاولات الستانلس والمغاسل — تعتمد على إعدادات قاعدة البيانات
+// حسابات حاسبات الطاولات الستانلس والمغاسل والأرفف — تعتمد على إعدادات قاعدة البيانات
+
+/** الحد الأدنى والأقصى لأي مقاس (سم) */
+export const SIZE_MIN = 1;
+export const SIZE_MAX = 295;
 
 export interface SteelTableSettings {
   base: { width: number; depth: number };
