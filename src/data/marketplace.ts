@@ -16,7 +16,7 @@ export interface Category {
   descriptionEn: string;
   groups: SubCategory[];
   brands: string[];
-  sub?: SubCategory[];
+  sub?: string[];
 }
 
 export interface Listing {
