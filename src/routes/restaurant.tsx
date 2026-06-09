@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState, useEffect, type ReactNode } from "react";
+import { useMemo, useState, useEffect } from "react";
+import type { ReactNode } from "react";
 import {
   UtensilsCrossed,
   Coffee,
@@ -27,20 +28,19 @@ import { Footer } from "@/components/Footer";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { useProjectTypes, useEquipment, useCalcSettings, type Equipment } from "@/hooks/useRestaurant";
-import {
-  steelTablePrice,
-  sinkPrice,
-  shelfPrice,
-  SIZE_MIN,
-  SIZE_MAX,
-  BHD,
-  type SteelTableConfig,
-  type SinkConfig,
-  type ShelfConfig,
-  type SteelTableSettings,
-  type SinkSettings,
-  type ShelfSettings,
+
+// تم فصل استيراد الدوال عن الأنواع
+import { useProjectTypes, useEquipment, useCalcSettings } from "@/hooks/useRestaurant";
+import type { Equipment } from "@/hooks/useRestaurant";
+
+import { steelTablePrice, sinkPrice, shelfPrice, SIZE_MIN, SIZE_MAX, BHD } from "@/lib/restaurant-calc";
+import type {
+  SteelTableConfig,
+  SinkConfig,
+  ShelfConfig,
+  SteelTableSettings,
+  SinkSettings,
+  ShelfSettings,
 } from "@/lib/restaurant-calc";
 
 const ICONS: Record<string, typeof Coffee> = {
