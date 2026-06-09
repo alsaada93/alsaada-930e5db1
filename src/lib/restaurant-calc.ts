@@ -1,4 +1,8 @@
-// حسابات حاسبتي الطاولات الستانلس والمغاسل — تعتمد على إعدادات قاعدة البيانات
+// حسابات حاسبات الطاولات الستانلس والمغاسل والأرفف — تعتمد على إعدادات قاعدة البيانات
+
+/** الحد الأدنى والأقصى لأي مقاس (سم) */
+export const SIZE_MIN = 1;
+export const SIZE_MAX = 295;
 
 export interface SteelTableSettings {
   base: { width: number; depth: number };
@@ -71,6 +75,30 @@ export function sinkPrice(cfg: SinkConfig, s: SinkSettings): number {
   const extraBowls = Math.max(0, cfg.bowls - 1);
   price += extraBowls * s.extraBowl;
   if (cfg.bottomShelf) price += byLength(cfg.length, s.bottomShelf);
+  return Math.round(price * 100) / 100;
+}
+
+/* ===================== الأرفف ===================== */
+export interface ShelfSettings {
+  /** المقاس المعياري وسعره الثابت */
+  base: { width: number; depth: number; price: number };
+}
+
+/** الرف 100×30سم = 20 د.ب أي ~66.67 د.ب لكل متر مربع */
+export const DEFAULT_SHELF: ShelfSettings = {
+  base: { width: 100, depth: 30, price: 20 },
+};
+
+export interface ShelfConfig {
+  length: number; // الطول سم
+  width: number; // العمق سم
+}
+
+/** السعر يتناسب طردياً مع المساحة بالنسبة للمقاس المعياري */
+export function shelfPrice(cfg: ShelfConfig, s: ShelfSettings): number {
+  const baseArea = s.base.width * s.base.depth;
+  const area = Math.max(1, cfg.length) * Math.max(1, cfg.width);
+  const price = s.base.price * (area / baseArea);
   return Math.round(price * 100) / 100;
 }
 

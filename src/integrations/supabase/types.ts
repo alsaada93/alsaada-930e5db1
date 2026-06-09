@@ -637,6 +637,7 @@ export type Database = {
       restaurant_equipment: {
         Row: {
           active: boolean
+          brand_logo_url: string | null
           category: string | null
           country_of_origin: string | null
           created_at: string
@@ -653,6 +654,7 @@ export type Database = {
         }
         Insert: {
           active?: boolean
+          brand_logo_url?: string | null
           category?: string | null
           country_of_origin?: string | null
           created_at?: string
@@ -669,6 +671,7 @@ export type Database = {
         }
         Update: {
           active?: boolean
+          brand_logo_url?: string | null
           category?: string | null
           country_of_origin?: string | null
           created_at?: string

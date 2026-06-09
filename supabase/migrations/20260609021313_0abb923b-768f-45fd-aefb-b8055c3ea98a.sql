@@ -1,0 +1,1 @@
+ALTER TABLE public.restaurant_equipment ADD COLUMN IF NOT EXISTS brand_logo_url text;
