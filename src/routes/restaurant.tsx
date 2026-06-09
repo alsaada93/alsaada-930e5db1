@@ -1144,7 +1144,7 @@ function SinkDrawing({ bowls, bottomShelf }: { bowls: number; bottomShelf: boole
 function ShelfDrawing() {
   return (
     <svg viewBox="0 0 200 150" className="h-32 w-44">
-      <Rows3 x={0} className="hidden" />
+      
       <polygon points="40,55 150,55 180,72 70,72" fill="#cbd5e1" stroke="#475569" strokeWidth="2" />
       <polygon points="70,72 180,72 180,82 70,82" fill="#94a3b8" stroke="#475569" strokeWidth="2" />
       <polygon points="40,95 150,95 180,112 70,112" fill="#e2e8f0" stroke="#475569" strokeWidth="2" />
