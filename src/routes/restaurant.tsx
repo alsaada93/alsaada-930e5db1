@@ -29,7 +29,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-// تم فصل استيراد الدوال عن الأنواع
 import { useProjectTypes, useEquipment, useCalcSettings } from "@/hooks/useRestaurant";
 import type { Equipment } from "@/hooks/useRestaurant";
 
@@ -89,6 +88,7 @@ interface TableItem extends SteelTableConfig {
   splashRight: boolean;
   splashLeft: boolean;
 }
+
 interface SinkItem extends SinkConfig {
   uid: string;
   price: number;
@@ -96,6 +96,7 @@ interface SinkItem extends SinkConfig {
   splashRight: boolean;
   splashLeft: boolean;
 }
+
 interface ShelfItem extends ShelfConfig {
   uid: string;
   price: number;
@@ -107,10 +108,10 @@ const newUid = () =>
     : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
 // دالة ذكية لتطبيق خصم 10% ثم جبر الكسور وحذف الآحاد (مثلاً 157 تصبح 150)
-const calculateFinalPrice = (rawPrice: number) => {
+const calculateFinalPrice = (rawPrice: number): number => {
   if (rawPrice <= 0) return 0;
-  const afterDiscount = rawPrice * 0.9; // تطبيق خصم 10%
-  return Math.floor(afterDiscount / 10) * 10; // التقريب للأسفل لأقرب عشرة لضمان حذف رقم الآحاد
+  const afterDiscount = rawPrice * 0.9;
+  return Math.floor(afterDiscount / 10) * 10;
 };
 
 function RestaurantPage() {
@@ -121,7 +122,6 @@ function RestaurantPage() {
 
   const [activeType, setActiveType] = useState<string | null>(null);
 
-  // بيانات العميل والمالية
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [deliveryDate, setDeliveryDate] = useState("");
@@ -138,7 +138,6 @@ function RestaurantPage() {
   const [editSink, setEditSink] = useState<SinkItem | null>(null);
   const [editShelf, setEditShelf] = useState<ShelfItem | null>(null);
 
-  // نظام الحفظ التلقائي (Drafting)
   const draftKey = "alsaada_project_draft";
 
   useEffect(() => {
@@ -414,23 +413,24 @@ function RestaurantPage() {
           <section>
             <h2 className="mb-3 text-lg font-bold">١. اختر نوع المشروع</h2>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-              {types.map((t) => {
-                const Icon = ICONS[t.icon ?? ""] ?? Settings2;
-                const active = activeType === t.slug;
-                return (
-                  <button
-                    key={t.id}
-                    type="button"
-                    onClick={() => setActiveType(t.slug)}
-                    className={`flex flex-col items-center gap-2 rounded-2xl border p-4 transition-colors ${
-                      active ? "border-primary bg-primary/10 text-primary" : "border-border hover:border-primary/50"
-                    }`}
-                  >
-                    <Icon className="h-7 w-7" />
-                    <span className="text-sm font-bold">{t.name}</span>
-                  </button>
-                );
-              })}
+              {types &&
+                types.map((t) => {
+                  const Icon = ICONS[t.icon ?? ""] ?? Settings2;
+                  const active = activeType === t.slug;
+                  return (
+                    <button
+                      key={t.id}
+                      type="button"
+                      onClick={() => setActiveType(t.slug)}
+                      className={`flex flex-col items-center gap-2 rounded-2xl border p-4 transition-colors ${
+                        active ? "border-primary bg-primary/10 text-primary" : "border-border hover:border-primary/50"
+                      }`}
+                    >
+                      <Icon className="h-7 w-7" />
+                      <span className="text-sm font-bold">{t.name}</span>
+                    </button>
+                  );
+                })}
             </div>
           </section>
 
@@ -795,7 +795,7 @@ function RestaurantPage() {
                     <div className="space-y-2 text-right">
                       <p>
                         <span className="font-bold text-gray-500 w-24 inline-block">نوع المشروع:</span>{" "}
-                        <span className="font-bold">{types.find((t) => t.slug === activeType)?.name || "-"}</span>
+                        <span className="font-bold">{types?.find((t) => t.slug === activeType)?.name || "-"}</span>
                       </p>
                       <p>
                         <span className="font-bold text-gray-500 w-24 inline-block">الاستلام:</span>{" "}
@@ -1020,7 +1020,7 @@ function SteelTableCalculator({
   const [count, setCount] = useState(1);
 
   const isValid = length !== "" && width !== "";
-  // استخدام الدالة الجديدة لتطبيق الخصم وحذف الآحاد
+
   const rawPrice = isValid
     ? steelTablePrice({ grade, length: Number(length), width: Number(width), midShelf }, settings)
     : 0;
@@ -1173,7 +1173,6 @@ function SinkCalculator({
   const [count, setCount] = useState(1);
 
   const isValid = length !== "" && width !== "";
-  // استخدام الدالة الجديدة لتطبيق الخصم وحذف الآحاد
   const rawPrice = isValid
     ? sinkPrice({ length: Number(length), width: Number(width), bowls, bottomShelf, bowlDepth }, settings)
     : 0;
@@ -1346,7 +1345,6 @@ function ShelfCalculator({
   const [count, setCount] = useState(1);
 
   const isValid = length !== "" && width !== "";
-  // استخدام الدالة الجديدة لتطبيق الخصم وحذف الآحاد
   const rawPrice = isValid ? shelfPrice({ length: Number(length), width: Number(width) }, settings) : 0;
   const price = calculateFinalPrice(rawPrice);
 
@@ -1441,6 +1439,7 @@ function SaveBtn({ onClick, disabled }: { onClick: () => void; disabled?: boolea
     </button>
   );
 }
+
 function CancelBtn({ onClick }: { onClick: () => void }) {
   return (
     <button
@@ -1806,8 +1805,6 @@ function NumInput({ value, onChange }: { value: NumOrEmpty; onChange: (n: NumOrE
     />
   );
 }
-
-/* ================== رسومات SVG ديناميكية واحترافية ================== */
 
 function TableDrawing({
   length,
