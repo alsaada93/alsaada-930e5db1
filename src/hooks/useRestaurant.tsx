@@ -25,6 +25,7 @@ export interface Equipment {
   country_of_origin: string | null;
   description: string | null;
   image_url: string | null;
+  brand_logo_url: string | null;
   category: string | null;
   price_new: number;
   price_used: number;
