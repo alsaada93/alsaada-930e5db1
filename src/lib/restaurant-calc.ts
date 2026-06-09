@@ -78,5 +78,29 @@ export function sinkPrice(cfg: SinkConfig, s: SinkSettings): number {
   return Math.round(price * 100) / 100;
 }
 
+/* ===================== الأرفف ===================== */
+export interface ShelfSettings {
+  /** المقاس المعياري وسعره الثابت */
+  base: { width: number; depth: number; price: number };
+}
+
+/** الرف 100×30سم = 20 د.ب أي ~66.67 د.ب لكل متر مربع */
+export const DEFAULT_SHELF: ShelfSettings = {
+  base: { width: 100, depth: 30, price: 20 },
+};
+
+export interface ShelfConfig {
+  length: number; // الطول سم
+  width: number; // العمق سم
+}
+
+/** السعر يتناسب طردياً مع المساحة بالنسبة للمقاس المعياري */
+export function shelfPrice(cfg: ShelfConfig, s: ShelfSettings): number {
+  const baseArea = s.base.width * s.base.depth;
+  const area = Math.max(1, cfg.length) * Math.max(1, cfg.width);
+  const price = s.base.price * (area / baseArea);
+  return Math.round(price * 100) / 100;
+}
+
 export const BHD = (n: number) =>
   `${(Math.round(n * 1000) / 1000).toLocaleString("ar-EG", { maximumFractionDigits: 3 })} د.ب`;
