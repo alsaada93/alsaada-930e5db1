@@ -91,6 +91,7 @@ export function useEquipment() {
 export function useCalcSettings() {
   const [steel, setSteel] = useState<SteelTableSettings>(DEFAULT_STEEL);
   const [sink, setSink] = useState<SinkSettings>(DEFAULT_SINK);
+  const [shelf, setShelf] = useState<ShelfSettings>(DEFAULT_SHELF);
   useEffect(() => {
     let on = true;
     db.from("restaurant_calc_settings")
@@ -100,11 +101,12 @@ export function useCalcSettings() {
         for (const row of data) {
           if (row.key === "steel_table" && row.value) setSteel(row.value as SteelTableSettings);
           if (row.key === "sink" && row.value) setSink(row.value as SinkSettings);
+          if (row.key === "shelf" && row.value) setShelf(row.value as ShelfSettings);
         }
       });
     return () => {
       on = false;
     };
   }, []);
-  return { steel, sink };
+  return { steel, sink, shelf };
 }
