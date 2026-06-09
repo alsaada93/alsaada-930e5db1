@@ -18,6 +18,9 @@ import {
   X,
   Ruler,
   User,
+  Table as TableIcon,
+  Bath,
+  AlignToTop,
 } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
@@ -78,13 +81,21 @@ type NumOrEmpty = number | "";
 interface Selection {
   condition: Cond;
 }
+
+// إضافة خيارات الحواجز للعناصر المصنعة
 interface TableItem extends SteelTableConfig {
   uid: string;
   price: number;
+  splashBack: boolean;
+  splashRight: boolean;
+  splashLeft: boolean;
 }
 interface SinkItem extends SinkConfig {
   uid: string;
   price: number;
+  splashBack: boolean;
+  splashRight: boolean;
+  splashLeft: boolean;
 }
 interface ShelfItem extends ShelfConfig {
   uid: string;
@@ -110,7 +121,6 @@ function RestaurantPage() {
   const [deliveryDate, setDeliveryDate] = useState("");
   const [notes, setNotes] = useState("");
   const [discount, setDiscount] = useState<number>(0);
-  const [vatRate, setVatRate] = useState<number>(10); // الافتراضي 10%
 
   const [selected, setSelected] = useState<Record<string, Selection>>({});
   const [tables, setTables] = useState<TableItem[]>([]);
@@ -136,7 +146,6 @@ function RestaurantPage() {
         setDeliveryDate(parsed.deliveryDate || "");
         setNotes(parsed.notes || "");
         setDiscount(parsed.discount || 0);
-        setVatRate(parsed.vatRate ?? 10);
         setSelected(parsed.selected || {});
         setTables(parsed.tables || []);
         setSinks(parsed.sinks || []);
@@ -156,26 +165,13 @@ function RestaurantPage() {
       deliveryDate,
       notes,
       discount,
-      vatRate,
       selected,
       tables,
       sinks,
       shelves,
     };
     localStorage.setItem(draftKey, JSON.stringify(draft));
-  }, [
-    activeType,
-    customerName,
-    customerPhone,
-    deliveryDate,
-    notes,
-    discount,
-    vatRate,
-    selected,
-    tables,
-    sinks,
-    shelves,
-  ]);
+  }, [activeType, customerName, customerPhone, deliveryDate, notes, discount, selected, tables, sinks, shelves]);
 
   const visibleEquipment = useMemo(() => {
     if (!activeType) return [];
@@ -207,9 +203,7 @@ function RestaurantPage() {
 
   const subTotal = equipChosenTotal + tablesTotal + sinksTotal + shelvesTotal;
   const discountAmount = discount;
-  const netTotal = Math.max(0, subTotal - discountAmount);
-  const vatAmount = netTotal * (vatRate / 100);
-  const finalTotal = netTotal + vatAmount;
+  const finalTotal = Math.max(0, subTotal - discountAmount);
 
   const savings = equipNewTotal > 0 ? Math.round((1 - equipUsedTotal / equipNewTotal) * 100) : 0;
 
@@ -235,7 +229,6 @@ function RestaurantPage() {
         deliveryDate,
         notes,
         discount,
-        vatRate,
         selected,
         tables,
         sinks,
@@ -255,13 +248,23 @@ function RestaurantPage() {
   // تجميع العناصر للطباعة
   const printGroups = useMemo(() => {
     let index = 1;
-    const items: Array<{ id: number; desc: string; qty: number; unitPrice: number; total: number }> = [];
+    const items: Array<{
+      id: number;
+      img: ReactNode | string;
+      title: string;
+      desc: string;
+      qty: number;
+      unitPrice: number;
+      total: number;
+    }> = [];
 
     chosen.forEach(({ e, sel }) => {
       const price = sel.condition === "new" ? e.price_new : e.price_used;
       items.push({
         id: index++,
-        desc: `${e.name} (${sel.condition === "new" ? "جديد" : "مستعمل"})`,
+        img: e.image_url || "/placeholder.svg",
+        title: e.name,
+        desc: `الحالة: ${sel.condition === "new" ? "جديد" : "مستعمل"} | ${[e.manufacturer, e.country_of_origin].filter(Boolean).join(" - ")}`,
         qty: 1,
         unitPrice: price,
         total: price,
@@ -270,7 +273,7 @@ function RestaurantPage() {
 
     const groupedTables = tables.reduce(
       (acc, t) => {
-        const key = `${t.grade}-${t.length}-${t.width}-${t.midShelf}`;
+        const key = `${t.grade}-${t.length}-${t.width}-${t.midShelf}-${t.splashBack}-${t.splashRight}-${t.splashLeft}`;
         if (!acc[key]) acc[key] = { ...t, qty: 0 };
         acc[key].qty += 1;
         return acc;
@@ -278,9 +281,20 @@ function RestaurantPage() {
       {} as Record<string, any>,
     );
     Object.values(groupedTables).forEach((t) => {
+      const extras = [
+        t.midShelf ? "شلف وسطي" : "",
+        t.splashBack ? "حاجز خلفي" : "",
+        t.splashRight ? "حاجز يمين" : "",
+        t.splashLeft ? "حاجز يسار" : "",
+      ]
+        .filter(Boolean)
+        .join("، ");
+
       items.push({
         id: index++,
-        desc: `طاولة ستانلس ${t.grade} (${t.length}×${t.width}سم) ${t.midShelf ? "+ شلف وسطي" : ""}`,
+        img: <TableIcon className="h-6 w-6 text-gray-500" />,
+        title: `طاولة ستانلس ستيل (درجة ${t.grade})`,
+        desc: `المقاس: ${t.length}×${t.width} سم${extras ? ` | الإضافات: ${extras}` : ""}`,
         qty: t.qty,
         unitPrice: t.price,
         total: t.price * t.qty,
@@ -289,7 +303,7 @@ function RestaurantPage() {
 
     const groupedSinks = sinks.reduce(
       (acc, s) => {
-        const key = `${s.length}-${s.width}-${s.bowls}-${s.bottomShelf}-${s.bowlDepth}`;
+        const key = `${s.length}-${s.width}-${s.bowls}-${s.bottomShelf}-${s.bowlDepth}-${s.splashBack}-${s.splashRight}-${s.splashLeft}`;
         if (!acc[key]) acc[key] = { ...s, qty: 0 };
         acc[key].qty += 1;
         return acc;
@@ -297,9 +311,20 @@ function RestaurantPage() {
       {} as Record<string, any>,
     );
     Object.values(groupedSinks).forEach((s) => {
+      const extras = [
+        s.bottomShelf ? "شلف سفلي" : "",
+        s.splashBack ? "حاجز خلفي (10سم)" : "",
+        s.splashRight ? "حاجز يمين" : "",
+        s.splashLeft ? "حاجز يسار" : "",
+      ]
+        .filter(Boolean)
+        .join("، ");
+
       items.push({
         id: index++,
-        desc: `مغسلة ستانلس 304 (${s.length}×${s.width}سم، ${s.bowls} حوض، عمق ${s.bowlDepth}سم) ${s.bottomShelf ? "+ شلف سفلي" : ""}`,
+        img: <Bath className="h-6 w-6 text-gray-500" />,
+        title: `مغسلة ستانلس ستيل (درجة 304)`,
+        desc: `المقاس: ${s.length}×${s.width} سم | عدد الأحواض: ${s.bowls} | عمق الحوض: ${s.bowlDepth} سم${extras ? ` | الإضافات: ${extras}` : ""}`,
         qty: s.qty,
         unitPrice: s.price,
         total: s.price * s.qty,
@@ -318,7 +343,9 @@ function RestaurantPage() {
     Object.values(groupedShelves).forEach((s) => {
       items.push({
         id: index++,
-        desc: `رف ستانلس (${s.length}×${s.width}سم)`,
+        img: <AlignToTop className="h-6 w-6 text-gray-500" />,
+        title: `رف جداري ستانلس ستيل`,
+        desc: `المقاس: ${s.length}×${s.width} سم | يعلق على الحائط`,
         qty: s.qty,
         unitPrice: s.price,
         total: s.price * s.qty,
@@ -334,7 +361,6 @@ function RestaurantPage() {
         <Header />
       </div>
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 print:p-0 print:m-0 print:max-w-none">
-        {/* المحتوى التفاعلي (يخفى عند الطباعة) */}
         <div className="print:hidden">
           <header className="mb-8 text-center">
             <h1 className="text-3xl font-extrabold md:text-4xl">دراسة تكلفة المشاريع</h1>
@@ -566,7 +592,7 @@ function RestaurantPage() {
                               <img
                                 src={e.image_url || "/placeholder.svg"}
                                 alt=""
-                                className="h-10 w-10 rounded object-cover"
+                                className="h-10 w-10 rounded object-cover border"
                               />
                               {e.name}
                             </div>
@@ -583,7 +609,17 @@ function RestaurantPage() {
                       {tables.map((t) => (
                         <tr key={t.uid} className="border-t border-border">
                           <td className="p-3">
-                            طاولة ستانلس {t.grade} ({t.length}×{t.width}سم{t.midShelf ? " + شلف وسطي" : ""})
+                            طاولة ستانلس {t.grade} ({t.length}×{t.width}سم)
+                            <div className="text-xs text-muted-foreground mt-1">
+                              {[
+                                t.midShelf ? "شلف وسطي" : "",
+                                t.splashBack ? "حاجز خلفي" : "",
+                                t.splashRight ? "حاجز يمين" : "",
+                                t.splashLeft ? "حاجز يسار" : "",
+                              ]
+                                .filter(Boolean)
+                                .join(" • ")}
+                            </div>
                           </td>
                           <td className="p-3">تصنيع</td>
                           <td className="p-3 font-bold">{BHD(t.price)}</td>
@@ -605,8 +641,18 @@ function RestaurantPage() {
                       {sinks.map((s) => (
                         <tr key={s.uid} className="border-t border-border">
                           <td className="p-3">
-                            مغسلة ستانلس 304 ({s.length}×{s.width}سم، {s.bowls} حوض، عمق {s.bowlDepth}سم
-                            {s.bottomShelf ? " + شلف سفلي" : ""})
+                            مغسلة ستانلس 304 ({s.length}×{s.width}سم، عمق {s.bowlDepth}سم)
+                            <div className="text-xs text-muted-foreground mt-1">
+                              {s.bowls} حوض •{" "}
+                              {[
+                                s.bottomShelf ? "شلف سفلي" : "",
+                                s.splashBack ? "حاجز خلفي" : "",
+                                s.splashRight ? "حاجز يمين" : "",
+                                s.splashLeft ? "حاجز يسار" : "",
+                              ]
+                                .filter(Boolean)
+                                .join(" • ")}
+                            </div>
                           </td>
                           <td className="p-3">تصنيع</td>
                           <td className="p-3 font-bold">{BHD(s.price)}</td>
@@ -628,7 +674,7 @@ function RestaurantPage() {
                       {shelves.map((s) => (
                         <tr key={s.uid} className="border-t border-border">
                           <td className="p-3">
-                            رف ستانلس ({s.length}×{s.width}سم)
+                            رف جداري ستانلس ({s.length}×{s.width}سم)
                           </td>
                           <td className="p-3">تصنيع</td>
                           <td className="p-3 font-bold">{BHD(s.price)}</td>
@@ -672,15 +718,6 @@ function RestaurantPage() {
                   </div>
                   <div className="rounded-2xl border border-border p-4 flex flex-col justify-center space-y-4">
                     <div className="flex items-center justify-between">
-                      <label className="text-sm font-bold">نسبة ضريبة القيمة المضافة (%)</label>
-                      <input
-                        type="number"
-                        value={vatRate}
-                        onChange={(e) => setVatRate(Number(e.target.value))}
-                        className="w-24 rounded-lg border border-input bg-background px-3 py-1.5 text-sm text-center"
-                      />
-                    </div>
-                    <div className="flex items-center justify-between">
                       <label className="text-sm font-bold">قيمة الخصم الثابت (د.ب)</label>
                       <input
                         type="number"
@@ -692,11 +729,10 @@ function RestaurantPage() {
                   </div>
                 </div>
 
-                <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+                <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                   <Stat label="الإجمالي الفرعي" value={BHD(subTotal)} />
-                  <Stat label="نسبة التوفير" value={`${savings}%`} accent />
+                  <Stat label="نسبة التوفير (مستعمل/جديد)" value={`${savings}%`} accent />
                   <Stat label="الخصم" value={`- ${BHD(discountAmount)}`} />
-                  <Stat label={`الضريبة (${vatRate}%)`} value={BHD(vatAmount)} />
                   <Stat label="المجموع النهائي" value={BHD(finalTotal)} primary />
                 </div>
               </section>
@@ -713,7 +749,7 @@ function RestaurantPage() {
             <thead className="table-header-group">
               <tr>
                 <td>
-                  <div className="h-[180px]"></div>
+                  <div className="h-[160px]"></div>
                 </td>
               </tr>
             </thead>
@@ -767,21 +803,47 @@ function RestaurantPage() {
                   <table className="w-full text-right mb-8 border-collapse">
                     <thead>
                       <tr className="bg-gray-100 border-y-2 border-gray-900">
-                        <th className="py-3 px-2 text-center font-bold w-12">م</th>
-                        <th className="py-3 px-2 font-bold">الوصف</th>
-                        <th className="py-3 px-2 text-center font-bold w-20">الكمية</th>
-                        <th className="py-3 px-2 text-center font-bold w-32">سعر الوحدة</th>
+                        <th className="py-3 px-2 text-center font-bold w-12 border-l border-gray-300">م</th>
+                        <th className="py-3 px-4 font-bold border-l border-gray-300">تفاصيل العنصر</th>
+                        <th className="py-3 px-2 text-center font-bold w-20 border-l border-gray-300">الكمية</th>
+                        <th className="py-3 px-2 text-center font-bold w-32 border-l border-gray-300">سعر الوحدة</th>
                         <th className="py-3 px-2 text-center font-bold w-32">الإجمالي</th>
                       </tr>
                     </thead>
                     <tbody>
                       {printGroups.map((item) => (
                         <tr key={item.id} className="border-b border-gray-200 print:break-inside-avoid">
-                          <td className="py-3 px-2 text-center text-sm font-bold text-gray-500">{item.id}</td>
-                          <td className="py-3 px-2 text-sm font-bold">{item.desc}</td>
-                          <td className="py-3 px-2 text-center text-sm">{item.qty}</td>
-                          <td className="py-3 px-2 text-center text-sm">{BHD(item.unitPrice)}</td>
-                          <td className="py-3 px-2 text-center font-bold">{BHD(item.total)}</td>
+                          <td className="py-4 px-2 text-center text-sm font-bold text-gray-500 align-middle border-l border-gray-100">
+                            {item.id}
+                          </td>
+                          <td className="py-4 px-4 align-middle border-l border-gray-100">
+                            <div className="flex items-center gap-4">
+                              {typeof item.img === "string" ? (
+                                <img
+                                  src={item.img}
+                                  alt=""
+                                  className="w-14 h-14 object-cover rounded-md border border-gray-200 shrink-0"
+                                />
+                              ) : (
+                                <div className="w-14 h-14 flex items-center justify-center bg-gray-100 rounded-md border border-gray-200 shrink-0">
+                                  {item.img}
+                                </div>
+                              )}
+                              <div className="flex flex-col">
+                                <span className="font-bold text-base text-gray-900">{item.title}</span>
+                                <span className="text-gray-600 text-sm mt-0.5">{item.desc}</span>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="py-4 px-2 text-center font-medium align-middle border-l border-gray-100">
+                            {item.qty}
+                          </td>
+                          <td className="py-4 px-2 text-center font-medium align-middle border-l border-gray-100">
+                            {BHD(item.unitPrice)}
+                          </td>
+                          <td className="py-4 px-2 text-center font-bold text-gray-900 align-middle">
+                            {BHD(item.total)}
+                          </td>
                         </tr>
                       ))}
                       {printGroups.length === 0 && (
@@ -798,29 +860,25 @@ function RestaurantPage() {
                     <div className="w-1/2 pr-4">
                       {notes && (
                         <div className="border border-gray-200 rounded-lg p-4 bg-gray-50 text-sm">
-                          <h4 className="font-bold mb-2 border-b pb-1">ملاحظات وشروط المشروع:</h4>
-                          <p className="whitespace-pre-wrap leading-relaxed">{notes}</p>
+                          <h4 className="font-bold mb-2 border-b pb-1 text-gray-700">ملاحظات وشروط المشروع:</h4>
+                          <p className="whitespace-pre-wrap leading-relaxed text-gray-600">{notes}</p>
                         </div>
                       )}
                     </div>
                     <div className="w-[45%] border-2 border-gray-900 rounded-lg overflow-hidden">
-                      <div className="flex justify-between py-2 px-4 border-b border-gray-200 bg-white text-sm">
+                      <div className="flex justify-between py-3 px-5 border-b border-gray-200 bg-white">
                         <span className="font-bold text-gray-600">الإجمالي الفرعي:</span>
-                        <span className="font-bold">{BHD(subTotal)}</span>
+                        <span className="font-bold text-lg">{BHD(subTotal)}</span>
                       </div>
                       {discount > 0 && (
-                        <div className="flex justify-between py-2 px-4 border-b border-gray-200 bg-white text-sm text-red-600">
-                          <span className="font-bold">الخصم:</span>
-                          <span className="font-bold">- {BHD(discount)}</span>
+                        <div className="flex justify-between py-3 px-5 border-b border-gray-200 bg-red-50 text-red-600">
+                          <span className="font-bold">الخصم الممنوح:</span>
+                          <span className="font-bold text-lg">- {BHD(discount)}</span>
                         </div>
                       )}
-                      <div className="flex justify-between py-2 px-4 border-b border-gray-200 bg-white text-sm">
-                        <span className="font-bold text-gray-600">ضريبة القيمة المضافة ({vatRate}%):</span>
-                        <span className="font-bold">{BHD(vatAmount)}</span>
-                      </div>
-                      <div className="flex justify-between py-4 px-4 bg-gray-900 text-white text-lg">
-                        <span className="font-extrabold">الإجمالي النهائي:</span>
-                        <span className="font-extrabold">{BHD(finalTotal)}</span>
+                      <div className="flex justify-between py-4 px-5 bg-gray-900 text-white">
+                        <span className="font-extrabold text-xl">الإجمالي النهائي:</span>
+                        <span className="font-extrabold text-xl">{BHD(finalTotal)}</span>
                       </div>
                     </div>
                   </div>
@@ -905,10 +963,10 @@ function Stat({
     <div
       className={`rounded-2xl border p-4 ${
         primary
-          ? "border-primary bg-primary text-primary-foreground"
+          ? "border-primary bg-primary text-primary-foreground shadow-sm"
           : accent
             ? "border-emerald-500/40 bg-emerald-500/10"
-            : "border-border"
+            : "border-border bg-card shadow-sm"
       }`}
     >
       <div className={`text-xs ${primary ? "opacity-80" : "text-muted-foreground"}`}>{label}</div>
@@ -946,15 +1004,22 @@ function SteelTableCalculator({
   onAdd,
 }: {
   settings: SteelTableSettings;
-  onAdd: (cfg: SteelTableConfig, price: number, count: number) => void;
+  onAdd: (cfg: Omit<TableItem, "uid" | "price">, price: number, count: number) => void;
 }) {
   const [grade, setGrade] = useState<"201" | "304">("201");
   const [length, setLength] = useState<NumOrEmpty>("");
   const [width, setWidth] = useState<NumOrEmpty>("");
   const [midShelf, setMidShelf] = useState(false);
+
+  // حواجز الطاولة
+  const [splashBack, setSplashBack] = useState(false);
+  const [splashRight, setSplashRight] = useState(false);
+  const [splashLeft, setSplashLeft] = useState(false);
+
   const [count, setCount] = useState(1);
 
   const isValid = length !== "" && width !== "";
+  // ملاحظة: التسعير يعتمد على المعادلة الأصلية، الخيارات الإضافية وصفية للتصنيع
   const price = isValid
     ? steelTablePrice({ grade, length: Number(length), width: Number(width), midShelf }, settings)
     : 0;
@@ -962,8 +1027,8 @@ function SteelTableCalculator({
   return (
     <section className="mt-10 print:hidden">
       <h2 className="mb-3 text-lg font-bold">٣. حاسبة تصنيع الطاولات الستانلس</h2>
-      <div className="grid gap-6 rounded-2xl border border-border p-5 lg:grid-cols-2">
-        <div className="space-y-4">
+      <div className="grid gap-6 rounded-2xl border border-border p-5 lg:grid-cols-2 bg-card shadow-sm">
+        <div className="space-y-5">
           <Field label="نوعية الاستيل">
             <div className="flex gap-2">
               {(["201", "304"] as const).map((g) => (
@@ -988,25 +1053,70 @@ function SteelTableCalculator({
               <NumInput value={width} onChange={setWidth} />
             </Field>
           </div>
-          <CountField value={count} onChange={setCount} />
-          <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
-            <input
-              type="checkbox"
-              checked={midShelf}
-              onChange={(e) => setMidShelf(e.target.checked)}
-              className="h-4 w-4 rounded border-gray-300"
-            />
-            إضافة شلف وسطي (الشلف السفلي مشمول افتراضياً)
-          </label>
+
+          <div className="border-t pt-4">
+            <Field label="الإضافات والحواجز">
+              <div className="mt-2 grid grid-cols-2 gap-3">
+                <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={midShelf}
+                    onChange={(e) => setMidShelf(e.target.checked)}
+                    className="h-4 w-4 rounded border-gray-300"
+                  />
+                  شلف وسطي إضافي
+                </label>
+                <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={splashBack}
+                    onChange={(e) => setSplashBack(e.target.checked)}
+                    className="h-4 w-4 rounded border-gray-300"
+                  />
+                  حاجز خلفي
+                </label>
+                <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={splashRight}
+                    onChange={(e) => setSplashRight(e.target.checked)}
+                    className="h-4 w-4 rounded border-gray-300"
+                  />
+                  حاجز يمين
+                </label>
+                <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={splashLeft}
+                    onChange={(e) => setSplashLeft(e.target.checked)}
+                    className="h-4 w-4 rounded border-gray-300"
+                  />
+                  حاجز يسار
+                </label>
+              </div>
+            </Field>
+          </div>
+
+          <div className="border-t pt-4">
+            <CountField value={count} onChange={setCount} />
+          </div>
         </div>
-        <div className="flex flex-col items-center justify-center gap-4 rounded-xl bg-muted/40 p-4 relative overflow-hidden">
-          <TableDrawing length={length} width={width} midShelf={midShelf} grade={grade} />
-          <div className="text-center z-10">
-            <div className="text-sm text-muted-foreground">السعر للقطعة الواحدة</div>
-            <div className="text-2xl font-extrabold text-primary">{isValid ? BHD(price) : "---"}</div>
+        <div className="flex flex-col items-center justify-center gap-4 rounded-xl bg-muted/40 p-4 relative overflow-hidden border border-dashed border-gray-200">
+          <TableDrawing
+            length={length}
+            width={width}
+            midShelf={midShelf}
+            splashBack={splashBack}
+            splashRight={splashRight}
+            splashLeft={splashLeft}
+            grade={grade}
+          />
+          <div className="text-center z-10 bg-background/80 px-6 py-3 rounded-2xl shadow-sm backdrop-blur-sm mt-4">
+            <div className="text-sm text-muted-foreground font-bold">التكلفة المتوقعة</div>
+            <div className="text-3xl font-black text-primary my-1">{isValid ? BHD(price) : "---"}</div>
             {count > 1 && isValid && (
-              <div className="mt-1 text-xs text-muted-foreground">
-                الإجمالي ({count}): <span className="font-bold">{BHD(price * count)}</span>
+              <div className="text-xs text-muted-foreground font-bold">
+                الإجمالي ({count}): <span className="text-foreground">{BHD(price * count)}</span>
               </div>
             )}
           </div>
@@ -1015,14 +1125,26 @@ function SteelTableCalculator({
             disabled={!isValid}
             onClick={() => {
               if (isValid) {
-                onAdd({ grade, length: Number(length), width: Number(width), midShelf }, price, count);
+                onAdd(
+                  {
+                    grade,
+                    length: Number(length),
+                    width: Number(width),
+                    midShelf,
+                    splashBack,
+                    splashRight,
+                    splashLeft,
+                  },
+                  price,
+                  count,
+                );
                 setLength("");
                 setWidth("");
               }
             }}
-            className="flex items-center gap-1 rounded-lg bg-primary px-4 py-2 font-bold text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed z-10"
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 font-bold text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed z-10 shadow-md mt-2 transition-transform hover:scale-[1.02] active:scale-95"
           >
-            <Plus className="h-4 w-4" /> إضافة إلى المشروع
+            <Plus className="h-5 w-5" /> إضافة الطاولة للمشروع
           </button>
         </div>
       </div>
@@ -1035,13 +1157,19 @@ function SinkCalculator({
   onAdd,
 }: {
   settings: SinkSettings;
-  onAdd: (cfg: SinkConfig, price: number, count: number) => void;
+  onAdd: (cfg: Omit<SinkItem, "uid" | "price">, price: number, count: number) => void;
 }) {
   const [length, setLength] = useState<NumOrEmpty>("");
   const [width, setWidth] = useState<NumOrEmpty>("");
   const [bowls, setBowls] = useState(1);
   const [bottomShelf, setBottomShelf] = useState(false);
   const [bowlDepth, setBowlDepth] = useState(settings.defaultDepth);
+
+  // حواجز المغسلة (الخلفي ستاندرد كما طلبت)
+  const [splashBack, setSplashBack] = useState(true);
+  const [splashRight, setSplashRight] = useState(false);
+  const [splashLeft, setSplashLeft] = useState(false);
+
   const [count, setCount] = useState(1);
 
   const isValid = length !== "" && width !== "";
@@ -1052,8 +1180,8 @@ function SinkCalculator({
   return (
     <section className="mt-10 print:hidden">
       <h2 className="mb-3 text-lg font-bold">٤. حاسبة تفصيل المغاسل (استيل 304)</h2>
-      <div className="grid gap-6 rounded-2xl border border-border p-5 lg:grid-cols-2">
-        <div className="space-y-4">
+      <div className="grid gap-6 rounded-2xl border border-border p-5 lg:grid-cols-2 bg-card shadow-sm">
+        <div className="space-y-5">
           <div className="grid grid-cols-2 gap-3">
             <Field label="الطول (سم)">
               <NumInput value={length} onChange={setLength} />
@@ -1062,6 +1190,7 @@ function SinkCalculator({
               <NumInput value={width} onChange={setWidth} />
             </Field>
           </div>
+
           <div className="grid grid-cols-2 gap-3">
             <Field label="عدد الأحواض">
               <div className="flex items-center gap-3">
@@ -1082,8 +1211,8 @@ function SinkCalculator({
                 </button>
               </div>
             </Field>
-            <CountField value={count} onChange={setCount} />
           </div>
+
           <Field label="عمق الحوض (سم)">
             <div className="flex flex-wrap gap-2">
               {settings.depths.map((d) => (
@@ -1096,29 +1225,76 @@ function SinkCalculator({
                   }`}
                 >
                   {d}
-                  {d === settings.defaultDepth && <span className="ms-1 text-[10px] text-emerald-600">موصى به</span>}
+                  {d === settings.defaultDepth && <span className="ms-1 text-[10px] text-emerald-600">(موصى به)</span>}
                 </button>
               ))}
             </div>
           </Field>
-          <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
-            <input
-              type="checkbox"
-              checked={bottomShelf}
-              onChange={(e) => setBottomShelf(e.target.checked)}
-              className="h-4 w-4 rounded border-gray-300"
-            />
-            إضافة شلف سفلي
-          </label>
+
+          <div className="border-t pt-4">
+            <Field label="الإضافات والحواجز">
+              <div className="mt-2 grid grid-cols-2 gap-3">
+                <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={bottomShelf}
+                    onChange={(e) => setBottomShelf(e.target.checked)}
+                    className="h-4 w-4 rounded border-gray-300"
+                  />
+                  شلف سفلي
+                </label>
+                <label className="flex items-center gap-2 text-sm font-medium cursor-pointer text-emerald-700">
+                  <input
+                    type="checkbox"
+                    checked={splashBack}
+                    onChange={(e) => setSplashBack(e.target.checked)}
+                    className="h-4 w-4 rounded border-emerald-500 text-emerald-600 focus:ring-emerald-500"
+                  />
+                  حاجز خلفي (10سم ستاندرد)
+                </label>
+                <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={splashRight}
+                    onChange={(e) => setSplashRight(e.target.checked)}
+                    className="h-4 w-4 rounded border-gray-300"
+                  />
+                  حاجز يمين
+                </label>
+                <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={splashLeft}
+                    onChange={(e) => setSplashLeft(e.target.checked)}
+                    className="h-4 w-4 rounded border-gray-300"
+                  />
+                  حاجز يسار
+                </label>
+              </div>
+            </Field>
+          </div>
+
+          <div className="border-t pt-4">
+            <CountField value={count} onChange={setCount} />
+          </div>
         </div>
-        <div className="flex flex-col items-center justify-center gap-4 rounded-xl bg-muted/40 p-4 relative overflow-hidden">
-          <SinkDrawing length={length} width={width} bowls={bowls} bottomShelf={bottomShelf} bowlDepth={bowlDepth} />
-          <div className="text-center z-10">
-            <div className="text-sm text-muted-foreground">السعر للقطعة الواحدة</div>
-            <div className="text-2xl font-extrabold text-primary">{isValid ? BHD(price) : "---"}</div>
+        <div className="flex flex-col items-center justify-center gap-4 rounded-xl bg-muted/40 p-4 relative overflow-hidden border border-dashed border-gray-200">
+          <SinkDrawing
+            length={length}
+            width={width}
+            bowls={bowls}
+            bottomShelf={bottomShelf}
+            bowlDepth={bowlDepth}
+            splashBack={splashBack}
+            splashRight={splashRight}
+            splashLeft={splashLeft}
+          />
+          <div className="text-center z-10 bg-background/80 px-6 py-3 rounded-2xl shadow-sm backdrop-blur-sm mt-4">
+            <div className="text-sm text-muted-foreground font-bold">التكلفة المتوقعة</div>
+            <div className="text-3xl font-black text-primary my-1">{isValid ? BHD(price) : "---"}</div>
             {count > 1 && isValid && (
-              <div className="mt-1 text-xs text-muted-foreground">
-                الإجمالي ({count}): <span className="font-bold">{BHD(price * count)}</span>
+              <div className="text-xs text-muted-foreground font-bold">
+                الإجمالي ({count}): <span className="text-foreground">{BHD(price * count)}</span>
               </div>
             )}
           </div>
@@ -1127,14 +1303,27 @@ function SinkCalculator({
             disabled={!isValid}
             onClick={() => {
               if (isValid) {
-                onAdd({ length: Number(length), width: Number(width), bowls, bottomShelf, bowlDepth }, price, count);
+                onAdd(
+                  {
+                    length: Number(length),
+                    width: Number(width),
+                    bowls,
+                    bottomShelf,
+                    bowlDepth,
+                    splashBack,
+                    splashRight,
+                    splashLeft,
+                  },
+                  price,
+                  count,
+                );
                 setLength("");
                 setWidth("");
               }
             }}
-            className="flex items-center gap-1 rounded-lg bg-primary px-4 py-2 font-bold text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed z-10"
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 font-bold text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed z-10 shadow-md mt-2 transition-transform hover:scale-[1.02] active:scale-95"
           >
-            <Plus className="h-4 w-4" /> إضافة إلى المشروع
+            <Plus className="h-5 w-5" /> إضافة المغسلة للمشروع
           </button>
         </div>
       </div>
@@ -1158,27 +1347,33 @@ function ShelfCalculator({
 
   return (
     <section className="mt-10 print:hidden">
-      <h2 className="mb-3 text-lg font-bold">٥. حاسبة تفصيل الأرفف (استيل)</h2>
-      <div className="grid gap-6 rounded-2xl border border-border p-5 lg:grid-cols-2">
-        <div className="space-y-4">
+      <h2 className="mb-3 text-lg font-bold">٥. حاسبة تفصيل أرفف جدارية (استيل)</h2>
+      <div className="grid gap-6 rounded-2xl border border-border p-5 lg:grid-cols-2 bg-card shadow-sm">
+        <div className="space-y-5">
           <div className="grid grid-cols-2 gap-3">
             <Field label="الطول (سم)">
               <NumInput value={length} onChange={setLength} />
             </Field>
-            <Field label="العرض (سم)">
+            <Field label="العمق/البروز (سم)">
               <NumInput value={width} onChange={setWidth} />
             </Field>
           </div>
-          <CountField value={count} onChange={setCount} />
+          <div className="border-t pt-4">
+            <CountField value={count} onChange={setCount} />
+          </div>
+          <p className="text-xs text-muted-foreground mt-4 leading-relaxed font-medium bg-muted/50 p-3 rounded-lg border">
+            المقاس المعياري {settings.base.width}×{settings.base.depth}سم بسعر {BHD(settings.base.price)}، ويرتفع السعر
+            تلقائياً كلما زادت المساحة. هذا الرف مخصص للتعليق على الجدار.
+          </p>
         </div>
-        <div className="flex flex-col items-center justify-center gap-4 rounded-xl bg-muted/40 p-4 relative overflow-hidden">
-          <ShelfDrawing length={length} width={width} />
-          <div className="text-center z-10">
-            <div className="text-sm text-muted-foreground">السعر للقطعة الواحدة</div>
-            <div className="text-2xl font-extrabold text-primary">{isValid ? BHD(price) : "---"}</div>
+        <div className="flex flex-col items-center justify-center gap-4 rounded-xl bg-muted/40 p-4 relative overflow-hidden border border-dashed border-gray-200">
+          <WallShelfDrawing length={length} width={width} />
+          <div className="text-center z-10 bg-background/80 px-6 py-3 rounded-2xl shadow-sm backdrop-blur-sm mt-4">
+            <div className="text-sm text-muted-foreground font-bold">التكلفة المتوقعة</div>
+            <div className="text-3xl font-black text-primary my-1">{isValid ? BHD(price) : "---"}</div>
             {count > 1 && isValid && (
-              <div className="mt-1 text-xs text-muted-foreground">
-                الإجمالي ({count}): <span className="font-bold">{BHD(price * count)}</span>
+              <div className="text-xs text-muted-foreground font-bold">
+                الإجمالي ({count}): <span className="text-foreground">{BHD(price * count)}</span>
               </div>
             )}
           </div>
@@ -1192,9 +1387,9 @@ function ShelfCalculator({
                 setWidth("");
               }
             }}
-            className="flex items-center gap-1 rounded-lg bg-primary px-4 py-2 font-bold text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed z-10"
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 font-bold text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed z-10 shadow-md mt-2 transition-transform hover:scale-[1.02] active:scale-95"
           >
-            <Plus className="h-4 w-4" /> إضافة إلى المشروع
+            <Plus className="h-5 w-5" /> إضافة الرف للمشروع
           </button>
         </div>
       </div>
@@ -1214,16 +1409,16 @@ function DialogShell({
   footer: ReactNode;
 }) {
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4 print:hidden">
-      <div className="w-full max-w-md rounded-2xl bg-card p-5 shadow-xl">
-        <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-lg font-bold">{title}</h3>
-          <button onClick={onClose} aria-label="إغلاق" className="rounded hover:bg-muted p-1">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4 print:hidden backdrop-blur-sm">
+      <div className="w-full max-w-md rounded-2xl bg-card p-6 shadow-2xl border border-border">
+        <div className="mb-5 flex items-center justify-between border-b pb-3">
+          <h3 className="text-xl font-bold">{title}</h3>
+          <button onClick={onClose} aria-label="إغلاق" className="rounded-lg hover:bg-muted p-1.5 transition-colors">
             <X className="h-5 w-5" />
           </button>
         </div>
-        <div className="space-y-4">{children}</div>
-        <div className="mt-5 flex justify-end gap-2">{footer}</div>
+        <div className="space-y-5">{children}</div>
+        <div className="mt-6 flex justify-end gap-3 pt-3 border-t">{footer}</div>
       </div>
     </div>
   );
@@ -1234,7 +1429,7 @@ function SaveBtn({ onClick, disabled }: { onClick: () => void; disabled?: boolea
     <button
       onClick={onClick}
       disabled={disabled}
-      className="rounded-lg bg-primary px-4 py-2 text-sm font-bold text-primary-foreground disabled:opacity-50"
+      className="rounded-lg bg-primary px-5 py-2.5 text-sm font-bold text-primary-foreground disabled:opacity-50 transition-colors hover:bg-primary/90"
     >
       حفظ التعديل
     </button>
@@ -1242,7 +1437,10 @@ function SaveBtn({ onClick, disabled }: { onClick: () => void; disabled?: boolea
 }
 function CancelBtn({ onClick }: { onClick: () => void }) {
   return (
-    <button onClick={onClick} className="rounded-lg border border-border px-4 py-2 text-sm font-bold hover:bg-muted">
+    <button
+      onClick={onClick}
+      className="rounded-lg border border-border bg-background px-5 py-2.5 text-sm font-bold hover:bg-muted transition-colors"
+    >
       إلغاء
     </button>
   );
@@ -1263,6 +1461,9 @@ function EditTableDialog({
   const [length, setLength] = useState<NumOrEmpty>(value.length);
   const [width, setWidth] = useState<NumOrEmpty>(value.width);
   const [midShelf, setMidShelf] = useState(value.midShelf);
+  const [splashBack, setSplashBack] = useState(value.splashBack);
+  const [splashRight, setSplashRight] = useState(value.splashRight);
+  const [splashLeft, setSplashLeft] = useState(value.splashLeft);
 
   const isValid = length !== "" && width !== "";
   const price = isValid
@@ -1279,7 +1480,18 @@ function EditTableDialog({
           <SaveBtn
             disabled={!isValid}
             onClick={() =>
-              isValid && onSave({ ...value, grade, length: Number(length), width: Number(width), midShelf, price })
+              isValid &&
+              onSave({
+                ...value,
+                grade,
+                length: Number(length),
+                width: Number(width),
+                midShelf,
+                splashBack,
+                splashRight,
+                splashLeft,
+                price,
+              })
             }
           />
         </>
@@ -1292,9 +1504,7 @@ function EditTableDialog({
               key={g}
               type="button"
               onClick={() => setGrade(g)}
-              className={`flex-1 rounded-lg border p-2 font-bold ${
-                grade === g ? "border-primary bg-primary/10 text-primary" : "border-border"
-              }`}
+              className={`flex-1 rounded-lg border p-2 font-bold ${grade === g ? "border-primary bg-primary/10 text-primary" : "border-border"}`}
             >
               استيل {g}
             </button>
@@ -1309,12 +1519,47 @@ function EditTableDialog({
           <NumInput value={width} onChange={setWidth} />
         </Field>
       </div>
-      <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
-        <input type="checkbox" checked={midShelf} onChange={(e) => setMidShelf(e.target.checked)} className="h-4 w-4" />
-        إضافة شلف وسطي
-      </label>
-      <div className="text-sm">
-        السعر: <span className="font-bold text-primary">{isValid ? BHD(price) : "---"}</span>
+      <div className="grid grid-cols-2 gap-3 bg-muted/30 p-3 rounded-lg border border-border">
+        <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
+          <input
+            type="checkbox"
+            checked={midShelf}
+            onChange={(e) => setMidShelf(e.target.checked)}
+            className="h-4 w-4"
+          />
+          شلف وسطي
+        </label>
+        <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
+          <input
+            type="checkbox"
+            checked={splashBack}
+            onChange={(e) => setSplashBack(e.target.checked)}
+            className="h-4 w-4"
+          />
+          حاجز خلفي
+        </label>
+        <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
+          <input
+            type="checkbox"
+            checked={splashRight}
+            onChange={(e) => setSplashRight(e.target.checked)}
+            className="h-4 w-4"
+          />
+          حاجز يمين
+        </label>
+        <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
+          <input
+            type="checkbox"
+            checked={splashLeft}
+            onChange={(e) => setSplashLeft(e.target.checked)}
+            className="h-4 w-4"
+          />
+          حاجز يسار
+        </label>
+      </div>
+      <div className="text-sm font-bold bg-primary/5 p-3 rounded-lg border border-primary/20 flex justify-between">
+        <span>السعر المعدل:</span>
+        <span className="text-primary text-lg">{isValid ? BHD(price) : "---"}</span>
       </div>
     </DialogShell>
   );
@@ -1336,6 +1581,9 @@ function EditSinkDialog({
   const [bowls, setBowls] = useState(value.bowls);
   const [bottomShelf, setBottomShelf] = useState(value.bottomShelf);
   const [bowlDepth, setBowlDepth] = useState(value.bowlDepth);
+  const [splashBack, setSplashBack] = useState(value.splashBack);
+  const [splashRight, setSplashRight] = useState(value.splashRight);
+  const [splashLeft, setSplashLeft] = useState(value.splashLeft);
 
   const isValid = length !== "" && width !== "";
   const price = isValid
@@ -1353,7 +1601,18 @@ function EditSinkDialog({
             disabled={!isValid}
             onClick={() =>
               isValid &&
-              onSave({ ...value, length: Number(length), width: Number(width), bowls, bottomShelf, bowlDepth, price })
+              onSave({
+                ...value,
+                length: Number(length),
+                width: Number(width),
+                bowls,
+                bottomShelf,
+                bowlDepth,
+                splashBack,
+                splashRight,
+                splashLeft,
+                price,
+              })
             }
           />
         </>
@@ -1372,7 +1631,7 @@ function EditSinkDialog({
           <button
             type="button"
             onClick={() => setBowls((b) => Math.max(1, b - 1))}
-            className="rounded-lg border border-border p-2"
+            className="rounded-lg border border-border p-2 hover:bg-muted"
           >
             <Minus className="h-4 w-4" />
           </button>
@@ -1380,7 +1639,7 @@ function EditSinkDialog({
           <button
             type="button"
             onClick={() => setBowls((b) => Math.min(10, b + 1))}
-            className="rounded-lg border border-border p-2"
+            className="rounded-lg border border-border p-2 hover:bg-muted"
           >
             <Plus className="h-4 w-4" />
           </button>
@@ -1393,26 +1652,54 @@ function EditSinkDialog({
               key={d}
               type="button"
               onClick={() => setBowlDepth(d)}
-              className={`rounded-lg border px-3 py-1.5 text-sm font-bold ${
-                bowlDepth === d ? "border-primary bg-primary/10 text-primary" : "border-border"
-              }`}
+              className={`rounded-lg border px-3 py-1.5 text-sm font-bold ${bowlDepth === d ? "border-primary bg-primary/10 text-primary" : "border-border"}`}
             >
               {d}
             </button>
           ))}
         </div>
       </Field>
-      <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
-        <input
-          type="checkbox"
-          checked={bottomShelf}
-          onChange={(e) => setBottomShelf(e.target.checked)}
-          className="h-4 w-4"
-        />
-        إضافة شلف سفلي
-      </label>
-      <div className="text-sm">
-        السعر: <span className="font-bold text-primary">{isValid ? BHD(price) : "---"}</span>
+      <div className="grid grid-cols-2 gap-3 bg-muted/30 p-3 rounded-lg border border-border">
+        <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
+          <input
+            type="checkbox"
+            checked={bottomShelf}
+            onChange={(e) => setBottomShelf(e.target.checked)}
+            className="h-4 w-4"
+          />
+          شلف سفلي
+        </label>
+        <label className="flex items-center gap-2 text-sm font-medium cursor-pointer text-emerald-700">
+          <input
+            type="checkbox"
+            checked={splashBack}
+            onChange={(e) => setSplashBack(e.target.checked)}
+            className="h-4 w-4 rounded border-emerald-500 text-emerald-600 focus:ring-emerald-500"
+          />
+          حاجز خلفي (ستاندرد)
+        </label>
+        <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
+          <input
+            type="checkbox"
+            checked={splashRight}
+            onChange={(e) => setSplashRight(e.target.checked)}
+            className="h-4 w-4"
+          />
+          حاجز يمين
+        </label>
+        <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
+          <input
+            type="checkbox"
+            checked={splashLeft}
+            onChange={(e) => setSplashLeft(e.target.checked)}
+            className="h-4 w-4"
+          />
+          حاجز يسار
+        </label>
+      </div>
+      <div className="text-sm font-bold bg-primary/5 p-3 rounded-lg border border-primary/20 flex justify-between">
+        <span>السعر المعدل:</span>
+        <span className="text-primary text-lg">{isValid ? BHD(price) : "---"}</span>
       </div>
     </DialogShell>
   );
@@ -1437,7 +1724,7 @@ function EditShelfDialog({
 
   return (
     <DialogShell
-      title="تعديل الرف"
+      title="تعديل الرف الجداري"
       onClose={onClose}
       footer={
         <>
@@ -1453,12 +1740,13 @@ function EditShelfDialog({
         <Field label="الطول (سم)">
           <NumInput value={length} onChange={setLength} />
         </Field>
-        <Field label="العرض (سم)">
+        <Field label="العمق (سم)">
           <NumInput value={width} onChange={setWidth} />
         </Field>
       </div>
-      <div className="text-sm">
-        السعر: <span className="font-bold text-primary">{isValid ? BHD(price) : "---"}</span>
+      <div className="text-sm font-bold bg-primary/5 p-3 rounded-lg border border-primary/20 flex justify-between">
+        <span>السعر المعدل:</span>
+        <span className="text-primary text-lg">{isValid ? BHD(price) : "---"}</span>
       </div>
     </DialogShell>
   );
@@ -1467,8 +1755,8 @@ function EditShelfDialog({
 function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div>
-      <div className="mb-1.5 flex items-center gap-1 text-sm font-bold">
-        <Ruler className="h-3.5 w-3.5 text-muted-foreground" />
+      <div className="mb-2 flex items-center gap-1.5 text-sm font-bold text-gray-700">
+        <Ruler className="h-4 w-4 text-primary/70" />
         {label}
       </div>
       {children}
@@ -1496,20 +1784,28 @@ function NumInput({ value, onChange }: { value: NumOrEmpty; onChange: (n: NumOrE
           onChange(Math.min(SIZE_MAX, Math.max(SIZE_MIN, Number(value))));
         }
       }}
-      className="w-full rounded-lg border border-input bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+      className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 font-bold"
     />
   );
 }
+
+/* ================== رسومات SVG ديناميكية واحترافية ================== */
 
 function TableDrawing({
   length,
   width,
   midShelf,
+  splashBack,
+  splashRight,
+  splashLeft,
   grade,
 }: {
   length: NumOrEmpty;
   width: NumOrEmpty;
   midShelf: boolean;
+  splashBack: boolean;
+  splashRight: boolean;
+  splashLeft: boolean;
   grade: string;
 }) {
   const l = length === "" ? 120 : length;
@@ -1521,71 +1817,89 @@ function TableDrawing({
   const dz = w * scale * 0.6;
   const dyW = w * scale * 0.4;
   const h = 50;
+  const spH = 15; // ارتفاع الحاجز
 
-  const startX = 20 + dz;
-  const startY = 40;
+  const startX = 30 + dz;
+  const startY = 50; // النزول قليلاً لاستيعاب الحاجز
 
-  const topFace = `${startX},${startY} ${startX + dx},${startY + dyL} ${startX + dx - dz},${startY + dyL + dyW} ${startX - dz},${startY + dyW}`;
-  const midFace = `${startX},${startY + h / 2} ${startX + dx},${startY + h / 2 + dyL} ${startX + dx - dz},${startY + h / 2 + dyL + dyW} ${startX - dz},${startY + h / 2 + dyW}`;
-  const bottomFace = `${startX},${startY + h} ${startX + dx},${startY + h + dyL} ${startX + dx - dz},${startY + h + dyL + dyW} ${startX - dz},${startY + h + dyW}`;
+  // الإحداثيات الأساسية للسطح العلوي
+  const pA = { x: startX, y: startY }; // الركن الخلفي
+  const pB = { x: startX + dx, y: startY + dyL }; // الركن الأيمن
+  const pC = { x: startX + dx - dz, y: startY + dyL + dyW }; // الركن الأمامي
+  const pD = { x: startX - dz, y: startY + dyW }; // الركن الأيسر
+
+  const topFace = `${pA.x},${pA.y} ${pB.x},${pB.y} ${pC.x},${pC.y} ${pD.x},${pD.y}`;
+  const midFace = `${pA.x},${pA.y + h / 2} ${pB.x},${pB.y + h / 2} ${pC.x},${pC.y + h / 2} ${pD.x},${pD.y + h / 2}`;
+  const bottomFace = `${pA.x},${pA.y + h} ${pB.x},${pB.y + h} ${pC.x},${pC.y + h} ${pD.x},${pD.y + h}`;
 
   return (
-    <svg viewBox="0 0 250 160" className="h-40 w-full max-w-[250px] opacity-90 drop-shadow-md">
-      <line x1={startX} y1={startY} x2={startX} y2={startY + h} stroke="#64748b" strokeWidth="2" />
-      <line
-        x1={startX - dz}
-        y1={startY + dyW}
-        x2={startX - dz}
-        y2={startY + dyW + h}
-        stroke="#475569"
-        strokeWidth="3"
-      />
-      <line
-        x1={startX + dx}
-        y1={startY + dyL}
-        x2={startX + dx}
-        y2={startY + dyL + h}
-        stroke="#475569"
-        strokeWidth="3"
-      />
+    <svg viewBox="0 0 250 180" className="h-44 w-full max-w-[280px] drop-shadow-md">
+      {/* الأرجل الخلفية */}
+      <line x1={pA.x} y1={pA.y} x2={pA.x} y2={pA.y + h} stroke="#64748b" strokeWidth="2" />
+      <line x1={pD.x} y1={pD.y} x2={pD.x} y2={pD.y + h} stroke="#475569" strokeWidth="3" />
+      <line x1={pB.x} y1={pB.y} x2={pB.x} y2={pB.y + h} stroke="#475569" strokeWidth="3" />
+
+      {/* الشلوف */}
       <polygon points={bottomFace} fill="#e2e8f0" stroke="#475569" strokeWidth="1.5" />
-      {midShelf && <polygon points={midFace} fill="#e2e8f0" stroke="#475569" strokeWidth="1.5" />}
-      <line
-        x1={startX + dx - dz}
-        y1={startY + dyL + dyW}
-        x2={startX + dx - dz}
-        y2={startY + dyL + dyW + h}
-        stroke="#334155"
-        strokeWidth="3"
-      />
+      {midShelf && <polygon points={midFace} fill="#f1f5f9" stroke="#475569" strokeWidth="1.5" />}
+
+      {/* الرجل الأمامية */}
+      <line x1={pC.x} y1={pC.y} x2={pC.x} y2={pC.y + h} stroke="#334155" strokeWidth="3" />
+
+      {/* السطح العلوي */}
       <polygon points={topFace} fill="#cbd5e1" stroke="#475569" strokeWidth="2" />
+
+      {/* الحواجز (Splash Guards) */}
+      {splashBack && (
+        <polygon
+          points={`${pA.x},${pA.y} ${pB.x},${pB.y} ${pB.x},${pB.y - spH} ${pA.x},${pA.y - spH}`}
+          fill="#94a3b8"
+          stroke="#334155"
+          strokeWidth="1.5"
+        />
+      )}
+      {splashLeft && (
+        <polygon
+          points={`${pD.x},${pD.y} ${pA.x},${pA.y} ${pA.x},${pA.y - spH} ${pD.x},${pD.y - spH}`}
+          fill="#64748b"
+          stroke="#334155"
+          strokeWidth="1.5"
+        />
+      )}
+      {splashRight && (
+        <polygon
+          points={`${pB.x},${pB.y} ${pC.x},${pC.y} ${pC.x},${pC.y - spH} ${pB.x},${pB.y - spH}`}
+          fill="#e2e8f0"
+          stroke="#334155"
+          strokeWidth="1.5"
+        />
+      )}
+
+      {/* الأبعاد المكتوبة */}
       {length !== "" && (
         <text
-          x={startX + dx / 2 + 10}
-          y={startY + dyL / 2 - 5}
+          x={pA.x + dx / 2 + 10}
+          y={pA.y + dyL / 2 - 5}
           fill="#0f172a"
-          fontSize="10"
+          fontSize="11"
           fontWeight="bold"
-          transform={`rotate(20 ${startX + dx / 2} ${startY + dyL / 2})`}
+          transform={`rotate(20 ${pA.x + dx / 2} ${pA.y + dyL / 2})`}
         >
-          L: {length}cm
+          طول {length}
         </text>
       )}
       {width !== "" && (
         <text
-          x={startX - dz / 2 - 15}
-          y={startY + dyW / 2 + 15}
+          x={pA.x - dz / 2 - 15}
+          y={pA.y + dyW / 2 + 15}
           fill="#0f172a"
-          fontSize="10"
+          fontSize="11"
           fontWeight="bold"
-          transform={`rotate(-35 ${startX - dz / 2} ${startY + dyW / 2})`}
+          transform={`rotate(-35 ${pA.x - dz / 2} ${pA.y + dyW / 2})`}
         >
-          W: {width}cm
+          عرض {width}
         </text>
       )}
-      <text x="125" y="150" textAnchor="middle" fill="#64748b" fontSize="12" fontWeight="bold">
-        طاولة {grade}
-      </text>
     </svg>
   );
 }
@@ -1596,12 +1910,18 @@ function SinkDrawing({
   bowls,
   bottomShelf,
   bowlDepth,
+  splashBack,
+  splashRight,
+  splashLeft,
 }: {
   length: NumOrEmpty;
   width: NumOrEmpty;
   bowls: number;
   bottomShelf: boolean;
   bowlDepth: number;
+  splashBack: boolean;
+  splashRight: boolean;
+  splashLeft: boolean;
 }) {
   const l = length === "" ? 120 : length;
   const w = width === "" ? 60 : width;
@@ -1612,145 +1932,198 @@ function SinkDrawing({
   const dz = w * scale * 0.6;
   const dyW = w * scale * 0.4;
   const h = 50;
+  const spH = 15; // ارتفاع الحاجز
 
-  const startX = 20 + dz;
-  const startY = 40;
+  // تأثير عمق الحوض الواقعي
+  const depthVisual = (bowlDepth / 30) * 16; // يتغير النزول في الرسم حسب العمق المدخل
 
-  const topFace = `${startX},${startY} ${startX + dx},${startY + dyL} ${startX + dx - dz},${startY + dyL + dyW} ${startX - dz},${startY + dyW}`;
-  const bottomFace = `${startX},${startY + h} ${startX + dx},${startY + h + dyL} ${startX + dx - dz},${startY + h + dyL + dyW} ${startX - dz},${startY + h + dyW}`;
+  const startX = 30 + dz;
+  const startY = 50;
+
+  const pA = { x: startX, y: startY };
+  const pB = { x: startX + dx, y: startY + dyL };
+  const pC = { x: startX + dx - dz, y: startY + dyL + dyW };
+  const pD = { x: startX - dz, y: startY + dyW };
+
+  const topFace = `${pA.x},${pA.y} ${pB.x},${pB.y} ${pC.x},${pC.y} ${pD.x},${pD.y}`;
+  const bottomFace = `${pA.x},${pA.y + h} ${pB.x},${pB.y + h} ${pC.x},${pC.y + h} ${pD.x},${pD.y + h}`;
 
   const actualBowls = Math.min(bowls, 5);
 
   return (
-    <svg viewBox="0 0 250 160" className="h-40 w-full max-w-[250px] opacity-90 drop-shadow-md">
-      <line x1={startX} y1={startY} x2={startX} y2={startY + h} stroke="#64748b" strokeWidth="2" />
-      <line
-        x1={startX - dz}
-        y1={startY + dyW}
-        x2={startX - dz}
-        y2={startY + dyW + h}
-        stroke="#475569"
-        strokeWidth="3"
-      />
-      <line
-        x1={startX + dx}
-        y1={startY + dyL}
-        x2={startX + dx}
-        y2={startY + dyL + h}
-        stroke="#475569"
-        strokeWidth="3"
-      />
+    <svg viewBox="0 0 250 180" className="h-44 w-full max-w-[280px] drop-shadow-md">
+      <line x1={pA.x} y1={pA.y} x2={pA.x} y2={pA.y + h} stroke="#64748b" strokeWidth="2" />
+      <line x1={pD.x} y1={pD.y} x2={pD.x} y2={pD.y + h} stroke="#475569" strokeWidth="3" />
+      <line x1={pB.x} y1={pB.y} x2={pB.x} y2={pB.y + h} stroke="#475569" strokeWidth="3" />
+
       {bottomShelf && <polygon points={bottomFace} fill="#e2e8f0" stroke="#475569" strokeWidth="1.5" />}
-      <line
-        x1={startX + dx - dz}
-        y1={startY + dyL + dyW}
-        x2={startX + dx - dz}
-        y2={startY + dyL + dyW + h}
-        stroke="#334155"
-        strokeWidth="3"
-      />
+
+      <line x1={pC.x} y1={pC.y} x2={pC.x} y2={pC.y + h} stroke="#334155" strokeWidth="3" />
+
+      {/* السطح العلوي للمغسلة */}
       <polygon points={topFace} fill="#cbd5e1" stroke="#475569" strokeWidth="2" />
+
+      {/* رسم الأحواض ثلاثية الأبعاد ديناميكياً */}
       {Array.from({ length: actualBowls }).map((_, i) => {
+        // حساب إحداثيات الحوض
         const fractionX = (i + 0.5) / actualBowls;
         const cx = startX + dx * fractionX - dz * 0.5;
         const cy = startY + dyL * fractionX + dyW * 0.5;
-        const bW = (dx / actualBowls) * 0.6;
-        const bD = dz * 0.5;
+        const bW = (dx / actualBowls) * 0.7; // عرض الحوض
+        const bD = dz * 0.7; // عمق الحوض للداخل
+
+        const hA = { x: cx - bW / 2, y: cy - bD / 2 };
+        const hB = { x: cx + bW / 2, y: cy - bD / 2 + dyL / actualBowls };
+        const hC = { x: cx + bW / 2 - bD / 2, y: cy + dyL / actualBowls + bD / 2 };
+        const hD = { x: cx - bW / 2 - bD / 2, y: cy + bD / 2 };
+
+        // القاع ينزل حسب depthVisual
+        const dropY = depthVisual;
 
         return (
           <g key={i}>
+            {/* الجدار الداخلي الأيمن */}
             <polygon
-              points={`${cx - bW / 2},${cy - bD / 2} ${cx + bW / 2},${cy - bD / 2 + dyL / actualBowls} ${cx + bW / 2 - bD / 2},${cy + dyL / actualBowls + bD / 2} ${cx - bW / 2 - bD / 2},${cy + bD / 2}`}
-              fill="#94a3b8"
-              stroke="#334155"
-              strokeWidth="1"
+              points={`${hB.x},${hB.y} ${hC.x},${hC.y} ${hC.x},${hC.y + dropY} ${hB.x},${hB.y + dropY}`}
+              fill="#64748b"
             />
+            {/* الجدار الداخلي الخلفي */}
+            <polygon
+              points={`${hA.x},${hA.y} ${hB.x},${hB.y} ${hB.x},${hB.y + dropY} ${hA.x},${hA.y + dropY}`}
+              fill="#475569"
+            />
+            {/* القاع */}
+            <polygon
+              points={`${hA.x},${hA.y + dropY} ${hB.x},${hB.y + dropY} ${hC.x},${hC.y + dropY} ${hD.x},${hD.y + dropY}`}
+              fill="#334155"
+            />
+            {/* فتحة التصريف (بسيطة) */}
+            <ellipse cx={cx - bD / 4} cy={cy + dropY + dyL / (actualBowls * 2)} rx={3} ry={1.5} fill="#0f172a" />
           </g>
         );
       })}
+
+      {/* الحواجز (Splash Guards) - تُرسم فوق السطح والأحواض */}
+      {splashBack && (
+        <polygon
+          points={`${pA.x},${pA.y} ${pB.x},${pB.y} ${pB.x},${pB.y - spH} ${pA.x},${pA.y - spH}`}
+          fill="#94a3b8"
+          stroke="#334155"
+          strokeWidth="1.5"
+        />
+      )}
+      {splashLeft && (
+        <polygon
+          points={`${pD.x},${pD.y} ${pA.x},${pA.y} ${pA.x},${pA.y - spH} ${pD.x},${pD.y - spH}`}
+          fill="#64748b"
+          stroke="#334155"
+          strokeWidth="1.5"
+        />
+      )}
+      {splashRight && (
+        <polygon
+          points={`${pB.x},${pB.y} ${pC.x},${pC.y} ${pC.x},${pC.y - spH} ${pB.x},${pB.y - spH}`}
+          fill="#e2e8f0"
+          stroke="#334155"
+          strokeWidth="1.5"
+        />
+      )}
+
       {length !== "" && (
         <text
-          x={startX + dx / 2 + 10}
-          y={startY + dyL / 2 - 5}
+          x={pA.x + dx / 2 + 10}
+          y={pA.y + dyL / 2 - 5}
           fill="#0f172a"
-          fontSize="10"
+          fontSize="11"
           fontWeight="bold"
-          transform={`rotate(20 ${startX + dx / 2} ${startY + dyL / 2})`}
+          transform={`rotate(20 ${pA.x + dx / 2} ${pA.y + dyL / 2})`}
         >
-          L: {length}cm
+          طول {length}
         </text>
       )}
       {width !== "" && (
         <text
-          x={startX - dz / 2 - 15}
-          y={startY + dyW / 2 + 15}
+          x={pA.x - dz / 2 - 15}
+          y={pA.y + dyW / 2 + 15}
           fill="#0f172a"
-          fontSize="10"
+          fontSize="11"
           fontWeight="bold"
-          transform={`rotate(-35 ${startX - dz / 2} ${startY + dyW / 2})`}
+          transform={`rotate(-35 ${pA.x - dz / 2} ${pA.y + dyW / 2})`}
         >
-          W: {width}cm
+          عرض {width}
         </text>
       )}
-      <text x="125" y="150" textAnchor="middle" fill="#64748b" fontSize="12" fontWeight="bold">
-        مغسلة {bowls} حوض (عمق {bowlDepth})
-      </text>
     </svg>
   );
 }
 
-function ShelfDrawing({ length, width }: { length: NumOrEmpty; width: NumOrEmpty }) {
+function WallShelfDrawing({ length, width }: { length: NumOrEmpty; width: NumOrEmpty }) {
   const l = length === "" ? 120 : length;
-  const w = width === "" ? 40 : width;
+  const w = width === "" ? 30 : width;
 
   const scale = 140 / Math.max(l, w, 100);
   const dx = l * scale * 0.8;
   const dyL = l * scale * 0.3;
   const dz = w * scale * 0.6;
   const dyW = w * scale * 0.4;
-  const h = 70;
-  const levels = 4;
 
-  const startX = 20 + dz;
-  const startY = 20;
+  const startX = 40 + dz;
+  const startY = 80;
+
+  // سطح الرف الجداري
+  const face = `${startX},${startY} ${startX + dx},${startY + dyL} ${startX + dx - dz},${startY + dyL + dyW} ${startX - dz},${startY + dyW}`;
+
+  // حافة الرف
+  const edgeH = 5;
+  const frontEdge = `${startX + dx},${startY + dyL} ${startX + dx - dz},${startY + dyL + dyW} ${startX + dx - dz},${startY + dyL + dyW + edgeH} ${startX + dx},${startY + dyL + edgeH}`;
+  const sideEdge = `${startX - dz},${startY + dyW} ${startX + dx - dz},${startY + dyL + dyW} ${startX + dx - dz},${startY + dyL + dyW + edgeH} ${startX - dz},${startY + dyW + edgeH}`;
+
+  // مواقع الدعامات (Brackets)
+  const bracketDrop = 30; // طول الدعامة الجدارية
+  // الدعامة اليسرى (قريبة)
+  const br1_X = startX - dz * 0.8;
+  const br1_Y = startY + dyW * 0.8 + edgeH;
+  const br1_Wall = { x: startX + dx * 0.1 - dz * 0.8, y: startY + dyL * 0.1 + dyW * 0.8 + edgeH };
+  // الدعامة اليمنى (بعيدة)
+  const br2_X = startX + dx * 0.8 - dz * 0.8;
+  const br2_Y = startY + dyL * 0.8 + dyW * 0.8 + edgeH;
+  const br2_Wall = { x: startX + dx * 0.9 - dz * 0.8, y: startY + dyL * 0.9 + dyW * 0.8 + edgeH };
 
   return (
-    <svg viewBox="0 0 250 160" className="h-40 w-full max-w-[250px] opacity-90 drop-shadow-md">
-      <line x1={startX} y1={startY} x2={startX} y2={startY + h} stroke="#64748b" strokeWidth="2" />
-      <line
-        x1={startX + dx}
-        y1={startY + dyL}
-        x2={startX + dx}
-        y2={startY + dyL + h}
+    <svg viewBox="0 0 250 180" className="h-44 w-full max-w-[280px] drop-shadow-md">
+      {/* رسم الدعامات (Wall Brackets) */}
+      <path
+        d={`M ${br1_Wall.x} ${br1_Wall.y} L ${br1_Wall.x} ${br1_Wall.y + bracketDrop} L ${br1_X} ${br1_Y} Z`}
+        fill="#94a3b8"
         stroke="#475569"
+        strokeWidth="1"
+      />
+      <path
+        d={`M ${br2_Wall.x} ${br2_Wall.y} L ${br2_Wall.x} ${br2_Wall.y + bracketDrop} L ${br2_X} ${br2_Y} Z`}
+        fill="#94a3b8"
+        stroke="#475569"
+        strokeWidth="1"
+      />
+
+      {/* الرف نفسه */}
+      <polygon points={face} fill="#cbd5e1" stroke="#475569" strokeWidth="1.5" />
+      <polygon points={frontEdge} fill="#94a3b8" stroke="#475569" strokeWidth="1.5" />
+      <polygon points={sideEdge} fill="#64748b" stroke="#475569" strokeWidth="1.5" />
+
+      {/* خط الجدار الوهمي */}
+      <line
+        x1={startX}
+        y1={startY}
+        x2={startX + dx}
+        y2={startY + dyL}
+        stroke="#334155"
         strokeWidth="2"
+        strokeDasharray="4 4"
       />
-      {Array.from({ length: levels }).map((_, i) => {
-        const yOffset = (h / (levels - 1)) * i;
-        const face = `${startX},${startY + yOffset} ${startX + dx},${startY + yOffset + dyL} ${startX + dx - dz},${startY + yOffset + dyL + dyW} ${startX - dz},${startY + yOffset + dyW}`;
-        return (
-          <polygon key={i} points={face} fill={i === 0 ? "#cbd5e1" : "#e2e8f0"} stroke="#475569" strokeWidth="1.5" />
-        );
-      })}
-      <line
-        x1={startX - dz}
-        y1={startY + dyW}
-        x2={startX - dz}
-        y2={startY + dyW + h}
-        stroke="#334155"
-        strokeWidth="3"
-      />
-      <line
-        x1={startX + dx - dz}
-        y1={startY + dyL + dyW}
-        x2={startX + dx - dz}
-        y2={startY + dyL + dyW + h}
-        stroke="#334155"
-        strokeWidth="3"
-      />
+
       {length !== "" && (
-        <text x={startX + dx / 2} y={startY + dyL / 2 - 10} fill="#0f172a" fontSize="10" fontWeight="bold">
-          L: {length}cm
+        <text x={startX + dx / 2} y={startY + dyL / 2 - 10} fill="#0f172a" fontSize="11" fontWeight="bold">
+          طول {length}
         </text>
       )}
       {width !== "" && (
@@ -1758,16 +2131,13 @@ function ShelfDrawing({ length, width }: { length: NumOrEmpty; width: NumOrEmpty
           x={startX - dz / 2 - 15}
           y={startY + dyW / 2 + 25}
           fill="#0f172a"
-          fontSize="10"
+          fontSize="11"
           fontWeight="bold"
           transform={`rotate(-35 ${startX - dz / 2} ${startY + dyW / 2})`}
         >
-          W: {width}cm
+          بروز {width}
         </text>
       )}
-      <text x="125" y="150" textAnchor="middle" fill="#64748b" fontSize="12" fontWeight="bold">
-        أرفف تخزين
-      </text>
     </svg>
   );
 }
