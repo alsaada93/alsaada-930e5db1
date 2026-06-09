@@ -1,6 +1,8 @@
-@import "tailwindcss" source(none);
+@import "tailwindcss";
 @source "../src";
-@import "tw-animate-css";
+
+/* تم إيقاف هذا السطر لأنه سبب المشكلة (المكتبة غير موجودة) */
+/* @import "tw-animate-css"; */
 
 @import url("https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Tajawal:wght@400;500;700;800&display=swap");
 
