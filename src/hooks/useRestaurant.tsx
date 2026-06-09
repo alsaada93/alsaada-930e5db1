@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
+  DEFAULT_SHELF,
   DEFAULT_SINK,
   DEFAULT_STEEL,
+  type ShelfSettings,
   type SinkSettings,
   type SteelTableSettings,
 } from "@/lib/restaurant-calc";
