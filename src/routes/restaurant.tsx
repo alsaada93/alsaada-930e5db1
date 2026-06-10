@@ -343,7 +343,7 @@ function RestaurantPage() {
     Object.values(groupedShelves).forEach((s) => {
       items.push({
         id: index++,
-        img: <AlignToTop className="h-6 w-6 text-gray-500" />,
+        img: <Rows3 className="h-6 w-6 text-gray-500" />,
         title: `رف جداري ستانلس ستيل`,
         desc: `المقاس: ${s.length}×${s.width} سم | يعلق على الحائط`,
         qty: s.qty,
