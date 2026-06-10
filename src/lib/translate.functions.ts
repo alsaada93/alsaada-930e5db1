@@ -46,7 +46,34 @@ export const translateListings = createServerFn({ method: "POST" })
       };
     }
 
-    const missing = items.filter((i) => !cachedIds.has(i.id));
+    const missingInput = items.filter((i) => !cachedIds.has(i.id));
+    if (missingInput.length === 0) return result;
+
+    // Never trust client-supplied title/description: fetch the authentic
+    // source text from the listings table so attackers cannot poison the
+    // publicly-readable translation cache with fabricated content.
+    const missingIds = missingInput.map((i) => i.id);
+    const { data: sourceRows } = await supabaseAdmin
+      .from("listings")
+      .select("id,title,description")
+      .in("id", missingIds);
+
+    const sourceMap = new Map<string, { title: string; description: string }>();
+    for (const row of sourceRows ?? []) {
+      sourceMap.set(row.id as string, {
+        title: (row.title as string) ?? "",
+        description: (row.description as string) ?? "",
+      });
+    }
+
+    // Only translate listings that actually exist in the database.
+    const missing = missingInput
+      .filter((i) => sourceMap.has(i.id))
+      .map((i) => ({
+        id: i.id,
+        title: sourceMap.get(i.id)!.title,
+        description: sourceMap.get(i.id)!.description,
+      }));
     if (missing.length === 0) return result;
 
     const apiKey = process.env.LOVABLE_API_KEY;
