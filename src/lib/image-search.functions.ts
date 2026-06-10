@@ -1,12 +1,17 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 /**
  * AI visual search (AliExpress / Alibaba style): the client sends a photo as a
  * data URL, an AI vision model identifies the item and returns a short search
  * keyword we then use to find similar listings.
+ *
+ * Restricted to authenticated users to prevent anonymous abuse of the paid
+ * AI vision API (cost abuse via repeated large image uploads).
  */
 export const searchByImage = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator(
     z.object({
       imageDataUrl: z
