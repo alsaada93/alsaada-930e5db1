@@ -1023,19 +1023,47 @@ function ManufacturingPage() {
             </div>
           </section>
 
+          <section className="mb-6 rounded-2xl border border-border bg-muted/10 p-5">
+            <h2 className="mb-3 flex items-center gap-2 text-lg font-bold">
+              <Ruler className="h-5 w-5 text-primary" /> سُمك الاستانلس ستيل (يطبّق على كل التفصيل)
+            </h2>
+            <div className="flex flex-wrap gap-2">
+              {thickness.options.map((mm) => (
+                <button
+                  key={mm}
+                  type="button"
+                  onClick={() => setThicknessMm(mm)}
+                  className={`rounded-lg border px-4 py-2 text-sm font-bold ${
+                    thicknessMm === mm
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border hover:bg-muted/50"
+                  }`}
+                >
+                  {mm} ملم
+                  {mm === thickness.default && (
+                    <span className="ms-1 text-[10px] text-emerald-600">(الافتراضي)</span>
+                  )}
+                </button>
+              ))}
+            </div>
+          </section>
+
           <SteelTableCalculator
             settings={steel}
             discount={discounts.table}
+            factor={factor}
             onAdd={(cfg, price, count) => setTables((p) => [...p, ...Array.from({ length: count }, () => ({ ...cfg, uid: newUid(), price }))])}
           />
           <SinkCalculator
             settings={sink}
             discount={discounts.sink}
+            factor={factor}
             onAdd={(cfg, price, count) => setSinks((p) => [...p, ...Array.from({ length: count }, () => ({ ...cfg, uid: newUid(), price }))])}
           />
           <ShelfCalculator
             settings={shelf}
             discount={discounts.shelf}
+            factor={factor}
             onAdd={(cfg, price, count) => setShelves((p) => [...p, ...Array.from({ length: count }, () => ({ ...cfg, uid: newUid(), price }))])}
           />
 
