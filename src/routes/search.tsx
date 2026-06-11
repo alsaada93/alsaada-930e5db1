@@ -145,7 +145,7 @@ function SearchPage() {
               <select value={search.region ?? ""} onChange={(e) => update({ region: e.target.value || undefined })} className={fieldCls}>
                 <option value="">{lang === "ar" ? "كل المناطق" : "All regions"}</option>
                 {regionOptions.map((r) => (
-                  <option key={r} value={r}>{r}</option>
+                  <option key={r} value={r}>{displayCity(r)}</option>
                 ))}
               </select>
             </div>
