@@ -22,11 +22,12 @@ async function fetchReviews(sellerId: string): Promise<Review[]> {
   return (data ?? []) as Review[];
 }
 
-export function SellerReviews({ sellerId }: { sellerId: string }) {
+export function SellerReviews({ sellerId, sellerName }: { sellerId: string; sellerName?: string }) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
+  const isOwnListing = !!user && user.id === sellerId;
 
   const { data: reviews = [], isLoading } = useQuery({
     queryKey: ["seller_reviews", sellerId],
