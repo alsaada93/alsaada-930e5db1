@@ -1222,13 +1222,13 @@ function ManufacturingPage() {
       </div>
 
       {editTable && (
-        <EditTableDialog settings={steel} discount={discounts.table} value={editTable} onClose={() => setEditTable(null)} onSave={(u) => { setTables((p) => p.map((x) => (x.uid === u.uid ? u : x))); setEditTable(null); }} />
+        <EditTableDialog settings={steel} discount={discounts.table} factor={factor} value={editTable} onClose={() => setEditTable(null)} onSave={(u) => { setTables((p) => p.map((x) => (x.uid === u.uid ? u : x))); setEditTable(null); }} />
       )}
       {editSink && (
-        <EditSinkDialog settings={sink} discount={discounts.sink} value={editSink} onClose={() => setEditSink(null)} onSave={(u) => { setSinks((p) => p.map((x) => (x.uid === u.uid ? u : x))); setEditSink(null); }} />
+        <EditSinkDialog settings={sink} discount={discounts.sink} factor={factor} value={editSink} onClose={() => setEditSink(null)} onSave={(u) => { setSinks((p) => p.map((x) => (x.uid === u.uid ? u : x))); setEditSink(null); }} />
       )}
       {editShelf && (
-        <EditShelfDialog settings={shelf} discount={discounts.shelf} value={editShelf} onClose={() => setEditShelf(null)} onSave={(u) => { setShelves((p) => p.map((x) => (x.uid === u.uid ? u : x))); setEditShelf(null); }} />
+        <EditShelfDialog settings={shelf} discount={discounts.shelf} factor={factor} value={editShelf} onClose={() => setEditShelf(null)} onSave={(u) => { setShelves((p) => p.map((x) => (x.uid === u.uid ? u : x))); setEditShelf(null); }} />
       )}
     </div>
   );
