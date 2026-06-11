@@ -827,6 +827,8 @@ function RestaurantPage() {
                                 <img
                                   src={item.img}
                                   alt=""
+                                  loading="lazy"
+                                  decoding="async"
                                   className="w-14 h-14 object-cover rounded-md border border-gray-200 shrink-0"
                                 />
                               ) : (
