@@ -71,6 +71,36 @@ export function Header() {
             <span>{lang === "ar" ? "EN" : "ع"}</span>
           </button>
 
+          {/* قائمة الجوال — تُظهر الروابط المخفية على الشاشات الصغيرة */}
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              aria-label={lang === "ar" ? "القائمة" : "Menu"}
+              className="flex items-center rounded-lg p-2 hover:bg-white/10 focus:outline-none sm:hidden"
+            >
+              <Menu className="h-5 w-5" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-52">
+              <DropdownMenuItem asChild>
+                <Link to="/restaurant" className="flex items-center gap-2">
+                  <Calculator className="h-4 w-4" />
+                  {lang === "ar" ? "حاسبة المطاعم" : "Restaurant Cost"}
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/account" className="flex items-center gap-2">
+                  <Heart className="h-4 w-4" />
+                  {lang === "ar" ? "المفضلة" : "Favorites"}
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/account" className="flex items-center gap-2">
+                  <Bell className="h-4 w-4" />
+                  {lang === "ar" ? "الإشعارات" : "Notifications"}
+                </Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
           <Link
             to="/restaurant"
             className="hidden rounded-lg px-3 py-2 text-sm font-bold hover:bg-white/10 sm:block"
