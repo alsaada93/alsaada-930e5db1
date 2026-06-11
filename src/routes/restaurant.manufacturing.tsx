@@ -616,12 +616,14 @@ function PreviewPane({
 function EditTableDialog({
   settings,
   discount,
+  factor,
   value,
   onClose,
   onSave,
 }: {
   settings: SteelTableSettings;
   discount: number;
+  factor: number;
   value: TableItem;
   onClose: () => void;
   onSave: (t: TableItem) => void;
@@ -638,7 +640,7 @@ function EditTableDialog({
   const rawPrice = isValid
     ? steelTablePrice({ grade, length: Number(length), width: Number(width), midShelf }, settings)
     : 0;
-  const price = applyDiscount(rawPrice, discount);
+  const price = applyDiscount(rawPrice * factor, discount);
 
   return (
     <DialogShell
