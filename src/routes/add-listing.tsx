@@ -545,17 +545,18 @@ function AddListingPage() {
 
       if (isEdit && editId) {
         const { status: _ignoreStatus, ...editPayload } = payload;
-        const { error } = await supabase.from("listings").update({ ...editPayload, video: existingVideo }).eq("id", editId);
+        const { error } = await supabase.from("listings").update({ ...editPayload, video: videoUrl }).eq("id", editId);
         if (error) throw error;
         toast.success(ar ? "تم تحديث الإعلان" : "Listing updated");
         navigate({ to: "/listing/$id", params: { id: editId } });
         return;
       }
 
-      const { data, error } = await supabase.from("listings").insert({ ...payload, video: null }).select("id").single();
+      const { data, error } = await supabase.from("listings").insert({ ...payload, video: videoUrl }).select("id").single();
       if (error) throw error;
       setNewId(data?.id ?? null);
       setSubmitted(true);
+      toast.success(ar ? "تم إضافة الإعلان بنجاح، وبقيت موافقة الإدارة" : "Listing submitted — pending admin approval");
       try { localStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ }
     } catch (err) {
       console.error(err);
