@@ -632,37 +632,14 @@ function AddListingPage() {
         <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-12">
           <div className="rounded-2xl border border-border bg-card p-8 text-center shadow-card">
             <CheckCircle2 className="mx-auto h-14 w-14 text-primary" />
-            <h1 className="mt-4 text-2xl font-extrabold">{t("add.received")}</h1>
-            <p className="mt-2 text-muted-foreground">{t("add.receivedDesc")}</p>
-
-            {/* Add video after publishing */}
-            <div className="mt-6 rounded-2xl border border-dashed border-primary/40 bg-accent/30 p-5 text-start">
-              <h2 className="flex items-center gap-1.5 text-sm font-extrabold">
-                <Video className="h-4 w-4 text-primary" />
-                {ar ? "أضف فيديو لإعلانك (اختياري)" : "Add a video to your listing (optional)"}
-              </h2>
-              <p className="mt-1 text-xs text-muted-foreground">
-                {ar
-                  ? "الفيديو يزيد ثقة المشترين ويسرّع البيع."
-                  : "A video builds buyer trust and speeds up the sale."}
-              </p>
-              <input ref={postVidInput} type="file" accept="video/*" hidden onChange={(e) => handlePostVideo(e.target.files)} />
-              {videoDone ? (
-                <div className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-primary/10 px-3 py-2 text-sm font-bold text-primary">
-                  <Check className="h-4 w-4" /> {ar ? "تم رفع الفيديو" : "Video uploaded"}
-                </div>
-              ) : (
-                <button
-                  type="button"
-                  disabled={videoSaving}
-                  onClick={() => postVidInput.current?.click()}
-                  className="mt-3 inline-flex items-center gap-2 rounded-lg border border-primary/40 bg-background px-4 py-2 text-sm font-bold hover:bg-accent disabled:opacity-60"
-                >
-                  <Video className="h-4 w-4 text-primary" />
-                  {videoSaving ? (ar ? "جارٍ الرفع..." : "Uploading...") : ar ? "اختر فيديو" : "Choose video"}
-                </button>
-              )}
-            </div>
+            <h1 className="mt-4 text-2xl font-extrabold">
+              {ar ? "تم إضافة الإعلان بنجاح" : "Listing submitted"}
+            </h1>
+            <p className="mt-2 text-muted-foreground">
+              {ar
+                ? "تم استلام جميع بيانات إعلانك. الإعلان الآن بانتظار موافقة الإدارة، وستصلك رسالة بالقبول أو الرفض مع السبب."
+                : "We received your listing details. It is now pending admin approval — you will be notified upon approval or rejection with a reason."}
+            </p>
 
             <button
               onClick={() => navigate({ to: "/" })}
