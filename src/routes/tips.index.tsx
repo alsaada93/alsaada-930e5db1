@@ -3,8 +3,17 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { articles } from "@/data/articles";
+import { listPublishedPosts, type BlogPost } from "@/lib/blog.functions";
 
 export const Route = createFileRoute("/tips/")({
+  loader: async (): Promise<{ posts: BlogPost[] }> => {
+    try {
+      const posts = await listPublishedPosts();
+      return { posts };
+    } catch {
+      return { posts: [] };
+    }
+  },
   head: () => ({
     meta: [
       { title: "نصائح ومقالات معدات المطاعم — حراج السعادة" },
@@ -27,6 +36,10 @@ export const Route = createFileRoute("/tips/")({
 });
 
 function TipsPage() {
+  const { posts } = Route.useLoaderData() as { posts: BlogPost[] };
+  const dbSlugs = new Set(posts.map((p) => p.slug));
+  const staticArticles = articles.filter((a) => !dbSlugs.has(a.slug));
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -38,7 +51,27 @@ function TipsPage() {
           </p>
         </header>
         <div className="grid gap-4 sm:grid-cols-2">
-          {articles.map((a) => (
+          {posts.map((p) => (
+            <Link
+              key={p.id}
+              to="/tips/$slug"
+              params={{ slug: p.slug }}
+              className="block rounded-2xl border border-border bg-card p-5 transition-colors hover:border-primary"
+            >
+              {p.cover_image && (
+                <img
+                  src={p.cover_image}
+                  alt={p.title}
+                  loading="lazy"
+                  decoding="async"
+                  className="mb-3 aspect-video w-full rounded-lg object-cover"
+                />
+              )}
+              <h2 className="mb-2 text-lg font-bold text-primary">{p.title}</h2>
+              <p className="line-clamp-3 text-sm text-muted-foreground">{p.excerpt}</p>
+            </Link>
+          ))}
+          {staticArticles.map((a) => (
             <Link
               key={a.slug}
               to="/tips/$slug"

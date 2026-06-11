@@ -3,9 +3,32 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { getArticle, type Article, type ArticleSection } from "@/data/articles";
+import { getPublishedPost } from "@/lib/blog.functions";
 
 export const Route = createFileRoute("/tips/$slug")({
-  loader: ({ params }) => {
+  loader: async ({ params }): Promise<Article> => {
+    try {
+      const post = await getPublishedPost({ data: { slug: params.slug } });
+      if (post) {
+        const sections: ArticleSection[] = post.content
+          .split(/\n{2,}/)
+          .map((p) => p.trim())
+          .filter(Boolean)
+          .map((body) => ({ heading: "", body }));
+        return {
+          slug: post.slug,
+          title: post.title,
+          excerpt: post.excerpt ?? "",
+          sections,
+          hashtags: (post.keywords ?? "")
+            .split(",")
+            .map((k) => k.trim())
+            .filter(Boolean),
+        } as Article;
+      }
+    } catch {
+      // fall back to static articles
+    }
     const article = getArticle(params.slug);
     if (!article) throw notFound();
     return article;
@@ -88,7 +111,7 @@ function ArticlePage() {
           </header>
           {a.sections.map((s: ArticleSection, i: number) => (
             <section key={i} className="rounded-2xl border border-border bg-card p-5">
-              <h2 className="mb-3 text-xl font-bold text-primary">{s.heading}</h2>
+              {s.heading && <h2 className="mb-3 text-xl font-bold text-primary">{s.heading}</h2>}
               <p>{s.body}</p>
               {s.list_items && s.list_items.length > 0 && (
                 <ul className="mt-3 list-disc space-y-1 pr-5">
