@@ -140,7 +140,10 @@ export const Route = createFileRoute("/listing/$id")({
                 : "https://schema.org/UsedCondition",
             offers: {
               "@type": "Offer",
-              price: loaderData?.item.price ?? 0,
+              price:
+                loaderData?.item.listingType === "auction"
+                  ? (loaderData?.item.startPrice ?? loaderData?.item.price ?? 0)
+                  : (loaderData?.item.price ?? 0),
               priceCurrency: "BHD",
               url,
               ...(loaderData?.item.oldPrice && loaderData.item.oldPrice > (loaderData.item.price ?? 0)
