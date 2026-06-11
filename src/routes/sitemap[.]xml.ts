@@ -59,6 +59,25 @@ export const Route = createFileRoute("/sitemap.xml")({
           /* تجاهل أي خطأ حتى تبقى خريطة الموقع متاحة */
         }
 
+        // أضف مقالات المدونة المنشورة
+        try {
+          const { data: posts } = await supabaseAdmin
+            .from("blog_posts")
+            .select("slug, updated_at, published_at")
+            .eq("published", true)
+            .limit(2000);
+          for (const p of posts ?? []) {
+            entries.push({
+              path: `/tips/${p.slug}`,
+              lastmod: (p.updated_at ?? p.published_at ?? undefined) as string | undefined,
+              changefreq: "monthly",
+              priority: "0.6",
+            });
+          }
+        } catch {
+          /* تجاهل أي خطأ */
+        }
+
         const urls = entries.map((e) =>
           [
             `  <url>`,
