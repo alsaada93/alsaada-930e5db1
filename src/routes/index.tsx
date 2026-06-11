@@ -77,7 +77,7 @@ function Index() {
           {featured.length > 0 && (
             <ListingsSection title={t("sec.featured")} subtitle={t("sec.featuredSub")} items={featured} />
           )}
-          <AuctionsSection />
+          
           <Testimonials />
           <BusinessSection />
           <HomeBanners position="bottom" />
