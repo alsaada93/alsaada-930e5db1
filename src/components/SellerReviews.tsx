@@ -56,10 +56,16 @@ export function SellerReviews({ sellerId, sellerName }: { sellerId: string; sell
 
   return (
     <section className="rounded-2xl border border-border bg-card p-5">
-      <h2 className="text-lg font-extrabold">تقييمات البائع ({reviews.length.toLocaleString("ar")})</h2>
+      <h2 className="text-lg font-extrabold">
+        تقييمات {sellerName?.trim() || "المعلن"} ({reviews.length.toLocaleString("ar")})
+      </h2>
 
       {/* نموذج إضافة تقييم */}
-      {user ? (
+      {isOwnListing ? (
+        <p className="mt-4 rounded-xl border border-dashed border-border p-4 text-sm text-muted-foreground">
+          لا يمكنك تقييم إعلانك الخاص.
+        </p>
+      ) : user ? (
         <form
           onSubmit={(e) => {
             e.preventDefault();
