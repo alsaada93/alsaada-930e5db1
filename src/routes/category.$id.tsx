@@ -110,6 +110,14 @@ function CategoryPage() {
     [listings, category.name],
   );
 
+  // قائمة التصنيفات الفرعية (اختيارية كفلاتر): من الأقسام أو من الإعلانات نفسها
+  const subOptions = useMemo(() => {
+    const fromGroups = (category.groups ?? []).flatMap((g) => g.items ?? []);
+    const fromData = items.map((l) => l.sub).filter((s): s is string => !!s);
+    const base = category.sub && category.sub.length > 0 ? category.sub : fromGroups;
+    return Array.from(new Set([...base, ...fromData]));
+  }, [category, items]);
+
   const update = (patch: Partial<CategorySearch>) => {
     navigate({
       to: "/category/$id",
