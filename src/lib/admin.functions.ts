@@ -69,6 +69,7 @@ export const adminSetListingStatus = createServerFn({ method: "POST" })
       .object({
         id: z.string().uuid(),
         status: z.enum(["approved", "rejected", "suspended", "pending"]),
+        reason: z.string().max(500).optional(),
       })
       .parse(input),
   )
@@ -81,6 +82,30 @@ export const adminSetListingStatus = createServerFn({ method: "POST" })
       .update({ status: data.status })
       .eq("id", data.id);
     if (error) throw error;
+
+    // Notify the listing owner about approval/rejection (with reason)
+    if (data.status === "approved" || data.status === "rejected") {
+      const { data: listing } = await supabaseAdmin
+        .from("listings")
+        .select("user_id, title")
+        .eq("id", data.id)
+        .maybeSingle();
+      const ownerId = (listing?.user_id as string | null) ?? null;
+      if (ownerId) {
+        const title = (listing?.title as string | null) ?? "إعلانك";
+        const message =
+          data.status === "approved"
+            ? `تمت الموافقة على إعلانك "${title}" وأصبح منشوراً.`
+            : `تم رفض إعلانك "${title}".${data.reason ? ` السبب: ${data.reason}` : ""}`;
+        await supabaseAdmin.from("notifications").insert({
+          recipient_id: ownerId,
+          listing_id: data.id,
+          type: data.status === "approved" ? "approved" : "rejected",
+          message,
+          sender_name: "إدارة حراج السعادة",
+        });
+      }
+    }
     return { ok: true };
   });
 

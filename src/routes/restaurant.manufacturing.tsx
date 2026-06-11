@@ -887,6 +887,12 @@ function ManufacturingPage() {
   const [editTable, setEditTable] = useState<TableItem | null>(null);
   const [editSink, setEditSink] = useState<SinkItem | null>(null);
   const [editShelf, setEditShelf] = useState<ShelfItem | null>(null);
+  // Client-only print date to avoid SSR hydration mismatch
+  const [printDate, setPrintDate] = useState("");
+  useEffect(() => {
+    setPrintDate(new Date().toLocaleDateString("ar-BH"));
+  }, []);
+
 
   useEffect(() => {
     try {
@@ -1166,7 +1172,7 @@ function ManufacturingPage() {
               <h2 className="mt-1 text-lg font-bold uppercase tracking-widest text-gray-600">عرض سعر تصنيع ستيل</h2>
             </div>
             <div className="text-left text-sm font-medium">
-              <p><span className="text-gray-500">التاريخ:</span> {new Date().toLocaleDateString("ar-BH")}</p>
+              <p><span className="text-gray-500">التاريخ:</span> {printDate}</p>
             </div>
           </div>
           <div className="mb-6 flex justify-between rounded-lg border-2 border-gray-200 bg-gray-50 p-4">

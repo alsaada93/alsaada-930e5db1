@@ -87,6 +87,10 @@ function AddListingPage() {
   const [media, setMedia] = useState<{ id: string; url: string; file?: File }[]>([]);
   // Existing video (edit mode) — can be removed
   const [existingVideo, setExistingVideo] = useState<string | null>(null);
+  // New video selected during creation (uploaded alongside images on submit)
+  const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [videoPreview, setVideoPreview] = useState<string | null>(null);
+  const vidInput = useRef<HTMLInputElement>(null);
 
   // Guest contact (required if not logged in)
   const [guestName, setGuestName] = useState("");
@@ -488,6 +492,17 @@ function AddListingPage() {
         media.map((m) => (m.file ? uploadFile(m.file, "images") : Promise.resolve(m.url))),
       );
 
+      // Upload the video chosen during creation (if any)
+      let videoUrl: string | null = isEdit ? existingVideo : null;
+      if (videoFile) {
+        try {
+          videoUrl = await uploadFile(videoFile, "videos");
+        } catch (e) {
+          console.error("video upload failed", e);
+          toast.error(ar ? "تعذّر رفع الفيديو، سيُنشر الإعلان بدون فيديو" : "Video upload failed; listing will publish without it");
+        }
+      }
+
       const isBusiness = listingType === "business";
       const isAuction = listingType === "auction";
       const auctionHours = num(auctionDuration) ?? 24;
@@ -530,17 +545,18 @@ function AddListingPage() {
 
       if (isEdit && editId) {
         const { status: _ignoreStatus, ...editPayload } = payload;
-        const { error } = await supabase.from("listings").update({ ...editPayload, video: existingVideo }).eq("id", editId);
+        const { error } = await supabase.from("listings").update({ ...editPayload, video: videoUrl }).eq("id", editId);
         if (error) throw error;
         toast.success(ar ? "تم تحديث الإعلان" : "Listing updated");
         navigate({ to: "/listing/$id", params: { id: editId } });
         return;
       }
 
-      const { data, error } = await supabase.from("listings").insert({ ...payload, video: null }).select("id").single();
+      const { data, error } = await supabase.from("listings").insert({ ...payload, video: videoUrl }).select("id").single();
       if (error) throw error;
       setNewId(data?.id ?? null);
       setSubmitted(true);
+      toast.success(ar ? "تم إضافة الإعلان بنجاح، وبقيت موافقة الإدارة" : "Listing submitted — pending admin approval");
       try { localStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ }
     } catch (err) {
       console.error(err);
@@ -616,37 +632,14 @@ function AddListingPage() {
         <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-12">
           <div className="rounded-2xl border border-border bg-card p-8 text-center shadow-card">
             <CheckCircle2 className="mx-auto h-14 w-14 text-primary" />
-            <h1 className="mt-4 text-2xl font-extrabold">{t("add.received")}</h1>
-            <p className="mt-2 text-muted-foreground">{t("add.receivedDesc")}</p>
-
-            {/* Add video after publishing */}
-            <div className="mt-6 rounded-2xl border border-dashed border-primary/40 bg-accent/30 p-5 text-start">
-              <h2 className="flex items-center gap-1.5 text-sm font-extrabold">
-                <Video className="h-4 w-4 text-primary" />
-                {ar ? "أضف فيديو لإعلانك (اختياري)" : "Add a video to your listing (optional)"}
-              </h2>
-              <p className="mt-1 text-xs text-muted-foreground">
-                {ar
-                  ? "الفيديو يزيد ثقة المشترين ويسرّع البيع."
-                  : "A video builds buyer trust and speeds up the sale."}
-              </p>
-              <input ref={postVidInput} type="file" accept="video/*" hidden onChange={(e) => handlePostVideo(e.target.files)} />
-              {videoDone ? (
-                <div className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-primary/10 px-3 py-2 text-sm font-bold text-primary">
-                  <Check className="h-4 w-4" /> {ar ? "تم رفع الفيديو" : "Video uploaded"}
-                </div>
-              ) : (
-                <button
-                  type="button"
-                  disabled={videoSaving}
-                  onClick={() => postVidInput.current?.click()}
-                  className="mt-3 inline-flex items-center gap-2 rounded-lg border border-primary/40 bg-background px-4 py-2 text-sm font-bold hover:bg-accent disabled:opacity-60"
-                >
-                  <Video className="h-4 w-4 text-primary" />
-                  {videoSaving ? (ar ? "جارٍ الرفع..." : "Uploading...") : ar ? "اختر فيديو" : "Choose video"}
-                </button>
-              )}
-            </div>
+            <h1 className="mt-4 text-2xl font-extrabold">
+              {ar ? "تم إضافة الإعلان بنجاح" : "Listing submitted"}
+            </h1>
+            <p className="mt-2 text-muted-foreground">
+              {ar
+                ? "تم استلام جميع بيانات إعلانك. الإعلان الآن بانتظار موافقة الإدارة، وستصلك رسالة بالقبول أو الرفض مع السبب."
+                : "We received your listing details. It is now pending admin approval — you will be notified upon approval or rejection with a reason."}
+            </p>
 
             <button
               onClick={() => navigate({ to: "/" })}
@@ -827,7 +820,7 @@ function AddListingPage() {
                       type="button"
                       aria-label={ar ? `حذف الصورة ${i + 1}` : `Delete image ${i + 1}`}
                       onClick={() => setMedia((p) => p.filter((_, idx) => idx !== i))}
-                      className="absolute end-1 top-1 rounded-full bg-destructive p-1 text-destructive-foreground opacity-0 transition group-hover:opacity-100"
+                      className="absolute end-1 top-1 rounded-full bg-destructive p-1 text-destructive-foreground opacity-100 transition sm:opacity-0 sm:group-hover:opacity-100"
                     >
                       <X className="h-3.5 w-3.5" />
                     </button>
@@ -836,12 +829,12 @@ function AddListingPage() {
                         type="button"
                         aria-label={ar ? `تعديل الصورة ${i + 1}` : `Edit image ${i + 1}`}
                         onClick={() => setEditingIndex(i)}
-                        className="absolute start-1 top-1 rounded-full bg-primary p-1 text-primary-foreground opacity-0 transition group-hover:opacity-100"
+                        className="absolute start-1 top-1 rounded-full bg-primary p-1 text-primary-foreground opacity-100 transition sm:opacity-0 sm:group-hover:opacity-100"
                       >
                         <Pencil className="h-3.5 w-3.5" />
                       </button>
                     )}
-                    <div className="absolute inset-x-0 bottom-0 flex justify-center gap-1 bg-gradient-to-t from-black/60 to-transparent p-1 opacity-0 transition group-hover:opacity-100">
+                    <div className="absolute inset-x-0 bottom-0 flex justify-center gap-1 bg-gradient-to-t from-black/60 to-transparent p-1 opacity-100 transition sm:opacity-0 sm:group-hover:opacity-100">
                       <button
                         type="button"
                         disabled={i === 0}
@@ -893,9 +886,53 @@ function AddListingPage() {
                 </div>
               )}
 
-              <p className="mt-2 text-xs text-muted-foreground">
-                {ar ? "يمكنك إضافة الفيديو بعد نشر الإعلان." : "You can add a video after publishing."}
-              </p>
+              {/* Video upload alongside images (during creation) */}
+              <div className="mt-4">
+                <label className="mb-1 block text-sm font-semibold">
+                  {ar ? "فيديو الإعلان (اختياري)" : "Listing video (optional)"}
+                </label>
+                <input
+                  ref={vidInput}
+                  type="file"
+                  accept="video/*"
+                  hidden
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (!f) return;
+                    if (f.size > 60 * 1024 * 1024) {
+                      toast.error(ar ? "حجم الفيديو كبير (الحد 60 ميجابايت)" : "Video too large (max 60MB)");
+                      return;
+                    }
+                    setVideoFile(f);
+                    setVideoPreview(URL.createObjectURL(f));
+                  }}
+                />
+                {videoPreview ? (
+                  <div className="relative w-full max-w-xs overflow-hidden rounded-lg border border-border">
+                    <video src={videoPreview} controls className="h-full w-full" />
+                    <button
+                      type="button"
+                      aria-label={ar ? "حذف الفيديو" : "Delete video"}
+                      onClick={() => {
+                        setVideoFile(null);
+                        setVideoPreview(null);
+                      }}
+                      className="absolute end-1 top-1 rounded-full bg-destructive p-1 text-destructive-foreground"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => vidInput.current?.click()}
+                    className="flex items-center gap-2 rounded-lg border-2 border-dashed border-border px-4 py-3 text-sm font-semibold text-muted-foreground hover:border-primary hover:text-primary"
+                  >
+                    <Video className="h-5 w-5" />
+                    {ar ? "اختر فيديو" : "Choose video"}
+                  </button>
+                )}
+              </div>
             </div>
 
           </div>

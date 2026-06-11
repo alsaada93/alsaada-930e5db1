@@ -21,6 +21,7 @@ import {
   Search,
   History,
   Users,
+  Bell,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Header } from "@/components/Header";
@@ -88,6 +89,7 @@ function AccountPage() {
   const [followedListings, setFollowedListings] = useState<ListingRow[]>([]);
   const [recentViews, setRecentViews] = useState<ListingRow[]>([]);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const [notifications, setNotifications] = useState<{ id: string; type: string; message: string | null; read: boolean; created_at: string }[]>([]);
   const [activePanel, setActivePanel] = useState<string | null>(null);
 
   useEffect(() => {
@@ -177,6 +179,15 @@ function AccountPage() {
       } else if (active) {
         setFollowedListings([]);
       }
+
+      // الإشعارات (الموافقة/الرفض والرسائل)
+      const { data: notifs } = await db
+        .from("notifications")
+        .select("id,type,message,read,created_at")
+        .eq("recipient_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(30);
+      if (active) setNotifications((notifs as any) ?? []);
     })();
     return () => {
       active = false;
@@ -345,6 +356,42 @@ function AccountPage() {
             <span className="text-sm font-bold">أضف إعلانك الآن</span>
           </Link>
         </div>
+
+        {/* الإشعارات */}
+        {notifications.length > 0 && (
+          <div className="mt-4 overflow-hidden rounded-2xl border border-border bg-card shadow-card">
+            <div className="flex items-center gap-2 border-b border-border px-4 py-3 text-sm font-extrabold">
+              <Bell className="h-4 w-4 text-primary" /> الإشعارات
+            </div>
+            <ul className="max-h-80 divide-y divide-border overflow-y-auto">
+              {notifications.map((n) => (
+                <li
+                  key={n.id}
+                  className={`px-4 py-3 text-sm ${n.read ? "" : "bg-accent/30"}`}
+                >
+                  <div className="flex items-start gap-2">
+                    <span
+                      className={`mt-0.5 inline-block h-2 w-2 shrink-0 rounded-full ${
+                        n.type === "approved"
+                          ? "bg-chart-3"
+                          : n.type === "rejected"
+                            ? "bg-destructive"
+                            : "bg-primary"
+                      }`}
+                    />
+                    <div>
+                      <p className="font-semibold">{n.message ?? ""}</p>
+                      <p className="mt-0.5 text-xs text-muted-foreground">
+                        {new Date(n.created_at).toLocaleDateString("ar-BH")}
+                      </p>
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
 
         {/* قائمة الخيارات */}
         <div className="mt-4 overflow-hidden rounded-2xl border border-border bg-card shadow-card">
