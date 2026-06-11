@@ -462,6 +462,8 @@ function RestaurantPage() {
                                 <img
                                   src={e.brand_logo_url}
                                   alt={e.manufacturer ?? ""}
+                                  loading="lazy"
+                                  decoding="async"
                                   className="h-full w-full object-contain"
                                 />
                               </span>
