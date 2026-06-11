@@ -329,7 +329,7 @@ function Gallery({ images, video, title }: { images: string[]; video: string | n
 }
 
 function ListingPage() {
-  const { item } = Route.useLoaderData();
+  const { item, rating: ratingData } = Route.useLoaderData();
   const navigate = useNavigate();
   const { user } = useAuth();
   const { boost } = useViewBoost();
