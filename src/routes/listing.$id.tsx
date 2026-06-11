@@ -320,7 +320,7 @@ function Gallery({ images, video, title }: { images: string[]; video: string | n
           className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4"
           onClick={() => setLightbox(false)}
         >
-          <img src={active.url} alt={title} loading="lazy" decoding="async" className="max-h-full max-w-full object-contain" />>
+          <img src={active.url} alt={title} loading="lazy" decoding="async" className="max-h-full max-w-full object-contain" />
         </div>
       )}
     </div>
