@@ -779,13 +779,12 @@ function RestaurantPage() {
                     <div className="text-left text-sm font-medium space-y-1">
                       <p>
                         <span className="text-gray-500">رقم العرض:</span> QT-
-                        {Math.floor(Date.now() / 1000)
-                          .toString()
-                          .slice(-6)}
+                        {quoteMeta.no}
                       </p>
                       <p>
-                        <span className="text-gray-500">التاريخ:</span> {new Date().toLocaleDateString("ar-BH")}
+                        <span className="text-gray-500">التاريخ:</span> {quoteMeta.date}
                       </p>
+
                     </div>
                   </div>
 
