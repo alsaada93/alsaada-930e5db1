@@ -104,3 +104,23 @@ export function shelfPrice(cfg: ShelfConfig, s: ShelfSettings): number {
 
 export const BHD = (n: number) =>
   `${(Math.round(n * 1000) / 1000).toLocaleString("ar-EG", { maximumFractionDigits: 3 })} د.ب`;
+
+/* ===================== الخصومات حسب نوع التصنيع ===================== */
+export interface Discounts {
+  /** نسبة الخصم للطاولات (٪) */
+  table: number;
+  /** نسبة الخصم للمغاسل (٪) */
+  sink: number;
+  /** نسبة الخصم للأرفف (٪) */
+  shelf: number;
+}
+
+export const DEFAULT_DISCOUNTS: Discounts = { table: 10, sink: 10, shelf: 10 };
+
+/** يطبّق نسبة الخصم ثم يجبر السعر لأقرب ١٠ للأسفل (سلوك التسعير الحالي) */
+export function applyDiscount(rawPrice: number, percent: number): number {
+  if (rawPrice <= 0) return 0;
+  const pct = Math.min(100, Math.max(0, percent));
+  const afterDiscount = rawPrice * (1 - pct / 100);
+  return Math.floor(afterDiscount / 10) * 10;
+}
