@@ -16,6 +16,7 @@ const items = [
   { title: "صور العرض", url: "/admin/slides", icon: Images },
   { title: "مظهر الموقع", url: "/admin/appearance", icon: Palette },
   { title: "تحسين SEO", url: "/admin/seo", icon: Search },
+  { title: "ضغط الصور", url: "/admin/images", icon: ImageDown },
 ];
 
 export function AdminSidebar() {
