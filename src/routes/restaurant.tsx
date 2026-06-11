@@ -133,6 +133,15 @@ function RestaurantPage() {
   const [editTable, setEditTable] = useState<TableItem | null>(null);
   const [editSink, setEditSink] = useState<SinkItem | null>(null);
   const [editShelf, setEditShelf] = useState<ShelfItem | null>(null);
+  // Quote meta computed client-side only to avoid SSR hydration mismatch
+  const [quoteMeta, setQuoteMeta] = useState<{ no: string; date: string }>({ no: "------", date: "" });
+  useEffect(() => {
+    setQuoteMeta({
+      no: Math.floor(Date.now() / 1000).toString().slice(-6),
+      date: new Date().toLocaleDateString("ar-BH"),
+    });
+  }, []);
+
 
   const draftKey = "alsaada_project_draft";
 
