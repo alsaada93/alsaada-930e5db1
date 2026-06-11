@@ -356,6 +356,42 @@ function AccountPage() {
           </Link>
         </div>
 
+        {/* الإشعارات */}
+        {notifications.length > 0 && (
+          <div className="mt-4 overflow-hidden rounded-2xl border border-border bg-card shadow-card">
+            <div className="flex items-center gap-2 border-b border-border px-4 py-3 text-sm font-extrabold">
+              <Bell className="h-4 w-4 text-primary" /> الإشعارات
+            </div>
+            <ul className="max-h-80 divide-y divide-border overflow-y-auto">
+              {notifications.map((n) => (
+                <li
+                  key={n.id}
+                  className={`px-4 py-3 text-sm ${n.read ? "" : "bg-accent/30"}`}
+                >
+                  <div className="flex items-start gap-2">
+                    <span
+                      className={`mt-0.5 inline-block h-2 w-2 shrink-0 rounded-full ${
+                        n.type === "approved"
+                          ? "bg-chart-3"
+                          : n.type === "rejected"
+                            ? "bg-destructive"
+                            : "bg-primary"
+                      }`}
+                    />
+                    <div>
+                      <p className="font-semibold">{n.message ?? ""}</p>
+                      <p className="mt-0.5 text-xs text-muted-foreground">
+                        {new Date(n.created_at).toLocaleDateString("ar-BH")}
+                      </p>
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+
         {/* قائمة الخيارات */}
         <div className="mt-4 overflow-hidden rounded-2xl border border-border bg-card shadow-card">
           {menuItems.map((m, i) => (
