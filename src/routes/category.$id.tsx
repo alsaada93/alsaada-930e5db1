@@ -121,8 +121,8 @@ function CategoryPage() {
   const [showFilters, setShowFilters] = useState(false);
 
   const items = useMemo(
-    () => listings.filter((l) => l.category === category.name),
-    [listings, category.name],
+    () => listings.filter((l) => l.category === category.name || l.category === category.id),
+    [listings, category.name, category.id],
   );
 
   // قائمة التصنيفات الفرعية (اختيارية كفلاتر): من الأقسام أو من الإعلانات نفسها
