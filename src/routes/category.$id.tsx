@@ -6,6 +6,7 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ListingCard } from "@/components/ListingCard";
 import { categories, bahrainRegions, type Listing, type Category } from "@/data/marketplace";
+import { displayCity } from "@/data/bahrainCities";
 import { useListings } from "@/hooks/useListings";
 import { useLanguage } from "@/hooks/useLanguage";
 import { supabase } from "@/integrations/supabase/client";
@@ -292,7 +293,7 @@ function CategoryPage() {
                   <option value="">{lang === "ar" ? "كل المناطق" : "All regions"}</option>
                   {regionOptions.map((r) => (
                     <option key={r} value={r}>
-                      {r}
+                      {displayCity(r)}
                     </option>
                   ))}
                 </select>

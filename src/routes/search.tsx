@@ -5,6 +5,7 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ListingCard } from "@/components/ListingCard";
 import { bahrainRegions, type Listing } from "@/data/marketplace";
+import { displayCity } from "@/data/bahrainCities";
 import { useListings } from "@/hooks/useListings";
 import { useLanguage } from "@/hooks/useLanguage";
 
@@ -144,7 +145,7 @@ function SearchPage() {
               <select value={search.region ?? ""} onChange={(e) => update({ region: e.target.value || undefined })} className={fieldCls}>
                 <option value="">{lang === "ar" ? "كل المناطق" : "All regions"}</option>
                 {regionOptions.map((r) => (
-                  <option key={r} value={r}>{r}</option>
+                  <option key={r} value={r}>{displayCity(r)}</option>
                 ))}
               </select>
             </div>

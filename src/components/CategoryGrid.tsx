@@ -1,5 +1,6 @@
+import { useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { UtensilsCrossed, Hotel, Smartphone, Sofa, Store, Gavel, Calculator, type LucideIcon } from "lucide-react";
+import { UtensilsCrossed, Hotel, Smartphone, Sofa, Store, Gavel, Calculator, ChevronDown, type LucideIcon } from "lucide-react";
 import { useCategories } from "@/hooks/useCategories";
 import { useLanguage } from "@/hooks/useLanguage";
 
@@ -17,6 +18,70 @@ const gradients: Record<string, string> = {
   furniture: "from-emerald-500 to-teal-500",
 };
 
+function CategoryCard({ c }: { c: ReturnType<typeof useCategories>["categories"][number] }) {
+  const { t, lang } = useLanguage();
+  const [open, setOpen] = useState(false);
+  const Icon = icons[c.id] ?? Smartphone;
+  const grad = gradients[c.id] ?? "from-primary to-accent";
+
+  return (
+    <div className="group relative flex flex-col items-start gap-3 overflow-hidden rounded-2xl border border-border bg-card p-4 text-start shadow-card transition-all hover:-translate-y-1 hover:border-primary/40">
+      {/* رأس البطاقة رابط للتصنيف الرئيسي */}
+      <Link
+        to="/category/$id"
+        params={{ id: c.id }}
+        className="flex w-full flex-col items-start gap-3"
+        aria-label={lang === "ar" ? c.name : c.nameEn}
+      >
+        <span className={`flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br ${grad} text-white shadow-lg transition-transform group-hover:scale-110`}>
+          <Icon className="h-8 w-8" strokeWidth={1.75} />
+        </span>
+        <h3 className="font-bold text-card-foreground">{lang === "ar" ? c.name : c.nameEn}</h3>
+        <p className="line-clamp-2 text-xs text-muted-foreground">
+          {lang === "ar" ? c.description : c.descriptionEn}
+        </p>
+        {c.count > 0 && (
+          <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-semibold text-secondary-foreground">
+            {c.count.toLocaleString(lang)} {t("cat.adsSuffix")}
+          </span>
+        )}
+      </Link>
+
+      {/* زر فتح التصنيفات الفرعية بقائمة منسدلة */}
+      {c.groups.length > 0 && (
+        <div className="mt-auto w-full">
+          <button
+            type="button"
+            onClick={() => setOpen((o) => !o)}
+            aria-expanded={open}
+            className="flex w-full items-center justify-between rounded-lg border border-border bg-background px-3 py-1.5 text-xs font-bold text-foreground transition-colors hover:bg-accent"
+          >
+            <span>{lang === "ar" ? "التصنيفات الفرعية" : "Subcategories"}</span>
+            <ChevronDown className={`h-4 w-4 transition-transform ${open ? "rotate-180" : ""}`} />
+          </button>
+          {open && (
+            <div className="mt-2 max-h-40 overflow-auto rounded-lg border border-border bg-background p-2">
+              <div className="flex flex-wrap gap-1.5">
+                {c.groups.map((g) => (
+                  <Link
+                    key={g.name}
+                    to="/category/$id"
+                    params={{ id: c.id }}
+                    search={{ sub: g.name }}
+                    className="rounded-full bg-secondary px-2 py-0.5 text-[11px] font-semibold text-secondary-foreground transition-colors hover:bg-primary hover:text-primary-foreground"
+                  >
+                    {g.name}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function CategoryGrid() {
   const { t, lang } = useLanguage();
   const { categories } = useCategories();
@@ -30,60 +95,9 @@ export function CategoryGrid() {
         </div>
       </div>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-        {categories.map((c) => {
-          const Icon = icons[c.id] ?? Smartphone;
-          const grad = gradients[c.id] ?? "from-primary to-accent";
-          return (
-            <div
-              key={c.id}
-              className="group relative flex flex-col items-start gap-3 overflow-hidden rounded-2xl border border-border bg-card p-4 text-start shadow-card transition-all hover:-translate-y-1 hover:border-primary/40"
-            >
-              {/* البطاقة بالكامل رابط للتصنيف */}
-              <Link
-                to="/category/$id"
-                params={{ id: c.id }}
-                className="absolute inset-0 z-0"
-                aria-label={lang === "ar" ? c.name : c.nameEn}
-              />
-              <span
-                className={`pointer-events-none flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br ${grad} text-white shadow-lg transition-transform group-hover:scale-110`}
-              >
-                <Icon className="h-8 w-8" strokeWidth={1.75} />
-              </span>
-              <h3 className="pointer-events-none font-bold text-card-foreground">{lang === "ar" ? c.name : c.nameEn}</h3>
-              <p className="pointer-events-none line-clamp-2 text-xs text-muted-foreground">
-                {lang === "ar" ? c.description : c.descriptionEn}
-              </p>
-              {c.count > 0 && (
-                <span className="pointer-events-none mt-auto rounded-full bg-secondary px-2 py-0.5 text-xs font-semibold text-secondary-foreground">
-                  {c.count.toLocaleString(lang)} {t("cat.adsSuffix")}
-                </span>
-              )}
-
-              {/* لوحة الأنواع الفرعية تظهر عند التأشير بالماوس — كل نوع قابل للضغط */}
-              {c.groups.length > 0 && (
-                <div
-                  className={`pointer-events-none absolute inset-0 z-10 flex flex-col bg-gradient-to-br ${grad} p-4 text-white opacity-0 transition-opacity duration-300 group-hover:pointer-events-auto group-hover:opacity-100`}
-                >
-                  <span className="mb-2 text-sm font-extrabold">{lang === "ar" ? c.name : c.nameEn}</span>
-                  <div className="flex flex-wrap gap-1.5 overflow-auto">
-                    {c.groups.map((g) => (
-                      <Link
-                        key={g.name}
-                        to="/category/$id"
-                        params={{ id: c.id }}
-                        search={{ sub: g.name }}
-                        className="rounded-full bg-white/20 px-2 py-0.5 text-[11px] font-semibold backdrop-blur-sm transition-colors hover:bg-white/40"
-                      >
-                        {g.name}
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          );
-        })}
+        {categories.map((c) => (
+          <CategoryCard key={c.id} c={c} />
+        ))}
 
         {/* تصنيف: أنشطة ومطاعم للبيع */}
         <a
