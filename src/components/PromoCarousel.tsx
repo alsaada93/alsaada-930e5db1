@@ -28,7 +28,7 @@ export function PromoCarousel() {
                 i === current ? "opacity-100" : "pointer-events-none opacity-0"
               }`}
             >
-              <img src={s.image_url} alt={s.title ?? "عرض"} className="h-full w-full object-cover" />
+              <img src={s.image_url} alt={s.title ?? "عرض"} loading="lazy" decoding="async" className="h-full w-full object-cover" />
               {(s.title || s.subtitle) && (
                 <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-4 text-white">
                   {s.title && <p className="text-lg font-extrabold">{s.title}</p>}
