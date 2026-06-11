@@ -4,7 +4,16 @@ import { Plus, Trash2, Pencil, Loader2, Upload, X } from "lucide-react";
 import { toast } from "sonner";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import { supabase } from "@/integrations/supabase/client";
-import { DEFAULT_SINK, DEFAULT_STEEL } from "@/lib/restaurant-calc";
+import {
+  DEFAULT_SINK,
+  DEFAULT_STEEL,
+  DEFAULT_SHELF,
+  DEFAULT_DISCOUNTS,
+  DEFAULT_THICKNESS,
+  type Discounts,
+  type ShelfSettings,
+  type ThicknessSettings,
+} from "@/lib/restaurant-calc";
 
 export const Route = createFileRoute("/admin/restaurant")({
   component: AdminRestaurantPage,
