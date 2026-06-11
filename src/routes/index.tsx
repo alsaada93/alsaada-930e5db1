@@ -9,7 +9,7 @@ import { PromoCarousel } from "@/components/PromoCarousel";
 import { HomeBanners } from "@/components/HomeBanners";
 // FeatureStrip removed per request — no marketing feature text on home page
 import { ListingsSection } from "@/components/ListingsSection";
-import { AuctionsSection } from "@/components/AuctionsSection";
+// AuctionsSection removed per request — auctions discontinued
 import { BusinessSection } from "@/components/BusinessSection";
 import { Testimonials } from "@/components/Testimonials";
 import { Footer } from "@/components/Footer";
