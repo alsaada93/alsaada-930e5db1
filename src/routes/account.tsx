@@ -88,6 +88,7 @@ function AccountPage() {
   const [followedListings, setFollowedListings] = useState<ListingRow[]>([]);
   const [recentViews, setRecentViews] = useState<ListingRow[]>([]);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const [notifications, setNotifications] = useState<{ id: string; type: string; message: string | null; read: boolean; created_at: string }[]>([]);
   const [activePanel, setActivePanel] = useState<string | null>(null);
 
   useEffect(() => {
