@@ -789,10 +789,10 @@ function ListingPage() {
           className="mt-4"
         />
 
-        {/* تقييمات البائع */}
-        {item.sellerId && (
+        {/* تقييمات المعلن — أي مستخدم مسجّل يمكنه تقييم صاحب الإعلان */}
+        {item.userId && (
           <div className="mt-10">
-            <SellerReviews sellerId={item.sellerId} />
+            <SellerReviews sellerId={item.userId} sellerName={sellerName} />
           </div>
         )}
       </main>
