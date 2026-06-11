@@ -55,6 +55,14 @@ export const bahrainCityCoords: Record<string, { lat: number; lng: number }> = {
 /** مركز افتراضي (المنامة) عند عدم توفر إحداثيات المدينة. */
 export const BAHRAIN_CENTER = { lat: 26.2235, lng: 50.5876 };
 
+/** يعرض اسم الموقع مسبوقًا بكلمة "البحرين" (مثل: البحرين توبلي). */
+export function displayCity(city?: string | null): string {
+  const c = (city ?? "").trim();
+  if (!c) return "البحرين";
+  if (c.startsWith("البحرين") || c.includes("البحرين")) return c;
+  return `البحرين ${c}`;
+}
+
 /** يرجّع إحداثيات مركز المدينة إن وُجدت. */
 export function cityCenter(city?: string | null): { lat: number; lng: number } | null {
   if (!city) return null;
