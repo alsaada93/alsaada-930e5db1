@@ -36,7 +36,7 @@ import { useListingTranslations } from "@/hooks/useListingTranslations";
 import { Tag, Truck, Tag as TagIcon, Globe, Package } from "lucide-react";
 import { useViewBoost, boostViews } from "@/hooks/useViewBoost";
 import { countryByName } from "@/data/countries";
-import { cityCenter, osmEmbed } from "@/data/bahrainCities";
+import { cityCenter, osmEmbed, displayCity } from "@/data/bahrainCities";
 import { brandInfo } from "@/data/brandsCatalog";
 
 const EXPIRY_DAYS = 60;
@@ -747,7 +747,7 @@ function ListingPage() {
         {/* اسم المنطقة فوق الخريطة */}
         {item.city && (
           <div className="mt-6 flex items-center gap-1.5 text-lg font-extrabold">
-            <MapPin className="h-5 w-5 text-primary" /> {item.city}
+            <MapPin className="h-5 w-5 text-primary" /> {displayCity(item.city)}
           </div>
         )}
 
