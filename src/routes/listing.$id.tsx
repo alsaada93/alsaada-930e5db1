@@ -197,6 +197,35 @@ export const Route = createFileRoute("/listing/$id")({
               : {}),
           }),
         },
+        {
+          type: "application/ld+json",
+          children: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            itemListElement: [
+              {
+                "@type": "ListItem",
+                position: 1,
+                name: "الرئيسية",
+                item: "https://www.alsaada.sale/",
+              },
+              {
+                "@type": "ListItem",
+                position: 2,
+                name: loaderData?.item.groupName || "الإعلانات",
+                item: loaderData?.item.categoryId
+                  ? `https://www.alsaada.sale/category/${loaderData.item.categoryId}`
+                  : "https://www.alsaada.sale/search",
+              },
+              {
+                "@type": "ListItem",
+                position: 3,
+                name: t,
+                item: url,
+              },
+            ],
+          }),
+        },
       ],
     };
   },
