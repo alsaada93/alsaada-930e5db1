@@ -887,6 +887,12 @@ function ManufacturingPage() {
   const [editTable, setEditTable] = useState<TableItem | null>(null);
   const [editSink, setEditSink] = useState<SinkItem | null>(null);
   const [editShelf, setEditShelf] = useState<ShelfItem | null>(null);
+  // Client-only print date to avoid SSR hydration mismatch
+  const [printDate, setPrintDate] = useState("");
+  useEffect(() => {
+    setPrintDate(new Date().toLocaleDateString("ar-BH"));
+  }, []);
+
 
   useEffect(() => {
     try {
