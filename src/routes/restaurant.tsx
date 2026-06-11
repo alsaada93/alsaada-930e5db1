@@ -595,6 +595,8 @@ function RestaurantPage() {
                               <img
                                 src={e.image_url || "/placeholder.svg"}
                                 alt=""
+                                loading="lazy"
+                                decoding="async"
                                 className="h-10 w-10 rounded object-cover border"
                               />
                               {e.name}
