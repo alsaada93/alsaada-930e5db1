@@ -462,19 +462,22 @@ function SinkCalculator({
 function ShelfCalculator({
   settings,
   discount,
+  factor,
   onAdd,
 }: {
   settings: ShelfSettings;
   discount: number;
+  factor: number;
   onAdd: (cfg: ShelfConfig, price: number, count: number) => void;
 }) {
+  const [grade, setGrade] = useState<"201" | "304">("201");
   const [length, setLength] = useState<NumOrEmpty>("");
   const [width, setWidth] = useState<NumOrEmpty>("");
   const [count, setCount] = useState(1);
 
   const isValid = length !== "" && width !== "";
-  const rawPrice = isValid ? shelfPrice({ length: Number(length), width: Number(width) }, settings) : 0;
-  const price = applyDiscount(rawPrice, discount);
+  const rawPrice = isValid ? shelfPrice({ grade, length: Number(length), width: Number(width) }, settings) : 0;
+  const price = applyDiscount(rawPrice * factor, discount);
 
   return (
     <section className="mt-10 print:hidden">
