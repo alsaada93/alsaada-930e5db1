@@ -492,6 +492,17 @@ function AddListingPage() {
         media.map((m) => (m.file ? uploadFile(m.file, "images") : Promise.resolve(m.url))),
       );
 
+      // Upload the video chosen during creation (if any)
+      let videoUrl: string | null = isEdit ? existingVideo : null;
+      if (videoFile) {
+        try {
+          videoUrl = await uploadFile(videoFile, "videos");
+        } catch (e) {
+          console.error("video upload failed", e);
+          toast.error(ar ? "تعذّر رفع الفيديو، سيُنشر الإعلان بدون فيديو" : "Video upload failed; listing will publish without it");
+        }
+      }
+
       const isBusiness = listingType === "business";
       const isAuction = listingType === "auction";
       const auctionHours = num(auctionDuration) ?? 24;
