@@ -36,7 +36,7 @@ import { useListingTranslations } from "@/hooks/useListingTranslations";
 import { Tag, Truck, Tag as TagIcon, Globe, Package } from "lucide-react";
 import { useViewBoost, boostViews } from "@/hooks/useViewBoost";
 import { countryByName } from "@/data/countries";
-import { cityCenter, osmEmbed, displayCity } from "@/data/bahrainCities";
+import { cityCenter, displayCity } from "@/data/bahrainCities";
 import { brandInfo } from "@/data/brandsCatalog";
 
 const EXPIRY_DAYS = 60;
@@ -88,6 +88,7 @@ export const Route = createFileRoute("/listing/$id")({
         publishedAt: (data.published_at as string | null) ?? null,
         expiresAt: (data.expires_at as string | null) ?? null,
         sellerId: undefined as string | undefined,
+        sellerName: ((data.contact_name as string | null) ?? null) as string | null,
         phone: data.contact_phone ?? undefined,
         description: data.description as string | null,
         brand: (data.brand as string | null) ?? null,
@@ -328,7 +329,7 @@ function Gallery({ images, video, title }: { images: string[]; video: string | n
 }
 
 function ListingPage() {
-  const { item } = Route.useLoaderData();
+  const { item, rating: ratingData } = Route.useLoaderData();
   const navigate = useNavigate();
   const { user } = useAuth();
   const { boost } = useViewBoost();
@@ -416,9 +417,9 @@ function ListingPage() {
 
 
   const phone = seller?.phone ?? item.phone ?? "33982383";
-  const sellerName = seller?.name ?? "بائع موثوق";
-  const rating = seller?.rating ?? 4.8;
-  const reviews = seller?.reviews_count ?? 0;
+  const sellerName = item.sellerName?.trim() || seller?.name || "المعلن";
+  const rating = ratingData?.value ?? seller?.rating ?? 0;
+  const reviews = ratingData?.count ?? seller?.reviews_count ?? 0;
   const deals = seller?.deals_count ?? 0;
   const verified = seller?.verified ?? false;
 
@@ -454,7 +455,7 @@ function ListingPage() {
   const exactPoint = item.lat != null && item.lng != null ? { lat: item.lat, lng: item.lng } : null;
   const mapPoint = exactPoint ?? cityCenter(item.city);
   const approxLocation = !exactPoint && !!mapPoint;
-  const mapSrc = mapPoint ? osmEmbed(mapPoint.lat, mapPoint.lng) : null;
+  const mapSrc = mapPoint ? `https://www.google.com/maps?q=${mapPoint.lat},${mapPoint.lng}&z=15&hl=ar&output=embed` : null;
 
   // معلومات الماركة (الوصف وبلد المنشأ والتخصص) تُعرض تلقائياً
   const bInfo = brandInfo(item.brand);
@@ -695,11 +696,17 @@ function ListingPage() {
                 )}
               </div>
               <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
-                <span className="inline-flex items-center gap-0.5 font-semibold text-amber-500">
-                  <Star className="h-4 w-4 fill-amber-500" /> {rating.toLocaleString("ar")}
-                </span>
-                <span className="text-muted-foreground">({reviews.toLocaleString("ar")} تقييم)</span>
-                <span className="text-muted-foreground">• {deals.toLocaleString("ar")} صفقة ناجحة</span>
+                {reviews > 0 ? (
+                  <>
+                    <span className="inline-flex items-center gap-0.5 font-semibold text-amber-500">
+                      <Star className="h-4 w-4 fill-amber-500" /> {rating.toLocaleString("ar")}
+                    </span>
+                    <span className="text-muted-foreground">({reviews.toLocaleString("ar")} تقييم)</span>
+                  </>
+                ) : (
+                  <span className="text-muted-foreground">لا توجد تقييمات بعد</span>
+                )}
+                {deals > 0 && <span className="text-muted-foreground">• {deals.toLocaleString("ar")} صفقة ناجحة</span>}
               </div>
               {publishedAt && mounted && (
                 <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
@@ -755,10 +762,12 @@ function ListingPage() {
         {mapSrc && mapPoint && (
           <div className="mt-3 overflow-hidden rounded-2xl border border-border bg-card">
             <iframe
-              title="خريطة موقع الإعلان"
+              title="خريطة قوقل لموقع الإعلان"
               src={mapSrc}
               className="h-72 w-full border-0"
               loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              allowFullScreen
             />
             {approxLocation && (
               <p className="px-3 pt-2 text-center text-xs text-muted-foreground">
@@ -766,12 +775,12 @@ function ListingPage() {
               </p>
             )}
             <a
-              href={`https://www.openstreetmap.org/?mlat=${mapPoint.lat}&mlon=${mapPoint.lng}#map=14/${mapPoint.lat}/${mapPoint.lng}`}
+              href={`https://www.google.com/maps/search/?api=1&query=${mapPoint.lat},${mapPoint.lng}`}
               target="_blank"
               rel="noopener noreferrer"
               className="block p-3 text-center text-sm font-semibold text-primary hover:underline"
             >
-              فتح في الخريطة الكاملة
+              فتح في خرائط قوقل
             </a>
           </div>
         )}
@@ -782,10 +791,10 @@ function ListingPage() {
           className="mt-4"
         />
 
-        {/* تقييمات البائع */}
-        {item.sellerId && (
+        {/* تقييمات المعلن — أي مستخدم مسجّل يمكنه تقييم صاحب الإعلان */}
+        {item.userId && (
           <div className="mt-10">
-            <SellerReviews sellerId={item.sellerId} />
+            <SellerReviews sellerId={item.userId} sellerName={sellerName} />
           </div>
         )}
       </main>
