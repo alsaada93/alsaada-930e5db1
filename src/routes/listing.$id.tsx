@@ -696,11 +696,17 @@ function ListingPage() {
                 )}
               </div>
               <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
-                <span className="inline-flex items-center gap-0.5 font-semibold text-amber-500">
-                  <Star className="h-4 w-4 fill-amber-500" /> {rating.toLocaleString("ar")}
-                </span>
-                <span className="text-muted-foreground">({reviews.toLocaleString("ar")} تقييم)</span>
-                <span className="text-muted-foreground">• {deals.toLocaleString("ar")} صفقة ناجحة</span>
+                {reviews > 0 ? (
+                  <>
+                    <span className="inline-flex items-center gap-0.5 font-semibold text-amber-500">
+                      <Star className="h-4 w-4 fill-amber-500" /> {rating.toLocaleString("ar")}
+                    </span>
+                    <span className="text-muted-foreground">({reviews.toLocaleString("ar")} تقييم)</span>
+                  </>
+                ) : (
+                  <span className="text-muted-foreground">لا توجد تقييمات بعد</span>
+                )}
+                {deals > 0 && <span className="text-muted-foreground">• {deals.toLocaleString("ar")} صفقة ناجحة</span>}
               </div>
               {publishedAt && mounted && (
                 <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
