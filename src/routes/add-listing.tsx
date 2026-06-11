@@ -831,7 +831,7 @@ function AddListingPage() {
                       type="button"
                       aria-label={ar ? `حذف الصورة ${i + 1}` : `Delete image ${i + 1}`}
                       onClick={() => setMedia((p) => p.filter((_, idx) => idx !== i))}
-                      className="absolute end-1 top-1 rounded-full bg-destructive p-1 text-destructive-foreground opacity-0 transition group-hover:opacity-100"
+                      className="absolute end-1 top-1 rounded-full bg-destructive p-1 text-destructive-foreground opacity-100 transition sm:opacity-0 sm:group-hover:opacity-100"
                     >
                       <X className="h-3.5 w-3.5" />
                     </button>
@@ -840,12 +840,12 @@ function AddListingPage() {
                         type="button"
                         aria-label={ar ? `تعديل الصورة ${i + 1}` : `Edit image ${i + 1}`}
                         onClick={() => setEditingIndex(i)}
-                        className="absolute start-1 top-1 rounded-full bg-primary p-1 text-primary-foreground opacity-0 transition group-hover:opacity-100"
+                        className="absolute start-1 top-1 rounded-full bg-primary p-1 text-primary-foreground opacity-100 transition sm:opacity-0 sm:group-hover:opacity-100"
                       >
                         <Pencil className="h-3.5 w-3.5" />
                       </button>
                     )}
-                    <div className="absolute inset-x-0 bottom-0 flex justify-center gap-1 bg-gradient-to-t from-black/60 to-transparent p-1 opacity-0 transition group-hover:opacity-100">
+                    <div className="absolute inset-x-0 bottom-0 flex justify-center gap-1 bg-gradient-to-t from-black/60 to-transparent p-1 opacity-100 transition sm:opacity-0 sm:group-hover:opacity-100">
                       <button
                         type="button"
                         disabled={i === 0}
