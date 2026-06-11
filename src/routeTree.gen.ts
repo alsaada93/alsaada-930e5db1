@@ -41,6 +41,7 @@ import { Route as AdminListingsRouteImport } from './routes/admin.listings'
 import { Route as AdminHeroRouteImport } from './routes/admin.hero'
 import { Route as AdminCategoriesRouteImport } from './routes/admin.categories'
 import { Route as AdminBrandsRouteImport } from './routes/admin.brands'
+import { Route as AdminBlogRouteImport } from './routes/admin.blog'
 import { Route as AdminAuctionsRouteImport } from './routes/admin.auctions'
 import { Route as AdminAppearanceRouteImport } from './routes/admin.appearance'
 import { Route as AdminAccessRouteImport } from './routes/admin.access'
@@ -206,6 +207,11 @@ const AdminBrandsRoute = AdminBrandsRouteImport.update({
   path: '/brands',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminBlogRoute = AdminBlogRouteImport.update({
+  id: '/blog',
+  path: '/blog',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminAuctionsRoute = AdminAuctionsRouteImport.update({
   id: '/auctions',
   path: '/auctions',
@@ -250,6 +256,7 @@ export interface FileRoutesByFullPath {
   '/admin/access': typeof AdminAccessRoute
   '/admin/appearance': typeof AdminAppearanceRoute
   '/admin/auctions': typeof AdminAuctionsRoute
+  '/admin/blog': typeof AdminBlogRoute
   '/admin/brands': typeof AdminBrandsRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/hero': typeof AdminHeroRoute
@@ -287,6 +294,7 @@ export interface FileRoutesByTo {
   '/admin/access': typeof AdminAccessRoute
   '/admin/appearance': typeof AdminAppearanceRoute
   '/admin/auctions': typeof AdminAuctionsRoute
+  '/admin/blog': typeof AdminBlogRoute
   '/admin/brands': typeof AdminBrandsRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/hero': typeof AdminHeroRoute
@@ -326,6 +334,7 @@ export interface FileRoutesById {
   '/admin/access': typeof AdminAccessRoute
   '/admin/appearance': typeof AdminAppearanceRoute
   '/admin/auctions': typeof AdminAuctionsRoute
+  '/admin/blog': typeof AdminBlogRoute
   '/admin/brands': typeof AdminBrandsRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/hero': typeof AdminHeroRoute
@@ -366,6 +375,7 @@ export interface FileRouteTypes {
     | '/admin/access'
     | '/admin/appearance'
     | '/admin/auctions'
+    | '/admin/blog'
     | '/admin/brands'
     | '/admin/categories'
     | '/admin/hero'
@@ -403,6 +413,7 @@ export interface FileRouteTypes {
     | '/admin/access'
     | '/admin/appearance'
     | '/admin/auctions'
+    | '/admin/blog'
     | '/admin/brands'
     | '/admin/categories'
     | '/admin/hero'
@@ -441,6 +452,7 @@ export interface FileRouteTypes {
     | '/admin/access'
     | '/admin/appearance'
     | '/admin/auctions'
+    | '/admin/blog'
     | '/admin/brands'
     | '/admin/categories'
     | '/admin/hero'
@@ -710,6 +722,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminBrandsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/blog': {
+      id: '/admin/blog'
+      path: '/blog'
+      fullPath: '/admin/blog'
+      preLoaderRoute: typeof AdminBlogRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/auctions': {
       id: '/admin/auctions'
       path: '/auctions'
@@ -745,6 +764,7 @@ interface AdminRouteChildren {
   AdminAccessRoute: typeof AdminAccessRoute
   AdminAppearanceRoute: typeof AdminAppearanceRoute
   AdminAuctionsRoute: typeof AdminAuctionsRoute
+  AdminBlogRoute: typeof AdminBlogRoute
   AdminBrandsRoute: typeof AdminBrandsRoute
   AdminCategoriesRoute: typeof AdminCategoriesRoute
   AdminHeroRoute: typeof AdminHeroRoute
@@ -760,6 +780,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminAccessRoute: AdminAccessRoute,
   AdminAppearanceRoute: AdminAppearanceRoute,
   AdminAuctionsRoute: AdminAuctionsRoute,
+  AdminBlogRoute: AdminBlogRoute,
   AdminBrandsRoute: AdminBrandsRoute,
   AdminCategoriesRoute: AdminCategoriesRoute,
   AdminHeroRoute: AdminHeroRoute,
