@@ -87,6 +87,10 @@ function AddListingPage() {
   const [media, setMedia] = useState<{ id: string; url: string; file?: File }[]>([]);
   // Existing video (edit mode) — can be removed
   const [existingVideo, setExistingVideo] = useState<string | null>(null);
+  // New video selected during creation (uploaded alongside images on submit)
+  const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [videoPreview, setVideoPreview] = useState<string | null>(null);
+  const vidInput = useRef<HTMLInputElement>(null);
 
   // Guest contact (required if not logged in)
   const [guestName, setGuestName] = useState("");
