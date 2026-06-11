@@ -28,8 +28,22 @@ export const Route = createFileRoute("/category/$id")({
     cond: typeof search.cond === "string" ? search.cond : undefined,
     sort: typeof search.sort === "string" ? search.sort : undefined,
   }),
-  loader: ({ params }) => {
-    const category = categories.find((c) => c.id === params.id);
+  loader: async ({ params }) => {
+    // التصنيفات قد تكون مُعدّلة من لوحة الإدارة ومخزّنة في site_settings،
+    // لذا نبحث في القائمة الديناميكية أولاً ثم نرجع للقائمة الثابتة.
+    let pool: Category[] = categories;
+    try {
+      const { data } = await supabase
+        .from("site_settings")
+        .select("value")
+        .eq("key", "categories")
+        .maybeSingle();
+      const value = data?.value as Category[] | null | undefined;
+      if (Array.isArray(value) && value.length > 0) pool = value;
+    } catch {
+      /* fall back to static categories */
+    }
+    const category = pool.find((c) => c.id === params.id) ?? categories.find((c) => c.id === params.id);
     if (!category) throw notFound();
     return { category };
   },
