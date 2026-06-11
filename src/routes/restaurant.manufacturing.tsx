@@ -868,7 +868,12 @@ const DRAFT_KEY = "alsaada_manufacturing_draft";
 
 function ManufacturingPage() {
   const { user } = useAuth();
-  const { steel, sink, shelf, discounts } = useCalcSettings();
+  const { steel, sink, shelf, discounts, thickness } = useCalcSettings();
+  const [thicknessMm, setThicknessMm] = useState<number>(thickness.default);
+  useEffect(() => {
+    setThicknessMm(thickness.default);
+  }, [thickness.default]);
+  const factor = thicknessFactor(thickness, thicknessMm);
 
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
