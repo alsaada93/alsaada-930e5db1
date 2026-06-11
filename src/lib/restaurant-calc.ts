@@ -80,16 +80,20 @@ export function sinkPrice(cfg: SinkConfig, s: SinkSettings): number {
 
 /* ===================== الأرفف ===================== */
 export interface ShelfSettings {
-  /** المقاس المعياري وسعره الثابت */
+  /** المقاس المعياري وسعره الثابت (استيل 201) */
   base: { width: number; depth: number; price: number };
+  /** معامل سعر الاستيل 304 مقارنة بـ 201 */
+  grade304Multiplier: number;
 }
 
 /** الرف 100×30سم = 20 د.ب أي ~66.67 د.ب لكل متر مربع */
 export const DEFAULT_SHELF: ShelfSettings = {
   base: { width: 100, depth: 30, price: 20 },
+  grade304Multiplier: 1.4,
 };
 
 export interface ShelfConfig {
+  grade?: "201" | "304";
   length: number; // الطول سم
   width: number; // العمق سم
 }
@@ -98,8 +102,30 @@ export interface ShelfConfig {
 export function shelfPrice(cfg: ShelfConfig, s: ShelfSettings): number {
   const baseArea = s.base.width * s.base.depth;
   const area = Math.max(1, cfg.length) * Math.max(1, cfg.width);
-  const price = s.base.price * (area / baseArea);
+  let price = s.base.price * (area / baseArea);
+  if (cfg.grade === "304") price *= s.grade304Multiplier ?? 1.4;
   return Math.round(price * 100) / 100;
+}
+
+/* ===================== سمك الاستانلس ستيل ===================== */
+export interface ThicknessSettings {
+  /** خيارات السمك المتاحة (ملم) */
+  options: number[];
+  /** معامل السعر لكل سمك */
+  multipliers: Record<string, number>;
+  /** السمك الافتراضي */
+  default: number;
+}
+
+export const DEFAULT_THICKNESS: ThicknessSettings = {
+  options: [0.8, 1, 1.2, 1.5, 2],
+  multipliers: { "0.8": 0.9, "1": 1, "1.2": 1.15, "1.5": 1.35, "2": 1.6 },
+  default: 1,
+};
+
+/** معامل السعر حسب السمك المختار */
+export function thicknessFactor(t: ThicknessSettings, mm: number): number {
+  return t.multipliers[String(mm)] ?? 1;
 }
 
 export const BHD = (n: number) =>
