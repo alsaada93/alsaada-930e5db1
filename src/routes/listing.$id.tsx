@@ -417,9 +417,9 @@ function ListingPage() {
 
 
   const phone = seller?.phone ?? item.phone ?? "33982383";
-  const sellerName = seller?.name ?? "بائع موثوق";
-  const rating = seller?.rating ?? 4.8;
-  const reviews = seller?.reviews_count ?? 0;
+  const sellerName = item.sellerName?.trim() || seller?.name || "المعلن";
+  const rating = ratingData?.value ?? seller?.rating ?? 0;
+  const reviews = ratingData?.count ?? seller?.reviews_count ?? 0;
   const deals = seller?.deals_count ?? 0;
   const verified = seller?.verified ?? false;
 
