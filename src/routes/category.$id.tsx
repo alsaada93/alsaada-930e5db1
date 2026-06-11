@@ -5,9 +5,10 @@ import { toast } from "sonner";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ListingCard } from "@/components/ListingCard";
-import { categories, bahrainRegions, type Listing } from "@/data/marketplace";
+import { categories, bahrainRegions, type Listing, type Category } from "@/data/marketplace";
 import { useListings } from "@/hooks/useListings";
 import { useLanguage } from "@/hooks/useLanguage";
+import { supabase } from "@/integrations/supabase/client";
 
 interface CategorySearch {
   sub?: string;
@@ -27,8 +28,22 @@ export const Route = createFileRoute("/category/$id")({
     cond: typeof search.cond === "string" ? search.cond : undefined,
     sort: typeof search.sort === "string" ? search.sort : undefined,
   }),
-  loader: ({ params }) => {
-    const category = categories.find((c) => c.id === params.id);
+  loader: async ({ params }) => {
+    // التصنيفات قد تكون مُعدّلة من لوحة الإدارة ومخزّنة في site_settings،
+    // لذا نبحث في القائمة الديناميكية أولاً ثم نرجع للقائمة الثابتة.
+    let pool: Category[] = categories;
+    try {
+      const { data } = await supabase
+        .from("site_settings")
+        .select("value")
+        .eq("key", "categories")
+        .maybeSingle();
+      const value = data?.value as Category[] | null | undefined;
+      if (Array.isArray(value) && value.length > 0) pool = value;
+    } catch {
+      /* fall back to static categories */
+    }
+    const category = pool.find((c) => c.id === params.id) ?? categories.find((c) => c.id === params.id);
     if (!category) throw notFound();
     return { category };
   },
@@ -106,8 +121,8 @@ function CategoryPage() {
   const [showFilters, setShowFilters] = useState(false);
 
   const items = useMemo(
-    () => listings.filter((l) => l.category === category.name),
-    [listings, category.name],
+    () => listings.filter((l) => l.category === category.name || l.category === category.id),
+    [listings, category.name, category.id],
   );
 
   // قائمة التصنيفات الفرعية (اختيارية كفلاتر): من الأقسام أو من الإعلانات نفسها

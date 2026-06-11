@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Globe, Heart, Bell, User, Camera, LogOut, LayoutDashboard, UserCircle } from "lucide-react";
+import { Globe, Heart, Bell, User, Camera, LogOut, LayoutDashboard, UserCircle, Menu, Calculator } from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useAuth } from "@/hooks/useAuth";
@@ -70,6 +70,36 @@ export function Header() {
             <Globe className="h-4 w-4" />
             <span>{lang === "ar" ? "EN" : "ع"}</span>
           </button>
+
+          {/* قائمة الجوال — تُظهر الروابط المخفية على الشاشات الصغيرة */}
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              aria-label={lang === "ar" ? "القائمة" : "Menu"}
+              className="flex items-center rounded-lg p-2 hover:bg-white/10 focus:outline-none sm:hidden"
+            >
+              <Menu className="h-5 w-5" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-52">
+              <DropdownMenuItem asChild>
+                <Link to="/restaurant" className="flex items-center gap-2">
+                  <Calculator className="h-4 w-4" />
+                  {lang === "ar" ? "حاسبة المطاعم" : "Restaurant Cost"}
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/account" className="flex items-center gap-2">
+                  <Heart className="h-4 w-4" />
+                  {lang === "ar" ? "المفضلة" : "Favorites"}
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/account" className="flex items-center gap-2">
+                  <Bell className="h-4 w-4" />
+                  {lang === "ar" ? "الإشعارات" : "Notifications"}
+                </Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
 
           <Link
             to="/restaurant"

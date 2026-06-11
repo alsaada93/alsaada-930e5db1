@@ -462,6 +462,8 @@ function RestaurantPage() {
                                 <img
                                   src={e.brand_logo_url}
                                   alt={e.manufacturer ?? ""}
+                                  loading="lazy"
+                                  decoding="async"
                                   className="h-full w-full object-contain"
                                 />
                               </span>
@@ -593,6 +595,8 @@ function RestaurantPage() {
                               <img
                                 src={e.image_url || "/placeholder.svg"}
                                 alt=""
+                                loading="lazy"
+                                decoding="async"
                                 className="h-10 w-10 rounded object-cover border"
                               />
                               {e.name}
@@ -823,6 +827,8 @@ function RestaurantPage() {
                                 <img
                                   src={item.img}
                                   alt=""
+                                  loading="lazy"
+                                  decoding="async"
                                   className="w-14 h-14 object-cover rounded-md border border-gray-200 shrink-0"
                                 />
                               ) : (
