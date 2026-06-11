@@ -5,9 +5,10 @@ import { toast } from "sonner";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ListingCard } from "@/components/ListingCard";
-import { categories, bahrainRegions, type Listing } from "@/data/marketplace";
+import { categories, bahrainRegions, type Listing, type Category } from "@/data/marketplace";
 import { useListings } from "@/hooks/useListings";
 import { useLanguage } from "@/hooks/useLanguage";
+import { supabase } from "@/integrations/supabase/client";
 
 interface CategorySearch {
   sub?: string;
