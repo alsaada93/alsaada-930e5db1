@@ -111,7 +111,7 @@ function ArticlePage() {
           </header>
           {a.sections.map((s: ArticleSection, i: number) => (
             <section key={i} className="rounded-2xl border border-border bg-card p-5">
-              <h2 className="mb-3 text-xl font-bold text-primary">{s.heading}</h2>
+              {s.heading && <h2 className="mb-3 text-xl font-bold text-primary">{s.heading}</h2>}
               <p>{s.body}</p>
               {s.list_items && s.list_items.length > 0 && (
                 <ul className="mt-3 list-disc space-y-1 pr-5">
