@@ -292,7 +292,7 @@ function CategoryPage() {
                   <option value="">{lang === "ar" ? "كل المناطق" : "All regions"}</option>
                   {regionOptions.map((r) => (
                     <option key={r} value={r}>
-                      {r}
+                      {displayCity(r)}
                     </option>
                   ))}
                 </select>
