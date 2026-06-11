@@ -112,17 +112,27 @@ export const Route = createFileRoute("/listing/$id")({
   },
   head: ({ loaderData, params }) => {
     const t = loaderData?.item.title ?? "إعلان";
+    const city = loaderData?.item.city || "البحرين";
     const url = `https://www.alsaada.sale/listing/${params.id}`;
     const image = loaderData?.item.images?.[0] ?? "";
+    const metaTitle = `${t} للبيع في ${city} | حراج السعادة`;
+    const rawDesc = (loaderData?.item.description || "").replace(/\s+/g, " ").trim();
+    const metaDesc =
+      (rawDesc ? rawDesc.slice(0, 150) : `${t} للبيع في ${city}`) +
+      ` — حراج السعادة لبيع وشراء معدات المطاعم والأثاث في البحرين.`;
     return {
       meta: [
-        { title: `${t} | حراج السعادة Haraj Al Saada` },
-        { name: "description", content: `${t} — ${loaderData?.item.city ?? ""} على حراج السعادة` },
-        { property: "og:title", content: `${t} | حراج السعادة Haraj Al Saada` },
-        { property: "og:description", content: `${t} للبيع في ${loaderData?.item.city ?? "البحرين"}` },
+        { title: metaTitle },
+        { name: "description", content: metaDesc.slice(0, 160) },
+        { property: "og:title", content: metaTitle },
+        { property: "og:description", content: metaDesc.slice(0, 200) },
         { property: "og:type", content: "product" },
         { property: "og:url", content: url },
         ...(image ? [{ property: "og:image", content: image }] : []),
+        { name: "twitter:card", content: image ? "summary_large_image" : "summary" },
+        { name: "twitter:title", content: metaTitle },
+        { name: "twitter:description", content: metaDesc.slice(0, 200) },
+        ...(image ? [{ name: "twitter:image", content: image }] : []),
       ],
       links: [{ rel: "canonical", href: url }],
       scripts: [
