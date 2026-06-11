@@ -36,7 +36,7 @@ export const Route = createFileRoute("/tips/")({
 });
 
 function TipsPage() {
-  const { posts } = Route.useLoaderData();
+  const { posts } = Route.useLoaderData() as { posts: BlogPost[] };
   const dbSlugs = new Set(posts.map((p) => p.slug));
   const staticArticles = articles.filter((a) => !dbSlugs.has(a.slug));
 
