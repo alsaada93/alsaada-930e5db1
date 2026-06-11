@@ -347,10 +347,12 @@ function SteelTableCalculator({
 function SinkCalculator({
   settings,
   discount,
+  factor,
   onAdd,
 }: {
   settings: SinkSettings;
   discount: number;
+  factor: number;
   onAdd: (cfg: Omit<SinkItem, "uid" | "price">, price: number, count: number) => void;
 }) {
   const [length, setLength] = useState<NumOrEmpty>("");
@@ -367,7 +369,7 @@ function SinkCalculator({
   const rawPrice = isValid
     ? sinkPrice({ length: Number(length), width: Number(width), bowls, bottomShelf, bowlDepth }, settings)
     : 0;
-  const price = applyDiscount(rawPrice, discount);
+  const price = applyDiscount(rawPrice * factor, discount);
 
   return (
     <section className="mt-10 print:hidden">
