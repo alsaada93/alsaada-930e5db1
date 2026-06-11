@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Globe, Heart, Bell, User, Camera, LogOut, LayoutDashboard, UserCircle } from "lucide-react";
+import { Globe, Heart, Bell, User, Camera, LogOut, LayoutDashboard, UserCircle, Menu, Calculator } from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useAuth } from "@/hooks/useAuth";
