@@ -697,12 +697,14 @@ function EditTableDialog({
 function EditSinkDialog({
   settings,
   discount,
+  factor,
   value,
   onClose,
   onSave,
 }: {
   settings: SinkSettings;
   discount: number;
+  factor: number;
   value: SinkItem;
   onClose: () => void;
   onSave: (s: SinkItem) => void;
@@ -720,7 +722,7 @@ function EditSinkDialog({
   const rawPrice = isValid
     ? sinkPrice({ length: Number(length), width: Number(width), bowls, bottomShelf, bowlDepth }, settings)
     : 0;
-  const price = applyDiscount(rawPrice, discount);
+  const price = applyDiscount(rawPrice * factor, discount);
 
   return (
     <DialogShell
