@@ -36,7 +36,7 @@ import { useListingTranslations } from "@/hooks/useListingTranslations";
 import { Tag, Truck, Tag as TagIcon, Globe, Package } from "lucide-react";
 import { useViewBoost, boostViews } from "@/hooks/useViewBoost";
 import { countryByName } from "@/data/countries";
-import { cityCenter, osmEmbed, displayCity } from "@/data/bahrainCities";
+import { cityCenter, displayCity } from "@/data/bahrainCities";
 import { brandInfo } from "@/data/brandsCatalog";
 
 const EXPIRY_DAYS = 60;
