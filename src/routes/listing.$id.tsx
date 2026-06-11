@@ -762,10 +762,12 @@ function ListingPage() {
         {mapSrc && mapPoint && (
           <div className="mt-3 overflow-hidden rounded-2xl border border-border bg-card">
             <iframe
-              title="خريطة موقع الإعلان"
+              title="خريطة قوقل لموقع الإعلان"
               src={mapSrc}
               className="h-72 w-full border-0"
               loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              allowFullScreen
             />
             {approxLocation && (
               <p className="px-3 pt-2 text-center text-xs text-muted-foreground">
@@ -773,12 +775,12 @@ function ListingPage() {
               </p>
             )}
             <a
-              href={`https://www.openstreetmap.org/?mlat=${mapPoint.lat}&mlon=${mapPoint.lng}#map=14/${mapPoint.lat}/${mapPoint.lng}`}
+              href={`https://www.google.com/maps/search/?api=1&query=${mapPoint.lat},${mapPoint.lng}`}
               target="_blank"
               rel="noopener noreferrer"
               className="block p-3 text-center text-sm font-semibold text-primary hover:underline"
             >
-              فتح في الخريطة الكاملة
+              فتح في خرائط قوقل
             </a>
           </div>
         )}
