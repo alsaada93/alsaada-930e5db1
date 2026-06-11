@@ -3,10 +3,10 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { articles } from "@/data/articles";
-import { listPublishedPosts } from "@/lib/blog.functions";
+import { listPublishedPosts, type BlogPost } from "@/lib/blog.functions";
 
 export const Route = createFileRoute("/tips/")({
-  loader: async () => {
+  loader: async (): Promise<{ posts: BlogPost[] }> => {
     try {
       const posts = await listPublishedPosts();
       return { posts };
