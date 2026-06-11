@@ -253,10 +253,12 @@ function CancelBtn({ onClick }: { onClick: () => void }) {
 function SteelTableCalculator({
   settings,
   discount,
+  factor,
   onAdd,
 }: {
   settings: SteelTableSettings;
   discount: number;
+  factor: number;
   onAdd: (cfg: Omit<TableItem, "uid" | "price">, price: number, count: number) => void;
 }) {
   const [grade, setGrade] = useState<"201" | "304">("201");
@@ -272,7 +274,7 @@ function SteelTableCalculator({
   const rawPrice = isValid
     ? steelTablePrice({ grade, length: Number(length), width: Number(width), midShelf }, settings)
     : 0;
-  const price = applyDiscount(rawPrice, discount);
+  const price = applyDiscount(rawPrice * factor, discount);
 
   return (
     <section className="mt-10 print:hidden">
