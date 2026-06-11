@@ -88,6 +88,7 @@ export const Route = createFileRoute("/listing/$id")({
         publishedAt: (data.published_at as string | null) ?? null,
         expiresAt: (data.expires_at as string | null) ?? null,
         sellerId: undefined as string | undefined,
+        sellerName: ((data.contact_name as string | null) ?? null) as string | null,
         phone: data.contact_phone ?? undefined,
         description: data.description as string | null,
         brand: (data.brand as string | null) ?? null,
