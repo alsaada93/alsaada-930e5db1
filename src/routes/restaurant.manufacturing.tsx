@@ -484,6 +484,22 @@ function ShelfCalculator({
       <h2 className="mb-3 text-lg font-bold">٣. حاسبة تفصيل أرفف جدارية (استيل)</h2>
       <div className="grid gap-6 rounded-2xl border border-border p-5 lg:grid-cols-2 bg-card shadow-sm">
         <div className="space-y-5">
+          <Field label="نوعية الاستيل">
+            <div className="flex gap-2">
+              {(["201", "304"] as const).map((g) => (
+                <button
+                  key={g}
+                  type="button"
+                  onClick={() => setGrade(g)}
+                  className={`flex-1 rounded-lg border p-2 font-bold ${
+                    grade === g ? "border-primary bg-primary/10 text-primary" : "border-border hover:bg-muted/50"
+                  }`}
+                >
+                  استيل {g}
+                </button>
+              ))}
+            </div>
+          </Field>
           <div className="grid grid-cols-2 gap-3">
             <Field label="الطول (سم)">
               <NumInput value={length} onChange={setLength} />
@@ -512,7 +528,7 @@ function ShelfCalculator({
           addLabel="إضافة الرف للمشروع"
           onAdd={() => {
             if (!isValid) return;
-            onAdd({ length: Number(length), width: Number(width) }, price, count);
+            onAdd({ grade, length: Number(length), width: Number(width) }, price, count);
             setLength("");
             setWidth("");
           }}
