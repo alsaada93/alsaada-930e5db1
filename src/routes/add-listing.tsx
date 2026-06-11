@@ -897,9 +897,53 @@ function AddListingPage() {
                 </div>
               )}
 
-              <p className="mt-2 text-xs text-muted-foreground">
-                {ar ? "يمكنك إضافة الفيديو بعد نشر الإعلان." : "You can add a video after publishing."}
-              </p>
+              {/* Video upload alongside images (during creation) */}
+              <div className="mt-4">
+                <label className="mb-1 block text-sm font-semibold">
+                  {ar ? "فيديو الإعلان (اختياري)" : "Listing video (optional)"}
+                </label>
+                <input
+                  ref={vidInput}
+                  type="file"
+                  accept="video/*"
+                  hidden
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (!f) return;
+                    if (f.size > 60 * 1024 * 1024) {
+                      toast.error(ar ? "حجم الفيديو كبير (الحد 60 ميجابايت)" : "Video too large (max 60MB)");
+                      return;
+                    }
+                    setVideoFile(f);
+                    setVideoPreview(URL.createObjectURL(f));
+                  }}
+                />
+                {videoPreview ? (
+                  <div className="relative w-full max-w-xs overflow-hidden rounded-lg border border-border">
+                    <video src={videoPreview} controls className="h-full w-full" />
+                    <button
+                      type="button"
+                      aria-label={ar ? "حذف الفيديو" : "Delete video"}
+                      onClick={() => {
+                        setVideoFile(null);
+                        setVideoPreview(null);
+                      }}
+                      className="absolute end-1 top-1 rounded-full bg-destructive p-1 text-destructive-foreground"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => vidInput.current?.click()}
+                    className="flex items-center gap-2 rounded-lg border-2 border-dashed border-border px-4 py-3 text-sm font-semibold text-muted-foreground hover:border-primary hover:text-primary"
+                  >
+                    <Video className="h-5 w-5" />
+                    {ar ? "اختر فيديو" : "Choose video"}
+                  </button>
+                )}
+              </div>
             </div>
 
           </div>
