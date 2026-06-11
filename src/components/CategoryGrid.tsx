@@ -1,5 +1,6 @@
+import { useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { UtensilsCrossed, Hotel, Smartphone, Sofa, Store, Gavel, Calculator, type LucideIcon } from "lucide-react";
+import { UtensilsCrossed, Hotel, Smartphone, Sofa, Store, Gavel, Calculator, ChevronDown, type LucideIcon } from "lucide-react";
 import { useCategories } from "@/hooks/useCategories";
 import { useLanguage } from "@/hooks/useLanguage";
 
