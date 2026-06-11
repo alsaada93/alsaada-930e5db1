@@ -455,7 +455,7 @@ function ListingPage() {
   const exactPoint = item.lat != null && item.lng != null ? { lat: item.lat, lng: item.lng } : null;
   const mapPoint = exactPoint ?? cityCenter(item.city);
   const approxLocation = !exactPoint && !!mapPoint;
-  const mapSrc = mapPoint ? osmEmbed(mapPoint.lat, mapPoint.lng) : null;
+  const mapSrc = mapPoint ? `https://www.google.com/maps?q=${mapPoint.lat},${mapPoint.lng}&z=15&hl=ar&output=embed` : null;
 
   // معلومات الماركة (الوصف وبلد المنشأ والتخصص) تُعرض تلقائياً
   const bInfo = brandInfo(item.brand);
