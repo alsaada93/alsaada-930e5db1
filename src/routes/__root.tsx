@@ -142,13 +142,6 @@ function RootShell({ children }: { children: ReactNode }) {
         {/* Apply the saved theme before first paint to prevent a design flicker */}
         <script dangerouslySetInnerHTML={{ __html: THEME_BOOT_SCRIPT }} />
 
-        {/* Google AdSense */}
-        <script
-          async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8756700125021106"
-          crossOrigin="anonymous"
-        />
-
         <HeadContent />
       </head>
 
@@ -168,6 +161,20 @@ function RootComponent() {
     if (sessionStorage.getItem("visit_recorded")) return;
     sessionStorage.setItem("visit_recorded", "1");
     recordVisit({ data: { path: window.location.pathname } }).catch(() => {});
+  }, []);
+
+  // Load Google AdSense on the client only, after hydration, to avoid SSR
+  // hydration mismatches caused by AdSense auto-ads injecting markup.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (document.getElementById("adsbygoogle-js")) return;
+    const s = document.createElement("script");
+    s.id = "adsbygoogle-js";
+    s.async = true;
+    s.src =
+      "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8756700125021106";
+    s.crossOrigin = "anonymous";
+    document.head.appendChild(s);
   }, []);
 
   return (
