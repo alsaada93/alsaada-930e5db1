@@ -790,22 +790,25 @@ function EditSinkDialog({
 function EditShelfDialog({
   settings,
   discount,
+  factor,
   value,
   onClose,
   onSave,
 }: {
   settings: ShelfSettings;
   discount: number;
+  factor: number;
   value: ShelfItem;
   onClose: () => void;
   onSave: (s: ShelfItem) => void;
 }) {
+  const [grade, setGrade] = useState<"201" | "304">(value.grade ?? "201");
   const [length, setLength] = useState<NumOrEmpty>(value.length);
   const [width, setWidth] = useState<NumOrEmpty>(value.width);
 
   const isValid = length !== "" && width !== "";
-  const rawPrice = isValid ? shelfPrice({ length: Number(length), width: Number(width) }, settings) : 0;
-  const price = applyDiscount(rawPrice, discount);
+  const rawPrice = isValid ? shelfPrice({ grade, length: Number(length), width: Number(width) }, settings) : 0;
+  const price = applyDiscount(rawPrice * factor, discount);
 
   return (
     <DialogShell
@@ -814,10 +817,26 @@ function EditShelfDialog({
       footer={
         <>
           <CancelBtn onClick={onClose} />
-          <SaveBtn disabled={!isValid} onClick={() => isValid && onSave({ ...value, length: Number(length), width: Number(width), price })} />
+          <SaveBtn disabled={!isValid} onClick={() => isValid && onSave({ ...value, grade, length: Number(length), width: Number(width), price })} />
         </>
       }
     >
+      <Field label="نوعية الاستيل">
+        <div className="flex gap-2">
+          {(["201", "304"] as const).map((g) => (
+            <button
+              key={g}
+              type="button"
+              onClick={() => setGrade(g)}
+              className={`flex-1 rounded-lg border p-2 font-bold ${
+                grade === g ? "border-primary bg-primary/10 text-primary" : "border-border"
+              }`}
+            >
+              استيل {g}
+            </button>
+          ))}
+        </div>
+      </Field>
       <div className="grid grid-cols-2 gap-3">
         <Field label="الطول (سم)">
           <NumInput value={length} onChange={setLength} />
