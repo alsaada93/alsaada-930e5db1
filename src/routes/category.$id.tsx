@@ -110,6 +110,14 @@ function CategoryPage() {
     [listings, category.name],
   );
 
+  // قائمة التصنيفات الفرعية (اختيارية كفلاتر): من الأقسام أو من الإعلانات نفسها
+  const subOptions = useMemo(() => {
+    const fromGroups = (category.groups ?? []).flatMap((g: { items?: string[] }) => g.items ?? []);
+    const fromData = items.map((l) => l.sub).filter((s): s is string => !!s);
+    const base = category.sub && category.sub.length > 0 ? category.sub : fromGroups;
+    return Array.from(new Set([...base, ...fromData]));
+  }, [category, items]);
+
   const update = (patch: Partial<CategorySearch>) => {
     navigate({
       to: "/category/$id",
@@ -189,8 +197,8 @@ function CategoryPage() {
             </div>
           </div>
 
-          {/* Subcategory chips */}
-          {category.sub.length > 0 && (
+          {/* Subcategory chips — optional filters, not required */}
+          {subOptions.length > 0 && (
             <div className="mt-5 flex flex-wrap gap-2">
               <button
                 onClick={() => update({ sub: undefined })}
@@ -202,7 +210,7 @@ function CategoryPage() {
               >
                 {lang === "ar" ? "الكل" : "All"}
               </button>
-              {category.sub.map((s: string) => (
+              {subOptions.map((s: string) => (
                 <button
                   key={s}
                   onClick={() => update({ sub: s })}

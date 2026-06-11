@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { UtensilsCrossed, Hotel, Smartphone, Sofa, Store, Gavel, type LucideIcon } from "lucide-react";
+import { UtensilsCrossed, Hotel, Smartphone, Sofa, Store, Gavel, Calculator, type LucideIcon } from "lucide-react";
 import { useCategories } from "@/hooks/useCategories";
 import { useLanguage } from "@/hooks/useLanguage";
 
@@ -116,6 +116,22 @@ export function CategoryGrid() {
               : "Bid on the best deals and win at lower prices"}
           </p>
         </a>
+
+        {/* حاسبة المطاعم — بطاقة مميزة تمتد على عرض أكبر */}
+        <Link
+          to="/restaurant"
+          className="group relative col-span-2 flex flex-col items-start gap-3 overflow-hidden rounded-2xl border border-primary/40 bg-gradient-to-br from-emerald-500 to-teal-600 p-5 text-start text-white shadow-glow transition-all hover:-translate-y-1 sm:col-span-3 lg:col-span-2"
+        >
+          <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/20 text-white shadow-lg backdrop-blur-sm transition-transform group-hover:scale-110">
+            <Calculator className="h-8 w-8" strokeWidth={1.75} />
+          </span>
+          <h3 className="text-lg font-extrabold">{lang === "ar" ? "🏪 حاسبة المطاعم" : "🏪 Restaurant Cost Calculator"}</h3>
+          <p className="text-sm font-semibold text-white/90">
+            {lang === "ar"
+              ? "احسب تكلفة مشروعك خلال دقيقة واحدة"
+              : "Estimate your project cost in one minute"}
+          </p>
+        </Link>
       </div>
     </section>
   );
