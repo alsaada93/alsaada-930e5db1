@@ -3,8 +3,17 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { articles } from "@/data/articles";
+import { listPublishedPosts } from "@/lib/blog.functions";
 
 export const Route = createFileRoute("/tips/")({
+  loader: async () => {
+    try {
+      const posts = await listPublishedPosts();
+      return { posts };
+    } catch {
+      return { posts: [] };
+    }
+  },
   head: () => ({
     meta: [
       { title: "نصائح ومقالات معدات المطاعم — حراج السعادة" },
