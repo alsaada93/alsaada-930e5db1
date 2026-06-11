@@ -28,6 +28,7 @@ import {
   sinkPrice,
   shelfPrice,
   applyDiscount,
+  thicknessFactor,
   SIZE_MIN,
   SIZE_MAX,
   BHD,
