@@ -69,9 +69,15 @@ function AdminListingsPage() {
     k === "all" ? items.length : items.filter((i) => i.status === k).length;
 
   const doStatus = async (id: string, status: Status) => {
+    let reason: string | undefined;
+    if (status === "rejected") {
+      const r = prompt("سبب الرفض (سيصل للمعلن):", "");
+      if (r === null) return;
+      reason = r.trim() || undefined;
+    }
     setBusy(id);
     try {
-      await setStatusFn({ data: { id, status } });
+      await setStatusFn({ data: { id, status, reason } });
       toast.success("تم تحديث حالة الإعلان");
       refresh();
     } catch {
