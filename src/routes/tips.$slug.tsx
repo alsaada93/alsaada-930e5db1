@@ -3,9 +3,32 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { getArticle, type Article, type ArticleSection } from "@/data/articles";
+import { getPublishedPost } from "@/lib/blog.functions";
 
 export const Route = createFileRoute("/tips/$slug")({
-  loader: ({ params }) => {
+  loader: async ({ params }): Promise<Article> => {
+    try {
+      const post = await getPublishedPost({ data: { slug: params.slug } });
+      if (post) {
+        const sections: ArticleSection[] = post.content
+          .split(/\n{2,}/)
+          .map((p) => p.trim())
+          .filter(Boolean)
+          .map((body) => ({ heading: "", body }));
+        return {
+          slug: post.slug,
+          title: post.title,
+          excerpt: post.excerpt ?? "",
+          sections,
+          hashtags: (post.keywords ?? "")
+            .split(",")
+            .map((k) => k.trim())
+            .filter(Boolean),
+        } as Article;
+      }
+    } catch {
+      // fall back to static articles
+    }
     const article = getArticle(params.slug);
     if (!article) throw notFound();
     return article;
