@@ -30,6 +30,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as TipsIndexRouteImport } from './routes/tips.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as TipsSlugRouteImport } from './routes/tips.$slug'
+import { Route as RestaurantManufacturingRouteImport } from './routes/restaurant.manufacturing'
 import { Route as LoginAdminRouteImport } from './routes/login.admin'
 import { Route as ListingIdRouteImport } from './routes/listing.$id'
 import { Route as CategoryIdRouteImport } from './routes/category.$id'
@@ -152,6 +153,11 @@ const TipsSlugRoute = TipsSlugRouteImport.update({
   path: '/tips/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RestaurantManufacturingRoute = RestaurantManufacturingRouteImport.update({
+  id: '/manufacturing',
+  path: '/manufacturing',
+  getParentRoute: () => RestaurantRoute,
+} as any)
 const LoginAdminRoute = LoginAdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -248,7 +254,7 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/report': typeof ReportRoute
   '/reset-password': typeof ResetPasswordRoute
-  '/restaurant': typeof RestaurantRoute
+  '/restaurant': typeof RestaurantRouteWithChildren
   '/search': typeof SearchRoute
   '/sell': typeof SellRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -268,6 +274,7 @@ export interface FileRoutesByFullPath {
   '/category/$id': typeof CategoryIdRoute
   '/listing/$id': typeof ListingIdRoute
   '/login/admin': typeof LoginAdminRoute
+  '/restaurant/manufacturing': typeof RestaurantManufacturingRoute
   '/tips/$slug': typeof TipsSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/tips/': typeof TipsIndexRoute
@@ -286,7 +293,7 @@ export interface FileRoutesByTo {
   '/privacy': typeof PrivacyRoute
   '/report': typeof ReportRoute
   '/reset-password': typeof ResetPasswordRoute
-  '/restaurant': typeof RestaurantRoute
+  '/restaurant': typeof RestaurantRouteWithChildren
   '/search': typeof SearchRoute
   '/sell': typeof SellRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -306,6 +313,7 @@ export interface FileRoutesByTo {
   '/category/$id': typeof CategoryIdRoute
   '/listing/$id': typeof ListingIdRoute
   '/login/admin': typeof LoginAdminRoute
+  '/restaurant/manufacturing': typeof RestaurantManufacturingRoute
   '/tips/$slug': typeof TipsSlugRoute
   '/admin': typeof AdminIndexRoute
   '/tips': typeof TipsIndexRoute
@@ -326,7 +334,7 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/report': typeof ReportRoute
   '/reset-password': typeof ResetPasswordRoute
-  '/restaurant': typeof RestaurantRoute
+  '/restaurant': typeof RestaurantRouteWithChildren
   '/search': typeof SearchRoute
   '/sell': typeof SellRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -346,6 +354,7 @@ export interface FileRoutesById {
   '/category/$id': typeof CategoryIdRoute
   '/listing/$id': typeof ListingIdRoute
   '/login/admin': typeof LoginAdminRoute
+  '/restaurant/manufacturing': typeof RestaurantManufacturingRoute
   '/tips/$slug': typeof TipsSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/tips/': typeof TipsIndexRoute
@@ -387,6 +396,7 @@ export interface FileRouteTypes {
     | '/category/$id'
     | '/listing/$id'
     | '/login/admin'
+    | '/restaurant/manufacturing'
     | '/tips/$slug'
     | '/admin/'
     | '/tips/'
@@ -425,6 +435,7 @@ export interface FileRouteTypes {
     | '/category/$id'
     | '/listing/$id'
     | '/login/admin'
+    | '/restaurant/manufacturing'
     | '/tips/$slug'
     | '/admin'
     | '/tips'
@@ -464,6 +475,7 @@ export interface FileRouteTypes {
     | '/category/$id'
     | '/listing/$id'
     | '/login/admin'
+    | '/restaurant/manufacturing'
     | '/tips/$slug'
     | '/admin/'
     | '/tips/'
@@ -484,7 +496,7 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   ReportRoute: typeof ReportRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
-  RestaurantRoute: typeof RestaurantRoute
+  RestaurantRoute: typeof RestaurantRouteWithChildren
   SearchRoute: typeof SearchRoute
   SellRoute: typeof SellRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
@@ -645,6 +657,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TipsSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/restaurant/manufacturing': {
+      id: '/restaurant/manufacturing'
+      path: '/manufacturing'
+      fullPath: '/restaurant/manufacturing'
+      preLoaderRoute: typeof RestaurantManufacturingRouteImport
+      parentRoute: typeof RestaurantRoute
+    }
     '/login/admin': {
       id: '/login/admin'
       path: '/admin'
@@ -804,6 +823,18 @@ const LoginRouteChildren: LoginRouteChildren = {
 
 const LoginRouteWithChildren = LoginRoute._addFileChildren(LoginRouteChildren)
 
+interface RestaurantRouteChildren {
+  RestaurantManufacturingRoute: typeof RestaurantManufacturingRoute
+}
+
+const RestaurantRouteChildren: RestaurantRouteChildren = {
+  RestaurantManufacturingRoute: RestaurantManufacturingRoute,
+}
+
+const RestaurantRouteWithChildren = RestaurantRoute._addFileChildren(
+  RestaurantRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
@@ -818,7 +849,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   ReportRoute: ReportRoute,
   ResetPasswordRoute: ResetPasswordRoute,
-  RestaurantRoute: RestaurantRoute,
+  RestaurantRoute: RestaurantRouteWithChildren,
   SearchRoute: SearchRoute,
   SellRoute: SellRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
