@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
+  DEFAULT_DISCOUNTS,
   DEFAULT_SHELF,
   DEFAULT_SINK,
   DEFAULT_STEEL,
+  type Discounts,
   type ShelfSettings,
   type SinkSettings,
   type SteelTableSettings,
@@ -92,6 +94,7 @@ export function useCalcSettings() {
   const [steel, setSteel] = useState<SteelTableSettings>(DEFAULT_STEEL);
   const [sink, setSink] = useState<SinkSettings>(DEFAULT_SINK);
   const [shelf, setShelf] = useState<ShelfSettings>(DEFAULT_SHELF);
+  const [discounts, setDiscounts] = useState<Discounts>(DEFAULT_DISCOUNTS);
   useEffect(() => {
     let on = true;
     db.from("restaurant_calc_settings")
@@ -102,11 +105,13 @@ export function useCalcSettings() {
           if (row.key === "steel_table" && row.value) setSteel(row.value as SteelTableSettings);
           if (row.key === "sink" && row.value) setSink(row.value as SinkSettings);
           if (row.key === "shelf" && row.value) setShelf(row.value as ShelfSettings);
+          if (row.key === "discounts" && row.value)
+            setDiscounts({ ...DEFAULT_DISCOUNTS, ...(row.value as Partial<Discounts>) });
         }
       });
     return () => {
       on = false;
     };
   }, []);
-  return { steel, sink, shelf };
+  return { steel, sink, shelf, discounts };
 }
