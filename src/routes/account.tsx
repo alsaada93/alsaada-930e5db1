@@ -178,6 +178,15 @@ function AccountPage() {
       } else if (active) {
         setFollowedListings([]);
       }
+
+      // الإشعارات (الموافقة/الرفض والرسائل)
+      const { data: notifs } = await db
+        .from("notifications")
+        .select("id,type,message,read,created_at")
+        .eq("recipient_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(30);
+      if (active) setNotifications((notifs as any) ?? []);
     })();
     return () => {
       active = false;
