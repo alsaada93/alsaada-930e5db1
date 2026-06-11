@@ -5,10 +5,12 @@ import {
   DEFAULT_SHELF,
   DEFAULT_SINK,
   DEFAULT_STEEL,
+  DEFAULT_THICKNESS,
   type Discounts,
   type ShelfSettings,
   type SinkSettings,
   type SteelTableSettings,
+  type ThicknessSettings,
 } from "@/lib/restaurant-calc";
 
 export interface ProjectType {
@@ -95,6 +97,7 @@ export function useCalcSettings() {
   const [sink, setSink] = useState<SinkSettings>(DEFAULT_SINK);
   const [shelf, setShelf] = useState<ShelfSettings>(DEFAULT_SHELF);
   const [discounts, setDiscounts] = useState<Discounts>(DEFAULT_DISCOUNTS);
+  const [thickness, setThickness] = useState<ThicknessSettings>(DEFAULT_THICKNESS);
   useEffect(() => {
     let on = true;
     db.from("restaurant_calc_settings")
@@ -104,14 +107,17 @@ export function useCalcSettings() {
         for (const row of data) {
           if (row.key === "steel_table" && row.value) setSteel(row.value as SteelTableSettings);
           if (row.key === "sink" && row.value) setSink(row.value as SinkSettings);
-          if (row.key === "shelf" && row.value) setShelf(row.value as ShelfSettings);
+          if (row.key === "shelf" && row.value)
+            setShelf({ ...DEFAULT_SHELF, ...(row.value as Partial<ShelfSettings>) });
           if (row.key === "discounts" && row.value)
             setDiscounts({ ...DEFAULT_DISCOUNTS, ...(row.value as Partial<Discounts>) });
+          if (row.key === "thickness" && row.value)
+            setThickness({ ...DEFAULT_THICKNESS, ...(row.value as Partial<ThicknessSettings>) });
         }
       });
     return () => {
       on = false;
     };
   }, []);
-  return { steel, sink, shelf, discounts };
+  return { steel, sink, shelf, discounts, thickness };
 }

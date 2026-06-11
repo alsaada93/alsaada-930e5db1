@@ -28,6 +28,7 @@ import {
   sinkPrice,
   shelfPrice,
   applyDiscount,
+  thicknessFactor,
   SIZE_MIN,
   SIZE_MAX,
   BHD,
@@ -253,10 +254,12 @@ function CancelBtn({ onClick }: { onClick: () => void }) {
 function SteelTableCalculator({
   settings,
   discount,
+  factor,
   onAdd,
 }: {
   settings: SteelTableSettings;
   discount: number;
+  factor: number;
   onAdd: (cfg: Omit<TableItem, "uid" | "price">, price: number, count: number) => void;
 }) {
   const [grade, setGrade] = useState<"201" | "304">("201");
@@ -272,7 +275,7 @@ function SteelTableCalculator({
   const rawPrice = isValid
     ? steelTablePrice({ grade, length: Number(length), width: Number(width), midShelf }, settings)
     : 0;
-  const price = applyDiscount(rawPrice, discount);
+  const price = applyDiscount(rawPrice * factor, discount);
 
   return (
     <section className="mt-10 print:hidden">
@@ -345,10 +348,12 @@ function SteelTableCalculator({
 function SinkCalculator({
   settings,
   discount,
+  factor,
   onAdd,
 }: {
   settings: SinkSettings;
   discount: number;
+  factor: number;
   onAdd: (cfg: Omit<SinkItem, "uid" | "price">, price: number, count: number) => void;
 }) {
   const [length, setLength] = useState<NumOrEmpty>("");
@@ -365,7 +370,7 @@ function SinkCalculator({
   const rawPrice = isValid
     ? sinkPrice({ length: Number(length), width: Number(width), bowls, bottomShelf, bowlDepth }, settings)
     : 0;
-  const price = applyDiscount(rawPrice, discount);
+  const price = applyDiscount(rawPrice * factor, discount);
 
   return (
     <section className="mt-10 print:hidden">
@@ -458,25 +463,44 @@ function SinkCalculator({
 function ShelfCalculator({
   settings,
   discount,
+  factor,
   onAdd,
 }: {
   settings: ShelfSettings;
   discount: number;
+  factor: number;
   onAdd: (cfg: ShelfConfig, price: number, count: number) => void;
 }) {
+  const [grade, setGrade] = useState<"201" | "304">("201");
   const [length, setLength] = useState<NumOrEmpty>("");
   const [width, setWidth] = useState<NumOrEmpty>("");
   const [count, setCount] = useState(1);
 
   const isValid = length !== "" && width !== "";
-  const rawPrice = isValid ? shelfPrice({ length: Number(length), width: Number(width) }, settings) : 0;
-  const price = applyDiscount(rawPrice, discount);
+  const rawPrice = isValid ? shelfPrice({ grade, length: Number(length), width: Number(width) }, settings) : 0;
+  const price = applyDiscount(rawPrice * factor, discount);
 
   return (
     <section className="mt-10 print:hidden">
       <h2 className="mb-3 text-lg font-bold">٣. حاسبة تفصيل أرفف جدارية (استيل)</h2>
       <div className="grid gap-6 rounded-2xl border border-border p-5 lg:grid-cols-2 bg-card shadow-sm">
         <div className="space-y-5">
+          <Field label="نوعية الاستيل">
+            <div className="flex gap-2">
+              {(["201", "304"] as const).map((g) => (
+                <button
+                  key={g}
+                  type="button"
+                  onClick={() => setGrade(g)}
+                  className={`flex-1 rounded-lg border p-2 font-bold ${
+                    grade === g ? "border-primary bg-primary/10 text-primary" : "border-border hover:bg-muted/50"
+                  }`}
+                >
+                  استيل {g}
+                </button>
+              ))}
+            </div>
+          </Field>
           <div className="grid grid-cols-2 gap-3">
             <Field label="الطول (سم)">
               <NumInput value={length} onChange={setLength} />
@@ -505,7 +529,7 @@ function ShelfCalculator({
           addLabel="إضافة الرف للمشروع"
           onAdd={() => {
             if (!isValid) return;
-            onAdd({ length: Number(length), width: Number(width) }, price, count);
+            onAdd({ grade, length: Number(length), width: Number(width) }, price, count);
             setLength("");
             setWidth("");
           }}
@@ -593,12 +617,14 @@ function PreviewPane({
 function EditTableDialog({
   settings,
   discount,
+  factor,
   value,
   onClose,
   onSave,
 }: {
   settings: SteelTableSettings;
   discount: number;
+  factor: number;
   value: TableItem;
   onClose: () => void;
   onSave: (t: TableItem) => void;
@@ -615,7 +641,7 @@ function EditTableDialog({
   const rawPrice = isValid
     ? steelTablePrice({ grade, length: Number(length), width: Number(width), midShelf }, settings)
     : 0;
-  const price = applyDiscount(rawPrice, discount);
+  const price = applyDiscount(rawPrice * factor, discount);
 
   return (
     <DialogShell
@@ -672,12 +698,14 @@ function EditTableDialog({
 function EditSinkDialog({
   settings,
   discount,
+  factor,
   value,
   onClose,
   onSave,
 }: {
   settings: SinkSettings;
   discount: number;
+  factor: number;
   value: SinkItem;
   onClose: () => void;
   onSave: (s: SinkItem) => void;
@@ -695,7 +723,7 @@ function EditSinkDialog({
   const rawPrice = isValid
     ? sinkPrice({ length: Number(length), width: Number(width), bowls, bottomShelf, bowlDepth }, settings)
     : 0;
-  const price = applyDiscount(rawPrice, discount);
+  const price = applyDiscount(rawPrice * factor, discount);
 
   return (
     <DialogShell
@@ -763,22 +791,25 @@ function EditSinkDialog({
 function EditShelfDialog({
   settings,
   discount,
+  factor,
   value,
   onClose,
   onSave,
 }: {
   settings: ShelfSettings;
   discount: number;
+  factor: number;
   value: ShelfItem;
   onClose: () => void;
   onSave: (s: ShelfItem) => void;
 }) {
+  const [grade, setGrade] = useState<"201" | "304">(value.grade ?? "201");
   const [length, setLength] = useState<NumOrEmpty>(value.length);
   const [width, setWidth] = useState<NumOrEmpty>(value.width);
 
   const isValid = length !== "" && width !== "";
-  const rawPrice = isValid ? shelfPrice({ length: Number(length), width: Number(width) }, settings) : 0;
-  const price = applyDiscount(rawPrice, discount);
+  const rawPrice = isValid ? shelfPrice({ grade, length: Number(length), width: Number(width) }, settings) : 0;
+  const price = applyDiscount(rawPrice * factor, discount);
 
   return (
     <DialogShell
@@ -787,10 +818,26 @@ function EditShelfDialog({
       footer={
         <>
           <CancelBtn onClick={onClose} />
-          <SaveBtn disabled={!isValid} onClick={() => isValid && onSave({ ...value, length: Number(length), width: Number(width), price })} />
+          <SaveBtn disabled={!isValid} onClick={() => isValid && onSave({ ...value, grade, length: Number(length), width: Number(width), price })} />
         </>
       }
     >
+      <Field label="نوعية الاستيل">
+        <div className="flex gap-2">
+          {(["201", "304"] as const).map((g) => (
+            <button
+              key={g}
+              type="button"
+              onClick={() => setGrade(g)}
+              className={`flex-1 rounded-lg border p-2 font-bold ${
+                grade === g ? "border-primary bg-primary/10 text-primary" : "border-border"
+              }`}
+            >
+              استيل {g}
+            </button>
+          ))}
+        </div>
+      </Field>
       <div className="grid grid-cols-2 gap-3">
         <Field label="الطول (سم)">
           <NumInput value={length} onChange={setLength} />
@@ -821,7 +868,12 @@ const DRAFT_KEY = "alsaada_manufacturing_draft";
 
 function ManufacturingPage() {
   const { user } = useAuth();
-  const { steel, sink, shelf, discounts } = useCalcSettings();
+  const { steel, sink, shelf, discounts, thickness } = useCalcSettings();
+  const [thicknessMm, setThicknessMm] = useState<number>(thickness.default);
+  useEffect(() => {
+    setThicknessMm(thickness.default);
+  }, [thickness.default]);
+  const factor = thicknessFactor(thickness, thicknessMm);
 
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
@@ -971,19 +1023,47 @@ function ManufacturingPage() {
             </div>
           </section>
 
+          <section className="mb-6 rounded-2xl border border-border bg-muted/10 p-5">
+            <h2 className="mb-3 flex items-center gap-2 text-lg font-bold">
+              <Ruler className="h-5 w-5 text-primary" /> سُمك الاستانلس ستيل (يطبّق على كل التفصيل)
+            </h2>
+            <div className="flex flex-wrap gap-2">
+              {thickness.options.map((mm) => (
+                <button
+                  key={mm}
+                  type="button"
+                  onClick={() => setThicknessMm(mm)}
+                  className={`rounded-lg border px-4 py-2 text-sm font-bold ${
+                    thicknessMm === mm
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border hover:bg-muted/50"
+                  }`}
+                >
+                  {mm} ملم
+                  {mm === thickness.default && (
+                    <span className="ms-1 text-[10px] text-emerald-600">(الافتراضي)</span>
+                  )}
+                </button>
+              ))}
+            </div>
+          </section>
+
           <SteelTableCalculator
             settings={steel}
             discount={discounts.table}
+            factor={factor}
             onAdd={(cfg, price, count) => setTables((p) => [...p, ...Array.from({ length: count }, () => ({ ...cfg, uid: newUid(), price }))])}
           />
           <SinkCalculator
             settings={sink}
             discount={discounts.sink}
+            factor={factor}
             onAdd={(cfg, price, count) => setSinks((p) => [...p, ...Array.from({ length: count }, () => ({ ...cfg, uid: newUid(), price }))])}
           />
           <ShelfCalculator
             settings={shelf}
             discount={discounts.shelf}
+            factor={factor}
             onAdd={(cfg, price, count) => setShelves((p) => [...p, ...Array.from({ length: count }, () => ({ ...cfg, uid: newUid(), price }))])}
           />
 
@@ -1142,13 +1222,13 @@ function ManufacturingPage() {
       </div>
 
       {editTable && (
-        <EditTableDialog settings={steel} discount={discounts.table} value={editTable} onClose={() => setEditTable(null)} onSave={(u) => { setTables((p) => p.map((x) => (x.uid === u.uid ? u : x))); setEditTable(null); }} />
+        <EditTableDialog settings={steel} discount={discounts.table} factor={factor} value={editTable} onClose={() => setEditTable(null)} onSave={(u) => { setTables((p) => p.map((x) => (x.uid === u.uid ? u : x))); setEditTable(null); }} />
       )}
       {editSink && (
-        <EditSinkDialog settings={sink} discount={discounts.sink} value={editSink} onClose={() => setEditSink(null)} onSave={(u) => { setSinks((p) => p.map((x) => (x.uid === u.uid ? u : x))); setEditSink(null); }} />
+        <EditSinkDialog settings={sink} discount={discounts.sink} factor={factor} value={editSink} onClose={() => setEditSink(null)} onSave={(u) => { setSinks((p) => p.map((x) => (x.uid === u.uid ? u : x))); setEditSink(null); }} />
       )}
       {editShelf && (
-        <EditShelfDialog settings={shelf} discount={discounts.shelf} value={editShelf} onClose={() => setEditShelf(null)} onSave={(u) => { setShelves((p) => p.map((x) => (x.uid === u.uid ? u : x))); setEditShelf(null); }} />
+        <EditShelfDialog settings={shelf} discount={discounts.shelf} factor={factor} value={editShelf} onClose={() => setEditShelf(null)} onSave={(u) => { setShelves((p) => p.map((x) => (x.uid === u.uid ? u : x))); setEditShelf(null); }} />
       )}
     </div>
   );

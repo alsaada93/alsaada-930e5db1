@@ -1,5 +1,5 @@
 import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
-import { ArrowRight, SlidersHorizontal, BookmarkPlus, X } from "lucide-react";
+import { ArrowRight, SlidersHorizontal, BookmarkPlus, X, ChevronDown } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Header } from "@/components/Header";
@@ -120,6 +120,7 @@ function CategoryPage() {
   const { listings } = useListings();
   const [regionQuery, setRegionQuery] = useState("");
   const [showFilters, setShowFilters] = useState(false);
+  const [showSubs, setShowSubs] = useState(false);
 
   const items = useMemo(
     () => listings.filter((l) => l.category === category.name || l.category === category.id),
@@ -213,32 +214,51 @@ function CategoryPage() {
             </div>
           </div>
 
-          {/* Subcategory chips — optional filters, not required */}
+          {/* Subcategory dropdown — optional filters, collapsed by default */}
           {subOptions.length > 0 && (
-            <div className="mt-5 flex flex-wrap gap-2">
+            <div className="mt-5">
               <button
-                onClick={() => update({ sub: undefined })}
-                className={`rounded-full border px-3 py-1 text-xs font-semibold transition-colors ${
-                  !search.sub
-                    ? "border-primary bg-primary text-primary-foreground"
-                    : "border-border bg-card text-card-foreground hover:border-primary/40"
-                }`}
+                onClick={() => setShowSubs((v) => !v)}
+                className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-card px-4 py-2 text-sm font-bold text-primary shadow-card transition-colors hover:bg-accent"
               >
-                {lang === "ar" ? "الكل" : "All"}
+                <SlidersHorizontal className="h-4 w-4" />
+                {lang === "ar" ? "التصنيفات الفرعية" : "Subcategories"}
+                {search.sub ? `: ${search.sub}` : ""}
+                <ChevronDown className={`h-4 w-4 transition-transform ${showSubs ? "rotate-180" : ""}`} />
               </button>
-              {subOptions.map((s: string) => (
-                <button
-                  key={s}
-                  onClick={() => update({ sub: s })}
-                  className={`rounded-full border px-3 py-1 text-xs font-semibold transition-colors ${
-                    search.sub === s
-                      ? "border-primary bg-primary text-primary-foreground"
-                      : "border-border bg-card text-card-foreground hover:border-primary/40"
-                  }`}
-                >
-                  {s}
-                </button>
-              ))}
+              {showSubs && (
+                <div className="mt-3 flex flex-wrap gap-2 rounded-2xl border border-border bg-card p-3 shadow-card">
+                  <button
+                    onClick={() => {
+                      update({ sub: undefined });
+                      setShowSubs(false);
+                    }}
+                    className={`rounded-full border px-3 py-1 text-xs font-semibold transition-colors ${
+                      !search.sub
+                        ? "border-primary bg-primary text-primary-foreground"
+                        : "border-border bg-card text-card-foreground hover:border-primary/40"
+                    }`}
+                  >
+                    {lang === "ar" ? "الكل" : "All"}
+                  </button>
+                  {subOptions.map((s: string) => (
+                    <button
+                      key={s}
+                      onClick={() => {
+                        update({ sub: s });
+                        setShowSubs(false);
+                      }}
+                      className={`rounded-full border px-3 py-1 text-xs font-semibold transition-colors ${
+                        search.sub === s
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-border bg-card text-card-foreground hover:border-primary/40"
+                      }`}
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </section>

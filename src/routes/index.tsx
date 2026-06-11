@@ -1,4 +1,5 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
 import { Header } from "@/components/Header";
 import { WeBuyBanner } from "@/components/WeBuyBanner";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
@@ -44,10 +45,11 @@ export const Route = createFileRoute("/")({
 function Index() {
   const { t } = useLanguage();
   const { listings } = useListings();
+  const [visibleCount, setVisibleCount] = useState(12);
   const normal = listings.filter((l) => (l.listingType ?? "normal") === "normal");
   const featured = normal.filter((l) => l.featured);
-  const latest = normal.slice(0, 12);
-  const hasMore = normal.length > 12;
+  const latest = normal.slice(0, visibleCount);
+  const hasMore = normal.length > visibleCount;
 
   return (
     <div className="min-h-screen bg-background">
@@ -63,12 +65,13 @@ function Index() {
           <ListingsSection title={t("sec.latest")} subtitle={t("sec.latestSub")} items={latest} />
           {hasMore && (
             <div className="mx-auto max-w-7xl px-4 pb-4 text-center">
-              <Link
-                to="/search"
+              <button
+                type="button"
+                onClick={() => setVisibleCount((c) => c + 6)}
                 className="inline-flex items-center justify-center rounded-full bg-gradient-primary px-8 py-3 text-sm font-bold text-primary-foreground shadow-glow transition-opacity hover:opacity-90"
               >
                 {t("sec.more") || "عرض المزيد"}
-              </Link>
+              </button>
             </div>
           )}
           {featured.length > 0 && (
