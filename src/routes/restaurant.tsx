@@ -27,6 +27,7 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { logCalcEvent } from "@/hooks/useCalculatorAdmin";
 import { toast } from "sonner";
 
 import { useProjectTypes, useEquipment, useCalcSettings } from "@/hooks/useRestaurant";
@@ -570,7 +571,14 @@ function RestaurantPage() {
                   <div className="flex gap-2">
                     <button
                       type="button"
-                      onClick={() => window.print()}
+                      onClick={() => {
+                        logCalcEvent(
+                          activeType,
+                          types.find((t) => t.slug === activeType)?.name ?? "مشروع",
+                          finalTotal,
+                        );
+                        window.print();
+                      }}
                       className="flex items-center gap-1 rounded-lg border border-border px-3 py-2 text-sm font-bold hover:bg-muted"
                     >
                       <Printer className="h-4 w-4" /> طباعة / PDF
