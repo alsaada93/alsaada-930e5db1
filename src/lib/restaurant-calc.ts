@@ -150,3 +150,94 @@ export function applyDiscount(rawPrice: number, percent: number): number {
   const afterDiscount = rawPrice * (1 - pct / 100);
   return Math.floor(afterDiscount / 10) * 10;
 }
+
+/* ===================== لوحة تحكم الحاسبة الاحترافية ===================== */
+
+/** منتج في الحاسبة (طاولة / مغسلة / رف) */
+export interface CalcProduct {
+  id: string;
+  name: string;
+  slug: string;
+  kind: string;
+  base_price: number;
+  image_url: string | null;
+  options: Record<string, unknown>;
+  active: boolean;
+  sort_order: number;
+}
+
+/** ملحق إضافي بسعر ثابت */
+export interface CalcAccessory {
+  id: string;
+  name: string;
+  slug: string;
+  price: number;
+  active: boolean;
+  sort_order: number;
+}
+
+/** التسعير الموحّد: سعر المتر الأساسي، معاملات أنواع الستانلس، معاملات السمك */
+export interface PricingSettings {
+  basePerM2: number;
+  grades: Record<string, number>;
+  thickness: Record<string, number>;
+}
+
+export const DEFAULT_PRICING: PricingSettings = {
+  basePerM2: 100,
+  grades: { "201": 1, "304": 1.35, "316": 1.7 },
+  thickness: { "0.8": 0.9, "1": 1, "1.2": 1.15 },
+};
+
+/** حدود المقاسات والوحدة */
+export interface SizeLimits {
+  unit: "cm" | "m";
+  length: { min: number; max: number };
+  width: { min: number; max: number };
+  height: { min: number; max: number };
+}
+
+export const DEFAULT_SIZES: SizeLimits = {
+  unit: "cm",
+  length: { min: 1, max: 295 },
+  width: { min: 1, max: 295 },
+  height: { min: 1, max: 200 },
+};
+
+/** إعدادات عرض السعر (PDF / واتساب / الرسائل) */
+export interface QuoteSettings {
+  pdfTitle: string;
+  pdfFooter: string;
+  logoUrl: string;
+  whatsapp: string;
+  clientMessage: string;
+}
+
+export const DEFAULT_QUOTE: QuoteSettings = {
+  pdfTitle: "عرض سعر — السعادة ماركت",
+  pdfFooter: "شكراً لتعاملكم مع السعادة ماركت",
+  logoUrl: "",
+  whatsapp: "",
+  clientMessage: "مرحباً، نشكر طلبكم. هذا عرض السعر الخاص بكم.",
+};
+
+/**
+ * حساب سعر منتج بالمقاس حسب التسعير الموحّد:
+ * السعر = سعر المتر الأساسي × المساحة(م²) × معامل نوع الستانلس × معامل السمك + السعر الأساسي للمنتج + الملحقات
+ */
+export function calcProductPrice(opts: {
+  basePrice: number;
+  lengthCm: number;
+  widthCm: number;
+  grade: string;
+  thicknessMm: string;
+  pricing: PricingSettings;
+  accessories: number; // مجموع أسعار الملحقات المختارة
+}): number {
+  const areaM2 = (Math.max(1, opts.lengthCm) * Math.max(1, opts.widthCm)) / 10000;
+  const gradeMul = opts.pricing.grades[opts.grade] ?? 1;
+  const thickMul = opts.pricing.thickness[opts.thicknessMm] ?? 1;
+  const raw =
+    opts.basePrice + opts.pricing.basePerM2 * areaM2 * gradeMul * thickMul + opts.accessories;
+  return Math.round(raw * 100) / 100;
+}
