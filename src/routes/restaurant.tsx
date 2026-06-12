@@ -27,6 +27,7 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { logCalcEvent } from "@/hooks/useCalculatorAdmin";
 import { toast } from "sonner";
 
 import { useProjectTypes, useEquipment, useCalcSettings } from "@/hooks/useRestaurant";
