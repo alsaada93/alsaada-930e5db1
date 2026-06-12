@@ -667,6 +667,63 @@ export type Database = {
         }
         Relationships: []
       }
+      restaurant_accessories: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: string
+          name: string
+          price: number
+          slug: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          name: string
+          price?: number
+          slug: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          name?: string
+          price?: number
+          slug?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      restaurant_calc_events: {
+        Row: {
+          created_at: string
+          id: string
+          product_name: string | null
+          product_slug: string | null
+          total_price: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          product_name?: string | null
+          product_slug?: string | null
+          total_price?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          product_name?: string | null
+          product_slug?: string | null
+          total_price?: number
+        }
+        Relationships: []
+      }
       restaurant_calc_settings: {
         Row: {
           key: string
@@ -734,6 +791,48 @@ export type Database = {
           price_new?: number
           price_used?: number
           project_type_slugs?: string[]
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      restaurant_products: {
+        Row: {
+          active: boolean
+          base_price: number
+          created_at: string
+          id: string
+          image_url: string | null
+          kind: string
+          name: string
+          options: Json
+          slug: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          base_price?: number
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          kind?: string
+          name: string
+          options?: Json
+          slug: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          base_price?: number
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          kind?: string
+          name?: string
+          options?: Json
+          slug?: string
           sort_order?: number
           updated_at?: string
         }
