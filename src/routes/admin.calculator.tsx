@@ -205,7 +205,9 @@ function ProductsTab({
             sizes={sizes}
             fileInput={
               <input
-                ref={(el) => (fileRefs.current[p.id] = el)}
+                ref={(el) => {
+                  fileRefs.current[p.id] = el;
+                }}
                 type="file"
                 accept="image/*"
                 hidden
