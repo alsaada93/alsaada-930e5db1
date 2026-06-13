@@ -5,6 +5,7 @@ import {
   DEFAULT_FAB_QUOTE,
   DEFAULT_GRADES,
   DEFAULT_THICKNESSES,
+  normalizeImages,
   type FabCategory,
   type FabDiscounts,
   type FabProduct,
