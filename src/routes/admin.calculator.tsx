@@ -321,11 +321,26 @@ function ProductsTab({ data }: { data: ReturnType<typeof useFabricationData> }) 
 
   const handleUpload = async (file?: File) => {
     if (!file) return;
+    if ((edit?.images?.length ?? 0) >= 10) {
+      toast.error("الحد الأقصى ١٠ صور لكل نوع");
+      return;
+    }
     setUploading(true);
     const url = await uploadImage(file);
-    if (url) setEdit((p) => ({ ...p, image_url: url, images: [...(p?.images ?? []), url] }));
+    if (url)
+      setEdit((p) => {
+        const images: FabImage[] = [...(p?.images ?? []), { url, tags: {} }];
+        return { ...p, image_url: p?.image_url || url, images };
+      });
     setUploading(false);
   };
+
+  const setImageTag = (idx: number, patch: Partial<FabImageTags>) =>
+    setEdit((p) => {
+      const images = [...(p?.images ?? [])];
+      images[idx] = { ...images[idx], tags: { ...images[idx].tags, ...patch } };
+      return { ...p, images };
+    });
 
   const save = async () => {
     if (!edit?.name?.trim()) return toast.error("اسم المنتج مطلوب");
