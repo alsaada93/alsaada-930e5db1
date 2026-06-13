@@ -322,37 +322,12 @@ function ConfigBody({
   const previewImg = useMemo(() => pickImage(product.images ?? [], cfg, product.image_url), [product, cfg]);
 
   return (
-    <div className="lg:flex lg:items-start lg:gap-5">
-      {/* العمود الأيسر على سطح المكتب: الرسم ثلاثي الأبعاد ثم الصورة */}
-      <div className="mb-4 space-y-3 lg:order-2 lg:mb-0 lg:sticky lg:top-4 lg:w-2/5 lg:shrink-0">
-        <Schematic3D cfg={cfg} fields={f} kind={kind} />
-        <div className="flex aspect-[4/3] items-center justify-center overflow-hidden rounded-xl border border-border bg-muted/30">
-          {previewImg ? (
-            <img src={previewImg} alt={product.name} className="h-full w-full object-cover" />
-          ) : (
-            <span className="text-xs text-muted-foreground">لا توجد صورة</span>
-          )}
-        </div>
-      </div>
-
-      {/* العمود الأيمن: الحقول والخيارات */}
-      <div className="min-w-0 lg:order-1 lg:flex-1">
+    <div className="min-w-0">
+      {/* المقاسات الأساسية */}
       <div className="grid grid-cols-2 gap-4">
-
         {f.length && <Num label="الطول (سم)" value={cfg.length} onChange={(n) => set("length", n)} />}
         {f.width && <Num label="العرض (سم)" value={cfg.width} onChange={(n) => set("width", n)} />}
         {f.height && <Num label="الارتفاع (سم)" value={cfg.height} onChange={(n) => set("height", n)} />}
-        {f.shelves && <Num label="عدد الأرفف" value={cfg.shelves} onChange={(n) => set("shelves", n)} min={0} max={20} />}
-        {f.tiers && <Num label="عدد الأدوار" value={cfg.tiers} onChange={(n) => set("tiers", n)} min={1} max={10} />}
-        {f.bowls && <Num label="عدد الأحواض" value={cfg.bowls} onChange={(n) => {
-          const count = Math.max(1, Math.min(6, n || 1));
-          setCfg((c) => {
-            const sizes = [...(c.bowlSizes ?? [])];
-            while (sizes.length < count) sizes.push({ ...DEFAULT_BOWL });
-            sizes.length = count;
-            return { ...c, bowls: count, bowlSizes: sizes };
-          });
-        }} min={1} max={6} />}
 
         {f.grade && (
           <Field label="نوع الستانلس">
@@ -373,6 +348,34 @@ function ConfigBody({
           </Field>
         )}
       </div>
+
+      {/* الصورة والرسم التوضيحي في المنتصف */}
+      <div className="my-5 mx-auto w-full max-w-xs space-y-3">
+        <Schematic3D cfg={cfg} fields={f} kind={kind} />
+        <div className="flex aspect-[4/3] items-center justify-center overflow-hidden rounded-xl border border-border bg-muted/30">
+          {previewImg ? (
+            <img src={previewImg} alt={product.name} className="h-full w-full object-cover" />
+          ) : (
+            <span className="text-xs text-muted-foreground">لا توجد صورة</span>
+          )}
+        </div>
+      </div>
+
+      {/* الأعداد: الأرفف والأدوار والأحواض */}
+      <div className="grid grid-cols-2 gap-4">
+        {f.shelves && <Num label="عدد الأرفف" value={cfg.shelves} onChange={(n) => set("shelves", n)} min={0} max={20} />}
+        {f.tiers && <Num label="عدد الأدوار" value={cfg.tiers} onChange={(n) => set("tiers", n)} min={1} max={10} />}
+        {f.bowls && <Num label="عدد الأحواض" value={cfg.bowls} onChange={(n) => {
+          const count = Math.max(1, Math.min(6, n || 1));
+          setCfg((c) => {
+            const sizes = [...(c.bowlSizes ?? [])];
+            while (sizes.length < count) sizes.push({ ...DEFAULT_BOWL });
+            sizes.length = count;
+            return { ...c, bowls: count, bowlSizes: sizes };
+          });
+        }} min={1} max={6} />}
+      </div>
+
 
       {/* تفاصيل الأحواض: الجهة والقياس والعمق لكل حوض */}
       {f.bowls && (
@@ -490,7 +493,6 @@ function ConfigBody({
           <div className="text-xs text-muted-foreground">السعر التقديري</div>
           <div className="text-2xl font-extrabold text-primary">{BHD(total)}</div>
         </div>
-      </div>
       </div>
     </div>
   );
