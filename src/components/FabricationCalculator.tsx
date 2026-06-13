@@ -269,7 +269,7 @@ function EditDialog({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
       <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-card p-5 shadow-xl" onClick={(e) => e.stopPropagation()}>
         <h3 className="mb-4 text-lg font-bold">تعديل: {product.name}</h3>
-        <ConfigBody product={product} grades={grades} thicknesses={thicknesses} cfg={cfg} setCfg={setCfg} total={total} />
+        <ConfigBody product={product} categorySlug={categorySlug} grades={grades} thicknesses={thicknesses} cfg={cfg} setCfg={setCfg} total={total} />
         <div className="mt-5 flex gap-2">
           <button type="button" onClick={onClose} className="flex-1 rounded-xl border border-border py-2.5 font-bold">
             إلغاء
