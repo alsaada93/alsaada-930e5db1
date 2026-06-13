@@ -301,6 +301,11 @@ export function describeItem(item: FabLineItem, product?: FabProduct): string {
     const side = item.drawerSide === "left" ? "يسار" : item.drawerSide === "center" ? "وسط" : "يمين";
     parts.push(`${item.drawers} درج (${side})`);
   }
+  const guards: string[] = [];
+  if (f.backGuard && item.backGuard) guards.push("خلفي");
+  if (f.rightGuard && item.rightGuard) guards.push("يمين");
+  if (f.leftGuard && item.leftGuard) guards.push("يسار");
+  if (guards.length) parts.push(`حاجز: ${guards.join("، ")}`);
   if (item.notes) parts.push(`ملاحظة: ${item.notes}`);
   return parts.join(" | ");
 }
