@@ -179,24 +179,85 @@ function RestaurantPage() {
     setSelected((s) => {
       const next = { ...s };
       if (next[e.id]) delete next[e.id];
-      else next[e.id] = { condition: "new" };
+      else next[e.id] = { condition: "new", qty: e.default_qty || 1 };
       return next;
     });
-  const setCond = (id: string, condition: Cond) => setSelected((s) => ({ ...s, [id]: { condition } }));
+  const setCond = (id: string, condition: Cond) =>
+    setSelected((s) => ({ ...s, [id]: { condition, qty: s[id]?.qty ?? 1 } }));
+  const setQty = (id: string, qty: number) =>
+    setSelected((s) => ({ ...s, [id]: { condition: s[id]?.condition ?? "new", qty: Math.max(1, qty) } }));
+
+  /** السعر الفعلي لقطعة جديدة (يستخدم سعر الخصم إن وُجد) */
+  const effNew = (e: Equipment) =>
+    e.price_new_discounted != null && e.price_new_discounted > 0 ? e.price_new_discounted : e.price_new;
+
+  /** أضف قائمة معدات دفعة واحدة (مع كميات اختيارية) */
+  const addMany = (items: { id: string; qty?: number }[]) => {
+    setSelected((s) => {
+      const next = { ...s };
+      let added = 0;
+      for (const it of items) {
+        const eq = equipment.find((e) => e.id === it.id);
+        if (!eq) continue;
+        if (!next[it.id]) added++;
+        next[it.id] = {
+          condition: next[it.id]?.condition ?? "new",
+          qty: it.qty ?? next[it.id]?.qty ?? eq.default_qty ?? 1,
+        };
+      }
+      if (added > 0) toast.success(`تمت إضافة ${added} معدة إلى مشروعك`);
+      else toast.info("هذه المعدات مضافة بالفعل");
+      return next;
+    });
+  };
+
+  const addPackage = (pkg: RestaurantPackage) => {
+    addMany(pkg.items.map((i) => ({ id: i.equipment_id, qty: i.qty })));
+    toast.success(`تم تطبيق الباقة: ${pkg.name}`);
+  };
+
+  const addSuggested = () => {
+    const essentials = visibleEquipment.filter((e) => e.essential);
+    if (essentials.length === 0) {
+      toast.info("لا توجد معدات أساسية محددة لهذا النوع");
+      return;
+    }
+    addMany(essentials.map((e) => ({ id: e.id, qty: e.default_qty || 1 })));
+  };
+
+  const typePackages = useMemo(
+    () => packages.filter((p) => !activeType || p.project_type_slug === activeType),
+    [packages, activeType],
+  );
 
   const equipMap = useMemo(() => new Map(equipment.map((e) => [e.id, e])), [equipment]);
   const chosen = Object.entries(selected)
     .map(([id, sel]) => ({ e: equipMap.get(id), sel }))
     .filter((x) => x.e) as { e: Equipment; sel: Selection }[];
 
-  const equipNewTotal = chosen.reduce((a, x) => a + x.e.price_new, 0);
-  const equipUsedTotal = chosen.reduce((a, x) => a + x.e.price_used, 0);
-  const equipChosenTotal = chosen.reduce((a, x) => a + (x.sel.condition === "new" ? x.e.price_new : x.e.price_used), 0);
+  const equipNewTotal = chosen.reduce((a, x) => a + effNew(x.e) * x.sel.qty, 0);
+  const equipUsedTotal = chosen.reduce((a, x) => a + x.e.price_used * x.sel.qty, 0);
+  const equipChosenTotal = chosen.reduce(
+    (a, x) => a + (x.sel.condition === "new" ? effNew(x.e) : x.e.price_used) * x.sel.qty,
+    0,
+  );
   const fabTotal = fabItems.reduce((a, it) => a + it.unitPrice * it.quantity, 0);
+
+  // تقسيم التكلفة حسب طبقة المعدات (أساسية / إضافية / تجهيزات تشغيل)
+  const layerTotals = useMemo(() => {
+    const out: Record<string, number> = { core: 0, extra: 0, operating: 0 };
+    chosen.forEach((x) => {
+      const up = x.sel.condition === "new" ? effNew(x.e) : x.e.price_used;
+      const layer = out[x.e.cost_layer] != null ? x.e.cost_layer : "core";
+      out[layer] += up * x.sel.qty;
+    });
+    return out;
+  }, [chosen]);
 
   const subTotal = equipChosenTotal + fabTotal;
   const finalTotal = Math.max(0, subTotal - discount);
   const savings = equipNewTotal > 0 ? Math.round((1 - equipUsedTotal / equipNewTotal) * 100) : 0;
+
 
   const resetProject = () => {
     setActiveType(null);
