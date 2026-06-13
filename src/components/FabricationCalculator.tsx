@@ -154,6 +154,8 @@ function configFromItem(item: FabLineItem): FabConfig {
     shelves: item.shelves,
     tiers: item.tiers,
     bowls: item.bowls,
+    bowlSide: item.bowlSide ?? "center",
+    bowlSizes: item.bowlSizes ?? [{ ...DEFAULT_BOWL }],
     topShelf: item.topShelf,
     bottomShelf: item.bottomShelf,
     wheels: item.wheels,
