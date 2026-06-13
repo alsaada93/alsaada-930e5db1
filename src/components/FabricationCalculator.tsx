@@ -245,6 +245,11 @@ function ConfigDialog({
   );
   const total = unitPrice * Math.max(1, cfg.quantity || 1);
 
+  const previewImg = useMemo(
+    () => pickImage(product.images ?? [], cfg, product.image_url),
+    [product, cfg],
+  );
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
       <div
@@ -257,6 +262,20 @@ function ConfigDialog({
             <X className="h-5 w-5" />
           </button>
         </div>
+
+        {/* معاينة: صورة موسومة حسب المواصفات + رسم يتغيّر مع المقاس */}
+        <div className="mb-4 grid grid-cols-2 gap-3">
+          <div className="flex aspect-[4/3] items-center justify-center overflow-hidden rounded-xl border border-border bg-muted/30">
+            {previewImg ? (
+              <img src={previewImg} alt={product.name} className="h-full w-full object-cover" />
+            ) : (
+              <span className="text-xs text-muted-foreground">لا توجد صورة</span>
+            )}
+          </div>
+          <Schematic cfg={cfg} fields={f} />
+        </div>
+
+
 
         <div className="grid grid-cols-2 gap-4">
           {f.length && <Num label="الطول (سم)" value={cfg.length} onChange={(n) => set("length", n)} />}
