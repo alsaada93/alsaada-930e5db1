@@ -340,8 +340,8 @@ function ProductsTab({ data }: { data: ReturnType<typeof useFabricationData> }) 
 
   const handleUpload = async (file?: File) => {
     if (!file) return;
-    if ((edit?.images?.length ?? 0) >= 10) {
-      toast.error("الحد الأقصى ١٠ صور لكل نوع");
+    if ((edit?.images?.length ?? 0) >= 20) {
+      toast.error("الحد الأقصى ٢٠ صورة لكل نوع");
       return;
     }
     setUploading(true);
@@ -503,10 +503,10 @@ function ProductsTab({ data }: { data: ReturnType<typeof useFabricationData> }) 
 
             {/* الصور الموسومة بالمواصفات */}
             <div>
-              <Label>الصور حسب المواصفات (حتى ١٠ صور)</Label>
+              <Label>الصور حسب المواصفات (حتى ٢٠ صورة)</Label>
               <p className="mt-1 text-xs text-muted-foreground">
-                لكل صورة حدّد الشروط (نوع الستانلس، السماكة، رف علوي/سفلي، عجلات، عدد الأحواض). تظهر الصورة الأكثر
-                تطابقاً مع اختيار العميل. الصورة بدون شروط تُستخدم كصورة افتراضية.
+                لكل صورة حدّد الشروط (نوع الستانلس، السماكة، الأرفف، العجلات، عدد الأحواض وجهته، الأدراج وجهتها، الحواجز).
+                تظهر الصورة الأكثر تطابقاً مع اختيار العميل بالضبط. الصورة بدون شروط تُستخدم كصورة افتراضية.
               </p>
               <div className="mt-3 space-y-3">
                 {(edit?.images ?? []).map((img, idx) => (
@@ -571,11 +571,66 @@ function ProductsTab({ data }: { data: ReturnType<typeof useFabricationData> }) 
                           className="h-8 w-full rounded-md border border-input bg-background px-2 text-xs"
                         >
                           <option value="">أي عدد</option>
-                          {[1, 2, 3, 4].map((b) => (
+                          {[1, 2, 3, 4, 5, 6].map((b) => (
                             <option key={b} value={b}>
                               {b}
                             </option>
                           ))}
+                        </select>
+                      </div>
+                      <div>
+                        <Label className="text-xs text-muted-foreground">جهة الحوض</Label>
+                        <select
+                          value={img.tags.bowlSide ?? ""}
+                          onChange={(e) => setImageTag(idx, { bowlSide: (e.target.value || undefined) as FabImageTags["bowlSide"] })}
+                          className="h-8 w-full rounded-md border border-input bg-background px-2 text-xs"
+                        >
+                          <option value="">أي جهة</option>
+                          <option value="right">يمين</option>
+                          <option value="center">وسط</option>
+                          <option value="left">يسار</option>
+                        </select>
+                      </div>
+                      <div>
+                        <Label className="text-xs text-muted-foreground">عدد الأدراج</Label>
+                        <select
+                          value={img.tags.drawers ?? ""}
+                          onChange={(e) =>
+                            setImageTag(idx, { drawers: e.target.value !== "" ? Number(e.target.value) : undefined })
+                          }
+                          className="h-8 w-full rounded-md border border-input bg-background px-2 text-xs"
+                        >
+                          <option value="">أي عدد</option>
+                          {[0, 1, 2, 3, 4, 5, 6].map((b) => (
+                            <option key={b} value={b}>
+                              {b}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <Label className="text-xs text-muted-foreground">جهة الأدراج</Label>
+                        <select
+                          value={img.tags.drawerSide ?? ""}
+                          onChange={(e) => setImageTag(idx, { drawerSide: (e.target.value || undefined) as FabImageTags["drawerSide"] })}
+                          className="h-8 w-full rounded-md border border-input bg-background px-2 text-xs"
+                        >
+                          <option value="">أي جهة</option>
+                          <option value="right">يمين</option>
+                          <option value="center">وسط</option>
+                          <option value="left">يسار</option>
+                        </select>
+                      </div>
+                      <div>
+                        <Label className="text-xs text-muted-foreground">موضع الرف الإضافي</Label>
+                        <select
+                          value={img.tags.shelfPosition ?? ""}
+                          onChange={(e) => setImageTag(idx, { shelfPosition: (e.target.value || undefined) as FabImageTags["shelfPosition"] })}
+                          className="h-8 w-full rounded-md border border-input bg-background px-2 text-xs"
+                        >
+                          <option value="">أي موضع</option>
+                          <option value="top">علوي</option>
+                          <option value="middle">وسطي</option>
                         </select>
                       </div>
                       <TriState
@@ -593,6 +648,21 @@ function ProductsTab({ data }: { data: ReturnType<typeof useFabricationData> }) 
                         value={img.tags.wheels}
                         onChange={(v) => setImageTag(idx, { wheels: v })}
                       />
+                      <TriState
+                        label="حاجز خلفي"
+                        value={img.tags.backGuard}
+                        onChange={(v) => setImageTag(idx, { backGuard: v })}
+                      />
+                      <TriState
+                        label="حاجز يمين"
+                        value={img.tags.rightGuard}
+                        onChange={(v) => setImageTag(idx, { rightGuard: v })}
+                      />
+                      <TriState
+                        label="حاجز يسار"
+                        value={img.tags.leftGuard}
+                        onChange={(v) => setImageTag(idx, { leftGuard: v })}
+                      />
                     </div>
                   </div>
                 ))}
@@ -601,7 +671,7 @@ function ProductsTab({ data }: { data: ReturnType<typeof useFabricationData> }) 
                 <button
                   type="button"
                   onClick={() => fileRef.current?.click()}
-                  disabled={(edit?.images?.length ?? 0) >= 10}
+                  disabled={(edit?.images?.length ?? 0) >= 20}
                   className="flex h-20 w-20 items-center justify-center rounded-md border border-dashed text-muted-foreground disabled:opacity-40"
                 >
                   {uploading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Upload className="h-5 w-5" />}

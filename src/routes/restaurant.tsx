@@ -286,7 +286,7 @@ function RestaurantPage() {
 
   const printGroups = useMemo(() => {
     let index = 1;
-    const items: Array<{ id: number; title: string; desc: string; qty: number; unitPrice: number; total: number }> = [];
+    const items: Array<{ id: number; title: string; desc: string; qty: number; unitPrice: number; total: number; img: string | null }> = [];
     chosen.forEach(({ e, sel }) => {
       const unitPrice = sel.condition === "new" ? e.price_new : e.price_used;
       items.push({
@@ -296,6 +296,7 @@ function RestaurantPage() {
         qty: 1,
         unitPrice,
         total: unitPrice,
+        img: e.image_url || null,
       });
     });
     fabItems.forEach((it) => {
@@ -306,6 +307,7 @@ function RestaurantPage() {
         qty: it.quantity,
         unitPrice: it.unitPrice,
         total: it.unitPrice * it.quantity,
+        img: it.imageUrl || null,
       });
     });
     return items;
@@ -644,9 +646,16 @@ function RestaurantPage() {
                   {fabItems.map((it) => (
                     <tr key={it.uid} className="border-t border-border">
                       <td className="p-3">
-                        {it.productName}
-                        <div className="mt-1 text-xs text-muted-foreground">
-                          {describeItem(it, productMap.get(it.productId) as FabProduct | undefined)}
+                        <div className="flex items-center gap-2">
+                          {it.imageUrl && (
+                            <img src={it.imageUrl} alt={it.productName} loading="lazy" className="h-10 w-10 shrink-0 rounded-md border object-cover" />
+                          )}
+                          <div>
+                            {it.productName}
+                            <div className="mt-1 text-xs text-muted-foreground">
+                              {describeItem(it, productMap.get(it.productId) as FabProduct | undefined)}
+                            </div>
+                          </div>
                         </div>
                       </td>
                       <td className="p-3">{it.quantity}</td>
@@ -782,8 +791,15 @@ function RestaurantPage() {
                             {item.id}
                           </td>
                           <td className="border-l border-gray-100 px-4 py-4 align-middle">
-                            <span className="block font-bold text-gray-900">{item.title}</span>
-                            <span className="mt-0.5 block text-sm text-gray-600">{item.desc}</span>
+                            <div className="flex items-center gap-3">
+                              {item.img && (
+                                <img src={item.img} alt={item.title} className="h-14 w-14 shrink-0 rounded-md border border-gray-200 object-cover print:[-webkit-print-color-adjust:exact]" />
+                              )}
+                              <div>
+                                <span className="block font-bold text-gray-900">{item.title}</span>
+                                <span className="mt-0.5 block text-sm text-gray-600">{item.desc}</span>
+                              </div>
+                            </div>
                           </td>
                           <td className="border-l border-gray-100 px-2 py-4 text-center align-middle font-medium">{item.qty}</td>
                           <td className="border-l border-gray-100 px-2 py-4 text-center align-middle font-medium">

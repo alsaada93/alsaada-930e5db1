@@ -113,7 +113,7 @@ export function FabricationCalculator({
                   grades={grades}
                   thicknesses={thicknesses}
                   discountPct={discountPct}
-                  onAdd={(cfg, unitPrice) =>
+                  onAdd={(cfg, unitPrice, imageUrl) =>
                     onAdd({
                       ...cfg,
                       uid: newUid(),
@@ -122,6 +122,7 @@ export function FabricationCalculator({
                       categorySlug: cat.slug,
                       icon: p.icon,
                       unitPrice,
+                      imageUrl,
                     })
                   }
                 />
@@ -141,7 +142,7 @@ export function FabricationCalculator({
           discountPct={discountPct}
           initial={editItem}
           onClose={onEditCancel}
-          onSave={(cfg, unitPrice) => onEditSave({ ...editItem, ...cfg, unitPrice })}
+          onSave={(cfg, unitPrice, imageUrl) => onEditSave({ ...editItem, ...cfg, unitPrice, imageUrl })}
         />
       )}
     </section>
@@ -188,7 +189,7 @@ function ProductConfigurator({
   grades: SteelGrades;
   thicknesses: Thicknesses;
   discountPct: number;
-  onAdd: (cfg: FabConfig, unitPrice: number) => void;
+  onAdd: (cfg: FabConfig, unitPrice: number, imageUrl: string | null) => void;
 }) {
   const [cfg, setCfg] = useState<FabConfig>(() => {
     const base = defaultConfig(thicknesses);
@@ -202,6 +203,7 @@ function ProductConfigurator({
     [product, cfg, grades, thicknesses, discountPct],
   );
   const total = unitPrice * Math.max(1, cfg.quantity || 1);
+  const previewImg = useMemo(() => pickImage(product.images ?? [], cfg, product.image_url), [product, cfg]);
 
   return (
     <div className="rounded-2xl border border-border bg-card p-4">
@@ -233,7 +235,7 @@ function ProductConfigurator({
       <button
         type="button"
         onClick={() => {
-          onAdd({ ...cfg, quantity: Math.max(1, cfg.quantity || 1) }, unitPrice);
+          onAdd({ ...cfg, quantity: Math.max(1, cfg.quantity || 1) }, unitPrice, previewImg);
           setAdded(true);
           setTimeout(() => setAdded(false), 1500);
         }}
@@ -262,7 +264,7 @@ function EditDialog({
   discountPct: number;
   initial: FabLineItem;
   onClose: () => void;
-  onSave: (cfg: FabConfig, unitPrice: number) => void;
+  onSave: (cfg: FabConfig, unitPrice: number, imageUrl: string | null) => void;
 }) {
   const [cfg, setCfg] = useState<FabConfig>(() => configFromItem(initial));
   const unitPrice = useMemo(
@@ -270,6 +272,7 @@ function EditDialog({
     [product, cfg, grades, thicknesses, discountPct],
   );
   const total = unitPrice * Math.max(1, cfg.quantity || 1);
+  const previewImg = useMemo(() => pickImage(product.images ?? [], cfg, product.image_url), [product, cfg]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
@@ -282,7 +285,7 @@ function EditDialog({
           </button>
           <button
             type="button"
-            onClick={() => onSave({ ...cfg, quantity: Math.max(1, cfg.quantity || 1) }, unitPrice)}
+            onClick={() => onSave({ ...cfg, quantity: Math.max(1, cfg.quantity || 1) }, unitPrice, previewImg)}
             className="flex-1 rounded-xl bg-primary py-2.5 font-bold text-primary-foreground"
           >
             حفظ التعديل
