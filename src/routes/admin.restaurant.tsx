@@ -36,7 +36,7 @@ interface Equip {
   sort_order: number;
 }
 
-type Tab = "equipment" | "types" | "calc";
+type Tab = "equipment" | "types";
 
 function AdminRestaurantPage() {
   const [tab, setTab] = useState<Tab>("equipment");
@@ -44,35 +44,42 @@ function AdminRestaurantPage() {
     <div>
       <AdminHeader
         title="دراسة تكلفة مشاريع المطاعم"
-        subtitle="تحكم كامل بالمعدات وأنواع المشاريع وأسعار حاسبات الطاولات والمغاسل"
+        subtitle="تحكم كامل بالمعدات وأنواع المشاريع — لإدارة الأسعار افتح «لوحة الحاسبة»"
       />
       <div className="p-6">
-        <div className="mb-5 flex gap-2 border-b border-border">
-          {(
-            [
-              ["equipment", "المعدات"],
-              ["types", "أنواع المشاريع"],
-              ["calc", "إعدادات الحاسبات"],
-            ] as [Tab, string][]
-          ).map(([k, label]) => (
-            <button
-              key={k}
-              onClick={() => setTab(k)}
-              className={`px-4 py-2 text-sm font-bold ${
-                tab === k ? "border-b-2 border-primary text-primary" : "text-muted-foreground"
-              }`}
-            >
-              {label}
-            </button>
-          ))}
+        <div className="mb-5 flex items-center justify-between gap-2 border-b border-border">
+          <div className="flex gap-2">
+            {(
+              [
+                ["equipment", "المعدات"],
+                ["types", "أنواع المشاريع"],
+              ] as [Tab, string][]
+            ).map(([k, label]) => (
+              <button
+                key={k}
+                onClick={() => setTab(k)}
+                className={`px-4 py-2 text-sm font-bold ${
+                  tab === k ? "border-b-2 border-primary text-primary" : "text-muted-foreground"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          <Link
+            to="/admin/calculator"
+            className="mb-1 rounded-lg bg-primary px-4 py-1.5 text-xs font-bold text-primary-foreground"
+          >
+            إدارة الأسعار ←
+          </Link>
         </div>
         {tab === "equipment" && <EquipmentTab />}
         {tab === "types" && <TypesTab />}
-        {tab === "calc" && <CalcTab />}
       </div>
     </div>
   );
 }
+
 
 /* ===================== Project types ===================== */
 function TypesTab() {
