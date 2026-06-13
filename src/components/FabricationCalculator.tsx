@@ -189,7 +189,7 @@ function ProductConfigurator({
   grades: SteelGrades;
   thicknesses: Thicknesses;
   discountPct: number;
-  onAdd: (cfg: FabConfig, unitPrice: number) => void;
+  onAdd: (cfg: FabConfig, unitPrice: number, imageUrl: string | null) => void;
 }) {
   const [cfg, setCfg] = useState<FabConfig>(() => {
     const base = defaultConfig(thicknesses);
