@@ -556,8 +556,11 @@ function RestaurantPage() {
               </div>
             </section>
           )}
+          </>
+          )}
 
-          {/* حاسبة التفصيل الديناميكية */}
+          {activeTab === "fabrication" && (
+          /* حاسبة التفصيل الديناميكية */
           <FabricationCalculator
             categories={categories}
             products={products}
@@ -572,6 +575,7 @@ function RestaurantPage() {
             }}
             onEditCancel={() => setEditItem(null)}
           />
+          )}
 
           {/* الملخص */}
           <section className="mt-12">
