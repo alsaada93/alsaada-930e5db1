@@ -142,7 +142,7 @@ export function FabricationCalculator({
           discountPct={discountPct}
           initial={editItem}
           onClose={onEditCancel}
-          onSave={(cfg, unitPrice) => onEditSave({ ...editItem, ...cfg, unitPrice })}
+          onSave={(cfg, unitPrice, imageUrl) => onEditSave({ ...editItem, ...cfg, unitPrice, imageUrl })}
         />
       )}
     </section>
