@@ -596,7 +596,7 @@ function ProductsTab({ data }: { data: ReturnType<typeof useFabricationData> }) 
                 />
               </div>
             </div>
-            </div>
+
 
             {/* الأسعار */}
             <div className="grid gap-3 sm:grid-cols-2">
