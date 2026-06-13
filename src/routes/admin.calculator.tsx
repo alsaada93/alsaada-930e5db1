@@ -673,6 +673,25 @@ function ProductsTab({ data }: { data: ReturnType<typeof useFabricationData> }) 
                   />
                 </div>
               )}
+              <div className="mt-3 max-w-xs">
+                <Label className="text-xs text-muted-foreground">شكل الرسم التوضيحي</Label>
+                <select
+                  className="mt-1 h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
+                  value={edit?.fields?.kind ?? "auto"}
+                  onChange={(e) =>
+                    setEdit((p) => ({
+                      ...p,
+                      fields: { ...(p?.fields ?? {}), kind: e.target.value as NonNullable<FabFields["kind"]> },
+                    }))
+                  }
+                >
+                  {KIND_OPTIONS.map((o) => (
+                    <option key={o.value} value={o.value}>
+                      {o.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
 
             {/* أسعار الإضافات */}
