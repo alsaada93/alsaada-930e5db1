@@ -162,6 +162,7 @@ export function FabricationCalculator({
           product={dialogProduct}
           grades={grades}
           thicknesses={thicknesses}
+          discountPct={discountPct}
           onClose={() => setDialogProduct(null)}
           onSubmit={(cfg, unitPrice) => {
             onAdd({
@@ -184,6 +185,7 @@ export function FabricationCalculator({
           product={editProduct}
           grades={grades}
           thicknesses={thicknesses}
+          discountPct={discountPct}
           initial={editItem}
           onClose={onEditCancel}
           onSubmit={(cfg, unitPrice) => onEditSave({ ...editItem, ...cfg, unitPrice })}
@@ -197,6 +199,7 @@ function ConfigDialog({
   product,
   grades,
   thicknesses,
+  discountPct,
   initial,
   onClose,
   onSubmit,
@@ -204,6 +207,7 @@ function ConfigDialog({
   product: FabProduct;
   grades: SteelGrades;
   thicknesses: Thicknesses;
+  discountPct: number;
   initial?: FabLineItem;
   onClose: () => void;
   onSubmit: (cfg: FabConfig, unitPrice: number) => void;
