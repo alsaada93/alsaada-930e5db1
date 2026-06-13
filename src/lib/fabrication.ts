@@ -36,16 +36,56 @@ export interface FabFields {
   drawers?: boolean;
   /** الحد الأقصى لعدد الأدراج (يحدده المسؤول من لوحة التحكم) */
   maxDrawers?: number;
+  /** حاجز خلفي */
+  backGuard?: boolean;
+  /** حاجز يمين */
+  rightGuard?: boolean;
+  /** حاجز يسار */
+  leftGuard?: boolean;
   grade?: boolean;
   thickness?: boolean;
   quantity?: boolean;
   notes?: boolean;
+  /** نوع الرسم التوضيحي للصنف (يحدده المسؤول، أو يُشتق من الفئة) */
+  kind?: FabKind;
 }
 
 /** موضع الرف القابل للتعديل (علوي أو وسطي) */
 export type ShelfPosition = "top" | "middle";
 /** جهة الأدراج */
 export type DrawerSide = "right" | "left" | "center";
+
+/** نوع الرسم التوضيحي لكل صنف */
+export type FabKind =
+  | "auto"
+  | "table"
+  | "sink"
+  | "wallShelf"
+  | "standingShelf"
+  | "cabinet"
+  | "trolley"
+  | "hood";
+
+/** يشتقّ نوع الرسم من إعداد المسؤول أو من فئة الصنف */
+export function resolveKind(fields: FabFields, categorySlug?: string | null): Exclude<FabKind, "auto"> {
+  if (fields.kind && fields.kind !== "auto") return fields.kind;
+  switch (categorySlug) {
+    case "sinks":
+      return "sink";
+    case "shelves":
+      return "wallShelf";
+    case "cabinets":
+      return "cabinet";
+    case "trolleys":
+      return "trolley";
+    case "hoods":
+      return "hood";
+    case "tables":
+    case "stands":
+    default:
+      return "table";
+  }
+}
 
 /** إعدادات تسعير الإضافات لكل منتج */
 export interface FabPricing {
@@ -57,6 +97,9 @@ export interface FabPricing {
     perShelf?: number;
     perTier?: number;
     perDrawer?: number;
+    backGuard?: number;
+    rightGuard?: number;
+    leftGuard?: number;
   };
 }
 
