@@ -56,7 +56,7 @@ export function useFabricationData(activeOnly = false): FabricationData {
         ...p,
         base_price: Number(p.base_price ?? 0),
         price_per_m2: Number(p.price_per_m2 ?? 0),
-        images: p.images ?? [],
+        images: normalizeImages(p.images),
         specs: p.specs ?? {},
         fields: p.fields ?? {},
         pricing: p.pricing ?? {},
