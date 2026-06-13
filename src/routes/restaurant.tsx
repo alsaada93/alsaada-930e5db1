@@ -307,6 +307,7 @@ function RestaurantPage() {
         qty: it.quantity,
         unitPrice: it.unitPrice,
         total: it.unitPrice * it.quantity,
+        img: it.imageUrl || null,
       });
     });
     return items;
