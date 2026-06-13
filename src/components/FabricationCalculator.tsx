@@ -494,7 +494,6 @@ function ConfigBody({
           <div className="text-2xl font-extrabold text-primary">{BHD(total)}</div>
         </div>
       </div>
-      </div>
     </div>
   );
 
