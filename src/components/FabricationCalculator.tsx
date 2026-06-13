@@ -239,8 +239,8 @@ function ConfigDialog({
   const set = <K extends keyof FabConfig>(k: K, v: FabConfig[K]) => setCfg((c) => ({ ...c, [k]: v }));
 
   const unitPrice = useMemo(
-    () => calcUnitPrice(product, cfg, grades, thicknesses),
-    [product, cfg, grades, thicknesses],
+    () => applyDiscount(calcUnitPrice(product, cfg, grades, thicknesses), discountPct),
+    [product, cfg, grades, thicknesses, discountPct],
   );
   const total = unitPrice * Math.max(1, cfg.quantity || 1);
 
