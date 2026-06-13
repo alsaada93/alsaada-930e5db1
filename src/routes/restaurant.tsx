@@ -340,6 +340,30 @@ function RestaurantPage() {
     loadProjects();
   };
 
+  const submitLead = async () => {
+    if (!leadName.trim() || leadPhone.replace(/[^0-9]/g, "").length < 6) {
+      toast.error("الرجاء إدخال الاسم ورقم واتساب صحيح");
+      return;
+    }
+    setLeadSaving(true);
+    const { error } = await db.from("restaurant_leads").insert({
+      name: leadName.trim(),
+      whatsapp: leadPhone.trim(),
+      project_name: types.find((t) => t.slug === activeType)?.name ?? "مشروع تفصيل",
+      project_type_slug: activeType,
+      total: finalTotal,
+      project_data: collectData(),
+    });
+    setLeadSaving(false);
+    if (error) {
+      toast.error("تعذّر إرسال الطلب، حاول مجدداً");
+    } else {
+      toast.success("تم استلام طلبك، سنتواصل معك قريباً");
+      setLeadName("");
+      setLeadPhone("");
+    }
+  };
+
   const shareWhatsApp = () => {
     const lines = [
       `*${quote.pdfTitle}*`,
