@@ -759,8 +759,25 @@ function Schematic3D({ cfg, fields, kind }: { cfg: FabConfig; fields: FabFields;
   if (bowls > 0) {
     for (let i = 0; i < bowls; i++) {
       const cellW = bw / bowls;
-      const m = cellW * 0.16;
-      const hx0 = i * cellW + m;
+      let m = cellW * 0.16;
+      let cellStart = i * cellW;
+      // حوض واحد: ضعه حسب الجهة المختارة (يمين/يسار/وسط)
+      if (bowls === 1) {
+        const bw2 = bw * 0.46;
+        const pad = bw * 0.07;
+        cellStart = cfg.bowlSide === "left" ? pad : cfg.bowlSide === "center" ? (bw - bw2) / 2 : bw - bw2 - pad;
+        m = 0;
+        const hx0 = cellStart;
+        const hx1 = cellStart + bw2;
+        const corners: [number, number][] = [P(hx0, 0.2, bh), P(hx1, 0.2, bh), P(hx1, 0.85, bh), P(hx0, 0.85, bh)];
+        bowlEls.push(
+          <g key={i}>
+            <polygon points={pts(corners)} className="fill-primary/30 stroke-primary" strokeWidth="1.3" strokeLinejoin="round" />
+          </g>,
+        );
+        continue;
+      }
+      const hx0 = cellStart + m;
       const hx1 = (i + 1) * cellW - m;
       const corners: [number, number][] = [P(hx0, 0.2, bh), P(hx1, 0.2, bh), P(hx1, 0.85, bh), P(hx0, 0.85, bh)];
       bowlEls.push(
