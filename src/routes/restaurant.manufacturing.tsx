@@ -1204,7 +1204,7 @@ function ManufacturingPage() {
                 </tr>
               ))}
               {printGroups.length === 0 && (
-                <tr><td colSpan={5} className="py-8 text-center font-bold text-gray-400">لا توجد عناصر</td></tr>
+                <tr><td colSpan={5} className="py-8 text-center font-bold text-gray-600">لا توجد عناصر</td></tr>
               )}
             </tbody>
           </table>
