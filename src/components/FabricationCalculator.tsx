@@ -384,6 +384,18 @@ function ConfigBody({
         </div>
       )}
 
+      {/* الحواجز الجانبية والخلفية */}
+      {(f.backGuard || f.rightGuard || f.leftGuard) && (
+        <div className="mt-4">
+          <div className="mb-1.5 text-sm font-bold text-muted-foreground">الحواجز</div>
+          <div className="flex flex-wrap gap-2">
+            {f.backGuard && <Toggle label="حاجز خلفي" on={cfg.backGuard} onClick={() => set("backGuard", !cfg.backGuard)} />}
+            {f.rightGuard && <Toggle label="حاجز يمين" on={cfg.rightGuard} onClick={() => set("rightGuard", !cfg.rightGuard)} />}
+            {f.leftGuard && <Toggle label="حاجز يسار" on={cfg.leftGuard} onClick={() => set("leftGuard", !cfg.leftGuard)} />}
+          </div>
+        </div>
+      )}
+
       {/* موضع الرف الإضافي: علوي أو وسطي */}
       {f.topShelf && cfg.topShelf && (
         <div className="mt-3">
