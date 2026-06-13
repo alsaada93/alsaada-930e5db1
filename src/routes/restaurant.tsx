@@ -646,9 +646,16 @@ function RestaurantPage() {
                   {fabItems.map((it) => (
                     <tr key={it.uid} className="border-t border-border">
                       <td className="p-3">
-                        {it.productName}
-                        <div className="mt-1 text-xs text-muted-foreground">
-                          {describeItem(it, productMap.get(it.productId) as FabProduct | undefined)}
+                        <div className="flex items-center gap-2">
+                          {it.imageUrl && (
+                            <img src={it.imageUrl} alt={it.productName} loading="lazy" className="h-10 w-10 shrink-0 rounded-md border object-cover" />
+                          )}
+                          <div>
+                            {it.productName}
+                            <div className="mt-1 text-xs text-muted-foreground">
+                              {describeItem(it, productMap.get(it.productId) as FabProduct | undefined)}
+                            </div>
+                          </div>
                         </div>
                       </td>
                       <td className="p-3">{it.quantity}</td>
