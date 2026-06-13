@@ -11,7 +11,7 @@ const items = [
   { title: "الماركات", url: "/admin/brands", icon: Tags },
   { title: "المزادات", url: "/admin/auctions", icon: Gavel },
   { title: "معدات المطاعم", url: "/admin/restaurant", icon: Calculator },
-  { title: "أسعار الحاسبة", url: "/admin/calculator", icon: Calculator },
+  { title: "حاسبة التفصيل", url: "/admin/calculator", icon: Calculator },
   { title: "المدونة", url: "/admin/blog", icon: Newspaper },
   { title: "واجهة الرئيسية", url: "/admin/hero", icon: MonitorPlay },
   { title: "صور العرض", url: "/admin/slides", icon: Images },
