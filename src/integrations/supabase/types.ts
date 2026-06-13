@@ -1086,6 +1086,35 @@ export type Database = {
         }
         Relationships: []
       }
+      seller_contacts: {
+        Row: {
+          created_at: string
+          phone: string | null
+          seller_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          phone?: string | null
+          seller_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          phone?: string | null
+          seller_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seller_contacts_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: true
+            referencedRelation: "sellers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       seller_reviews: {
         Row: {
           comment: string | null
@@ -1119,13 +1148,6 @@ export type Database = {
             referencedRelation: "sellers"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "seller_reviews_seller_id_fkey"
-            columns: ["seller_id"]
-            isOneToOne: false
-            referencedRelation: "sellers_public"
-            referencedColumns: ["id"]
-          },
         ]
       }
       sellers: {
@@ -1136,7 +1158,6 @@ export type Database = {
           id: string
           member_since: string
           name: string
-          phone: string | null
           rating: number
           reviews_count: number
           updated_at: string
@@ -1149,7 +1170,6 @@ export type Database = {
           id: string
           member_since?: string
           name: string
-          phone?: string | null
           rating?: number
           reviews_count?: number
           updated_at?: string
@@ -1162,7 +1182,6 @@ export type Database = {
           id?: string
           member_since?: string
           name?: string
-          phone?: string | null
           rating?: number
           reviews_count?: number
           updated_at?: string
@@ -1280,39 +1299,7 @@ export type Database = {
       }
     }
     Views: {
-      sellers_public: {
-        Row: {
-          city: string | null
-          deals_count: number | null
-          id: string | null
-          member_since: string | null
-          name: string | null
-          rating: number | null
-          reviews_count: number | null
-          verified: boolean | null
-        }
-        Insert: {
-          city?: string | null
-          deals_count?: number | null
-          id?: string | null
-          member_since?: string | null
-          name?: string | null
-          rating?: number | null
-          reviews_count?: number | null
-          verified?: boolean | null
-        }
-        Update: {
-          city?: string | null
-          deals_count?: number | null
-          id?: string | null
-          member_since?: string | null
-          name?: string | null
-          rating?: number | null
-          reviews_count?: number | null
-          verified?: boolean | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       delete_email: {
