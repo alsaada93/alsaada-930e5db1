@@ -340,8 +340,8 @@ function ProductsTab({ data }: { data: ReturnType<typeof useFabricationData> }) 
 
   const handleUpload = async (file?: File) => {
     if (!file) return;
-    if ((edit?.images?.length ?? 0) >= 10) {
-      toast.error("الحد الأقصى ١٠ صور لكل نوع");
+    if ((edit?.images?.length ?? 0) >= 20) {
+      toast.error("الحد الأقصى ٢٠ صورة لكل نوع");
       return;
     }
     setUploading(true);
