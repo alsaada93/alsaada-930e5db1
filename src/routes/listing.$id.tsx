@@ -21,7 +21,7 @@ import {
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 
-import { useSeller } from "@/hooks/useSellers";
+import { useSeller, useSellerPhone } from "@/hooks/useSellers";
 import { useAuth } from "@/hooks/useAuth";
 import { AuctionBidBox } from "@/components/AuctionBidBox";
 import { SellerReviews } from "@/components/SellerReviews";
@@ -373,6 +373,7 @@ function ListingPage() {
   const { user } = useAuth();
   const { boost } = useViewBoost();
   const { data: seller } = useSeller(item.sellerId);
+  const { data: sellerPhone } = useSellerPhone(item.sellerId);
   const [reposting, setReposting] = useState(false);
   const [isFav, setIsFav] = useState(false);
   const [offerOpen, setOfferOpen] = useState(false);
@@ -455,7 +456,7 @@ function ListingPage() {
   };
 
 
-  const phone = seller?.phone ?? item.phone ?? "33982383";
+  const phone = sellerPhone ?? item.phone ?? "33982383";
   const sellerName = item.sellerName?.trim() || seller?.name || "المعلن";
   const rating = ratingData?.value ?? seller?.rating ?? 0;
   const reviews = ratingData?.count ?? seller?.reviews_count ?? 0;

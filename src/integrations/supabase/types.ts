@@ -1086,6 +1086,35 @@ export type Database = {
         }
         Relationships: []
       }
+      seller_contacts: {
+        Row: {
+          created_at: string
+          phone: string | null
+          seller_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          phone?: string | null
+          seller_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          phone?: string | null
+          seller_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seller_contacts_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: true
+            referencedRelation: "sellers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       seller_reviews: {
         Row: {
           comment: string | null
@@ -1129,7 +1158,6 @@ export type Database = {
           id: string
           member_since: string
           name: string
-          phone: string | null
           rating: number
           reviews_count: number
           updated_at: string
@@ -1142,7 +1170,6 @@ export type Database = {
           id: string
           member_since?: string
           name: string
-          phone?: string | null
           rating?: number
           reviews_count?: number
           updated_at?: string
@@ -1155,7 +1182,6 @@ export type Database = {
           id?: string
           member_since?: string
           name?: string
-          phone?: string | null
           rating?: number
           reviews_count?: number
           updated_at?: string
