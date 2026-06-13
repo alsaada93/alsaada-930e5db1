@@ -371,6 +371,48 @@ function ConfigBody({
         )}
       </div>
 
+      {/* تفاصيل الأحواض: الجهة والقياس والعمق لكل حوض */}
+      {f.bowls && (
+        <div className="mt-4 space-y-3">
+          {cfg.bowls === 1 && (
+            <Field label="جهة الحوض">
+              <select value={cfg.bowlSide} onChange={(e) => set("bowlSide", e.target.value as DrawerSide)} className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm font-bold">
+                <option value="right">يمين</option>
+                <option value="center">وسط</option>
+                <option value="left">يسار</option>
+              </select>
+            </Field>
+          )}
+          <div className="space-y-3">
+            {Array.from({ length: cfg.bowls }).map((_, i) => {
+              const b = cfg.bowlSizes?.[i] ?? { ...DEFAULT_BOWL };
+              const setBowl = (patch: Partial<BowlSize>) => {
+                setCfg((c) => {
+                  const sizes = [...(c.bowlSizes ?? [])];
+                  while (sizes.length < c.bowls) sizes.push({ ...DEFAULT_BOWL });
+                  sizes[i] = { ...sizes[i], ...patch };
+                  return { ...c, bowlSizes: sizes };
+                });
+              };
+              return (
+                <div key={i} className="rounded-lg border border-border p-3">
+                  <div className="mb-2 text-sm font-bold text-muted-foreground">
+                    {cfg.bowls === 1 ? "قياس الحوض" : `قياس الحوض ${i + 1}`}
+                  </div>
+                  <div className="grid grid-cols-3 gap-3">
+                    <Num label="العرض (سم)" value={b.width} onChange={(n) => setBowl({ width: n })} min={5} max={200} />
+                    <Num label="الطول (سم)" value={b.length} onChange={(n) => setBowl({ length: n })} min={5} max={200} />
+                    <Num label="العمق (سم)" value={b.depth} onChange={(n) => setBowl({ depth: n })} min={5} max={100} />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+
+
       {/* الأدراج */}
       {f.drawers && (
         <div className="mt-4 grid grid-cols-2 gap-4">
