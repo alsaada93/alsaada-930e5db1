@@ -1119,6 +1119,13 @@ export type Database = {
             referencedRelation: "sellers"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "seller_reviews_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "sellers_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       sellers: {
@@ -1273,7 +1280,39 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      sellers_public: {
+        Row: {
+          city: string | null
+          deals_count: number | null
+          id: string | null
+          member_since: string | null
+          name: string | null
+          rating: number | null
+          reviews_count: number | null
+          verified: boolean | null
+        }
+        Insert: {
+          city?: string | null
+          deals_count?: number | null
+          id?: string | null
+          member_since?: string | null
+          name?: string | null
+          rating?: number | null
+          reviews_count?: number | null
+          verified?: boolean | null
+        }
+        Update: {
+          city?: string | null
+          deals_count?: number | null
+          id?: string | null
+          member_since?: string | null
+          name?: string | null
+          rating?: number | null
+          reviews_count?: number | null
+          verified?: boolean | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       delete_email: {
