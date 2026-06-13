@@ -435,3 +435,64 @@ function Toggle({ label, on, onClick }: { label: string; on: boolean; onClick: (
     </button>
   );
 }
+
+/** رسم تخطيطي يتغيّر تلقائياً حسب المقاسات المُدخلة */
+function Schematic({ cfg, fields }: { cfg: FabConfig; fields: FabFields }) {
+  const W = 200;
+  const H = 150;
+  const pad = 30;
+  const L = fields.length ? Math.max(1, cfg.length || 0) : 100;
+  const Hh = fields.height ? Math.max(1, cfg.height || 0) : 85;
+  const maxDim = Math.max(L, Hh, 1);
+  const rectW = (L / maxDim) * (W - pad * 2);
+  const rectH = (Hh / maxDim) * (H - pad * 2);
+  const x = (W - rectW) / 2;
+  const y = H - pad - rectH;
+  const showHeight = fields.height;
+  const showWheels = fields.wheels && cfg.wheels;
+  const showTop = fields.topShelf && cfg.topShelf;
+  const showBottom = fields.bottomShelf && cfg.bottomShelf;
+
+  return (
+    <div className="flex aspect-[4/3] items-center justify-center rounded-xl border border-border bg-background">
+      <svg viewBox={`0 0 ${W} ${H}`} className="h-full w-full" aria-label="رسم تخطيطي للمقاس">
+        {/* السطح/الجسم */}
+        <rect x={x} y={y} width={rectW} height={rectH} rx="2" className="fill-primary/10 stroke-primary" strokeWidth="2" />
+        {/* رف علوي */}
+        {showTop && (
+          <rect x={x} y={y - 8} width={rectW} height="4" className="fill-primary/60" />
+        )}
+        {/* رف سفلي */}
+        {showBottom && (
+          <rect x={x + 4} y={y + rectH - 14} width={rectW - 8} height="3" className="fill-primary/40" />
+        )}
+        {/* أرجل */}
+        {showHeight && (
+          <>
+            <line x1={x + 6} y1={y + rectH} x2={x + 6} y2={H - pad + (showWheels ? 6 : 10)} className="stroke-primary" strokeWidth="2" />
+            <line x1={x + rectW - 6} y1={y + rectH} x2={x + rectW - 6} y2={H - pad + (showWheels ? 6 : 10)} className="stroke-primary" strokeWidth="2" />
+          </>
+        )}
+        {/* عجلات */}
+        {showWheels && (
+          <>
+            <circle cx={x + 6} cy={H - pad + 9} r="4" className="fill-primary/70" />
+            <circle cx={x + rectW - 6} cy={H - pad + 9} r="4" className="fill-primary/70" />
+          </>
+        )}
+        {/* قياس الطول */}
+        {fields.length && (
+          <text x={W / 2} y={y - (showTop ? 14 : 6)} textAnchor="middle" className="fill-foreground" fontSize="11" fontWeight="bold">
+            {L} سم
+          </text>
+        )}
+        {/* قياس الارتفاع */}
+        {showHeight && (
+          <text x={x - 6} y={y + rectH / 2} textAnchor="end" className="fill-foreground" fontSize="11" fontWeight="bold">
+            {Hh}
+          </text>
+        )}
+      </svg>
+    </div>
+  );
+}
