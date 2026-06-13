@@ -296,6 +296,7 @@ function RestaurantPage() {
         qty: 1,
         unitPrice,
         total: unitPrice,
+        img: e.image_url || null,
       });
     });
     fabItems.forEach((it) => {
