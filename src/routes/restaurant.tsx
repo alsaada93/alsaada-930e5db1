@@ -871,7 +871,7 @@ function RestaurantPage() {
                       ))}
                       {printGroups.length === 0 && (
                         <tr>
-                          <td colSpan={5} className="py-8 text-center text-gray-400 font-bold">
+                          <td colSpan={5} className="py-8 text-center text-gray-600 font-bold">
                             لا توجد عناصر في المشروع
                           </td>
                         </tr>
