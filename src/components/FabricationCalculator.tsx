@@ -264,7 +264,7 @@ function EditDialog({
   discountPct: number;
   initial: FabLineItem;
   onClose: () => void;
-  onSave: (cfg: FabConfig, unitPrice: number) => void;
+  onSave: (cfg: FabConfig, unitPrice: number, imageUrl: string | null) => void;
 }) {
   const [cfg, setCfg] = useState<FabConfig>(() => configFromItem(initial));
   const unitPrice = useMemo(
