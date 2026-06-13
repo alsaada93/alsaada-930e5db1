@@ -113,7 +113,7 @@ export function FabricationCalculator({
                   grades={grades}
                   thicknesses={thicknesses}
                   discountPct={discountPct}
-                  onAdd={(cfg, unitPrice) =>
+                  onAdd={(cfg, unitPrice, imageUrl) =>
                     onAdd({
                       ...cfg,
                       uid: newUid(),
@@ -122,6 +122,7 @@ export function FabricationCalculator({
                       categorySlug: cat.slug,
                       icon: p.icon,
                       unitPrice,
+                      imageUrl,
                     })
                   }
                 />
