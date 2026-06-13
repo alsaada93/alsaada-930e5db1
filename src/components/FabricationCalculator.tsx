@@ -18,6 +18,7 @@ import {
   calcUnitPrice,
   defaultConfig,
   pickImage,
+  resolveKind,
   SIZE_MAX,
   SIZE_MIN,
   BHD,
