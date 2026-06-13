@@ -49,6 +49,7 @@ interface Props {
   products: FabProduct[];
   grades: SteelGrades;
   thicknesses: Thicknesses;
+  discountPct: number;
   onAdd: (item: FabLineItem) => void;
   editItem: FabLineItem | null;
   onEditSave: (item: FabLineItem) => void;
@@ -60,6 +61,7 @@ export function FabricationCalculator({
   products,
   grades,
   thicknesses,
+  discountPct,
   onAdd,
   editItem,
   onEditSave,
