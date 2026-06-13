@@ -59,7 +59,7 @@ export interface FabProduct {
   slug: string;
   icon: string | null;
   image_url: string | null;
-  images: string[];
+  images: FabImage[];
   description: string | null;
   specs: Record<string, unknown>;
   base_price: number;
