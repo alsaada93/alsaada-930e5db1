@@ -791,8 +791,15 @@ function RestaurantPage() {
                             {item.id}
                           </td>
                           <td className="border-l border-gray-100 px-4 py-4 align-middle">
-                            <span className="block font-bold text-gray-900">{item.title}</span>
-                            <span className="mt-0.5 block text-sm text-gray-600">{item.desc}</span>
+                            <div className="flex items-center gap-3">
+                              {item.img && (
+                                <img src={item.img} alt={item.title} className="h-14 w-14 shrink-0 rounded-md border border-gray-200 object-cover print:[-webkit-print-color-adjust:exact]" />
+                              )}
+                              <div>
+                                <span className="block font-bold text-gray-900">{item.title}</span>
+                                <span className="mt-0.5 block text-sm text-gray-600">{item.desc}</span>
+                              </div>
+                            </div>
                           </td>
                           <td className="border-l border-gray-100 px-2 py-4 text-center align-middle font-medium">{item.qty}</td>
                           <td className="border-l border-gray-100 px-2 py-4 text-center align-middle font-medium">
