@@ -343,7 +343,8 @@ function RestaurantPage() {
       customerName ? `العميل: ${customerName}` : "",
       "",
       ...chosen.map(
-        (c) => `• ${c.e.name} (${c.sel.condition === "new" ? "جديد" : "مستعمل"}) — ${BHD(c.sel.condition === "new" ? c.e.price_new : c.e.price_used)}`,
+        (c) =>
+          `• ${c.e.name} ×${c.sel.qty} (${c.sel.condition === "new" ? "جديد" : "مستعمل"}) — ${BHD((c.sel.condition === "new" ? effNew(c.e) : c.e.price_used) * c.sel.qty)}`,
       ),
       ...fabItems.map(
         (it) => `• ${it.productName} ×${it.quantity} — ${BHD(it.unitPrice * it.quantity)}`,
