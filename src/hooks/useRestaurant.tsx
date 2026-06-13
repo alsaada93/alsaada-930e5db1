@@ -103,8 +103,16 @@ export function useEquipment() {
           (data ?? []).map((d: any) => ({
             ...d,
             price_new: Number(d.price_new ?? 0),
+            price_new_discounted:
+              d.price_new_discounted != null ? Number(d.price_new_discounted) : null,
             price_used: Number(d.price_used ?? 0),
             project_type_slugs: d.project_type_slugs ?? [],
+            tier: d.tier ?? "standard",
+            cost_layer: d.cost_layer ?? "core",
+            essential: !!d.essential,
+            default_qty: Number(d.default_qty ?? 1),
+            specs: (d.specs && typeof d.specs === "object" ? d.specs : {}) as Record<string, string>,
+            images: d.images ?? [],
           })) as Equipment[],
         );
         setLoading(false);
@@ -114,6 +122,33 @@ export function useEquipment() {
     };
   }, []);
   return { equipment, loading };
+}
+
+/** الباقات الجاهزة لكل نوع مشروع */
+export function usePackages() {
+  const [packages, setPackages] = useState<RestaurantPackage[]>([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    let on = true;
+    db.from("restaurant_packages")
+      .select("*")
+      .eq("active", true)
+      .order("sort_order", { ascending: true })
+      .then(({ data }: any) => {
+        if (!on) return;
+        setPackages(
+          (data ?? []).map((d: any) => ({
+            ...d,
+            items: Array.isArray(d.items) ? d.items : [],
+          })) as RestaurantPackage[],
+        );
+        setLoading(false);
+      });
+    return () => {
+      on = false;
+    };
+  }, []);
+  return { packages, loading };
 }
 
 /** إعدادات الحاسبات من قاعدة البيانات مع قيم افتراضية */
