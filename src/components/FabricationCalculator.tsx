@@ -100,7 +100,7 @@ export function FabricationCalculator({
               <Icon className="h-5 w-5 text-primary" />
               <h3 className="text-base font-bold">{cat.name}</h3>
             </div>
-            <div className="grid gap-5 lg:grid-cols-2">
+            <div className="grid gap-5">
               {catProducts.map((p) => (
                 <ProductConfigurator
                   key={p.id}
