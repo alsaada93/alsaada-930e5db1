@@ -33,11 +33,19 @@ export interface FabFields {
   topShelf?: boolean;
   bottomShelf?: boolean;
   wheels?: boolean;
+  drawers?: boolean;
+  /** الحد الأقصى لعدد الأدراج (يحدده المسؤول من لوحة التحكم) */
+  maxDrawers?: number;
   grade?: boolean;
   thickness?: boolean;
   quantity?: boolean;
   notes?: boolean;
 }
+
+/** موضع الرف القابل للتعديل (علوي أو وسطي) */
+export type ShelfPosition = "top" | "middle";
+/** جهة الأدراج */
+export type DrawerSide = "right" | "left" | "center";
 
 /** إعدادات تسعير الإضافات لكل منتج */
 export interface FabPricing {
