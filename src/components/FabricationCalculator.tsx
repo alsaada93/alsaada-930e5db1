@@ -215,12 +215,14 @@ function ProductConfigurator({
 
       <ConfigBody
         product={product}
+        categorySlug={categorySlug}
         grades={grades}
         thicknesses={thicknesses}
         cfg={cfg}
         setCfg={setCfg}
         total={total}
       />
+
 
       <button
         type="button"
