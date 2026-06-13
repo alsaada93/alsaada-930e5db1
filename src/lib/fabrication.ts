@@ -384,6 +384,16 @@ function imageScore(tags: FabImageTags, cfg: FabConfig): number | null {
   if (!check(tags.bottomShelf != null, Boolean(tags.bottomShelf) === Boolean(cfg.bottomShelf))) return null;
   if (!check(tags.wheels != null, Boolean(tags.wheels) === Boolean(cfg.wheels))) return null;
   if (!check(tags.bowls != null, Number(tags.bowls) === Number(cfg.bowls))) return null;
+  if (!check(tags.bowlSide != null && String(tags.bowlSide) !== "", String(tags.bowlSide) === String(cfg.bowlSide)))
+    return null;
+  if (!check(tags.drawers != null, Number(tags.drawers) === Number(cfg.drawers))) return null;
+  if (!check(tags.drawerSide != null && String(tags.drawerSide) !== "", String(tags.drawerSide) === String(cfg.drawerSide)))
+    return null;
+  if (!check(tags.shelfPosition != null && String(tags.shelfPosition) !== "", String(tags.shelfPosition) === String(cfg.shelfPosition)))
+    return null;
+  if (!check(tags.backGuard != null, Boolean(tags.backGuard) === Boolean(cfg.backGuard))) return null;
+  if (!check(tags.rightGuard != null, Boolean(tags.rightGuard) === Boolean(cfg.rightGuard))) return null;
+  if (!check(tags.leftGuard != null, Boolean(tags.leftGuard) === Boolean(cfg.leftGuard))) return null;
   return score;
 }
 
