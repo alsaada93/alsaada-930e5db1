@@ -373,6 +373,7 @@ function ListingPage() {
   const { user } = useAuth();
   const { boost } = useViewBoost();
   const { data: seller } = useSeller(item.sellerId);
+  const { data: sellerPhone } = useSellerPhone(item.sellerId);
   const [reposting, setReposting] = useState(false);
   const [isFav, setIsFav] = useState(false);
   const [offerOpen, setOfferOpen] = useState(false);
