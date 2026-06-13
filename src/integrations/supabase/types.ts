@@ -259,6 +259,167 @@ export type Database = {
         }
         Relationships: []
       }
+      fabrication_categories: {
+        Row: {
+          active: boolean
+          created_at: string
+          description: string | null
+          icon: string | null
+          id: string
+          name: string
+          slug: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          name: string
+          slug: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          name?: string
+          slug?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      fabrication_products: {
+        Row: {
+          active: boolean
+          base_price: number
+          category_id: string | null
+          created_at: string
+          description: string | null
+          fields: Json
+          icon: string | null
+          id: string
+          image_url: string | null
+          images: Json
+          name: string
+          price_per_m2: number
+          pricing: Json
+          slug: string
+          sort_order: number
+          specs: Json
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          base_price?: number
+          category_id?: string | null
+          created_at?: string
+          description?: string | null
+          fields?: Json
+          icon?: string | null
+          id?: string
+          image_url?: string | null
+          images?: Json
+          name: string
+          price_per_m2?: number
+          pricing?: Json
+          slug: string
+          sort_order?: number
+          specs?: Json
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          base_price?: number
+          category_id?: string | null
+          created_at?: string
+          description?: string | null
+          fields?: Json
+          icon?: string | null
+          id?: string
+          image_url?: string | null
+          images?: Json
+          name?: string
+          price_per_m2?: number
+          pricing?: Json
+          slug?: string
+          sort_order?: number
+          specs?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fabrication_products_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "fabrication_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fabrication_projects: {
+        Row: {
+          created_at: string
+          customer_name: string | null
+          customer_phone: string | null
+          data: Json
+          id: string
+          name: string
+          status: string
+          total: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          customer_name?: string | null
+          customer_phone?: string | null
+          data?: Json
+          id?: string
+          name?: string
+          status?: string
+          total?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          customer_name?: string | null
+          customer_phone?: string | null
+          data?: Json
+          id?: string
+          name?: string
+          status?: string
+          total?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      fabrication_settings: {
+        Row: {
+          key: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          value?: Json
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          value?: Json
+        }
+        Relationships: []
+      }
       favorites: {
         Row: {
           created_at: string
