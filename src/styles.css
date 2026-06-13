@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@import url("https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Tajawal:wght@400;500;700;800&display=swap");
 @source "../src";
 
 /* تم إيقاف هذا السطر لأنه سبب المشكلة (المكتبة غير موجودة) */
