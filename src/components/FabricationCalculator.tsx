@@ -14,6 +14,7 @@ import {
   Ruler,
 } from "lucide-react";
 import {
+  applyDiscount,
   calcUnitPrice,
   defaultConfig,
   SIZE_MAX,
