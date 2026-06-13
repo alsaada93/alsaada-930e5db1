@@ -27,8 +27,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { logCalcEvent } from "@/hooks/useCalculatorAdmin";
 import { toast } from "sonner";
 
-import { useProjectTypes, useEquipment } from "@/hooks/useRestaurant";
-import type { Equipment } from "@/hooks/useRestaurant";
+import { useProjectTypes, useEquipment, usePackages } from "@/hooks/useRestaurant";
+import type { Equipment, RestaurantPackage } from "@/hooks/useRestaurant";
 import { useFabricationData } from "@/hooks/useFabrication";
 import { FabricationCalculator } from "@/components/FabricationCalculator";
 import { BHD, describeItem, type FabLineItem, type FabProduct } from "@/lib/fabrication";
@@ -68,7 +68,20 @@ export const Route = createFileRoute("/restaurant")({
 type Cond = "new" | "used";
 interface Selection {
   condition: Cond;
+  qty: number;
 }
+
+const LAYER_LABELS: Record<string, string> = {
+  core: "معدات أساسية",
+  extra: "معدات إضافية",
+  operating: "تجهيزات تشغيل",
+};
+
+const TIER_LABELS: Record<string, string> = {
+  economy: "اقتصادية",
+  standard: "متوسطة",
+  premium: "احترافية",
+};
 
 interface SavedProject {
   id: string;
@@ -84,6 +97,7 @@ function RestaurantPage() {
   const { user } = useAuth();
   const { types } = useProjectTypes();
   const { equipment } = useEquipment();
+  const { packages } = usePackages();
   const { categories, products, grades, thicknesses, discounts, quote } = useFabricationData(true);
 
   const [activeType, setActiveType] = useState<string | null>(null);
@@ -100,6 +114,9 @@ function RestaurantPage() {
   const [savedProjects, setSavedProjects] = useState<SavedProject[]>([]);
   const [showProjects, setShowProjects] = useState(false);
   const [activeTab, setActiveTab] = useState<"projects" | "fabrication">("fabrication");
+  const [leadName, setLeadName] = useState("");
+  const [leadPhone, setLeadPhone] = useState("");
+  const [leadSaving, setLeadSaving] = useState(false);
 
   // بيانات عرض السعر (تُحسب في المتصفح لتجنّب اختلاف SSR)
   const [quoteMeta, setQuoteMeta] = useState<{ no: string; date: string }>({ no: "------", date: "" });
@@ -165,24 +182,85 @@ function RestaurantPage() {
     setSelected((s) => {
       const next = { ...s };
       if (next[e.id]) delete next[e.id];
-      else next[e.id] = { condition: "new" };
+      else next[e.id] = { condition: "new", qty: e.default_qty || 1 };
       return next;
     });
-  const setCond = (id: string, condition: Cond) => setSelected((s) => ({ ...s, [id]: { condition } }));
+  const setCond = (id: string, condition: Cond) =>
+    setSelected((s) => ({ ...s, [id]: { condition, qty: s[id]?.qty ?? 1 } }));
+  const setQty = (id: string, qty: number) =>
+    setSelected((s) => ({ ...s, [id]: { condition: s[id]?.condition ?? "new", qty: Math.max(1, qty) } }));
+
+  /** السعر الفعلي لقطعة جديدة (يستخدم سعر الخصم إن وُجد) */
+  const effNew = (e: Equipment) =>
+    e.price_new_discounted != null && e.price_new_discounted > 0 ? e.price_new_discounted : e.price_new;
+
+  /** أضف قائمة معدات دفعة واحدة (مع كميات اختيارية) */
+  const addMany = (items: { id: string; qty?: number }[]) => {
+    setSelected((s) => {
+      const next = { ...s };
+      let added = 0;
+      for (const it of items) {
+        const eq = equipment.find((e) => e.id === it.id);
+        if (!eq) continue;
+        if (!next[it.id]) added++;
+        next[it.id] = {
+          condition: next[it.id]?.condition ?? "new",
+          qty: it.qty ?? next[it.id]?.qty ?? eq.default_qty ?? 1,
+        };
+      }
+      if (added > 0) toast.success(`تمت إضافة ${added} معدة إلى مشروعك`);
+      else toast.info("هذه المعدات مضافة بالفعل");
+      return next;
+    });
+  };
+
+  const addPackage = (pkg: RestaurantPackage) => {
+    addMany(pkg.items.map((i) => ({ id: i.equipment_id, qty: i.qty })));
+    toast.success(`تم تطبيق الباقة: ${pkg.name}`);
+  };
+
+  const addSuggested = () => {
+    const essentials = visibleEquipment.filter((e) => e.essential);
+    if (essentials.length === 0) {
+      toast.info("لا توجد معدات أساسية محددة لهذا النوع");
+      return;
+    }
+    addMany(essentials.map((e) => ({ id: e.id, qty: e.default_qty || 1 })));
+  };
+
+  const typePackages = useMemo(
+    () => packages.filter((p) => !activeType || p.project_type_slug === activeType),
+    [packages, activeType],
+  );
 
   const equipMap = useMemo(() => new Map(equipment.map((e) => [e.id, e])), [equipment]);
   const chosen = Object.entries(selected)
     .map(([id, sel]) => ({ e: equipMap.get(id), sel }))
     .filter((x) => x.e) as { e: Equipment; sel: Selection }[];
 
-  const equipNewTotal = chosen.reduce((a, x) => a + x.e.price_new, 0);
-  const equipUsedTotal = chosen.reduce((a, x) => a + x.e.price_used, 0);
-  const equipChosenTotal = chosen.reduce((a, x) => a + (x.sel.condition === "new" ? x.e.price_new : x.e.price_used), 0);
+  const equipNewTotal = chosen.reduce((a, x) => a + effNew(x.e) * x.sel.qty, 0);
+  const equipUsedTotal = chosen.reduce((a, x) => a + x.e.price_used * x.sel.qty, 0);
+  const equipChosenTotal = chosen.reduce(
+    (a, x) => a + (x.sel.condition === "new" ? effNew(x.e) : x.e.price_used) * x.sel.qty,
+    0,
+  );
   const fabTotal = fabItems.reduce((a, it) => a + it.unitPrice * it.quantity, 0);
+
+  // تقسيم التكلفة حسب طبقة المعدات (أساسية / إضافية / تجهيزات تشغيل)
+  const layerTotals = useMemo(() => {
+    const out: Record<string, number> = { core: 0, extra: 0, operating: 0 };
+    chosen.forEach((x) => {
+      const up = x.sel.condition === "new" ? effNew(x.e) : x.e.price_used;
+      const layer = out[x.e.cost_layer] != null ? x.e.cost_layer : "core";
+      out[layer] += up * x.sel.qty;
+    });
+    return out;
+  }, [chosen]);
 
   const subTotal = equipChosenTotal + fabTotal;
   const finalTotal = Math.max(0, subTotal - discount);
   const savings = equipNewTotal > 0 ? Math.round((1 - equipUsedTotal / equipNewTotal) * 100) : 0;
+
 
   const resetProject = () => {
     setActiveType(null);
@@ -262,13 +340,38 @@ function RestaurantPage() {
     loadProjects();
   };
 
+  const submitLead = async () => {
+    if (!leadName.trim() || leadPhone.replace(/[^0-9]/g, "").length < 6) {
+      toast.error("الرجاء إدخال الاسم ورقم واتساب صحيح");
+      return;
+    }
+    setLeadSaving(true);
+    const { error } = await db.from("restaurant_leads").insert({
+      name: leadName.trim(),
+      whatsapp: leadPhone.trim(),
+      project_name: types.find((t) => t.slug === activeType)?.name ?? "مشروع تفصيل",
+      project_type_slug: activeType,
+      total: finalTotal,
+      project_data: collectData(),
+    });
+    setLeadSaving(false);
+    if (error) {
+      toast.error("تعذّر إرسال الطلب، حاول مجدداً");
+    } else {
+      toast.success("تم استلام طلبك، سنتواصل معك قريباً");
+      setLeadName("");
+      setLeadPhone("");
+    }
+  };
+
   const shareWhatsApp = () => {
     const lines = [
       `*${quote.pdfTitle}*`,
       customerName ? `العميل: ${customerName}` : "",
       "",
       ...chosen.map(
-        (c) => `• ${c.e.name} (${c.sel.condition === "new" ? "جديد" : "مستعمل"}) — ${BHD(c.sel.condition === "new" ? c.e.price_new : c.e.price_used)}`,
+        (c) =>
+          `• ${c.e.name} ×${c.sel.qty} (${c.sel.condition === "new" ? "جديد" : "مستعمل"}) — ${BHD((c.sel.condition === "new" ? effNew(c.e) : c.e.price_used) * c.sel.qty)}`,
       ),
       ...fabItems.map(
         (it) => `• ${it.productName} ×${it.quantity} — ${BHD(it.unitPrice * it.quantity)}`,
@@ -288,14 +391,14 @@ function RestaurantPage() {
     let index = 1;
     const items: Array<{ id: number; title: string; desc: string; qty: number; unitPrice: number; total: number; img: string | null }> = [];
     chosen.forEach(({ e, sel }) => {
-      const unitPrice = sel.condition === "new" ? e.price_new : e.price_used;
+      const unitPrice = sel.condition === "new" ? effNew(e) : e.price_used;
       items.push({
         id: index++,
         title: e.name,
         desc: `الحالة: ${sel.condition === "new" ? "جديد" : "مستعمل"} | ${[e.manufacturer, e.country_of_origin].filter(Boolean).join(" - ")}`,
-        qty: 1,
+        qty: sel.qty,
         unitPrice,
-        total: unitPrice,
+        total: unitPrice * sel.qty,
         img: e.image_url || null,
       });
     });
@@ -484,28 +587,102 @@ function RestaurantPage() {
             </div>
           </section>
 
+          {activeType && typePackages.length > 0 && (
+            <section className="mt-10">
+              <h2 className="mb-1 text-lg font-bold">باقات جاهزة — صمّم مشروعك بضغطة واحدة</h2>
+              <p className="mb-3 text-sm text-muted-foreground">
+                اختر باقة جاهزة تناسب ميزانيتك وأضف كل معداتها دفعة واحدة، ثم عدّل ما تشاء.
+              </p>
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {typePackages.map((pkg) => {
+                  const pkgTotal = pkg.items.reduce((a, it) => {
+                    const eq = equipMap.get(it.equipment_id);
+                    return a + (eq ? effNew(eq) * it.qty : 0);
+                  }, 0);
+                  return (
+                    <div key={pkg.id} className="flex flex-col rounded-2xl border border-border p-4">
+                      <div className="mb-1 flex items-center justify-between">
+                        <h3 className="font-bold">{pkg.name}</h3>
+                        <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-bold text-primary">
+                          {TIER_LABELS[pkg.tier] ?? pkg.tier}
+                        </span>
+                      </div>
+                      {pkg.description && (
+                        <p className="mb-2 text-xs text-muted-foreground">{pkg.description}</p>
+                      )}
+                      <p className="mb-3 text-sm text-muted-foreground">
+                        {pkg.items.length} معدة • تبدأ من {BHD(pkgTotal)}
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => addPackage(pkg)}
+                        className="mt-auto flex items-center justify-center gap-1 rounded-lg bg-primary p-2 text-sm font-bold text-primary-foreground"
+                      >
+                        <Plus className="h-4 w-4" /> أضف الباقة كاملة
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+          )}
+
           {activeType && visibleEquipment.length > 0 && (
             <section className="mt-10">
-              <h2 className="mb-3 text-lg font-bold">معدات جاهزة لهذا المشروع</h2>
+              <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                <h2 className="text-lg font-bold">معدات جاهزة لهذا المشروع</h2>
+                {visibleEquipment.some((e) => e.essential) && (
+                  <button
+                    type="button"
+                    onClick={addSuggested}
+                    className="flex items-center gap-1 rounded-lg border border-primary/40 bg-primary/10 px-3 py-2 text-sm font-bold text-primary"
+                  >
+                    <Plus className="h-4 w-4" /> أضف المعدات الأساسية المقترحة دفعة واحدة
+                  </button>
+                )}
+              </div>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {visibleEquipment.map((e) => {
                   const sel = selected[e.id];
+                  const hasDisc = e.price_new_discounted != null && e.price_new_discounted > 0;
+                  const specEntries = Object.entries(e.specs || {}).slice(0, 3);
                   return (
                     <div
                       key={e.id}
                       className={`flex flex-col overflow-hidden rounded-2xl border ${sel ? "border-primary" : "border-border"}`}
                     >
-                      <img
-                        src={e.image_url || "/placeholder.svg"}
-                        alt={e.name}
-                        loading="lazy"
-                        className="aspect-[4/3] w-full object-cover"
-                      />
+                      <div className="relative">
+                        <img
+                          src={e.image_url || "/placeholder.svg"}
+                          alt={e.name}
+                          loading="lazy"
+                          className="aspect-[4/3] w-full object-cover"
+                        />
+                        {e.essential && (
+                          <span className="absolute right-2 top-2 rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold text-primary-foreground">
+                            أساسية
+                          </span>
+                        )}
+                      </div>
                       <div className="flex flex-1 flex-col gap-1 p-3">
-                        <h3 className="font-bold leading-tight">{e.name}</h3>
+                        <div className="flex items-center justify-between gap-2">
+                          <h3 className="font-bold leading-tight">{e.name}</h3>
+                          <span className="shrink-0 rounded bg-muted px-1.5 py-0.5 text-[10px] font-bold text-muted-foreground">
+                            {LAYER_LABELS[e.cost_layer] ?? e.cost_layer}
+                          </span>
+                        </div>
                         <p className="text-xs text-muted-foreground">
                           {[e.manufacturer, e.country_of_origin].filter(Boolean).join(" • ")}
                         </p>
+                        {specEntries.length > 0 && (
+                          <ul className="mt-1 space-y-0.5 text-[11px] text-muted-foreground">
+                            {specEntries.map(([k, v]) => (
+                              <li key={k}>
+                                <span className="font-bold">{k}:</span> {v}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
                         <div className="mt-2 grid grid-cols-2 gap-2 text-sm">
                           <button
                             type="button"
@@ -518,7 +695,16 @@ function RestaurantPage() {
                             }`}
                           >
                             جديد
-                            <div className="text-xs">{BHD(e.price_new)}</div>
+                            <div className="text-xs">
+                              {hasDisc ? (
+                                <>
+                                  <span className="text-primary">{BHD(e.price_new_discounted as number)}</span>{" "}
+                                  <span className="text-[10px] text-muted-foreground line-through">{BHD(e.price_new)}</span>
+                                </>
+                              ) : (
+                                BHD(e.price_new)
+                              )}
+                            </div>
                           </button>
                           <button
                             type="button"
@@ -532,8 +718,35 @@ function RestaurantPage() {
                           >
                             مستعمل
                             <div className="text-xs">{BHD(e.price_used)}</div>
+                            {e.used_condition && (
+                              <div className="text-[10px] text-muted-foreground">{e.used_condition}</div>
+                            )}
                           </button>
                         </div>
+                        {sel && (
+                          <div className="mt-2 flex items-center justify-between rounded-lg border border-border p-1.5">
+                            <span className="text-xs font-bold text-muted-foreground">الكمية</span>
+                            <div className="flex items-center gap-2">
+                              <button
+                                type="button"
+                                onClick={() => setQty(e.id, sel.qty - 1)}
+                                className="flex h-6 w-6 items-center justify-center rounded border border-border"
+                                aria-label="إنقاص"
+                              >
+                                <Minus className="h-3 w-3" />
+                              </button>
+                              <span className="w-6 text-center text-sm font-bold">{sel.qty}</span>
+                              <button
+                                type="button"
+                                onClick={() => setQty(e.id, sel.qty + 1)}
+                                className="flex h-6 w-6 items-center justify-center rounded border border-border"
+                                aria-label="زيادة"
+                              >
+                                <Plus className="h-3 w-3" />
+                              </button>
+                            </div>
+                          </div>
+                        )}
                         <button
                           type="button"
                           onClick={() => toggle(e)}
@@ -625,16 +838,26 @@ function RestaurantPage() {
                 </thead>
                 <tbody>
                   {chosen.map(({ e, sel }) => {
-                    const up = sel.condition === "new" ? e.price_new : e.price_used;
+                    const up = sel.condition === "new" ? effNew(e) : e.price_used;
                     return (
                       <tr key={e.id} className="border-t border-border">
                         <td className="p-3">
                           {e.name}
                           <div className="text-xs text-muted-foreground">معدة {sel.condition === "new" ? "جديدة" : "مستعملة"}</div>
                         </td>
-                        <td className="p-3">1</td>
+                        <td className="p-3">
+                          <div className="flex items-center gap-1.5">
+                            <button onClick={() => setQty(e.id, sel.qty - 1)} aria-label="إنقاص" className="rounded border border-border p-0.5">
+                              <Minus className="h-3 w-3" />
+                            </button>
+                            <span className="w-5 text-center font-bold">{sel.qty}</span>
+                            <button onClick={() => setQty(e.id, sel.qty + 1)} aria-label="زيادة" className="rounded border border-border p-0.5">
+                              <Plus className="h-3 w-3" />
+                            </button>
+                          </div>
+                        </td>
                         <td className="p-3">{BHD(up)}</td>
-                        <td className="p-3 font-bold">{BHD(up)}</td>
+                        <td className="p-3 font-bold">{BHD(up * sel.qty)}</td>
                         <td className="p-3">
                           <button onClick={() => toggle(e)} aria-label="حذف">
                             <Trash2 className="h-4 w-4 text-destructive" />
@@ -715,6 +938,85 @@ function RestaurantPage() {
               <Stat label="الخصم الإضافي" value={`- ${BHD(discount)}`} />
               <Stat label="المجموع النهائي" value={BHD(finalTotal)} primary />
             </div>
+
+            {chosen.length > 0 && (
+              <div className="mt-6 grid gap-6 lg:grid-cols-2">
+                {/* تقسيم التكلفة حسب الطبقة */}
+                <div className="rounded-2xl border border-border p-5">
+                  <h3 className="mb-3 text-base font-bold">تقسيم تكلفة المعدات</h3>
+                  <div className="space-y-2">
+                    {(["core", "extra", "operating"] as const).map((layer) => (
+                      <div key={layer} className="flex items-center justify-between text-sm">
+                        <span className="text-muted-foreground">{LAYER_LABELS[layer]}</span>
+                        <span className="font-bold">{BHD(layerTotals[layer])}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* مقارنة جديد مقابل مستعمل */}
+                <div className="rounded-2xl border border-border p-5">
+                  <h3 className="mb-3 text-base font-bold">مقارنة ذكية: جديد مقابل مستعمل</h3>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">إجمالي لو كل المعدات جديدة</span>
+                      <span className="font-bold">{BHD(equipNewTotal)}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">إجمالي لو كل المعدات مستعملة</span>
+                      <span className="font-bold">{BHD(equipUsedTotal)}</span>
+                    </div>
+                    <div className="flex items-center justify-between border-t border-border pt-2">
+                      <span className="text-muted-foreground">الفرق المحتمل (توفير)</span>
+                      <span className="font-bold text-emerald-600">{BHD(equipNewTotal - equipUsedTotal)}</span>
+                    </div>
+                    <p className="pt-1 text-xs text-muted-foreground">
+                      {savings >= 40
+                        ? "التوفير كبير جداً عند اختيار المستعمل — مناسب للبداية بميزانية محدودة."
+                        : savings > 0
+                          ? "يمكنك توفير جزء من الميزانية باختيار بعض المعدات مستعملة."
+                          : "أضف معدات لمقارنة خيارات الجديد والمستعمل."}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* طلب عرض سعر / تسجيل اهتمام (Leads) */}
+            {subTotal > 0 && (
+              <div className="mt-6 rounded-2xl border border-primary/30 bg-primary/5 p-5">
+                <h3 className="mb-1 text-base font-bold">اطلب عرض سعر رسمي</h3>
+                <p className="mb-3 text-sm text-muted-foreground">
+                  اترك اسمك ورقم الواتساب وسنتواصل معك بعرض سعر مفصّل لمشروعك.
+                </p>
+                <div className="grid gap-3 sm:grid-cols-[1fr_1fr_auto]">
+                  <input
+                    type="text"
+                    value={leadName}
+                    onChange={(e) => setLeadName(e.target.value)}
+                    placeholder="الاسم"
+                    className="rounded-lg border border-input bg-background px-3 py-2 text-sm"
+                  />
+                  <input
+                    type="tel"
+                    value={leadPhone}
+                    onChange={(e) => setLeadPhone(e.target.value)}
+                    placeholder="رقم الواتساب"
+                    className="rounded-lg border border-input bg-background px-3 py-2 text-sm"
+                    dir="ltr"
+                  />
+                  <button
+                    type="button"
+                    onClick={submitLead}
+                    disabled={leadSaving}
+                    className="rounded-lg bg-primary px-4 py-2 text-sm font-bold text-primary-foreground disabled:opacity-60"
+                  >
+                    إرسال الطلب
+                  </button>
+                </div>
+              </div>
+            )}
+
           </section>
         </div>
 
