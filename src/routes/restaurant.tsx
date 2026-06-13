@@ -364,14 +364,14 @@ function RestaurantPage() {
     let index = 1;
     const items: Array<{ id: number; title: string; desc: string; qty: number; unitPrice: number; total: number; img: string | null }> = [];
     chosen.forEach(({ e, sel }) => {
-      const unitPrice = sel.condition === "new" ? e.price_new : e.price_used;
+      const unitPrice = sel.condition === "new" ? effNew(e) : e.price_used;
       items.push({
         id: index++,
         title: e.name,
         desc: `الحالة: ${sel.condition === "new" ? "جديد" : "مستعمل"} | ${[e.manufacturer, e.country_of_origin].filter(Boolean).join(" - ")}`,
-        qty: 1,
+        qty: sel.qty,
         unitPrice,
-        total: unitPrice,
+        total: unitPrice * sel.qty,
         img: e.image_url || null,
       });
     });
