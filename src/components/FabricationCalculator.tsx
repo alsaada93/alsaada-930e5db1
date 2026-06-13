@@ -285,7 +285,7 @@ function EditDialog({
           </button>
           <button
             type="button"
-            onClick={() => onSave({ ...cfg, quantity: Math.max(1, cfg.quantity || 1) }, unitPrice)}
+            onClick={() => onSave({ ...cfg, quantity: Math.max(1, cfg.quantity || 1) }, unitPrice, previewImg)}
             className="flex-1 rounded-xl bg-primary py-2.5 font-bold text-primary-foreground"
           >
             حفظ التعديل
