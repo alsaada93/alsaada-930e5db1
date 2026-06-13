@@ -213,6 +213,7 @@ export function calcUnitPrice(
   if (f.bowls && extras.extraBowl) unit += Math.max(0, (cfg.bowls || 1) - 1) * extras.extraBowl;
   if (f.shelves && extras.perShelf) unit += Math.max(0, cfg.shelves || 0) * extras.perShelf;
   if (f.tiers && extras.perTier) unit += Math.max(0, cfg.tiers || 0) * extras.perTier;
+  if (f.drawers && extras.perDrawer) unit += Math.max(0, cfg.drawers || 0) * extras.perDrawer;
 
   return Math.round(unit * 100) / 100;
 }
