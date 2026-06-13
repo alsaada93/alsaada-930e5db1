@@ -560,28 +560,102 @@ function RestaurantPage() {
             </div>
           </section>
 
+          {activeType && typePackages.length > 0 && (
+            <section className="mt-10">
+              <h2 className="mb-1 text-lg font-bold">باقات جاهزة — صمّم مشروعك بضغطة واحدة</h2>
+              <p className="mb-3 text-sm text-muted-foreground">
+                اختر باقة جاهزة تناسب ميزانيتك وأضف كل معداتها دفعة واحدة، ثم عدّل ما تشاء.
+              </p>
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {typePackages.map((pkg) => {
+                  const pkgTotal = pkg.items.reduce((a, it) => {
+                    const eq = equipMap.get(it.equipment_id);
+                    return a + (eq ? effNew(eq) * it.qty : 0);
+                  }, 0);
+                  return (
+                    <div key={pkg.id} className="flex flex-col rounded-2xl border border-border p-4">
+                      <div className="mb-1 flex items-center justify-between">
+                        <h3 className="font-bold">{pkg.name}</h3>
+                        <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-bold text-primary">
+                          {TIER_LABELS[pkg.tier] ?? pkg.tier}
+                        </span>
+                      </div>
+                      {pkg.description && (
+                        <p className="mb-2 text-xs text-muted-foreground">{pkg.description}</p>
+                      )}
+                      <p className="mb-3 text-sm text-muted-foreground">
+                        {pkg.items.length} معدة • تبدأ من {BHD(pkgTotal)}
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => addPackage(pkg)}
+                        className="mt-auto flex items-center justify-center gap-1 rounded-lg bg-primary p-2 text-sm font-bold text-primary-foreground"
+                      >
+                        <Plus className="h-4 w-4" /> أضف الباقة كاملة
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+          )}
+
           {activeType && visibleEquipment.length > 0 && (
             <section className="mt-10">
-              <h2 className="mb-3 text-lg font-bold">معدات جاهزة لهذا المشروع</h2>
+              <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                <h2 className="text-lg font-bold">معدات جاهزة لهذا المشروع</h2>
+                {visibleEquipment.some((e) => e.essential) && (
+                  <button
+                    type="button"
+                    onClick={addSuggested}
+                    className="flex items-center gap-1 rounded-lg border border-primary/40 bg-primary/10 px-3 py-2 text-sm font-bold text-primary"
+                  >
+                    <Plus className="h-4 w-4" /> أضف المعدات الأساسية المقترحة دفعة واحدة
+                  </button>
+                )}
+              </div>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {visibleEquipment.map((e) => {
                   const sel = selected[e.id];
+                  const hasDisc = e.price_new_discounted != null && e.price_new_discounted > 0;
+                  const specEntries = Object.entries(e.specs || {}).slice(0, 3);
                   return (
                     <div
                       key={e.id}
                       className={`flex flex-col overflow-hidden rounded-2xl border ${sel ? "border-primary" : "border-border"}`}
                     >
-                      <img
-                        src={e.image_url || "/placeholder.svg"}
-                        alt={e.name}
-                        loading="lazy"
-                        className="aspect-[4/3] w-full object-cover"
-                      />
+                      <div className="relative">
+                        <img
+                          src={e.image_url || "/placeholder.svg"}
+                          alt={e.name}
+                          loading="lazy"
+                          className="aspect-[4/3] w-full object-cover"
+                        />
+                        {e.essential && (
+                          <span className="absolute right-2 top-2 rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold text-primary-foreground">
+                            أساسية
+                          </span>
+                        )}
+                      </div>
                       <div className="flex flex-1 flex-col gap-1 p-3">
-                        <h3 className="font-bold leading-tight">{e.name}</h3>
+                        <div className="flex items-center justify-between gap-2">
+                          <h3 className="font-bold leading-tight">{e.name}</h3>
+                          <span className="shrink-0 rounded bg-muted px-1.5 py-0.5 text-[10px] font-bold text-muted-foreground">
+                            {LAYER_LABELS[e.cost_layer] ?? e.cost_layer}
+                          </span>
+                        </div>
                         <p className="text-xs text-muted-foreground">
                           {[e.manufacturer, e.country_of_origin].filter(Boolean).join(" • ")}
                         </p>
+                        {specEntries.length > 0 && (
+                          <ul className="mt-1 space-y-0.5 text-[11px] text-muted-foreground">
+                            {specEntries.map(([k, v]) => (
+                              <li key={k}>
+                                <span className="font-bold">{k}:</span> {v}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
                         <div className="mt-2 grid grid-cols-2 gap-2 text-sm">
                           <button
                             type="button"
@@ -594,7 +668,16 @@ function RestaurantPage() {
                             }`}
                           >
                             جديد
-                            <div className="text-xs">{BHD(e.price_new)}</div>
+                            <div className="text-xs">
+                              {hasDisc ? (
+                                <>
+                                  <span className="text-primary">{BHD(e.price_new_discounted as number)}</span>{" "}
+                                  <span className="text-[10px] text-muted-foreground line-through">{BHD(e.price_new)}</span>
+                                </>
+                              ) : (
+                                BHD(e.price_new)
+                              )}
+                            </div>
                           </button>
                           <button
                             type="button"
@@ -608,8 +691,35 @@ function RestaurantPage() {
                           >
                             مستعمل
                             <div className="text-xs">{BHD(e.price_used)}</div>
+                            {e.used_condition && (
+                              <div className="text-[10px] text-muted-foreground">{e.used_condition}</div>
+                            )}
                           </button>
                         </div>
+                        {sel && (
+                          <div className="mt-2 flex items-center justify-between rounded-lg border border-border p-1.5">
+                            <span className="text-xs font-bold text-muted-foreground">الكمية</span>
+                            <div className="flex items-center gap-2">
+                              <button
+                                type="button"
+                                onClick={() => setQty(e.id, sel.qty - 1)}
+                                className="flex h-6 w-6 items-center justify-center rounded border border-border"
+                                aria-label="إنقاص"
+                              >
+                                <Minus className="h-3 w-3" />
+                              </button>
+                              <span className="w-6 text-center text-sm font-bold">{sel.qty}</span>
+                              <button
+                                type="button"
+                                onClick={() => setQty(e.id, sel.qty + 1)}
+                                className="flex h-6 w-6 items-center justify-center rounded border border-border"
+                                aria-label="زيادة"
+                              >
+                                <Plus className="h-3 w-3" />
+                              </button>
+                            </div>
+                          </div>
+                        )}
                         <button
                           type="button"
                           onClick={() => toggle(e)}
