@@ -22,6 +22,8 @@ import {
   SIZE_MAX,
   SIZE_MIN,
   BHD,
+  DEFAULT_BOWL,
+  type BowlSize,
   type DrawerSide,
   type FabCategory,
   type FabConfig,
@@ -154,6 +156,8 @@ function configFromItem(item: FabLineItem): FabConfig {
     shelves: item.shelves,
     tiers: item.tiers,
     bowls: item.bowls,
+    bowlSide: item.bowlSide ?? "center",
+    bowlSizes: item.bowlSizes ?? [{ ...DEFAULT_BOWL }],
     topShelf: item.topShelf,
     bottomShelf: item.bottomShelf,
     wheels: item.wheels,
@@ -337,7 +341,15 @@ function ConfigBody({
         {f.height && <Num label="الارتفاع (سم)" value={cfg.height} onChange={(n) => set("height", n)} />}
         {f.shelves && <Num label="عدد الأرفف" value={cfg.shelves} onChange={(n) => set("shelves", n)} min={0} max={20} />}
         {f.tiers && <Num label="عدد الأدوار" value={cfg.tiers} onChange={(n) => set("tiers", n)} min={1} max={10} />}
-        {f.bowls && <Num label="عدد الأحواض" value={cfg.bowls} onChange={(n) => set("bowls", n)} min={1} max={6} />}
+        {f.bowls && <Num label="عدد الأحواض" value={cfg.bowls} onChange={(n) => {
+          const count = Math.max(1, Math.min(6, n || 1));
+          setCfg((c) => {
+            const sizes = [...(c.bowlSizes ?? [])];
+            while (sizes.length < count) sizes.push({ ...DEFAULT_BOWL });
+            sizes.length = count;
+            return { ...c, bowls: count, bowlSizes: sizes };
+          });
+        }} min={1} max={6} />}
 
         {f.grade && (
           <Field label="نوع الستانلس">
@@ -358,6 +370,48 @@ function ConfigBody({
           </Field>
         )}
       </div>
+
+      {/* تفاصيل الأحواض: الجهة والقياس والعمق لكل حوض */}
+      {f.bowls && (
+        <div className="mt-4 space-y-3">
+          {cfg.bowls === 1 && (
+            <Field label="جهة الحوض">
+              <select value={cfg.bowlSide} onChange={(e) => set("bowlSide", e.target.value as DrawerSide)} className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm font-bold">
+                <option value="right">يمين</option>
+                <option value="center">وسط</option>
+                <option value="left">يسار</option>
+              </select>
+            </Field>
+          )}
+          <div className="space-y-3">
+            {Array.from({ length: cfg.bowls }).map((_, i) => {
+              const b = cfg.bowlSizes?.[i] ?? { ...DEFAULT_BOWL };
+              const setBowl = (patch: Partial<BowlSize>) => {
+                setCfg((c) => {
+                  const sizes = [...(c.bowlSizes ?? [])];
+                  while (sizes.length < c.bowls) sizes.push({ ...DEFAULT_BOWL });
+                  sizes[i] = { ...sizes[i], ...patch };
+                  return { ...c, bowlSizes: sizes };
+                });
+              };
+              return (
+                <div key={i} className="rounded-lg border border-border p-3">
+                  <div className="mb-2 text-sm font-bold text-muted-foreground">
+                    {cfg.bowls === 1 ? "قياس الحوض" : `قياس الحوض ${i + 1}`}
+                  </div>
+                  <div className="grid grid-cols-3 gap-3">
+                    <Num label="العرض (سم)" value={b.width} onChange={(n) => setBowl({ width: n })} min={5} max={200} />
+                    <Num label="الطول (سم)" value={b.length} onChange={(n) => setBowl({ length: n })} min={5} max={200} />
+                    <Num label="العمق (سم)" value={b.depth} onChange={(n) => setBowl({ depth: n })} min={5} max={100} />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+
 
       {/* الأدراج */}
       {f.drawers && (
@@ -705,8 +759,25 @@ function Schematic3D({ cfg, fields, kind }: { cfg: FabConfig; fields: FabFields;
   if (bowls > 0) {
     for (let i = 0; i < bowls; i++) {
       const cellW = bw / bowls;
-      const m = cellW * 0.16;
-      const hx0 = i * cellW + m;
+      let m = cellW * 0.16;
+      let cellStart = i * cellW;
+      // حوض واحد: ضعه حسب الجهة المختارة (يمين/يسار/وسط)
+      if (bowls === 1) {
+        const bw2 = bw * 0.46;
+        const pad = bw * 0.07;
+        cellStart = cfg.bowlSide === "left" ? pad : cfg.bowlSide === "center" ? (bw - bw2) / 2 : bw - bw2 - pad;
+        m = 0;
+        const hx0 = cellStart;
+        const hx1 = cellStart + bw2;
+        const corners: [number, number][] = [P(hx0, 0.2, bh), P(hx1, 0.2, bh), P(hx1, 0.85, bh), P(hx0, 0.85, bh)];
+        bowlEls.push(
+          <g key={i}>
+            <polygon points={pts(corners)} className="fill-primary/30 stroke-primary" strokeWidth="1.3" strokeLinejoin="round" />
+          </g>,
+        );
+        continue;
+      }
+      const hx0 = cellStart + m;
       const hx1 = (i + 1) * cellW - m;
       const corners: [number, number][] = [P(hx0, 0.2, bh), P(hx1, 0.2, bh), P(hx1, 0.85, bh), P(hx0, 0.85, bh)];
       bowlEls.push(

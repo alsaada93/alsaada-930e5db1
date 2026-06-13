@@ -176,6 +176,15 @@ export const DEFAULT_FAB_QUOTE: FabQuote = {
   clientMessage: "مرحباً، نشكر طلبكم. هذا عرض السعر الخاص بكم.",
 };
 
+/** قياس وعمق حوض واحد (سم) */
+export interface BowlSize {
+  width: number;
+  length: number;
+  depth: number;
+}
+
+export const DEFAULT_BOWL: BowlSize = { width: 40, length: 40, depth: 20 };
+
 /** القيم المُدخلة من المستخدم لمنتج معيّن */
 export interface FabConfig {
   length: number;
@@ -184,6 +193,10 @@ export interface FabConfig {
   shelves: number;
   tiers: number;
   bowls: number;
+  /** جهة الحوض عند وجود حوض واحد: يمين / يسار / وسط */
+  bowlSide: DrawerSide;
+  /** قياس وعمق كل حوض على حدة */
+  bowlSizes: BowlSize[];
   topShelf: boolean;
   bottomShelf: boolean;
   wheels: boolean;
@@ -221,6 +234,8 @@ export function defaultConfig(thicknesses: Thicknesses): FabConfig {
     shelves: 1,
     tiers: 2,
     bowls: 1,
+    bowlSide: "center",
+    bowlSizes: [{ ...DEFAULT_BOWL }],
     topShelf: false,
     bottomShelf: false,
     wheels: false,
@@ -291,7 +306,18 @@ export function describeItem(item: FabLineItem, product?: FabProduct): string {
   }
   if (f.grade) parts.push(`ستانلس ${item.grade}`);
   if (f.thickness) parts.push(`سماكة ${item.thickness} ملم`);
-  if (f.bowls) parts.push(`${item.bowls} حوض`);
+  if (f.bowls) {
+    if (item.bowls === 1) {
+      const side = item.bowlSide === "left" ? "يسار" : item.bowlSide === "center" ? "وسط" : "يمين";
+      parts.push(`حوض واحد (${side})`);
+    } else {
+      parts.push(`${item.bowls} حوض`);
+    }
+    const sizes = item.bowlSizes ?? [];
+    sizes.slice(0, item.bowls).forEach((b, i) => {
+      if (b) parts.push(`${sizes.length > 1 ? `حوض ${i + 1}: ` : "قياس الحوض: "}${b.width}×${b.length}×عمق ${b.depth} سم`);
+    });
+  }
   if (f.shelves) parts.push(`${item.shelves} رف`);
   if (f.tiers) parts.push(`${item.tiers} دور`);
   if (f.topShelf && item.topShelf) parts.push(item.shelfPosition === "middle" ? "رف وسطي" : "رف علوي");
