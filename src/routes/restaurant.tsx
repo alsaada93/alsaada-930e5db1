@@ -811,16 +811,26 @@ function RestaurantPage() {
                 </thead>
                 <tbody>
                   {chosen.map(({ e, sel }) => {
-                    const up = sel.condition === "new" ? e.price_new : e.price_used;
+                    const up = sel.condition === "new" ? effNew(e) : e.price_used;
                     return (
                       <tr key={e.id} className="border-t border-border">
                         <td className="p-3">
                           {e.name}
                           <div className="text-xs text-muted-foreground">معدة {sel.condition === "new" ? "جديدة" : "مستعملة"}</div>
                         </td>
-                        <td className="p-3">1</td>
+                        <td className="p-3">
+                          <div className="flex items-center gap-1.5">
+                            <button onClick={() => setQty(e.id, sel.qty - 1)} aria-label="إنقاص" className="rounded border border-border p-0.5">
+                              <Minus className="h-3 w-3" />
+                            </button>
+                            <span className="w-5 text-center font-bold">{sel.qty}</span>
+                            <button onClick={() => setQty(e.id, sel.qty + 1)} aria-label="زيادة" className="rounded border border-border p-0.5">
+                              <Plus className="h-3 w-3" />
+                            </button>
+                          </div>
+                        </td>
                         <td className="p-3">{BHD(up)}</td>
-                        <td className="p-3 font-bold">{BHD(up)}</td>
+                        <td className="p-3 font-bold">{BHD(up * sel.qty)}</td>
                         <td className="p-3">
                           <button onClick={() => toggle(e)} aria-label="حذف">
                             <Trash2 className="h-4 w-4 text-destructive" />
