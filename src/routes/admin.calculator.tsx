@@ -280,7 +280,7 @@ const EXTRA_LABELS: { key: keyof NonNullable<FabPricing["extras"]>; label: strin
 ];
 
 function ProductsTab({ data }: { data: ReturnType<typeof useFabricationData> }) {
-  const { products, categories, reload, grades, thicknesses } = data;
+  const { products, categories, reload } = data;
   const [filterCat, setFilterCat] = useState("");
   const [open, setOpen] = useState(false);
   const [edit, setEdit] = useState<Partial<FabProduct> | null>(null);
