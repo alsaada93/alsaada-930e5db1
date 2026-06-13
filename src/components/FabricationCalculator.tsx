@@ -23,6 +23,7 @@ import {
   BHD,
   type FabCategory,
   type FabConfig,
+  type FabFields,
   type FabLineItem,
   type FabProduct,
   type SteelGrades,
