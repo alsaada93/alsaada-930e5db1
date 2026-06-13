@@ -234,6 +234,8 @@ export function defaultConfig(thicknesses: Thicknesses): FabConfig {
     shelves: 1,
     tiers: 2,
     bowls: 1,
+    bowlSide: "center",
+    bowlSizes: [{ ...DEFAULT_BOWL }],
     topShelf: false,
     bottomShelf: false,
     wheels: false,
