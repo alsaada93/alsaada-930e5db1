@@ -114,6 +114,9 @@ function RestaurantPage() {
   const [savedProjects, setSavedProjects] = useState<SavedProject[]>([]);
   const [showProjects, setShowProjects] = useState(false);
   const [activeTab, setActiveTab] = useState<"projects" | "fabrication">("fabrication");
+  const [leadName, setLeadName] = useState("");
+  const [leadPhone, setLeadPhone] = useState("");
+  const [leadSaving, setLeadSaving] = useState(false);
 
   // بيانات عرض السعر (تُحسب في المتصفح لتجنّب اختلاف SSR)
   const [quoteMeta, setQuoteMeta] = useState<{ no: string; date: string }>({ no: "------", date: "" });
