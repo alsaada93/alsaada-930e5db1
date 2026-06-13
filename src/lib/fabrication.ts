@@ -51,6 +51,23 @@ export interface FabPricing {
   };
 }
 
+/** شروط عرض الصورة حسب مواصفات العميل */
+export interface FabImageTags {
+  grade?: string;
+  thickness?: string;
+  topShelf?: boolean;
+  bottomShelf?: boolean;
+  wheels?: boolean;
+  bowls?: number;
+}
+
+/** صورة موسومة بمواصفات */
+export interface FabImage {
+  url: string;
+  label?: string;
+  tags: FabImageTags;
+}
+
 /** منتج تفصيل */
 export interface FabProduct {
   id: string;
