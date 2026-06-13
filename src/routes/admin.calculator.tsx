@@ -639,6 +639,23 @@ function ProductsTab({ data }: { data: ReturnType<typeof useFabricationData> }) 
                   </label>
                 ))}
               </div>
+              {edit?.fields?.drawers && (
+                <div className="mt-3 max-w-xs">
+                  <Label className="text-xs text-muted-foreground">الحد الأقصى لعدد الأدراج</Label>
+                  <Input
+                    type="number"
+                    min={1}
+                    max={20}
+                    value={Number(edit?.fields?.maxDrawers) || 4}
+                    onChange={(e) =>
+                      setEdit((p) => ({
+                        ...p,
+                        fields: { ...(p?.fields ?? {}), maxDrawers: Math.max(1, Math.min(20, Number(e.target.value) || 1)) },
+                      }))
+                    }
+                  />
+                </div>
+              )}
             </div>
 
             {/* أسعار الإضافات */}
