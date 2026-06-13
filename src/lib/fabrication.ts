@@ -241,9 +241,13 @@ export function describeItem(item: FabLineItem, product?: FabProduct): string {
   if (f.bowls) parts.push(`${item.bowls} حوض`);
   if (f.shelves) parts.push(`${item.shelves} رف`);
   if (f.tiers) parts.push(`${item.tiers} دور`);
-  if (f.topShelf && item.topShelf) parts.push("رف علوي");
+  if (f.topShelf && item.topShelf) parts.push(item.shelfPosition === "middle" ? "رف وسطي" : "رف علوي");
   if (f.bottomShelf && item.bottomShelf) parts.push("رف سفلي");
   if (f.wheels && item.wheels) parts.push("عجلات");
+  if (f.drawers && item.drawers > 0) {
+    const side = item.drawerSide === "left" ? "يسار" : item.drawerSide === "center" ? "وسط" : "يمين";
+    parts.push(`${item.drawers} درج (${side})`);
+  }
   if (item.notes) parts.push(`ملاحظة: ${item.notes}`);
   return parts.join(" | ");
 }
