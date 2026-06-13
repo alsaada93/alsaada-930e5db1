@@ -111,6 +111,18 @@ export interface FabImageTags {
   bottomShelf?: boolean;
   wheels?: boolean;
   bowls?: number;
+  /** جهة الحوض (عند حوض واحد) */
+  bowlSide?: DrawerSide;
+  /** عدد الأدراج */
+  drawers?: number;
+  /** جهة الأدراج */
+  drawerSide?: DrawerSide;
+  /** موضع الرف الإضافي */
+  shelfPosition?: ShelfPosition;
+  /** الحواجز */
+  backGuard?: boolean;
+  rightGuard?: boolean;
+  leftGuard?: boolean;
 }
 
 /** صورة موسومة بمواصفات */
