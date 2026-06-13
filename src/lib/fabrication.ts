@@ -144,6 +144,12 @@ export interface FabConfig {
   topShelf: boolean;
   bottomShelf: boolean;
   wheels: boolean;
+  /** موضع الرف القابل للتعديل: علوي أو وسطي */
+  shelfPosition: ShelfPosition;
+  /** عدد الأدراج */
+  drawers: number;
+  /** جهة الأدراج */
+  drawerSide: DrawerSide;
   grade: string;
   thickness: string;
   quantity: number;
@@ -171,6 +177,9 @@ export function defaultConfig(thicknesses: Thicknesses): FabConfig {
     topShelf: false,
     bottomShelf: false,
     wheels: false,
+    shelfPosition: "top",
+    drawers: 0,
+    drawerSide: "right",
     grade: "201",
     thickness: String(thicknesses.default ?? 1),
     quantity: 1,
