@@ -911,6 +911,85 @@ function RestaurantPage() {
               <Stat label="الخصم الإضافي" value={`- ${BHD(discount)}`} />
               <Stat label="المجموع النهائي" value={BHD(finalTotal)} primary />
             </div>
+
+            {chosen.length > 0 && (
+              <div className="mt-6 grid gap-6 lg:grid-cols-2">
+                {/* تقسيم التكلفة حسب الطبقة */}
+                <div className="rounded-2xl border border-border p-5">
+                  <h3 className="mb-3 text-base font-bold">تقسيم تكلفة المعدات</h3>
+                  <div className="space-y-2">
+                    {(["core", "extra", "operating"] as const).map((layer) => (
+                      <div key={layer} className="flex items-center justify-between text-sm">
+                        <span className="text-muted-foreground">{LAYER_LABELS[layer]}</span>
+                        <span className="font-bold">{BHD(layerTotals[layer])}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* مقارنة جديد مقابل مستعمل */}
+                <div className="rounded-2xl border border-border p-5">
+                  <h3 className="mb-3 text-base font-bold">مقارنة ذكية: جديد مقابل مستعمل</h3>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">إجمالي لو كل المعدات جديدة</span>
+                      <span className="font-bold">{BHD(equipNewTotal)}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">إجمالي لو كل المعدات مستعملة</span>
+                      <span className="font-bold">{BHD(equipUsedTotal)}</span>
+                    </div>
+                    <div className="flex items-center justify-between border-t border-border pt-2">
+                      <span className="text-muted-foreground">الفرق المحتمل (توفير)</span>
+                      <span className="font-bold text-emerald-600">{BHD(equipNewTotal - equipUsedTotal)}</span>
+                    </div>
+                    <p className="pt-1 text-xs text-muted-foreground">
+                      {savings >= 40
+                        ? "التوفير كبير جداً عند اختيار المستعمل — مناسب للبداية بميزانية محدودة."
+                        : savings > 0
+                          ? "يمكنك توفير جزء من الميزانية باختيار بعض المعدات مستعملة."
+                          : "أضف معدات لمقارنة خيارات الجديد والمستعمل."}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* طلب عرض سعر / تسجيل اهتمام (Leads) */}
+            {subTotal > 0 && (
+              <div className="mt-6 rounded-2xl border border-primary/30 bg-primary/5 p-5">
+                <h3 className="mb-1 text-base font-bold">اطلب عرض سعر رسمي</h3>
+                <p className="mb-3 text-sm text-muted-foreground">
+                  اترك اسمك ورقم الواتساب وسنتواصل معك بعرض سعر مفصّل لمشروعك.
+                </p>
+                <div className="grid gap-3 sm:grid-cols-[1fr_1fr_auto]">
+                  <input
+                    type="text"
+                    value={leadName}
+                    onChange={(e) => setLeadName(e.target.value)}
+                    placeholder="الاسم"
+                    className="rounded-lg border border-input bg-background px-3 py-2 text-sm"
+                  />
+                  <input
+                    type="tel"
+                    value={leadPhone}
+                    onChange={(e) => setLeadPhone(e.target.value)}
+                    placeholder="رقم الواتساب"
+                    className="rounded-lg border border-input bg-background px-3 py-2 text-sm"
+                    dir="ltr"
+                  />
+                  <button
+                    type="button"
+                    onClick={submitLead}
+                    disabled={leadSaving}
+                    className="rounded-lg bg-primary px-4 py-2 text-sm font-bold text-primary-foreground disabled:opacity-60"
+                  >
+                    إرسال الطلب
+                  </button>
+                </div>
+              </div>
+            )}
+
           </section>
         </div>
 
