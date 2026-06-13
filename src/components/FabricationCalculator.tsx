@@ -235,7 +235,7 @@ function ProductConfigurator({
       <button
         type="button"
         onClick={() => {
-          onAdd({ ...cfg, quantity: Math.max(1, cfg.quantity || 1) }, unitPrice);
+          onAdd({ ...cfg, quantity: Math.max(1, cfg.quantity || 1) }, unitPrice, previewImg);
           setAdded(true);
           setTimeout(() => setAdded(false), 1500);
         }}
