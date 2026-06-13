@@ -482,35 +482,108 @@ function ProductsTab({ data }: { data: ReturnType<typeof useFabricationData> }) 
               />
             </div>
 
-            {/* الصور */}
+            {/* الصور الموسومة بالمواصفات */}
             <div>
-              <Label>الصور</Label>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {(edit?.images ?? []).map((url) => (
-                  <div key={url} className="relative h-20 w-20 overflow-hidden rounded-md border">
-                    <img src={url} alt="" className="h-full w-full object-cover" />
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setEdit((p) => {
-                          const images = (p?.images ?? []).filter((u) => u !== url);
-                          return {
-                            ...p,
-                            images,
-                            image_url: p?.image_url === url ? images[0] ?? "" : p?.image_url,
-                          };
-                        })
-                      }
-                      className="absolute right-0 top-0 bg-destructive p-0.5 text-destructive-foreground"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
+              <Label>الصور حسب المواصفات (حتى ١٠ صور)</Label>
+              <p className="mt-1 text-xs text-muted-foreground">
+                لكل صورة حدّد الشروط (نوع الستانلس، السماكة، رف علوي/سفلي، عجلات، عدد الأحواض). تظهر الصورة الأكثر
+                تطابقاً مع اختيار العميل. الصورة بدون شروط تُستخدم كصورة افتراضية.
+              </p>
+              <div className="mt-3 space-y-3">
+                {(edit?.images ?? []).map((img, idx) => (
+                  <div key={img.url} className="flex gap-3 rounded-lg border border-border p-3">
+                    <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-md border">
+                      <img src={img.url} alt="" className="h-full w-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setEdit((p) => {
+                            const images = (p?.images ?? []).filter((_, i) => i !== idx);
+                            return {
+                              ...p,
+                              images,
+                              image_url: p?.image_url === img.url ? images[0]?.url ?? "" : p?.image_url,
+                            };
+                          })
+                        }
+                        className="absolute right-0 top-0 bg-destructive p-0.5 text-destructive-foreground"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                    <div className="grid flex-1 grid-cols-2 gap-2 text-xs sm:grid-cols-3">
+                      <div>
+                        <Label className="text-xs text-muted-foreground">نوع الستانلس</Label>
+                        <select
+                          value={img.tags.grade ?? ""}
+                          onChange={(e) => setImageTag(idx, { grade: e.target.value || undefined })}
+                          className="h-8 w-full rounded-md border border-input bg-background px-2 text-xs"
+                        >
+                          <option value="">أي نوع</option>
+                          {Object.keys(grades).map((g) => (
+                            <option key={g} value={g}>
+                              {g}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <Label className="text-xs text-muted-foreground">السماكة</Label>
+                        <select
+                          value={img.tags.thickness ?? ""}
+                          onChange={(e) => setImageTag(idx, { thickness: e.target.value || undefined })}
+                          className="h-8 w-full rounded-md border border-input bg-background px-2 text-xs"
+                        >
+                          <option value="">أي سماكة</option>
+                          {thicknesses.options.map((t) => (
+                            <option key={t} value={String(t)}>
+                              {t} ملم
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <Label className="text-xs text-muted-foreground">عدد الأحواض</Label>
+                        <select
+                          value={img.tags.bowls ?? ""}
+                          onChange={(e) =>
+                            setImageTag(idx, { bowls: e.target.value ? Number(e.target.value) : undefined })
+                          }
+                          className="h-8 w-full rounded-md border border-input bg-background px-2 text-xs"
+                        >
+                          <option value="">أي عدد</option>
+                          {[1, 2, 3, 4].map((b) => (
+                            <option key={b} value={b}>
+                              {b}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <TriState
+                        label="رف علوي"
+                        value={img.tags.topShelf}
+                        onChange={(v) => setImageTag(idx, { topShelf: v })}
+                      />
+                      <TriState
+                        label="رف سفلي"
+                        value={img.tags.bottomShelf}
+                        onChange={(v) => setImageTag(idx, { bottomShelf: v })}
+                      />
+                      <TriState
+                        label="عجلات"
+                        value={img.tags.wheels}
+                        onChange={(v) => setImageTag(idx, { wheels: v })}
+                      />
+                    </div>
                   </div>
                 ))}
+              </div>
+              <div className="mt-3 flex gap-2">
                 <button
                   type="button"
                   onClick={() => fileRef.current?.click()}
-                  className="flex h-20 w-20 items-center justify-center rounded-md border border-dashed text-muted-foreground"
+                  disabled={(edit?.images?.length ?? 0) >= 10}
+                  className="flex h-20 w-20 items-center justify-center rounded-md border border-dashed text-muted-foreground disabled:opacity-40"
                 >
                   {uploading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Upload className="h-5 w-5" />}
                 </button>
@@ -522,6 +595,7 @@ function ProductsTab({ data }: { data: ReturnType<typeof useFabricationData> }) 
                   onChange={(e) => handleUpload(e.target.files?.[0])}
                 />
               </div>
+            </div>
             </div>
 
             {/* الأسعار */}
