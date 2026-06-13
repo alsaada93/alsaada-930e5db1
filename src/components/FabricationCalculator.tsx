@@ -131,6 +131,7 @@ export function FabricationCalculator({
       {editItem && editProduct && (
         <EditDialog
           product={editProduct}
+          categorySlug={editItem.categorySlug}
           grades={grades}
           thicknesses={thicknesses}
           discountPct={discountPct}
