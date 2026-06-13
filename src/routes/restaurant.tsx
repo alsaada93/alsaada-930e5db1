@@ -27,8 +27,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { logCalcEvent } from "@/hooks/useCalculatorAdmin";
 import { toast } from "sonner";
 
-import { useProjectTypes, useEquipment } from "@/hooks/useRestaurant";
-import type { Equipment } from "@/hooks/useRestaurant";
+import { useProjectTypes, useEquipment, usePackages } from "@/hooks/useRestaurant";
+import type { Equipment, RestaurantPackage } from "@/hooks/useRestaurant";
 import { useFabricationData } from "@/hooks/useFabrication";
 import { FabricationCalculator } from "@/components/FabricationCalculator";
 import { BHD, describeItem, type FabLineItem, type FabProduct } from "@/lib/fabrication";
