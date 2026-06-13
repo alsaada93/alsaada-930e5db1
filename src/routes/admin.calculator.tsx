@@ -37,6 +37,8 @@ import {
   BHD,
   type FabCategory,
   type FabFields,
+  type FabImage,
+  type FabImageTags,
   type FabPricing,
   type FabProduct,
 } from "@/lib/fabrication";
