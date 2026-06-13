@@ -32,10 +32,35 @@ export interface Equipment {
   brand_logo_url: string | null;
   category: string | null;
   price_new: number;
+  price_new_discounted: number | null;
   price_used: number;
+  used_condition: string | null;
   project_type_slugs: string[];
+  tier: string;
+  cost_layer: string;
+  essential: boolean;
+  default_qty: number;
+  specs: Record<string, string>;
+  images: string[];
+  linked_listing_id: string | null;
   active: boolean;
   sort_order: number;
+}
+
+export interface PackageItem {
+  equipment_id: string;
+  qty: number;
+}
+
+export interface RestaurantPackage {
+  id: string;
+  name: string;
+  description: string | null;
+  project_type_slug: string;
+  tier: string;
+  items: PackageItem[];
+  sort_order: number;
+  active: boolean;
 }
 
 const db = supabase as any;
