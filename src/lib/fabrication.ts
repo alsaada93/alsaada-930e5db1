@@ -224,6 +224,8 @@ export interface FabLineItem extends FabConfig {
   categorySlug: string;
   icon: string | null;
   unitPrice: number;
+  /** صورة القطعة المختارة حسب المواصفات (تظهر في قائمة الطباعة/الحفظ) */
+  imageUrl?: string | null;
 }
 
 export function defaultConfig(thicknesses: Thicknesses): FabConfig {
