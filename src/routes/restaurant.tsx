@@ -286,7 +286,7 @@ function RestaurantPage() {
 
   const printGroups = useMemo(() => {
     let index = 1;
-    const items: Array<{ id: number; title: string; desc: string; qty: number; unitPrice: number; total: number }> = [];
+    const items: Array<{ id: number; title: string; desc: string; qty: number; unitPrice: number; total: number; img: string | null }> = [];
     chosen.forEach(({ e, sel }) => {
       const unitPrice = sel.condition === "new" ? e.price_new : e.price_used;
       items.push({
