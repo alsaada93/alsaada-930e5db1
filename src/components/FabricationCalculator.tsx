@@ -290,6 +290,7 @@ function EditDialog({
 /** جسم نموذج التخصيص المشترك (معاينة + حقول) */
 function ConfigBody({
   product,
+  categorySlug,
   grades,
   thicknesses,
   cfg,
@@ -297,6 +298,7 @@ function ConfigBody({
   total,
 }: {
   product: FabProduct;
+  categorySlug: string;
   grades: SteelGrades;
   thicknesses: Thicknesses;
   cfg: FabConfig;
@@ -306,6 +308,7 @@ function ConfigBody({
   const f = product.fields ?? {};
   const set = <K extends keyof FabConfig>(k: K, v: FabConfig[K]) => setCfg((c) => ({ ...c, [k]: v }));
   const maxDrawers = Math.max(1, Math.min(20, Number(f.maxDrawers) || 4));
+  const kind = useMemo(() => resolveKind(f, categorySlug), [f, categorySlug]);
 
   const previewImg = useMemo(() => pickImage(product.images ?? [], cfg, product.image_url), [product, cfg]);
 
@@ -313,7 +316,7 @@ function ConfigBody({
     <div className="lg:flex lg:items-start lg:gap-5">
       {/* العمود الأيسر على سطح المكتب: الرسم ثلاثي الأبعاد ثم الصورة */}
       <div className="mb-4 space-y-3 lg:order-2 lg:mb-0 lg:sticky lg:top-4 lg:w-2/5 lg:shrink-0">
-        <Schematic3D cfg={cfg} fields={f} />
+        <Schematic3D cfg={cfg} fields={f} kind={kind} />
         <div className="flex aspect-[4/3] items-center justify-center overflow-hidden rounded-xl border border-border bg-muted/30">
           {previewImg ? (
             <img src={previewImg} alt={product.name} className="h-full w-full object-cover" />
