@@ -22,6 +22,8 @@ import {
   SIZE_MAX,
   SIZE_MIN,
   BHD,
+  DEFAULT_BOWL,
+  type BowlSize,
   type DrawerSide,
   type FabCategory,
   type FabConfig,
