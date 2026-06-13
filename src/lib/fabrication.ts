@@ -176,6 +176,15 @@ export const DEFAULT_FAB_QUOTE: FabQuote = {
   clientMessage: "مرحباً، نشكر طلبكم. هذا عرض السعر الخاص بكم.",
 };
 
+/** قياس وعمق حوض واحد (سم) */
+export interface BowlSize {
+  width: number;
+  length: number;
+  depth: number;
+}
+
+export const DEFAULT_BOWL: BowlSize = { width: 40, length: 40, depth: 20 };
+
 /** القيم المُدخلة من المستخدم لمنتج معيّن */
 export interface FabConfig {
   length: number;
@@ -184,6 +193,10 @@ export interface FabConfig {
   shelves: number;
   tiers: number;
   bowls: number;
+  /** جهة الحوض عند وجود حوض واحد: يمين / يسار / وسط */
+  bowlSide: DrawerSide;
+  /** قياس وعمق كل حوض على حدة */
+  bowlSizes: BowlSize[];
   topShelf: boolean;
   bottomShelf: boolean;
   wheels: boolean;
