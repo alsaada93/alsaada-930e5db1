@@ -99,6 +99,7 @@ function RestaurantPage() {
   const [projectId, setProjectId] = useState<string | null>(null);
   const [savedProjects, setSavedProjects] = useState<SavedProject[]>([]);
   const [showProjects, setShowProjects] = useState(false);
+  const [activeTab, setActiveTab] = useState<"projects" | "fabrication">("fabrication");
 
   // بيانات عرض السعر (تُحسب في المتصفح لتجنّب اختلاف SSR)
   const [quoteMeta, setQuoteMeta] = useState<{ no: string; date: string }>({ no: "------", date: "" });
