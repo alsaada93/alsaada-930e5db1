@@ -193,6 +193,10 @@ export interface FabConfig {
   drawers: number;
   /** جهة الأدراج */
   drawerSide: DrawerSide;
+  /** حواجز جانبية وخلفية */
+  backGuard: boolean;
+  rightGuard: boolean;
+  leftGuard: boolean;
   grade: string;
   thickness: string;
   quantity: number;
