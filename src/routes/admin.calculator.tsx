@@ -687,6 +687,35 @@ function ProductsTab({ data }: { data: ReturnType<typeof useFabricationData> }) 
   );
 }
 
+/** اختيار ثلاثي للوسوم: غير محدد / نعم / لا */
+function TriState({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value?: boolean;
+  onChange: (v: boolean | undefined) => void;
+}) {
+  const current = value === undefined ? "" : value ? "yes" : "no";
+  return (
+    <div>
+      <Label className="text-xs text-muted-foreground">{label}</Label>
+      <select
+        value={current}
+        onChange={(e) => onChange(e.target.value === "" ? undefined : e.target.value === "yes")}
+        className="h-8 w-full rounded-md border border-input bg-background px-2 text-xs"
+      >
+        <option value="">غير محدد</option>
+        <option value="yes">نعم</option>
+        <option value="no">لا</option>
+      </select>
+    </div>
+  );
+}
+
+
+
 /* ============================ الإعدادات العامة ============================ */
 
 function SettingsTab({ data }: { data: ReturnType<typeof useFabricationData> }) {
