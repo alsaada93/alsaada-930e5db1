@@ -203,6 +203,7 @@ function ProductConfigurator({
     [product, cfg, grades, thicknesses, discountPct],
   );
   const total = unitPrice * Math.max(1, cfg.quantity || 1);
+  const previewImg = useMemo(() => pickImage(product.images ?? [], cfg, product.image_url), [product, cfg]);
 
   return (
     <div className="rounded-2xl border border-border bg-card p-4">
