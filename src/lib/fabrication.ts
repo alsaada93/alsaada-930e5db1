@@ -306,7 +306,18 @@ export function describeItem(item: FabLineItem, product?: FabProduct): string {
   }
   if (f.grade) parts.push(`ستانلس ${item.grade}`);
   if (f.thickness) parts.push(`سماكة ${item.thickness} ملم`);
-  if (f.bowls) parts.push(`${item.bowls} حوض`);
+  if (f.bowls) {
+    if (item.bowls === 1) {
+      const side = item.bowlSide === "left" ? "يسار" : item.bowlSide === "center" ? "وسط" : "يمين";
+      parts.push(`حوض واحد (${side})`);
+    } else {
+      parts.push(`${item.bowls} حوض`);
+    }
+    const sizes = item.bowlSizes ?? [];
+    sizes.slice(0, item.bowls).forEach((b, i) => {
+      if (b) parts.push(`${sizes.length > 1 ? `حوض ${i + 1}: ` : "قياس الحوض: "}${b.width}×${b.length}×عمق ${b.depth} سم`);
+    });
+  }
   if (f.shelves) parts.push(`${item.shelves} رف`);
   if (f.tiers) parts.push(`${item.tiers} دور`);
   if (f.topShelf && item.topShelf) parts.push(item.shelfPosition === "middle" ? "رف وسطي" : "رف علوي");
