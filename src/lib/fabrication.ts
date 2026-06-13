@@ -33,11 +33,19 @@ export interface FabFields {
   topShelf?: boolean;
   bottomShelf?: boolean;
   wheels?: boolean;
+  drawers?: boolean;
+  /** الحد الأقصى لعدد الأدراج (يحدده المسؤول من لوحة التحكم) */
+  maxDrawers?: number;
   grade?: boolean;
   thickness?: boolean;
   quantity?: boolean;
   notes?: boolean;
 }
+
+/** موضع الرف القابل للتعديل (علوي أو وسطي) */
+export type ShelfPosition = "top" | "middle";
+/** جهة الأدراج */
+export type DrawerSide = "right" | "left" | "center";
 
 /** إعدادات تسعير الإضافات لكل منتج */
 export interface FabPricing {
@@ -48,6 +56,7 @@ export interface FabPricing {
     extraBowl?: number;
     perShelf?: number;
     perTier?: number;
+    perDrawer?: number;
   };
 }
 
@@ -135,6 +144,12 @@ export interface FabConfig {
   topShelf: boolean;
   bottomShelf: boolean;
   wheels: boolean;
+  /** موضع الرف القابل للتعديل: علوي أو وسطي */
+  shelfPosition: ShelfPosition;
+  /** عدد الأدراج */
+  drawers: number;
+  /** جهة الأدراج */
+  drawerSide: DrawerSide;
   grade: string;
   thickness: string;
   quantity: number;
@@ -162,6 +177,9 @@ export function defaultConfig(thicknesses: Thicknesses): FabConfig {
     topShelf: false,
     bottomShelf: false,
     wheels: false,
+    shelfPosition: "top",
+    drawers: 0,
+    drawerSide: "right",
     grade: "201",
     thickness: String(thicknesses.default ?? 1),
     quantity: 1,
@@ -195,6 +213,7 @@ export function calcUnitPrice(
   if (f.bowls && extras.extraBowl) unit += Math.max(0, (cfg.bowls || 1) - 1) * extras.extraBowl;
   if (f.shelves && extras.perShelf) unit += Math.max(0, cfg.shelves || 0) * extras.perShelf;
   if (f.tiers && extras.perTier) unit += Math.max(0, cfg.tiers || 0) * extras.perTier;
+  if (f.drawers && extras.perDrawer) unit += Math.max(0, cfg.drawers || 0) * extras.perDrawer;
 
   return Math.round(unit * 100) / 100;
 }
@@ -222,9 +241,13 @@ export function describeItem(item: FabLineItem, product?: FabProduct): string {
   if (f.bowls) parts.push(`${item.bowls} حوض`);
   if (f.shelves) parts.push(`${item.shelves} رف`);
   if (f.tiers) parts.push(`${item.tiers} دور`);
-  if (f.topShelf && item.topShelf) parts.push("رف علوي");
+  if (f.topShelf && item.topShelf) parts.push(item.shelfPosition === "middle" ? "رف وسطي" : "رف علوي");
   if (f.bottomShelf && item.bottomShelf) parts.push("رف سفلي");
   if (f.wheels && item.wheels) parts.push("عجلات");
+  if (f.drawers && item.drawers > 0) {
+    const side = item.drawerSide === "left" ? "يسار" : item.drawerSide === "center" ? "وسط" : "يمين";
+    parts.push(`${item.drawers} درج (${side})`);
+  }
   if (item.notes) parts.push(`ملاحظة: ${item.notes}`);
   return parts.join(" | ");
 }

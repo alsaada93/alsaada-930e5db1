@@ -263,9 +263,10 @@ const FIELD_LABELS: { key: keyof FabFields; label: string }[] = [
   { key: "shelves", label: "عدد الأرفف" },
   { key: "tiers", label: "عدد الأدوار" },
   { key: "bowls", label: "عدد الأحواض" },
-  { key: "topShelf", label: "رف علوي" },
+  { key: "topShelf", label: "رف إضافي (علوي/وسطي)" },
   { key: "bottomShelf", label: "رف سفلي" },
   { key: "wheels", label: "عجلات" },
+  { key: "drawers", label: "أدراج" },
   { key: "grade", label: "نوع الستانلس" },
   { key: "thickness", label: "السماكة" },
   { key: "quantity", label: "الكمية" },
@@ -273,12 +274,13 @@ const FIELD_LABELS: { key: keyof FabFields; label: string }[] = [
 ];
 
 const EXTRA_LABELS: { key: keyof NonNullable<FabPricing["extras"]>; label: string }[] = [
-  { key: "topShelf", label: "سعر الرف العلوي" },
+  { key: "topShelf", label: "سعر الرف الإضافي" },
   { key: "bottomShelf", label: "سعر الرف السفلي" },
   { key: "wheels", label: "سعر العجلات" },
   { key: "extraBowl", label: "سعر الحوض الإضافي" },
   { key: "perShelf", label: "سعر كل رف" },
   { key: "perTier", label: "سعر كل دور" },
+  { key: "perDrawer", label: "سعر كل درج" },
 ];
 
 function ProductsTab({ data }: { data: ReturnType<typeof useFabricationData> }) {
@@ -637,6 +639,23 @@ function ProductsTab({ data }: { data: ReturnType<typeof useFabricationData> }) 
                   </label>
                 ))}
               </div>
+              {edit?.fields?.drawers && (
+                <div className="mt-3 max-w-xs">
+                  <Label className="text-xs text-muted-foreground">الحد الأقصى لعدد الأدراج</Label>
+                  <Input
+                    type="number"
+                    min={1}
+                    max={20}
+                    value={Number(edit?.fields?.maxDrawers) || 4}
+                    onChange={(e) =>
+                      setEdit((p) => ({
+                        ...p,
+                        fields: { ...(p?.fields ?? {}), maxDrawers: Math.max(1, Math.min(20, Number(e.target.value) || 1)) },
+                      }))
+                    }
+                  />
+                </div>
+              )}
             </div>
 
             {/* أسعار الإضافات */}

@@ -10,7 +10,7 @@ import {
   Settings2,
   Plus,
   Minus,
-  X,
+  Check,
   Ruler,
 } from "lucide-react";
 import {
@@ -21,11 +21,13 @@ import {
   SIZE_MAX,
   SIZE_MIN,
   BHD,
+  type DrawerSide,
   type FabCategory,
   type FabConfig,
   type FabFields,
   type FabLineItem,
   type FabProduct,
+  type ShelfPosition,
   type SteelGrades,
   type Thicknesses,
 } from "@/lib/fabrication";
@@ -69,176 +71,118 @@ export function FabricationCalculator({
   onEditSave,
   onEditCancel,
 }: Props) {
-  const [activeCat, setActiveCat] = useState<string | null>(categories[0]?.slug ?? null);
-  const [dialogProduct, setDialogProduct] = useState<FabProduct | null>(null);
-
-  useEffect(() => {
-    if (!activeCat && categories[0]) setActiveCat(categories[0].slug);
-  }, [categories, activeCat]);
-
   const editProduct = useMemo(
     () => (editItem ? products.find((p) => p.id === editItem.productId) ?? null : null),
     [editItem, products],
   );
 
-  const visibleProducts = useMemo(() => {
-    const cat = categories.find((c) => c.slug === activeCat);
-    if (!cat) return [];
-    return products.filter((p) => p.category_id === cat.id);
-  }, [products, categories, activeCat]);
+  const sortedCats = useMemo(
+    () => [...categories].sort((a, b) => a.sort_order - b.sort_order),
+    [categories],
+  );
 
   return (
     <section className="mt-10">
       <h2 className="mb-1 text-lg font-bold">حاسبة تفصيل الستانلس ستيل</h2>
-      <p className="mb-4 text-sm text-muted-foreground">
-        اختر النوع ثم القطعة، وحدّد المقاسات والخيارات ليُحسب السعر مباشرة ويُضاف إلى مشروعك.
+      <p className="mb-6 text-sm text-muted-foreground">
+        جميع الأصناف معروضة في صفحة واحدة. حدّد المقاسات والخيارات لكل قطعة ويتغيّر الرسم ثلاثي الأبعاد والسعر مباشرة.
       </p>
 
-      {/* تبويبات الفئات */}
-      <div className="mb-5 flex flex-wrap gap-2">
-        {categories.map((c) => {
-          const Icon = ICONS[c.icon ?? ""] ?? Settings2;
-          const active = activeCat === c.slug;
-          return (
-            <button
-              key={c.id}
-              type="button"
-              onClick={() => setActiveCat(c.slug)}
-              className={`flex items-center gap-2 rounded-xl border px-3 py-2 text-sm font-bold transition-colors ${
-                active ? "border-primary bg-primary/10 text-primary" : "border-border hover:border-primary/50"
-              }`}
-            >
-              <Icon className="h-4 w-4" />
-              {c.name}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* شبكة المنتجات */}
-      {visibleProducts.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-border p-6 text-center text-muted-foreground">
-          لا توجد منتجات في هذه الفئة بعد. يمكن للإدارة إضافتها من لوحة التحكم.
-        </p>
-      ) : (
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {visibleProducts.map((p) => {
-            const Icon = ICONS[p.icon ?? ""] ?? Settings2;
-            return (
-              <button
-                key={p.id}
-                type="button"
-                onClick={() => setDialogProduct(p)}
-                className="flex items-start gap-3 rounded-2xl border border-border p-4 text-right transition-colors hover:border-primary/60 hover:bg-primary/5"
-              >
-                {p.image_url ? (
-                  <img
-                    src={p.image_url}
-                    alt={p.name}
-                    loading="lazy"
-                    className="h-14 w-14 shrink-0 rounded-lg border object-cover"
-                  />
-                ) : (
-                  <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                    <Icon className="h-6 w-6" />
-                  </span>
-                )}
-                <span className="flex flex-col">
-                  <span className="font-bold leading-tight">{p.name}</span>
-                  {p.description && (
-                    <span className="mt-1 line-clamp-2 text-xs text-muted-foreground">{p.description}</span>
-                  )}
-                  <span className="mt-2 inline-flex items-center gap-1 text-xs font-bold text-primary">
-                    <Plus className="h-3.5 w-3.5" /> تخصيص وإضافة
-                  </span>
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      )}
-
-      {/* نافذة تخصيص منتج جديد */}
-      {dialogProduct && (
-        <ConfigDialog
-          product={dialogProduct}
-          grades={grades}
-          thicknesses={thicknesses}
-          discountPct={discountPct}
-          onClose={() => setDialogProduct(null)}
-          onSubmit={(cfg, unitPrice) => {
-            onAdd({
-              ...cfg,
-              uid: newUid(),
-              productId: dialogProduct.id,
-              productName: dialogProduct.name,
-              categorySlug: categories.find((c) => c.id === dialogProduct.category_id)?.slug ?? "",
-              icon: dialogProduct.icon,
-              unitPrice,
-            });
-            setDialogProduct(null);
-          }}
-        />
-      )}
+      {sortedCats.map((cat) => {
+        const Icon = ICONS[cat.icon ?? ""] ?? Settings2;
+        const catProducts = products
+          .filter((p) => p.category_id === cat.id)
+          .sort((a, b) => a.sort_order - b.sort_order);
+        if (catProducts.length === 0) return null;
+        return (
+          <div key={cat.id} className="mb-10">
+            <div className="mb-4 flex items-center gap-2 border-b border-border pb-2">
+              <Icon className="h-5 w-5 text-primary" />
+              <h3 className="text-base font-bold">{cat.name}</h3>
+            </div>
+            <div className="grid gap-5 lg:grid-cols-2">
+              {catProducts.map((p) => (
+                <ProductConfigurator
+                  key={p.id}
+                  product={p}
+                  grades={grades}
+                  thicknesses={thicknesses}
+                  discountPct={discountPct}
+                  onAdd={(cfg, unitPrice) =>
+                    onAdd({
+                      ...cfg,
+                      uid: newUid(),
+                      productId: p.id,
+                      productName: p.name,
+                      categorySlug: cat.slug,
+                      icon: p.icon,
+                      unitPrice,
+                    })
+                  }
+                />
+              ))}
+            </div>
+          </div>
+        );
+      })}
 
       {/* نافذة تعديل عنصر قائم */}
       {editItem && editProduct && (
-        <ConfigDialog
+        <EditDialog
           product={editProduct}
           grades={grades}
           thicknesses={thicknesses}
           discountPct={discountPct}
           initial={editItem}
           onClose={onEditCancel}
-          onSubmit={(cfg, unitPrice) => onEditSave({ ...editItem, ...cfg, unitPrice })}
+          onSave={(cfg, unitPrice) => onEditSave({ ...editItem, ...cfg, unitPrice })}
         />
       )}
     </section>
   );
 }
 
-function ConfigDialog({
+function configFromItem(item: FabLineItem): FabConfig {
+  return {
+    length: item.length,
+    width: item.width,
+    height: item.height,
+    shelves: item.shelves,
+    tiers: item.tiers,
+    bowls: item.bowls,
+    topShelf: item.topShelf,
+    bottomShelf: item.bottomShelf,
+    wheels: item.wheels,
+    shelfPosition: item.shelfPosition ?? "top",
+    drawers: item.drawers ?? 0,
+    drawerSide: item.drawerSide ?? "right",
+    grade: item.grade,
+    thickness: item.thickness,
+    quantity: item.quantity,
+    notes: item.notes,
+  };
+}
+
+/** لوحة تخصيص منتج داخل الصفحة مباشرة (بدون نافذة منبثقة) */
+function ProductConfigurator({
   product,
   grades,
   thicknesses,
   discountPct,
-  initial,
-  onClose,
-  onSubmit,
+  onAdd,
 }: {
   product: FabProduct;
   grades: SteelGrades;
   thicknesses: Thicknesses;
   discountPct: number;
-  initial?: FabLineItem;
-  onClose: () => void;
-  onSubmit: (cfg: FabConfig, unitPrice: number) => void;
+  onAdd: (cfg: FabConfig, unitPrice: number) => void;
 }) {
-  const f = product.fields ?? {};
   const [cfg, setCfg] = useState<FabConfig>(() => {
     const base = defaultConfig(thicknesses);
-    if (initial) {
-      return {
-        length: initial.length,
-        width: initial.width,
-        height: initial.height,
-        shelves: initial.shelves,
-        tiers: initial.tiers,
-        bowls: initial.bowls,
-        topShelf: initial.topShelf,
-        bottomShelf: initial.bottomShelf,
-        wheels: initial.wheels,
-        grade: initial.grade,
-        thickness: initial.thickness,
-        quantity: initial.quantity,
-        notes: initial.notes,
-      };
-    }
     const gradeKeys = Object.keys(grades);
     return { ...base, grade: gradeKeys.includes(base.grade) ? base.grade : gradeKeys[0] ?? base.grade };
   });
-
-  const set = <K extends keyof FabConfig>(k: K, v: FabConfig[K]) => setCfg((c) => ({ ...c, [k]: v }));
+  const [added, setAdded] = useState(false);
 
   const unitPrice = useMemo(
     () => applyDiscount(calcUnitPrice(product, cfg, grades, thicknesses), discountPct),
@@ -246,139 +190,220 @@ function ConfigDialog({
   );
   const total = unitPrice * Math.max(1, cfg.quantity || 1);
 
-  const previewImg = useMemo(
-    () => pickImage(product.images ?? [], cfg, product.image_url),
-    [product, cfg],
+  return (
+    <div className="rounded-2xl border border-border bg-card p-4">
+      <div className="mb-3 flex items-center gap-3">
+        {product.image_url ? (
+          <img src={product.image_url} alt={product.name} loading="lazy" className="h-12 w-12 shrink-0 rounded-lg border object-cover" />
+        ) : (
+          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+            <Settings2 className="h-5 w-5" />
+          </span>
+        )}
+        <div>
+          <div className="font-bold leading-tight">{product.name}</div>
+          {product.description && <div className="line-clamp-1 text-xs text-muted-foreground">{product.description}</div>}
+        </div>
+      </div>
+
+      <ConfigBody
+        product={product}
+        grades={grades}
+        thicknesses={thicknesses}
+        cfg={cfg}
+        setCfg={setCfg}
+        total={total}
+      />
+
+      <button
+        type="button"
+        onClick={() => {
+          onAdd({ ...cfg, quantity: Math.max(1, cfg.quantity || 1) }, unitPrice);
+          setAdded(true);
+          setTimeout(() => setAdded(false), 1500);
+        }}
+        className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-2.5 font-bold text-primary-foreground transition-colors"
+      >
+        {added ? <><Check className="h-5 w-5" /> أُضيف للمشروع</> : <><Plus className="h-5 w-5" /> إضافة إلى المشروع</>}
+      </button>
+    </div>
   );
+}
+
+function EditDialog({
+  product,
+  grades,
+  thicknesses,
+  discountPct,
+  initial,
+  onClose,
+  onSave,
+}: {
+  product: FabProduct;
+  grades: SteelGrades;
+  thicknesses: Thicknesses;
+  discountPct: number;
+  initial: FabLineItem;
+  onClose: () => void;
+  onSave: (cfg: FabConfig, unitPrice: number) => void;
+}) {
+  const [cfg, setCfg] = useState<FabConfig>(() => configFromItem(initial));
+  const unitPrice = useMemo(
+    () => applyDiscount(calcUnitPrice(product, cfg, grades, thicknesses), discountPct),
+    [product, cfg, grades, thicknesses, discountPct],
+  );
+  const total = unitPrice * Math.max(1, cfg.quantity || 1);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
-      <div
-        className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-card p-5 shadow-xl"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-lg font-bold">{product.name}</h3>
-          <button onClick={onClose} aria-label="إغلاق" className="rounded-lg p-1 hover:bg-muted">
-            <X className="h-5 w-5" />
+      <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-card p-5 shadow-xl" onClick={(e) => e.stopPropagation()}>
+        <h3 className="mb-4 text-lg font-bold">تعديل: {product.name}</h3>
+        <ConfigBody product={product} grades={grades} thicknesses={thicknesses} cfg={cfg} setCfg={setCfg} total={total} />
+        <div className="mt-5 flex gap-2">
+          <button type="button" onClick={onClose} className="flex-1 rounded-xl border border-border py-2.5 font-bold">
+            إلغاء
+          </button>
+          <button
+            type="button"
+            onClick={() => onSave({ ...cfg, quantity: Math.max(1, cfg.quantity || 1) }, unitPrice)}
+            className="flex-1 rounded-xl bg-primary py-2.5 font-bold text-primary-foreground"
+          >
+            حفظ التعديل
           </button>
         </div>
-
-        {/* معاينة: صورة موسومة حسب المواصفات + رسم يتغيّر مع المقاس */}
-        <div className="mb-4 grid grid-cols-2 gap-3">
-          <div className="flex aspect-[4/3] items-center justify-center overflow-hidden rounded-xl border border-border bg-muted/30">
-            {previewImg ? (
-              <img src={previewImg} alt={product.name} className="h-full w-full object-cover" />
-            ) : (
-              <span className="text-xs text-muted-foreground">لا توجد صورة</span>
-            )}
-          </div>
-          <Schematic cfg={cfg} fields={f} />
-        </div>
-
-
-
-        <div className="grid grid-cols-2 gap-4">
-          {f.length && <Num label="الطول (سم)" value={cfg.length} onChange={(n) => set("length", n)} />}
-          {f.width && <Num label="العرض (سم)" value={cfg.width} onChange={(n) => set("width", n)} />}
-          {f.height && <Num label="الارتفاع (سم)" value={cfg.height} onChange={(n) => set("height", n)} />}
-          {f.shelves && <Num label="عدد الأرفف" value={cfg.shelves} onChange={(n) => set("shelves", n)} min={0} max={20} />}
-          {f.tiers && <Num label="عدد الأدوار" value={cfg.tiers} onChange={(n) => set("tiers", n)} min={1} max={10} />}
-          {f.bowls && <Num label="عدد الأحواض" value={cfg.bowls} onChange={(n) => set("bowls", n)} min={1} max={6} />}
-
-          {f.grade && (
-            <Field label="نوع الستانلس">
-              <select
-                value={cfg.grade}
-                onChange={(e) => set("grade", e.target.value)}
-                className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm font-bold"
-              >
-                {Object.keys(grades).map((g) => (
-                  <option key={g} value={g}>
-                    {g}
-                  </option>
-                ))}
-              </select>
-            </Field>
-          )}
-          {f.thickness && (
-            <Field label="السماكة (ملم)">
-              <select
-                value={cfg.thickness}
-                onChange={(e) => set("thickness", e.target.value)}
-                className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm font-bold"
-              >
-                {thicknesses.options.map((t) => (
-                  <option key={t} value={String(t)}>
-                    {t}
-                  </option>
-                ))}
-              </select>
-            </Field>
-          )}
-        </div>
-
-        {(f.topShelf || f.bottomShelf || f.wheels) && (
-          <div className="mt-4 flex flex-wrap gap-2">
-            {f.topShelf && <Toggle label="رف علوي" on={cfg.topShelf} onClick={() => set("topShelf", !cfg.topShelf)} />}
-            {f.bottomShelf && (
-              <Toggle label="رف سفلي" on={cfg.bottomShelf} onClick={() => set("bottomShelf", !cfg.bottomShelf)} />
-            )}
-            {f.wheels && <Toggle label="عجلات متحركة" on={cfg.wheels} onClick={() => set("wheels", !cfg.wheels)} />}
-          </div>
-        )}
-
-        {f.notes && (
-          <div className="mt-4">
-            <label className="mb-1.5 block text-sm font-bold text-muted-foreground">ملاحظات</label>
-            <textarea
-              value={cfg.notes}
-              onChange={(e) => set("notes", e.target.value)}
-              className="w-full rounded-lg border border-input bg-background p-2 text-sm"
-              rows={2}
-              placeholder="أي تفاصيل إضافية..."
-            />
-          </div>
-        )}
-
-        <div className="mt-5 flex items-center justify-between">
-          {f.quantity ? (
-            <div className="flex items-center gap-3">
-              <span className="text-sm font-bold text-muted-foreground">الكمية</span>
-              <button
-                type="button"
-                onClick={() => set("quantity", Math.max(1, cfg.quantity - 1))}
-                className="rounded-lg border border-border p-2 hover:bg-muted"
-              >
-                <Minus className="h-4 w-4" />
-              </button>
-              <span className="w-8 text-center font-bold">{cfg.quantity}</span>
-              <button
-                type="button"
-                onClick={() => set("quantity", Math.min(99, cfg.quantity + 1))}
-                className="rounded-lg border border-border p-2 hover:bg-muted"
-              >
-                <Plus className="h-4 w-4" />
-              </button>
-            </div>
-          ) : (
-            <span />
-          )}
-          <div className="text-left">
-            <div className="text-xs text-muted-foreground">السعر التقديري</div>
-            <div className="text-2xl font-extrabold text-primary">{BHD(total)}</div>
-          </div>
-        </div>
-
-        <button
-          type="button"
-          onClick={() => onSubmit({ ...cfg, quantity: Math.max(1, cfg.quantity || 1) }, unitPrice)}
-          className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3 font-bold text-primary-foreground"
-        >
-          <Plus className="h-5 w-5" /> {initial ? "حفظ التعديل" : "إضافة إلى المشروع"}
-        </button>
       </div>
     </div>
+  );
+}
+
+/** جسم نموذج التخصيص المشترك (معاينة + حقول) */
+function ConfigBody({
+  product,
+  grades,
+  thicknesses,
+  cfg,
+  setCfg,
+  total,
+}: {
+  product: FabProduct;
+  grades: SteelGrades;
+  thicknesses: Thicknesses;
+  cfg: FabConfig;
+  setCfg: React.Dispatch<React.SetStateAction<FabConfig>>;
+  total: number;
+}) {
+  const f = product.fields ?? {};
+  const set = <K extends keyof FabConfig>(k: K, v: FabConfig[K]) => setCfg((c) => ({ ...c, [k]: v }));
+  const maxDrawers = Math.max(1, Math.min(20, Number(f.maxDrawers) || 4));
+
+  const previewImg = useMemo(() => pickImage(product.images ?? [], cfg, product.image_url), [product, cfg]);
+
+  return (
+    <>
+      {/* معاينة: صورة موسومة + رسم ثلاثي الأبعاد */}
+      <div className="mb-4 grid grid-cols-2 gap-3">
+        <div className="flex aspect-[4/3] items-center justify-center overflow-hidden rounded-xl border border-border bg-muted/30">
+          {previewImg ? (
+            <img src={previewImg} alt={product.name} className="h-full w-full object-cover" />
+          ) : (
+            <span className="text-xs text-muted-foreground">لا توجد صورة</span>
+          )}
+        </div>
+        <Schematic3D cfg={cfg} fields={f} />
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        {f.length && <Num label="الطول (سم)" value={cfg.length} onChange={(n) => set("length", n)} />}
+        {f.width && <Num label="العرض (سم)" value={cfg.width} onChange={(n) => set("width", n)} />}
+        {f.height && <Num label="الارتفاع (سم)" value={cfg.height} onChange={(n) => set("height", n)} />}
+        {f.shelves && <Num label="عدد الأرفف" value={cfg.shelves} onChange={(n) => set("shelves", n)} min={0} max={20} />}
+        {f.tiers && <Num label="عدد الأدوار" value={cfg.tiers} onChange={(n) => set("tiers", n)} min={1} max={10} />}
+        {f.bowls && <Num label="عدد الأحواض" value={cfg.bowls} onChange={(n) => set("bowls", n)} min={1} max={6} />}
+
+        {f.grade && (
+          <Field label="نوع الستانلس">
+            <select value={cfg.grade} onChange={(e) => set("grade", e.target.value)} className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm font-bold">
+              {Object.keys(grades).map((g) => (
+                <option key={g} value={g}>{g}</option>
+              ))}
+            </select>
+          </Field>
+        )}
+        {f.thickness && (
+          <Field label="السماكة (ملم)">
+            <select value={cfg.thickness} onChange={(e) => set("thickness", e.target.value)} className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm font-bold">
+              {thicknesses.options.map((t) => (
+                <option key={t} value={String(t)}>{t}</option>
+              ))}
+            </select>
+          </Field>
+        )}
+      </div>
+
+      {/* الأدراج */}
+      {f.drawers && (
+        <div className="mt-4 grid grid-cols-2 gap-4">
+          <Num label={`عدد الأدراج (حد أقصى ${maxDrawers})`} value={cfg.drawers} onChange={(n) => set("drawers", n)} min={0} max={maxDrawers} />
+          {cfg.drawers > 0 && (
+            <Field label="جهة الأدراج">
+              <select value={cfg.drawerSide} onChange={(e) => set("drawerSide", e.target.value as DrawerSide)} className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm font-bold">
+                <option value="right">يمين</option>
+                <option value="center">وسط</option>
+                <option value="left">يسار</option>
+              </select>
+            </Field>
+          )}
+        </div>
+      )}
+
+      {/* الأرفف والعجلات */}
+      {(f.topShelf || f.bottomShelf || f.wheels) && (
+        <div className="mt-4 flex flex-wrap gap-2">
+          {f.topShelf && <Toggle label="رف إضافي" on={cfg.topShelf} onClick={() => set("topShelf", !cfg.topShelf)} />}
+          {f.bottomShelf && <Toggle label="رف سفلي" on={cfg.bottomShelf} onClick={() => set("bottomShelf", !cfg.bottomShelf)} />}
+          {f.wheels && <Toggle label="عجلات متحركة" on={cfg.wheels} onClick={() => set("wheels", !cfg.wheels)} />}
+        </div>
+      )}
+
+      {/* موضع الرف الإضافي: علوي أو وسطي */}
+      {f.topShelf && cfg.topShelf && (
+        <div className="mt-3">
+          <div className="mb-1.5 text-sm font-bold text-muted-foreground">موضع الرف الإضافي</div>
+          <div className="flex gap-2">
+            <Toggle label="علوي" on={cfg.shelfPosition === "top"} onClick={() => set("shelfPosition", "top" as ShelfPosition)} />
+            <Toggle label="وسطي" on={cfg.shelfPosition === "middle"} onClick={() => set("shelfPosition", "middle" as ShelfPosition)} />
+          </div>
+        </div>
+      )}
+
+      {f.notes && (
+        <div className="mt-4">
+          <label className="mb-1.5 block text-sm font-bold text-muted-foreground">ملاحظات</label>
+          <textarea value={cfg.notes} onChange={(e) => set("notes", e.target.value)} className="w-full rounded-lg border border-input bg-background p-2 text-sm" rows={2} placeholder="أي تفاصيل إضافية..." />
+        </div>
+      )}
+
+      <div className="mt-4 flex items-center justify-between">
+        {f.quantity ? (
+          <div className="flex items-center gap-3">
+            <span className="text-sm font-bold text-muted-foreground">الكمية</span>
+            <button type="button" onClick={() => set("quantity", Math.max(1, cfg.quantity - 1))} className="rounded-lg border border-border p-2 hover:bg-muted">
+              <Minus className="h-4 w-4" />
+            </button>
+            <span className="w-8 text-center font-bold">{cfg.quantity}</span>
+            <button type="button" onClick={() => set("quantity", Math.min(99, cfg.quantity + 1))} className="rounded-lg border border-border p-2 hover:bg-muted">
+              <Plus className="h-4 w-4" />
+            </button>
+          </div>
+        ) : (
+          <span />
+        )}
+        <div className="text-left">
+          <div className="text-xs text-muted-foreground">السعر التقديري</div>
+          <div className="text-2xl font-extrabold text-primary">{BHD(total)}</div>
+        </div>
+      </div>
+    </>
   );
 }
 
@@ -436,60 +461,135 @@ function Toggle({ label, on, onClick }: { label: string; on: boolean; onClick: (
   );
 }
 
-/** رسم تخطيطي يتغيّر تلقائياً حسب المقاسات المُدخلة */
-function Schematic({ cfg, fields }: { cfg: FabConfig; fields: FabFields }) {
-  const W = 200;
-  const H = 150;
-  const pad = 30;
-  const L = fields.length ? Math.max(1, cfg.length || 0) : 100;
-  const Hh = fields.height ? Math.max(1, cfg.height || 0) : 85;
-  const maxDim = Math.max(L, Hh, 1);
-  const rectW = (L / maxDim) * (W - pad * 2);
-  const rectH = (Hh / maxDim) * (H - pad * 2);
-  const x = (W - rectW) / 2;
-  const y = H - pad - rectH;
-  const showHeight = fields.height;
+/**
+ * رسم ثلاثي الأبعاد (إسقاط متساوي القياس) يتغيّر حسب المقاسات والخيارات:
+ * يعرض الجسم، الأرجل، العجلات، الرف العلوي/الوسطي، الرف السفلي والأدراج.
+ */
+function Schematic3D({ cfg, fields }: { cfg: FabConfig; fields: FabFields }) {
+  const VBW = 220;
+  const VBH = 180;
+
+  // أبعاد منطقية مُطبّعة إلى وحدات الرسم
+  const Lraw = fields.length ? Math.max(1, cfg.length || 0) : 100;
+  const Wraw = fields.width ? Math.max(1, cfg.width || 0) : 60;
+  const Hraw = fields.height ? Math.max(1, cfg.height || 0) : 85;
+  const maxDim = Math.max(Lraw, Wraw, Hraw, 1);
+  const bw = 30 + (Lraw / maxDim) * 90; // عرض الواجهة
+  const bd = 18 + (Wraw / maxDim) * 50; // العمق (depth)
+  const bh = 24 + (Hraw / maxDim) * 70; // ارتفاع الجسم
+  const legH = fields.height ? 18 + (Hraw / maxDim) * 22 : 0;
+
+  // زاوية الإسقاط المتساوي
+  const dx = bd * 0.7;
+  const dy = -bd * 0.4;
+
+  // نقطة أصل أمامية-سفلية-يسرى
+  const ox = 55;
+  const oy = 135 - legH;
+
   const showWheels = fields.wheels && cfg.wheels;
-  const showTop = fields.topShelf && cfg.topShelf;
+  const showShelf = fields.topShelf && cfg.topShelf;
+  const shelfMiddle = cfg.shelfPosition === "middle";
   const showBottom = fields.bottomShelf && cfg.bottomShelf;
+  const drawers = fields.drawers ? Math.max(0, cfg.drawers || 0) : 0;
+
+  // إحداثيات صندوق الجسم (واجهة + سطح + جانب)
+  const fTL = [ox, oy - bh];
+  const fTR = [ox + bw, oy - bh];
+  const fBR = [ox + bw, oy];
+  const fBL = [ox, oy];
+  const tTL = [ox + dx, oy - bh + dy];
+  const tTR = [ox + bw + dx, oy - bh + dy];
+  const tBR = [ox + bw + dx, oy + dy];
+
+  const pt = (p: number[]) => `${p[0]},${p[1]}`;
+
+  // أدراج: مستطيلات على الواجهة حسب الجهة
+  const drawerEls = [];
+  if (drawers > 0) {
+    const colW = bw * 0.34;
+    const dxPos =
+      cfg.drawerSide === "left" ? ox + 4 : cfg.drawerSide === "center" ? ox + (bw - colW) / 2 : ox + bw - colW - 4;
+    const gap = 3;
+    const dh = (bh - gap * (drawers + 1)) / drawers;
+    for (let i = 0; i < drawers; i++) {
+      const dyTop = oy - bh + gap + i * (dh + gap);
+      drawerEls.push(
+        <g key={i}>
+          <rect x={dxPos} y={dyTop} width={colW} height={Math.max(3, dh)} rx="1.5" className="fill-background stroke-primary" strokeWidth="1.2" />
+          <line x1={dxPos + colW * 0.3} y1={dyTop + Math.max(3, dh) / 2} x2={dxPos + colW * 0.7} y2={dyTop + Math.max(3, dh) / 2} className="stroke-primary" strokeWidth="1.5" />
+        </g>,
+      );
+    }
+  }
 
   return (
     <div className="flex aspect-[4/3] items-center justify-center rounded-xl border border-border bg-background">
-      <svg viewBox={`0 0 ${W} ${H}`} className="h-full w-full" aria-label="رسم تخطيطي للمقاس">
-        {/* السطح/الجسم */}
-        <rect x={x} y={y} width={rectW} height={rectH} rx="2" className="fill-primary/10 stroke-primary" strokeWidth="2" />
-        {/* رف علوي */}
-        {showTop && (
-          <rect x={x} y={y - 8} width={rectW} height="4" className="fill-primary/60" />
-        )}
+      <svg viewBox={`0 0 ${VBW} ${VBH}`} className="h-full w-full" aria-label="رسم ثلاثي الأبعاد للقطعة">
+        {/* السطح العلوي */}
+        <polygon points={`${pt(fTL)} ${pt(tTL)} ${pt(tTR)} ${pt(fTR)}`} className="fill-primary/30 stroke-primary" strokeWidth="1.4" />
+        {/* الجانب الأيمن */}
+        <polygon points={`${pt(fTR)} ${pt(tTR)} ${pt(tBR)} ${pt(fBR)}`} className="fill-primary/15 stroke-primary" strokeWidth="1.4" />
+        {/* الواجهة */}
+        <polygon points={`${pt(fTL)} ${pt(fTR)} ${pt(fBR)} ${pt(fBL)}`} className="fill-primary/5 stroke-primary" strokeWidth="1.4" />
+
+        {/* الأدراج */}
+        {drawerEls}
+
+        {/* رف إضافي (علوي أو وسطي) */}
+        {showShelf && (() => {
+          const sy = shelfMiddle ? oy - bh * 0.45 : oy - bh - 12;
+          return (
+            <polygon
+              points={`${ox},${sy} ${ox + dx},${sy + dy} ${ox + bw + dx},${sy + dy} ${ox + bw},${sy}`}
+              className="fill-primary/40 stroke-primary"
+              strokeWidth="1.2"
+            />
+          );
+        })()}
+
         {/* رف سفلي */}
-        {showBottom && (
-          <rect x={x + 4} y={y + rectH - 14} width={rectW - 8} height="3" className="fill-primary/40" />
+        {showBottom && legH > 0 && (
+          <polygon
+            points={`${ox + 3},${oy + legH * 0.6} ${ox + 3 + dx},${oy + legH * 0.6 + dy} ${ox + bw - 3 + dx},${oy + legH * 0.6 + dy} ${ox + bw - 3},${oy + legH * 0.6}`}
+            className="fill-primary/20 stroke-primary"
+            strokeWidth="1"
+          />
         )}
-        {/* أرجل */}
-        {showHeight && (
+
+        {/* الأرجل */}
+        {legH > 0 && (
           <>
-            <line x1={x + 6} y1={y + rectH} x2={x + 6} y2={H - pad + (showWheels ? 6 : 10)} className="stroke-primary" strokeWidth="2" />
-            <line x1={x + rectW - 6} y1={y + rectH} x2={x + rectW - 6} y2={H - pad + (showWheels ? 6 : 10)} className="stroke-primary" strokeWidth="2" />
+            <line x1={ox + 4} y1={oy} x2={ox + 4} y2={oy + legH} className="stroke-primary" strokeWidth="2" />
+            <line x1={ox + bw - 4} y1={oy} x2={ox + bw - 4} y2={oy + legH} className="stroke-primary" strokeWidth="2" />
+            <line x1={ox + 4 + dx} y1={oy + dy} x2={ox + 4 + dx} y2={oy + legH + dy} className="stroke-primary" strokeWidth="2" />
+            <line x1={ox + bw - 4 + dx} y1={oy + dy} x2={ox + bw - 4 + dx} y2={oy + legH + dy} className="stroke-primary" strokeWidth="2" />
           </>
         )}
+
         {/* عجلات */}
-        {showWheels && (
+        {showWheels && legH > 0 && (
           <>
-            <circle cx={x + 6} cy={H - pad + 9} r="4" className="fill-primary/70" />
-            <circle cx={x + rectW - 6} cy={H - pad + 9} r="4" className="fill-primary/70" />
+            <circle cx={ox + 4} cy={oy + legH + 3} r="3.5" className="fill-primary/70" />
+            <circle cx={ox + bw - 4} cy={oy + legH + 3} r="3.5" className="fill-primary/70" />
+            <circle cx={ox + 4 + dx} cy={oy + legH + 3 + dy} r="3" className="fill-primary/50" />
           </>
         )}
-        {/* قياس الطول */}
+
+        {/* قياسات */}
         {fields.length && (
-          <text x={W / 2} y={y - (showTop ? 14 : 6)} textAnchor="middle" className="fill-foreground" fontSize="11" fontWeight="bold">
-            {L} سم
+          <text x={ox + bw / 2} y={oy + legH + 16} textAnchor="middle" className="fill-foreground" fontSize="10" fontWeight="bold">
+            ط {Lraw} سم
           </text>
         )}
-        {/* قياس الارتفاع */}
-        {showHeight && (
-          <text x={x - 6} y={y + rectH / 2} textAnchor="end" className="fill-foreground" fontSize="11" fontWeight="bold">
-            {Hh}
+        {fields.height && (
+          <text x={ox - 6} y={oy - bh / 2} textAnchor="end" className="fill-foreground" fontSize="10" fontWeight="bold">
+            ع {Hraw}
+          </text>
+        )}
+        {fields.width && (
+          <text x={ox + bw + dx + 6} y={oy - bh + dy + 4} textAnchor="start" className="fill-foreground" fontSize="9" fontWeight="bold">
+            عمق {Wraw}
           </text>
         )}
       </svg>
