@@ -26,6 +26,7 @@ import {
   type FabCategory,
   type FabConfig,
   type FabFields,
+  type FabKind,
   type FabLineItem,
   type FabProduct,
   type ShelfPosition,
