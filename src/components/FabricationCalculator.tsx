@@ -241,6 +241,7 @@ function ProductConfigurator({
 
 function EditDialog({
   product,
+  categorySlug,
   grades,
   thicknesses,
   discountPct,
@@ -249,6 +250,7 @@ function EditDialog({
   onSave,
 }: {
   product: FabProduct;
+  categorySlug: string;
   grades: SteelGrades;
   thicknesses: Thicknesses;
   discountPct: number;
