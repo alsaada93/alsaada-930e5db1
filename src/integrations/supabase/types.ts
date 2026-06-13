@@ -922,6 +922,7 @@ export type Database = {
           manufacturer: string | null
           name: string
           price_new: number
+          price_new_discounted: number | null
           price_used: number
           project_type_slugs: string[]
           sort_order: number
@@ -948,6 +949,7 @@ export type Database = {
           manufacturer?: string | null
           name: string
           price_new?: number
+          price_new_discounted?: number | null
           price_used?: number
           project_type_slugs?: string[]
           sort_order?: number
@@ -974,6 +976,7 @@ export type Database = {
           manufacturer?: string | null
           name?: string
           price_new?: number
+          price_new_discounted?: number | null
           price_used?: number
           project_type_slugs?: string[]
           sort_order?: number
