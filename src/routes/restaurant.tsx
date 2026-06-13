@@ -97,6 +97,7 @@ function RestaurantPage() {
   const { user } = useAuth();
   const { types } = useProjectTypes();
   const { equipment } = useEquipment();
+  const { packages } = usePackages();
   const { categories, products, grades, thicknesses, discounts, quote } = useFabricationData(true);
 
   const [activeType, setActiveType] = useState<string | null>(null);
