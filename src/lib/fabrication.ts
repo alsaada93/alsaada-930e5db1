@@ -56,6 +56,7 @@ export interface FabPricing {
     extraBowl?: number;
     perShelf?: number;
     perTier?: number;
+    perDrawer?: number;
   };
 }
 
