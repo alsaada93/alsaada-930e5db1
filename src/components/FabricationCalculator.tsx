@@ -272,6 +272,7 @@ function EditDialog({
     [product, cfg, grades, thicknesses, discountPct],
   );
   const total = unitPrice * Math.max(1, cfg.quantity || 1);
+  const previewImg = useMemo(() => pickImage(product.images ?? [], cfg, product.image_url), [product, cfg]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
