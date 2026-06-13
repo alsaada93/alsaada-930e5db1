@@ -1,10 +1,10 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { Plus, Trash2, Pencil, Loader2, Upload, X } from "lucide-react";
 import { toast } from "sonner";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import { supabase } from "@/integrations/supabase/client";
-import { Link } from "@tanstack/react-router";
+
 
 
 export const Route = createFileRoute("/admin/restaurant")({
