@@ -68,7 +68,20 @@ export const Route = createFileRoute("/restaurant")({
 type Cond = "new" | "used";
 interface Selection {
   condition: Cond;
+  qty: number;
 }
+
+const LAYER_LABELS: Record<string, string> = {
+  core: "معدات أساسية",
+  extra: "معدات إضافية",
+  operating: "تجهيزات تشغيل",
+};
+
+const TIER_LABELS: Record<string, string> = {
+  economy: "اقتصادية",
+  standard: "متوسطة",
+  premium: "احترافية",
+};
 
 interface SavedProject {
   id: string;
