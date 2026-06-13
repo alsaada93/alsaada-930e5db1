@@ -105,6 +105,7 @@ export function FabricationCalculator({
                 <ProductConfigurator
                   key={p.id}
                   product={p}
+                  categorySlug={cat.slug}
                   grades={grades}
                   thicknesses={thicknesses}
                   discountPct={discountPct}
