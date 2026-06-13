@@ -267,10 +267,24 @@ const FIELD_LABELS: { key: keyof FabFields; label: string }[] = [
   { key: "bottomShelf", label: "رف سفلي" },
   { key: "wheels", label: "عجلات" },
   { key: "drawers", label: "أدراج" },
+  { key: "backGuard", label: "حاجز خلفي" },
+  { key: "rightGuard", label: "حاجز يمين" },
+  { key: "leftGuard", label: "حاجز يسار" },
   { key: "grade", label: "نوع الستانلس" },
   { key: "thickness", label: "السماكة" },
   { key: "quantity", label: "الكمية" },
   { key: "notes", label: "ملاحظات" },
+];
+
+const KIND_OPTIONS: { value: NonNullable<FabFields["kind"]>; label: string }[] = [
+  { value: "auto", label: "تلقائي (حسب الفئة)" },
+  { value: "table", label: "طاولة" },
+  { value: "sink", label: "مغسلة" },
+  { value: "wallShelf", label: "رف جداري" },
+  { value: "standingShelf", label: "رف وقافي" },
+  { value: "cabinet", label: "خزانة" },
+  { value: "trolley", label: "عربة" },
+  { value: "hood", label: "هود/شفاط" },
 ];
 
 const EXTRA_LABELS: { key: keyof NonNullable<FabPricing["extras"]>; label: string }[] = [
@@ -281,6 +295,9 @@ const EXTRA_LABELS: { key: keyof NonNullable<FabPricing["extras"]>; label: strin
   { key: "perShelf", label: "سعر كل رف" },
   { key: "perTier", label: "سعر كل دور" },
   { key: "perDrawer", label: "سعر كل درج" },
+  { key: "backGuard", label: "سعر الحاجز الخلفي" },
+  { key: "rightGuard", label: "سعر حاجز اليمين" },
+  { key: "leftGuard", label: "سعر حاجز اليسار" },
 ];
 
 function ProductsTab({ data }: { data: ReturnType<typeof useFabricationData> }) {
