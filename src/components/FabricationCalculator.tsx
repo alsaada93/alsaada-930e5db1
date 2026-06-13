@@ -341,7 +341,15 @@ function ConfigBody({
         {f.height && <Num label="الارتفاع (سم)" value={cfg.height} onChange={(n) => set("height", n)} />}
         {f.shelves && <Num label="عدد الأرفف" value={cfg.shelves} onChange={(n) => set("shelves", n)} min={0} max={20} />}
         {f.tiers && <Num label="عدد الأدوار" value={cfg.tiers} onChange={(n) => set("tiers", n)} min={1} max={10} />}
-        {f.bowls && <Num label="عدد الأحواض" value={cfg.bowls} onChange={(n) => set("bowls", n)} min={1} max={6} />}
+        {f.bowls && <Num label="عدد الأحواض" value={cfg.bowls} onChange={(n) => {
+          const count = Math.max(1, Math.min(6, n || 1));
+          setCfg((c) => {
+            const sizes = [...(c.bowlSizes ?? [])];
+            while (sizes.length < count) sizes.push({ ...DEFAULT_BOWL });
+            sizes.length = count;
+            return { ...c, bowls: count, bowlSizes: sizes };
+          });
+        }} min={1} max={6} />}
 
         {f.grade && (
           <Field label="نوع الستانلس">
