@@ -495,179 +495,325 @@ function Toggle({ label, on, onClick }: { label: string; on: boolean; onClick: (
 }
 
 /**
- * رسم ثلاثي الأبعاد (إسقاط متساوي القياس) يتغيّر حسب المقاسات والخيارات:
- * يعرض الجسم، الأرجل، العجلات، الرف العلوي/الوسطي، الرف السفلي والأدراج.
+ * رسم توضيحي ثلاثي الأبعاد يتغيّر شكله حسب نوع الصنف (طاولة، مغسلة، رف جداري،
+ * رف وقافي، خزانة، عربة، هود) وحسب المقاسات والخيارات المختارة.
  */
-function Schematic3D({ cfg, fields }: { cfg: FabConfig; fields: FabFields }) {
+function Schematic3D({ cfg, fields, kind }: { cfg: FabConfig; fields: FabFields; kind: FabKind }) {
   const VBW = 300;
   const VBH = 230;
   const gid = useMemo(() => `g${Math.random().toString(36).slice(2, 8)}`, []);
 
-  // أبعاد منطقية مُطبّعة إلى وحدات الرسم
   const Lraw = fields.length ? Math.max(1, cfg.length || 0) : 100;
   const Wraw = fields.width ? Math.max(1, cfg.width || 0) : 60;
   const Hraw = fields.height ? Math.max(1, cfg.height || 0) : 85;
   const maxDim = Math.max(Lraw, Wraw, Hraw, 1);
-  const bw = 60 + (Lraw / maxDim) * 110; // عرض الواجهة
-  const bd = 26 + (Wraw / maxDim) * 60; // العمق (depth)
-  const bh = 34 + (Hraw / maxDim) * 90; // ارتفاع الجسم
-  const legH = fields.height ? 22 + (Hraw / maxDim) * 26 : 0;
 
-  // زاوية الإسقاط المتساوي
-  const dx = bd * 0.72;
-  const dy = -bd * 0.42;
+  const bw = 70 + (Lraw / maxDim) * 120; // عرض الواجهة
+  const bd = 24 + (Wraw / maxDim) * 50; // العمق
+  const dx = bd * 0.95;
+  const dy = -bd * 0.5;
 
-  // نقطة أصل أمامية-سفلية-يسرى (موسّطة)
+  const defs = (
+    <defs>
+      <linearGradient id={`${gid}-top`} x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stopColor="currentColor" stopOpacity="0.55" className="text-primary" />
+        <stop offset="100%" stopColor="currentColor" stopOpacity="0.3" className="text-primary" />
+      </linearGradient>
+      <linearGradient id={`${gid}-side`} x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%" stopColor="currentColor" stopOpacity="0.3" className="text-primary" />
+        <stop offset="100%" stopColor="currentColor" stopOpacity="0.16" className="text-primary" />
+      </linearGradient>
+      <linearGradient id={`${gid}-front`} x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stopColor="currentColor" stopOpacity="0.18" className="text-primary" />
+        <stop offset="100%" stopColor="currentColor" stopOpacity="0.07" className="text-primary" />
+      </linearGradient>
+    </defs>
+  );
+
+  const wrap = (children: React.ReactNode) => (
+    <div className="overflow-hidden rounded-xl border border-border bg-gradient-to-br from-muted/40 to-background">
+      <svg viewBox={`0 0 ${VBW} ${VBH}`} className="aspect-[4/3] w-full" aria-label="رسم توضيحي للقطعة">
+        {defs}
+        {children}
+      </svg>
+    </div>
+  );
+
+  // رف جداري ستانلس
+  if (kind === "wallShelf") {
+    const n = Math.max(1, Math.min(8, fields.shelves ? cfg.shelves || 1 : 2));
+    const left = 50;
+    const right = VBW - 50;
+    const top = 28;
+    const bottom = 196;
+    const sd = 30; // عمق الرف
+    const sdx = sd * 0.95;
+    const sdy = -sd * 0.5;
+    const shelves = [];
+    for (let i = 0; i < n; i++) {
+      const y = top + 22 + (i * (bottom - top - 30)) / Math.max(1, n);
+      shelves.push(
+        <g key={i}>
+          {/* السطح العلوي للرف */}
+          <polygon
+            points={`${left},${y} ${right},${y} ${right + sdx},${y + sdy} ${left + sdx},${y + sdy}`}
+            fill={`url(#${gid}-top)`}
+            className="stroke-primary"
+            strokeWidth="1.4"
+            strokeLinejoin="round"
+          />
+          {/* الحافة الأمامية */}
+          <rect x={left} y={y} width={right - left} height="5" className="fill-primary/20 stroke-primary" strokeWidth="1.2" />
+          {/* حوامل مثلثة */}
+          <polygon points={`${left + 14},${y + 5} ${left + 14},${y + 22} ${left + 14 + sdx * 0.7},${y + 5 + sdy * 0.7}`} className="fill-primary/25 stroke-primary" strokeWidth="1" />
+          <polygon points={`${right - 14},${y + 5} ${right - 14},${y + 22} ${right - 14 + sdx * 0.7},${y + 5 + sdy * 0.7}`} className="fill-primary/25 stroke-primary" strokeWidth="1" />
+        </g>,
+      );
+    }
+    return wrap(
+      <>
+        {/* الجدار */}
+        <rect x={left - 10} y={top - 6} width={right - left + 20} height={bottom - top + 12} rx="4" className="fill-muted-foreground/5 stroke-muted-foreground/30" strokeWidth="1" strokeDasharray="4 4" />
+        {shelves}
+        <text x={(left + right) / 2} y={bottom + 22} textAnchor="middle" className="fill-foreground" fontSize="11" fontWeight="bold">
+          {Lraw} سم · {n} رف
+        </text>
+      </>,
+    );
+  }
+
+  // رف ستانلس وقافي (أرضي متعدد الأدوار)
+  if (kind === "standingShelf") {
+    const n = Math.max(2, Math.min(8, fields.tiers ? cfg.tiers || 2 : 4));
+    const ox = (VBW - bw - dx) / 2;
+    const topY = 26;
+    const botY = 200;
+    const span = botY - topY;
+    const post = (hx: number, v: number) => (
+      <line key={`p${hx}-${v}`} x1={ox + hx + v * dx} y1={topY + v * dy} x2={ox + hx + v * dx} y2={botY + v * dy} className={v ? "stroke-primary/70" : "stroke-primary"} strokeWidth="3" strokeLinecap="round" />
+    );
+    const tiers = [];
+    for (let i = 0; i < n; i++) {
+      const y = topY + (i * span) / (n - 1);
+      tiers.push(
+        <polygon
+          key={i}
+          points={`${ox},${y} ${ox + bw},${y} ${ox + bw + dx},${y + dy} ${ox + dx},${y + dy}`}
+          fill={`url(#${gid}-top)`}
+          className="stroke-primary"
+          strokeWidth="1.4"
+          strokeLinejoin="round"
+        />,
+      );
+    }
+    return wrap(
+      <>
+        {post(5, 1)}
+        {post(bw - 5, 1)}
+        {tiers}
+        {post(5, 0)}
+        {post(bw - 5, 0)}
+        <text x={ox + bw / 2} y={botY + 24} textAnchor="middle" className="fill-foreground" fontSize="11" fontWeight="bold">
+          {Lraw} سم · {n} دور
+        </text>
+      </>,
+    );
+  }
+
+  // الهود/الشفاط (شكل شبه منحرف)
+  if (kind === "hood") {
+    const ox = (VBW - bw - dx) / 2;
+    const baseY = 170;
+    const topY = 70;
+    const inset = bw * 0.16;
+    return wrap(
+      <>
+        {/* قناة التهوية */}
+        <rect x={ox + bw / 2 - 10} y={28} width="20" height={topY - 24} className="fill-primary/15 stroke-primary" strokeWidth="1.4" />
+        {/* الواجهة شبه المنحرفة */}
+        <polygon
+          points={`${ox},${baseY} ${ox + bw},${baseY} ${ox + bw - inset},${topY} ${ox + inset},${topY}`}
+          fill={`url(#${gid}-front)`}
+          className="stroke-primary"
+          strokeWidth="1.6"
+          strokeLinejoin="round"
+        />
+        {/* الجانب */}
+        <polygon
+          points={`${ox + bw},${baseY} ${ox + bw + dx},${baseY + dy} ${ox + bw - inset + dx},${topY + dy} ${ox + bw - inset},${topY}`}
+          fill={`url(#${gid}-side)`}
+          className="stroke-primary"
+          strokeWidth="1.6"
+          strokeLinejoin="round"
+        />
+        {/* السطح العلوي */}
+        <polygon
+          points={`${ox + inset},${topY} ${ox + bw - inset},${topY} ${ox + bw - inset + dx},${topY + dy} ${ox + inset + dx},${topY + dy}`}
+          fill={`url(#${gid}-top)`}
+          className="stroke-primary"
+          strokeWidth="1.4"
+          strokeLinejoin="round"
+        />
+        <text x={ox + bw / 2} y={baseY + 26} textAnchor="middle" className="fill-foreground" fontSize="11" fontWeight="bold">
+          {Lraw} سم
+        </text>
+      </>,
+    );
+  }
+
+  // الأصناف الصندوقية: طاولة / مغسلة / خزانة / عربة
+  const bh = 26 + (Hraw / maxDim) * 70;
+  const wantLegs = kind === "table" || kind === "sink" || kind === "trolley";
+  const legH = wantLegs ? 24 + (Hraw / maxDim) * 22 : 0;
+  const guardH = Math.min(20, 10 + bh * 0.12);
+
   const ox = (VBW - bw - dx) / 2;
-  const oy = (VBH + bh - dy) / 2 - legH / 2;
+  const oy = VBH - legH - 26;
 
-  const showWheels = fields.wheels && cfg.wheels;
+  // P(hx, v, up): إسقاط نقطة
+  const P = (hx: number, v: number, up: number): [number, number] => [ox + hx + v * dx, oy - up + v * dy];
+  const pts = (arr: [number, number][]) => arr.map((p) => `${p[0]},${p[1]}`).join(" ");
+
+  const showWheels = (fields.wheels && cfg.wheels) || kind === "trolley";
   const showShelf = fields.topShelf && cfg.topShelf;
   const shelfMiddle = cfg.shelfPosition === "middle";
-  const showBottom = fields.bottomShelf && cfg.bottomShelf;
+  const showBottom = (fields.bottomShelf && cfg.bottomShelf) || kind === "trolley";
   const drawers = fields.drawers ? Math.max(0, cfg.drawers || 0) : 0;
+  const bowls = kind === "sink" ? Math.max(1, fields.bowls ? cfg.bowls || 1 : 1) : 0;
 
-  // إحداثيات صندوق الجسم (واجهة + سطح + جانب)
-  const fTL = [ox, oy - bh];
-  const fTR = [ox + bw, oy - bh];
-  const fBR = [ox + bw, oy];
-  const fBL = [ox, oy];
-  const tTL = [ox + dx, oy - bh + dy];
-  const tTR = [ox + bw + dx, oy - bh + dy];
-  const tBR = [ox + bw + dx, oy + dy];
-
-  const pt = (p: number[]) => `${p[0]},${p[1]}`;
-
-  // أدراج: مستطيلات على الواجهة حسب الجهة
-  const drawerEls = [];
+  // أدراج على الواجهة
+  const drawerEls: React.ReactNode[] = [];
   if (drawers > 0) {
-    const colW = bw * 0.32;
-    const dxPos =
-      cfg.drawerSide === "left" ? ox + 6 : cfg.drawerSide === "center" ? ox + (bw - colW) / 2 : ox + bw - colW - 6;
+    const colW = bw * 0.3;
+    const x0 = cfg.drawerSide === "left" ? 6 : cfg.drawerSide === "center" ? (bw - colW) / 2 : bw - colW - 6;
     const gap = 4;
     const dh = (bh - gap * (drawers + 1)) / drawers;
     for (let i = 0; i < drawers; i++) {
-      const dyTop = oy - bh + gap + i * (dh + gap);
-      const h = Math.max(4, dh);
+      const upTop = bh - gap - i * (dh + gap);
+      const a = P(x0, 0, upTop);
       drawerEls.push(
         <g key={i}>
-          <rect x={dxPos} y={dyTop} width={colW} height={h} rx="2.5" className="fill-primary/15 stroke-primary" strokeWidth="1.4" />
-          <rect x={dxPos + colW * 0.32} y={dyTop + h / 2 - 1.2} width={colW * 0.36} height="2.4" rx="1.2" className="fill-primary" />
+          <rect x={a[0]} y={a[1]} width={colW} height={Math.max(4, dh)} rx="2.5" className="fill-primary/15 stroke-primary" strokeWidth="1.3" />
+          <rect x={a[0] + colW * 0.34} y={a[1] + Math.max(4, dh) / 2 - 1.1} width={colW * 0.32} height="2.2" rx="1.1" className="fill-primary" />
         </g>,
       );
     }
   }
 
-  return (
-    <div className="overflow-hidden rounded-xl border border-border bg-gradient-to-br from-muted/40 to-background">
-      <svg viewBox={`0 0 ${VBW} ${VBH}`} className="aspect-[4/3] w-full" aria-label="رسم ثلاثي الأبعاد للقطعة">
-        <defs>
-          <linearGradient id={`${gid}-top`} x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="currentColor" stopOpacity="0.55" className="text-primary" />
-            <stop offset="100%" stopColor="currentColor" stopOpacity="0.32" className="text-primary" />
-          </linearGradient>
-          <linearGradient id={`${gid}-side`} x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stopColor="currentColor" stopOpacity="0.30" className="text-primary" />
-            <stop offset="100%" stopColor="currentColor" stopOpacity="0.16" className="text-primary" />
-          </linearGradient>
-          <linearGradient id={`${gid}-front`} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="currentColor" stopOpacity="0.14" className="text-primary" />
-            <stop offset="100%" stopColor="currentColor" stopOpacity="0.06" className="text-primary" />
-          </linearGradient>
-        </defs>
+  // أحواض المغسلة على السطح
+  const bowlEls: React.ReactNode[] = [];
+  if (bowls > 0) {
+    for (let i = 0; i < bowls; i++) {
+      const cellW = bw / bowls;
+      const m = cellW * 0.16;
+      const hx0 = i * cellW + m;
+      const hx1 = (i + 1) * cellW - m;
+      const corners: [number, number][] = [P(hx0, 0.2, bh), P(hx1, 0.2, bh), P(hx1, 0.85, bh), P(hx0, 0.85, bh)];
+      bowlEls.push(
+        <g key={i}>
+          <polygon points={pts(corners)} className="fill-primary/30 stroke-primary" strokeWidth="1.3" strokeLinejoin="round" />
+        </g>,
+      );
+    }
+    // الحنفية في المنتصف الخلفي
+    const fx = P(bw / 2, 0.95, bh);
+    bowlEls.push(
+      <g key="faucet">
+        <line x1={fx[0]} y1={fx[1]} x2={fx[0]} y2={fx[1] - 18} className="stroke-primary" strokeWidth="2.4" strokeLinecap="round" />
+        <line x1={fx[0]} y1={fx[1] - 18} x2={fx[0] + 10} y2={fx[1] - 14} className="stroke-primary" strokeWidth="2.4" strokeLinecap="round" />
+      </g>,
+    );
+  }
 
-        {/* ظل أرضي ناعم */}
-        <ellipse cx={ox + bw / 2 + dx / 2} cy={oy + legH + 6} rx={bw * 0.55} ry={bd * 0.18} className="fill-foreground/10" />
+  return wrap(
+    <>
+      {/* ظل أرضي */}
+      <ellipse cx={ox + bw / 2 + dx / 2} cy={oy + legH + 6} rx={bw * 0.52} ry={bd * 0.16} className="fill-foreground/10" />
 
-        {/* السطح العلوي */}
-        <polygon points={`${pt(fTL)} ${pt(tTL)} ${pt(tTR)} ${pt(fTR)}`} fill={`url(#${gid}-top)`} className="stroke-primary" strokeWidth="1.6" strokeLinejoin="round" />
-        {/* الجانب الأيمن */}
-        <polygon points={`${pt(fTR)} ${pt(tTR)} ${pt(tBR)} ${pt(fBR)}`} fill={`url(#${gid}-side)`} className="stroke-primary" strokeWidth="1.6" strokeLinejoin="round" />
-        {/* الواجهة */}
-        <polygon points={`${pt(fTL)} ${pt(fTR)} ${pt(fBR)} ${pt(fBL)}`} fill={`url(#${gid}-front)`} className="stroke-primary" strokeWidth="1.6" strokeLinejoin="round" />
+      {/* الجسم: سطح + جانب + واجهة */}
+      <polygon points={pts([P(0, 0, bh), P(0, 1, bh), P(bw, 1, bh), P(bw, 0, bh)])} fill={`url(#${gid}-top)`} className="stroke-primary" strokeWidth="1.6" strokeLinejoin="round" />
+      <polygon points={pts([P(bw, 0, bh), P(bw, 1, bh), P(bw, 1, 0), P(bw, 0, 0)])} fill={`url(#${gid}-side)`} className="stroke-primary" strokeWidth="1.6" strokeLinejoin="round" />
+      <polygon points={pts([P(0, 0, bh), P(bw, 0, bh), P(bw, 0, 0), P(0, 0, 0)])} fill={`url(#${gid}-front)`} className="stroke-primary" strokeWidth="1.6" strokeLinejoin="round" />
 
-        {/* الأدراج */}
-        {drawerEls}
+      {/* أبواب الخزانة */}
+      {kind === "cabinet" && (
+        <>
+          <line x1={P(bw / 2, 0, bh)[0]} y1={P(bw / 2, 0, bh)[1]} x2={P(bw / 2, 0, 0)[0]} y2={P(bw / 2, 0, 0)[1]} className="stroke-primary/60" strokeWidth="1.3" />
+          <circle cx={P(bw / 2 - 6, 0, bh / 2)[0]} cy={P(bw / 2 - 6, 0, bh / 2)[1]} r="2.4" className="fill-primary" />
+          <circle cx={P(bw / 2 + 6, 0, bh / 2)[0]} cy={P(bw / 2 + 6, 0, bh / 2)[1]} r="2.4" className="fill-primary" />
+        </>
+      )}
 
-        {/* رف إضافي (علوي أو وسطي) */}
-        {showShelf && (() => {
-          const sy = shelfMiddle ? oy - bh * 0.45 : oy - bh - 16;
-          return (
-            <g>
-              <polygon
-                points={`${ox},${sy} ${ox + dx},${sy + dy} ${ox + bw + dx},${sy + dy} ${ox + bw},${sy}`}
-                fill={`url(#${gid}-top)`}
-                className="stroke-primary"
-                strokeWidth="1.4"
-                strokeLinejoin="round"
-              />
-              {!shelfMiddle && (
-                <>
-                  <line x1={ox + 6} y1={sy} x2={ox + 6} y2={oy - bh} className="stroke-primary/60" strokeWidth="1.4" />
-                  <line x1={ox + bw - 6} y1={sy} x2={ox + bw - 6} y2={oy - bh} className="stroke-primary/60" strokeWidth="1.4" />
-                </>
-              )}
-            </g>
-          );
-        })()}
+      {bowlEls}
+      {drawerEls}
 
-        {/* رف سفلي */}
-        {showBottom && legH > 0 && (
-          <polygon
-            points={`${ox + 3},${oy + legH * 0.6} ${ox + 3 + dx},${oy + legH * 0.6 + dy} ${ox + bw - 3 + dx},${oy + legH * 0.6 + dy} ${ox + bw - 3},${oy + legH * 0.6}`}
-            fill={`url(#${gid}-top)`}
-            className="stroke-primary"
-            strokeWidth="1.2"
-            strokeLinejoin="round"
-          />
-        )}
+      {/* الحواجز */}
+      {fields.backGuard && cfg.backGuard && (
+        <polygon points={pts([P(0, 1, bh), P(bw, 1, bh), P(bw, 1, bh + guardH), P(0, 1, bh + guardH)])} fill={`url(#${gid}-side)`} className="stroke-primary" strokeWidth="1.4" strokeLinejoin="round" />
+      )}
+      {fields.rightGuard && cfg.rightGuard && (
+        <polygon points={pts([P(bw, 0, bh), P(bw, 1, bh), P(bw, 1, bh + guardH), P(bw, 0, bh + guardH)])} fill={`url(#${gid}-side)`} className="stroke-primary" strokeWidth="1.4" strokeLinejoin="round" />
+      )}
+      {fields.leftGuard && cfg.leftGuard && (
+        <polygon points={pts([P(0, 0, bh), P(0, 1, bh), P(0, 1, bh + guardH), P(0, 0, bh + guardH)])} fill={`url(#${gid}-front)`} className="stroke-primary" strokeWidth="1.4" strokeLinejoin="round" />
+      )}
 
-        {/* الأرجل */}
-        {legH > 0 && (
-          <>
-            <line x1={ox + 5} y1={oy} x2={ox + 5} y2={oy + legH} className="stroke-primary" strokeWidth="2.6" strokeLinecap="round" />
-            <line x1={ox + bw - 5} y1={oy} x2={ox + bw - 5} y2={oy + legH} className="stroke-primary" strokeWidth="2.6" strokeLinecap="round" />
-            <line x1={ox + 5 + dx} y1={oy + dy} x2={ox + 5 + dx} y2={oy + legH + dy} className="stroke-primary/70" strokeWidth="2.6" strokeLinecap="round" />
-            <line x1={ox + bw - 5 + dx} y1={oy + dy} x2={ox + bw - 5 + dx} y2={oy + legH + dy} className="stroke-primary/70" strokeWidth="2.6" strokeLinecap="round" />
-          </>
-        )}
+      {/* رف إضافي علوي/وسطي */}
+      {showShelf && (() => {
+        const up = shelfMiddle ? bh * 0.5 : bh + 26;
+        return (
+          <g>
+            <polygon points={pts([P(0, 0, up), P(bw, 0, up), P(bw, 1, up), P(0, 1, up)])} fill={`url(#${gid}-top)`} className="stroke-primary" strokeWidth="1.4" strokeLinejoin="round" />
+            {!shelfMiddle && (
+              <>
+                <line x1={P(6, 0, up)[0]} y1={P(6, 0, up)[1]} x2={P(6, 0, bh)[0]} y2={P(6, 0, bh)[1]} className="stroke-primary/60" strokeWidth="1.4" />
+                <line x1={P(bw - 6, 0, up)[0]} y1={P(bw - 6, 0, up)[1]} x2={P(bw - 6, 0, bh)[0]} y2={P(bw - 6, 0, bh)[1]} className="stroke-primary/60" strokeWidth="1.4" />
+              </>
+            )}
+          </g>
+        );
+      })()}
 
-        {/* عجلات */}
-        {showWheels && legH > 0 && (
-          <>
-            <circle cx={ox + 5} cy={oy + legH + 4} r="4.5" className="fill-primary" />
-            <circle cx={ox + bw - 5} cy={oy + legH + 4} r="4.5" className="fill-primary" />
-            <circle cx={ox + 5 + dx} cy={oy + legH + 4 + dy} r="3.8" className="fill-primary/70" />
-            <circle cx={ox + bw - 5 + dx} cy={oy + legH + 4 + dy} r="3.8" className="fill-primary/70" />
-          </>
-        )}
+      {/* رف سفلي */}
+      {showBottom && legH > 0 && (
+        <polygon points={pts([P(4, 0, -legH * 0.5), P(bw - 4, 0, -legH * 0.5), P(bw - 4, 1, -legH * 0.5), P(4, 1, -legH * 0.5)])} fill={`url(#${gid}-top)`} className="stroke-primary" strokeWidth="1.2" strokeLinejoin="round" />
+      )}
 
-        {/* أدلّة القياس */}
-        {fields.length && (
-          <>
-            <line x1={ox} y1={oy + legH + 16} x2={ox + bw} y2={oy + legH + 16} className="stroke-muted-foreground/60" strokeWidth="1" />
-            <line x1={ox} y1={oy + legH + 12} x2={ox} y2={oy + legH + 20} className="stroke-muted-foreground/60" strokeWidth="1" />
-            <line x1={ox + bw} y1={oy + legH + 12} x2={ox + bw} y2={oy + legH + 20} className="stroke-muted-foreground/60" strokeWidth="1" />
-            <text x={ox + bw / 2} y={oy + legH + 30} textAnchor="middle" className="fill-foreground" fontSize="11" fontWeight="bold">
-              {Lraw} سم
-            </text>
-          </>
-        )}
-        {fields.height && (
-          <>
-            <line x1={ox - 12} y1={oy - bh} x2={ox - 12} y2={oy} className="stroke-muted-foreground/60" strokeWidth="1" />
-            <text x={ox - 16} y={oy - bh / 2} textAnchor="end" className="fill-foreground" fontSize="11" fontWeight="bold">
-              {Hraw}
-            </text>
-          </>
-        )}
-        {fields.width && (
-          <text x={ox + bw + dx + 8} y={oy - bh + dy + 4} textAnchor="start" className="fill-foreground" fontSize="10" fontWeight="bold">
-            عمق {Wraw}
+      {/* الأرجل */}
+      {legH > 0 && (
+        <>
+          {([[5, 0], [bw - 5, 0], [5, 1], [bw - 5, 1]] as [number, number][]).map(([hx, v], i) => {
+            const a = P(hx, v, 0);
+            const b = P(hx, v, -legH);
+            return <line key={i} x1={a[0]} y1={a[1]} x2={b[0]} y2={b[1]} className={v ? "stroke-primary/70" : "stroke-primary"} strokeWidth="2.6" strokeLinecap="round" />;
+          })}
+        </>
+      )}
+
+      {/* العجلات */}
+      {showWheels && legH > 0 && (
+        <>
+          {([[5, 0], [bw - 5, 0], [5, 1], [bw - 5, 1]] as [number, number][]).map(([hx, v], i) => {
+            const a = P(hx, v, -legH);
+            return <circle key={i} cx={a[0]} cy={a[1] + 4} r={v ? 3.8 : 4.5} className={v ? "fill-primary/70" : "fill-primary"} />;
+          })}
+        </>
+      )}
+
+      {/* أدلّة القياس */}
+      {fields.length && (
+        <>
+          <line x1={P(0, 0, 0)[0]} y1={oy + legH + 16} x2={P(bw, 0, 0)[0]} y2={oy + legH + 16} className="stroke-muted-foreground/60" strokeWidth="1" />
+          <text x={ox + bw / 2} y={oy + legH + 30} textAnchor="middle" className="fill-foreground" fontSize="11" fontWeight="bold">
+            {Lraw} سم
           </text>
-        )}
-      </svg>
-    </div>
+        </>
+      )}
+      {fields.height && (
+        <text x={ox - 12} y={oy - bh / 2} textAnchor="end" className="fill-foreground" fontSize="11" fontWeight="bold">
+          {Hraw}
+        </text>
+      )}
+    </>,
   );
-
 }
