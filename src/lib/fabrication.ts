@@ -264,6 +264,9 @@ export function calcUnitPrice(
   if (f.shelves && extras.perShelf) unit += Math.max(0, cfg.shelves || 0) * extras.perShelf;
   if (f.tiers && extras.perTier) unit += Math.max(0, cfg.tiers || 0) * extras.perTier;
   if (f.drawers && extras.perDrawer) unit += Math.max(0, cfg.drawers || 0) * extras.perDrawer;
+  if (f.backGuard && cfg.backGuard && extras.backGuard) unit += extras.backGuard;
+  if (f.rightGuard && cfg.rightGuard && extras.rightGuard) unit += extras.rightGuard;
+  if (f.leftGuard && cfg.leftGuard && extras.leftGuard) unit += extras.leftGuard;
 
   return Math.round(unit * 100) / 100;
 }
