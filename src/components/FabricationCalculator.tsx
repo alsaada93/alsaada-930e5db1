@@ -17,6 +17,7 @@ import {
   applyDiscount,
   calcUnitPrice,
   defaultConfig,
+  pickImage,
   SIZE_MAX,
   SIZE_MIN,
   BHD,
