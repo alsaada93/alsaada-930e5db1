@@ -21,7 +21,7 @@ import {
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 
-import { useSeller } from "@/hooks/useSellers";
+import { useSeller, useSellerPhone } from "@/hooks/useSellers";
 import { useAuth } from "@/hooks/useAuth";
 import { AuctionBidBox } from "@/components/AuctionBidBox";
 import { SellerReviews } from "@/components/SellerReviews";
