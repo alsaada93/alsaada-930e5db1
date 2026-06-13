@@ -456,7 +456,7 @@ function ListingPage() {
   };
 
 
-  const phone = seller?.phone ?? item.phone ?? "33982383";
+  const phone = sellerPhone ?? item.phone ?? "33982383";
   const sellerName = item.sellerName?.trim() || seller?.name || "المعلن";
   const rating = ratingData?.value ?? seller?.rating ?? 0;
   const reviews = ratingData?.count ?? seller?.reviews_count ?? 0;
