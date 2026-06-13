@@ -170,12 +170,14 @@ function configFromItem(item: FabLineItem): FabConfig {
 /** لوحة تخصيص منتج داخل الصفحة مباشرة (بدون نافذة منبثقة) */
 function ProductConfigurator({
   product,
+  categorySlug,
   grades,
   thicknesses,
   discountPct,
   onAdd,
 }: {
   product: FabProduct;
+  categorySlug: string;
   grades: SteelGrades;
   thicknesses: Thicknesses;
   discountPct: number;
