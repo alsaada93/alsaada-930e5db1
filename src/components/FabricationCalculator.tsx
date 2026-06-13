@@ -471,26 +471,27 @@ function Toggle({ label, on, onClick }: { label: string; on: boolean; onClick: (
  * يعرض الجسم، الأرجل، العجلات، الرف العلوي/الوسطي، الرف السفلي والأدراج.
  */
 function Schematic3D({ cfg, fields }: { cfg: FabConfig; fields: FabFields }) {
-  const VBW = 220;
-  const VBH = 180;
+  const VBW = 300;
+  const VBH = 230;
+  const gid = useMemo(() => `g${Math.random().toString(36).slice(2, 8)}`, []);
 
   // أبعاد منطقية مُطبّعة إلى وحدات الرسم
   const Lraw = fields.length ? Math.max(1, cfg.length || 0) : 100;
   const Wraw = fields.width ? Math.max(1, cfg.width || 0) : 60;
   const Hraw = fields.height ? Math.max(1, cfg.height || 0) : 85;
   const maxDim = Math.max(Lraw, Wraw, Hraw, 1);
-  const bw = 30 + (Lraw / maxDim) * 90; // عرض الواجهة
-  const bd = 18 + (Wraw / maxDim) * 50; // العمق (depth)
-  const bh = 24 + (Hraw / maxDim) * 70; // ارتفاع الجسم
-  const legH = fields.height ? 18 + (Hraw / maxDim) * 22 : 0;
+  const bw = 60 + (Lraw / maxDim) * 110; // عرض الواجهة
+  const bd = 26 + (Wraw / maxDim) * 60; // العمق (depth)
+  const bh = 34 + (Hraw / maxDim) * 90; // ارتفاع الجسم
+  const legH = fields.height ? 22 + (Hraw / maxDim) * 26 : 0;
 
   // زاوية الإسقاط المتساوي
-  const dx = bd * 0.7;
-  const dy = -bd * 0.4;
+  const dx = bd * 0.72;
+  const dy = -bd * 0.42;
 
-  // نقطة أصل أمامية-سفلية-يسرى
-  const ox = 55;
-  const oy = 135 - legH;
+  // نقطة أصل أمامية-سفلية-يسرى (موسّطة)
+  const ox = (VBW - bw - dx) / 2;
+  const oy = (VBH + bh - dy) / 2 - legH / 2;
 
   const showWheels = fields.wheels && cfg.wheels;
   const showShelf = fields.topShelf && cfg.topShelf;
@@ -512,44 +513,73 @@ function Schematic3D({ cfg, fields }: { cfg: FabConfig; fields: FabFields }) {
   // أدراج: مستطيلات على الواجهة حسب الجهة
   const drawerEls = [];
   if (drawers > 0) {
-    const colW = bw * 0.34;
+    const colW = bw * 0.32;
     const dxPos =
-      cfg.drawerSide === "left" ? ox + 4 : cfg.drawerSide === "center" ? ox + (bw - colW) / 2 : ox + bw - colW - 4;
-    const gap = 3;
+      cfg.drawerSide === "left" ? ox + 6 : cfg.drawerSide === "center" ? ox + (bw - colW) / 2 : ox + bw - colW - 6;
+    const gap = 4;
     const dh = (bh - gap * (drawers + 1)) / drawers;
     for (let i = 0; i < drawers; i++) {
       const dyTop = oy - bh + gap + i * (dh + gap);
+      const h = Math.max(4, dh);
       drawerEls.push(
         <g key={i}>
-          <rect x={dxPos} y={dyTop} width={colW} height={Math.max(3, dh)} rx="1.5" className="fill-background stroke-primary" strokeWidth="1.2" />
-          <line x1={dxPos + colW * 0.3} y1={dyTop + Math.max(3, dh) / 2} x2={dxPos + colW * 0.7} y2={dyTop + Math.max(3, dh) / 2} className="stroke-primary" strokeWidth="1.5" />
+          <rect x={dxPos} y={dyTop} width={colW} height={h} rx="2.5" className="fill-primary/15 stroke-primary" strokeWidth="1.4" />
+          <rect x={dxPos + colW * 0.32} y={dyTop + h / 2 - 1.2} width={colW * 0.36} height="2.4" rx="1.2" className="fill-primary" />
         </g>,
       );
     }
   }
 
   return (
-    <div className="flex aspect-[4/3] items-center justify-center rounded-xl border border-border bg-background">
-      <svg viewBox={`0 0 ${VBW} ${VBH}`} className="h-full w-full" aria-label="رسم ثلاثي الأبعاد للقطعة">
+    <div className="overflow-hidden rounded-xl border border-border bg-gradient-to-br from-muted/40 to-background">
+      <svg viewBox={`0 0 ${VBW} ${VBH}`} className="aspect-[4/3] w-full" aria-label="رسم ثلاثي الأبعاد للقطعة">
+        <defs>
+          <linearGradient id={`${gid}-top`} x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="currentColor" stopOpacity="0.55" className="text-primary" />
+            <stop offset="100%" stopColor="currentColor" stopOpacity="0.32" className="text-primary" />
+          </linearGradient>
+          <linearGradient id={`${gid}-side`} x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stopColor="currentColor" stopOpacity="0.30" className="text-primary" />
+            <stop offset="100%" stopColor="currentColor" stopOpacity="0.16" className="text-primary" />
+          </linearGradient>
+          <linearGradient id={`${gid}-front`} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="currentColor" stopOpacity="0.14" className="text-primary" />
+            <stop offset="100%" stopColor="currentColor" stopOpacity="0.06" className="text-primary" />
+          </linearGradient>
+        </defs>
+
+        {/* ظل أرضي ناعم */}
+        <ellipse cx={ox + bw / 2 + dx / 2} cy={oy + legH + 6} rx={bw * 0.55} ry={bd * 0.18} className="fill-foreground/10" />
+
         {/* السطح العلوي */}
-        <polygon points={`${pt(fTL)} ${pt(tTL)} ${pt(tTR)} ${pt(fTR)}`} className="fill-primary/30 stroke-primary" strokeWidth="1.4" />
+        <polygon points={`${pt(fTL)} ${pt(tTL)} ${pt(tTR)} ${pt(fTR)}`} fill={`url(#${gid}-top)`} className="stroke-primary" strokeWidth="1.6" strokeLinejoin="round" />
         {/* الجانب الأيمن */}
-        <polygon points={`${pt(fTR)} ${pt(tTR)} ${pt(tBR)} ${pt(fBR)}`} className="fill-primary/15 stroke-primary" strokeWidth="1.4" />
+        <polygon points={`${pt(fTR)} ${pt(tTR)} ${pt(tBR)} ${pt(fBR)}`} fill={`url(#${gid}-side)`} className="stroke-primary" strokeWidth="1.6" strokeLinejoin="round" />
         {/* الواجهة */}
-        <polygon points={`${pt(fTL)} ${pt(fTR)} ${pt(fBR)} ${pt(fBL)}`} className="fill-primary/5 stroke-primary" strokeWidth="1.4" />
+        <polygon points={`${pt(fTL)} ${pt(fTR)} ${pt(fBR)} ${pt(fBL)}`} fill={`url(#${gid}-front)`} className="stroke-primary" strokeWidth="1.6" strokeLinejoin="round" />
 
         {/* الأدراج */}
         {drawerEls}
 
         {/* رف إضافي (علوي أو وسطي) */}
         {showShelf && (() => {
-          const sy = shelfMiddle ? oy - bh * 0.45 : oy - bh - 12;
+          const sy = shelfMiddle ? oy - bh * 0.45 : oy - bh - 16;
           return (
-            <polygon
-              points={`${ox},${sy} ${ox + dx},${sy + dy} ${ox + bw + dx},${sy + dy} ${ox + bw},${sy}`}
-              className="fill-primary/40 stroke-primary"
-              strokeWidth="1.2"
-            />
+            <g>
+              <polygon
+                points={`${ox},${sy} ${ox + dx},${sy + dy} ${ox + bw + dx},${sy + dy} ${ox + bw},${sy}`}
+                fill={`url(#${gid}-top)`}
+                className="stroke-primary"
+                strokeWidth="1.4"
+                strokeLinejoin="round"
+              />
+              {!shelfMiddle && (
+                <>
+                  <line x1={ox + 6} y1={sy} x2={ox + 6} y2={oy - bh} className="stroke-primary/60" strokeWidth="1.4" />
+                  <line x1={ox + bw - 6} y1={sy} x2={ox + bw - 6} y2={oy - bh} className="stroke-primary/60" strokeWidth="1.4" />
+                </>
+              )}
+            </g>
           );
         })()}
 
@@ -557,47 +587,59 @@ function Schematic3D({ cfg, fields }: { cfg: FabConfig; fields: FabFields }) {
         {showBottom && legH > 0 && (
           <polygon
             points={`${ox + 3},${oy + legH * 0.6} ${ox + 3 + dx},${oy + legH * 0.6 + dy} ${ox + bw - 3 + dx},${oy + legH * 0.6 + dy} ${ox + bw - 3},${oy + legH * 0.6}`}
-            className="fill-primary/20 stroke-primary"
-            strokeWidth="1"
+            fill={`url(#${gid}-top)`}
+            className="stroke-primary"
+            strokeWidth="1.2"
+            strokeLinejoin="round"
           />
         )}
 
         {/* الأرجل */}
         {legH > 0 && (
           <>
-            <line x1={ox + 4} y1={oy} x2={ox + 4} y2={oy + legH} className="stroke-primary" strokeWidth="2" />
-            <line x1={ox + bw - 4} y1={oy} x2={ox + bw - 4} y2={oy + legH} className="stroke-primary" strokeWidth="2" />
-            <line x1={ox + 4 + dx} y1={oy + dy} x2={ox + 4 + dx} y2={oy + legH + dy} className="stroke-primary" strokeWidth="2" />
-            <line x1={ox + bw - 4 + dx} y1={oy + dy} x2={ox + bw - 4 + dx} y2={oy + legH + dy} className="stroke-primary" strokeWidth="2" />
+            <line x1={ox + 5} y1={oy} x2={ox + 5} y2={oy + legH} className="stroke-primary" strokeWidth="2.6" strokeLinecap="round" />
+            <line x1={ox + bw - 5} y1={oy} x2={ox + bw - 5} y2={oy + legH} className="stroke-primary" strokeWidth="2.6" strokeLinecap="round" />
+            <line x1={ox + 5 + dx} y1={oy + dy} x2={ox + 5 + dx} y2={oy + legH + dy} className="stroke-primary/70" strokeWidth="2.6" strokeLinecap="round" />
+            <line x1={ox + bw - 5 + dx} y1={oy + dy} x2={ox + bw - 5 + dx} y2={oy + legH + dy} className="stroke-primary/70" strokeWidth="2.6" strokeLinecap="round" />
           </>
         )}
 
         {/* عجلات */}
         {showWheels && legH > 0 && (
           <>
-            <circle cx={ox + 4} cy={oy + legH + 3} r="3.5" className="fill-primary/70" />
-            <circle cx={ox + bw - 4} cy={oy + legH + 3} r="3.5" className="fill-primary/70" />
-            <circle cx={ox + 4 + dx} cy={oy + legH + 3 + dy} r="3" className="fill-primary/50" />
+            <circle cx={ox + 5} cy={oy + legH + 4} r="4.5" className="fill-primary" />
+            <circle cx={ox + bw - 5} cy={oy + legH + 4} r="4.5" className="fill-primary" />
+            <circle cx={ox + 5 + dx} cy={oy + legH + 4 + dy} r="3.8" className="fill-primary/70" />
+            <circle cx={ox + bw - 5 + dx} cy={oy + legH + 4 + dy} r="3.8" className="fill-primary/70" />
           </>
         )}
 
-        {/* قياسات */}
+        {/* أدلّة القياس */}
         {fields.length && (
-          <text x={ox + bw / 2} y={oy + legH + 16} textAnchor="middle" className="fill-foreground" fontSize="10" fontWeight="bold">
-            ط {Lraw} سم
-          </text>
+          <>
+            <line x1={ox} y1={oy + legH + 16} x2={ox + bw} y2={oy + legH + 16} className="stroke-muted-foreground/60" strokeWidth="1" />
+            <line x1={ox} y1={oy + legH + 12} x2={ox} y2={oy + legH + 20} className="stroke-muted-foreground/60" strokeWidth="1" />
+            <line x1={ox + bw} y1={oy + legH + 12} x2={ox + bw} y2={oy + legH + 20} className="stroke-muted-foreground/60" strokeWidth="1" />
+            <text x={ox + bw / 2} y={oy + legH + 30} textAnchor="middle" className="fill-foreground" fontSize="11" fontWeight="bold">
+              {Lraw} سم
+            </text>
+          </>
         )}
         {fields.height && (
-          <text x={ox - 6} y={oy - bh / 2} textAnchor="end" className="fill-foreground" fontSize="10" fontWeight="bold">
-            ع {Hraw}
-          </text>
+          <>
+            <line x1={ox - 12} y1={oy - bh} x2={ox - 12} y2={oy} className="stroke-muted-foreground/60" strokeWidth="1" />
+            <text x={ox - 16} y={oy - bh / 2} textAnchor="end" className="fill-foreground" fontSize="11" fontWeight="bold">
+              {Hraw}
+            </text>
+          </>
         )}
         {fields.width && (
-          <text x={ox + bw + dx + 6} y={oy - bh + dy + 4} textAnchor="start" className="fill-foreground" fontSize="9" fontWeight="bold">
+          <text x={ox + bw + dx + 8} y={oy - bh + dy + 4} textAnchor="start" className="fill-foreground" fontSize="10" fontWeight="bold">
             عمق {Wraw}
           </text>
         )}
       </svg>
     </div>
   );
+
 }
