@@ -99,6 +99,7 @@ function RestaurantPage() {
   const [projectId, setProjectId] = useState<string | null>(null);
   const [savedProjects, setSavedProjects] = useState<SavedProject[]>([]);
   const [showProjects, setShowProjects] = useState(false);
+  const [activeTab, setActiveTab] = useState<"projects" | "fabrication">("fabrication");
 
   // بيانات عرض السعر (تُحسب في المتصفح لتجنّب اختلاف SSR)
   const [quoteMeta, setQuoteMeta] = useState<{ no: string; date: string }>({ no: "------", date: "" });
@@ -433,6 +434,30 @@ function RestaurantPage() {
             </div>
           </section>
 
+          {/* تبويبات: دراسة تكلفة المشاريع | تفصيل الستانلس ستيل */}
+          <div className="mb-6 grid grid-cols-2 gap-2 rounded-2xl border border-border bg-muted/20 p-1.5">
+            <button
+              type="button"
+              onClick={() => setActiveTab("projects")}
+              className={`rounded-xl px-4 py-3 text-sm font-bold transition-colors ${
+                activeTab === "projects" ? "bg-primary text-primary-foreground shadow" : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              دراسة تكلفة المشاريع
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("fabrication")}
+              className={`rounded-xl px-4 py-3 text-sm font-bold transition-colors ${
+                activeTab === "fabrication" ? "bg-primary text-primary-foreground shadow" : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              تفصيل الستانلس ستيل
+            </button>
+          </div>
+
+          {activeTab === "projects" && (
+          <>
           {/* اختياري: نوع المشروع + معدات جاهزة */}
           <section>
             <h2 className="mb-3 text-lg font-bold">نوع المشروع (اختياري — لعرض المعدات الجاهزة)</h2>
@@ -531,8 +556,11 @@ function RestaurantPage() {
               </div>
             </section>
           )}
+          </>
+          )}
 
-          {/* حاسبة التفصيل الديناميكية */}
+          {activeTab === "fabrication" && (
+          /* حاسبة التفصيل الديناميكية */
           <FabricationCalculator
             categories={categories}
             products={products}
@@ -547,6 +575,7 @@ function RestaurantPage() {
             }}
             onEditCancel={() => setEditItem(null)}
           />
+          )}
 
           {/* الملخص */}
           <section className="mt-12">

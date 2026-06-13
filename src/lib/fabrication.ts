@@ -51,6 +51,23 @@ export interface FabPricing {
   };
 }
 
+/** شروط عرض الصورة حسب مواصفات العميل */
+export interface FabImageTags {
+  grade?: string;
+  thickness?: string;
+  topShelf?: boolean;
+  bottomShelf?: boolean;
+  wheels?: boolean;
+  bowls?: number;
+}
+
+/** صورة موسومة بمواصفات */
+export interface FabImage {
+  url: string;
+  label?: string;
+  tags: FabImageTags;
+}
+
 /** منتج تفصيل */
 export interface FabProduct {
   id: string;
@@ -59,7 +76,7 @@ export interface FabProduct {
   slug: string;
   icon: string | null;
   image_url: string | null;
-  images: string[];
+  images: FabImage[];
   description: string | null;
   specs: Record<string, unknown>;
   base_price: number;
@@ -210,4 +227,59 @@ export function describeItem(item: FabLineItem, product?: FabProduct): string {
   if (f.wheels && item.wheels) parts.push("عجلات");
   if (item.notes) parts.push(`ملاحظة: ${item.notes}`);
   return parts.join(" | ");
+}
+
+/** يحوّل بيانات الصور القادمة من قاعدة البيانات (نصوص قديمة أو كائنات موسومة) إلى FabImage[] */
+export function normalizeImages(raw: unknown): FabImage[] {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .map((it): FabImage => {
+      if (typeof it === "string") return { url: it, tags: {} };
+      const o = (it ?? {}) as Record<string, unknown>;
+      return {
+        url: String(o.url ?? ""),
+        label: o.label ? String(o.label) : undefined,
+        tags: (o.tags ?? {}) as FabImageTags,
+      };
+    })
+    .filter((i) => i.url);
+}
+
+/** هل تنطبق وسوم الصورة على إعدادات العميل الحالية؟ ويُعيد عدد الوسوم المطابقة */
+function imageScore(tags: FabImageTags, cfg: FabConfig): number | null {
+  let score = 0;
+  const check = (cond: boolean, matched: boolean) => {
+    if (!cond) return true; // الوسم غير محدد
+    if (matched) {
+      score++;
+      return true;
+    }
+    return false;
+  };
+  if (!check(tags.grade != null && tags.grade !== "", String(tags.grade) === String(cfg.grade))) return null;
+  if (!check(tags.thickness != null && tags.thickness !== "", String(tags.thickness) === String(cfg.thickness)))
+    return null;
+  if (!check(tags.topShelf != null, Boolean(tags.topShelf) === Boolean(cfg.topShelf))) return null;
+  if (!check(tags.bottomShelf != null, Boolean(tags.bottomShelf) === Boolean(cfg.bottomShelf))) return null;
+  if (!check(tags.wheels != null, Boolean(tags.wheels) === Boolean(cfg.wheels))) return null;
+  if (!check(tags.bowls != null, Number(tags.bowls) === Number(cfg.bowls))) return null;
+  return score;
+}
+
+/** يختار أنسب صورة حسب مواصفات العميل، مع تفضيل أكثر الوسوم تطابقاً */
+export function pickImage(images: FabImage[], cfg: FabConfig, fallback?: string | null): string | null {
+  let best: FabImage | null = null;
+  let bestScore = -1;
+  for (const img of images) {
+    if (!img?.url) continue;
+    const s = imageScore(img.tags ?? {}, cfg);
+    if (s == null) continue;
+    if (s > bestScore) {
+      bestScore = s;
+      best = img;
+    }
+  }
+  if (best) return best.url;
+  if (images[0]?.url) return images[0].url;
+  return fallback ?? null;
 }
