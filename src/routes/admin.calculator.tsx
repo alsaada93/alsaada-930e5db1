@@ -671,7 +671,7 @@ function ProductsTab({ data }: { data: ReturnType<typeof useFabricationData> }) 
                 <button
                   type="button"
                   onClick={() => fileRef.current?.click()}
-                  disabled={(edit?.images?.length ?? 0) >= 10}
+                  disabled={(edit?.images?.length ?? 0) >= 20}
                   className="flex h-20 w-20 items-center justify-center rounded-md border border-dashed text-muted-foreground disabled:opacity-40"
                 >
                   {uploading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Upload className="h-5 w-5" />}
