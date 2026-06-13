@@ -908,51 +908,150 @@ export type Database = {
           active: boolean
           brand_logo_url: string | null
           category: string | null
+          condition: string
+          cost_layer: string
           country_of_origin: string | null
           created_at: string
+          default_qty: number
           description: string | null
+          essential: boolean
           id: string
           image_url: string | null
+          images: string[]
+          linked_listing_id: string | null
           manufacturer: string | null
           name: string
           price_new: number
           price_used: number
           project_type_slugs: string[]
           sort_order: number
+          specs: Json
+          tier: string
           updated_at: string
+          used_condition: string | null
         }
         Insert: {
           active?: boolean
           brand_logo_url?: string | null
           category?: string | null
+          condition?: string
+          cost_layer?: string
           country_of_origin?: string | null
           created_at?: string
+          default_qty?: number
           description?: string | null
+          essential?: boolean
           id?: string
           image_url?: string | null
+          images?: string[]
+          linked_listing_id?: string | null
           manufacturer?: string | null
           name: string
           price_new?: number
           price_used?: number
           project_type_slugs?: string[]
           sort_order?: number
+          specs?: Json
+          tier?: string
           updated_at?: string
+          used_condition?: string | null
         }
         Update: {
           active?: boolean
           brand_logo_url?: string | null
           category?: string | null
+          condition?: string
+          cost_layer?: string
           country_of_origin?: string | null
           created_at?: string
+          default_qty?: number
           description?: string | null
+          essential?: boolean
           id?: string
           image_url?: string | null
+          images?: string[]
+          linked_listing_id?: string | null
           manufacturer?: string | null
           name?: string
           price_new?: number
           price_used?: number
           project_type_slugs?: string[]
           sort_order?: number
+          specs?: Json
+          tier?: string
+          updated_at?: string
+          used_condition?: string | null
+        }
+        Relationships: []
+      }
+      restaurant_leads: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          project_data: Json
+          project_name: string | null
+          project_type_slug: string | null
+          total: number
+          whatsapp: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          project_data?: Json
+          project_name?: string | null
+          project_type_slug?: string | null
+          total?: number
+          whatsapp: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          project_data?: Json
+          project_name?: string | null
+          project_type_slug?: string | null
+          total?: number
+          whatsapp?: string
+        }
+        Relationships: []
+      }
+      restaurant_packages: {
+        Row: {
+          active: boolean
+          created_at: string
+          description: string | null
+          id: string
+          items: Json
+          name: string
+          project_type_slug: string
+          sort_order: number
+          tier: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          id?: string
+          items?: Json
+          name: string
+          project_type_slug: string
+          sort_order?: number
+          tier?: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          id?: string
+          items?: Json
+          name?: string
+          project_type_slug?: string
+          sort_order?: number
+          tier?: string
           updated_at?: string
         }
         Relationships: []
@@ -1038,6 +1137,7 @@ export type Database = {
           data: Json
           id: string
           name: string
+          share_slug: string | null
           total: number
           updated_at: string
           user_id: string
@@ -1047,6 +1147,7 @@ export type Database = {
           data?: Json
           id?: string
           name?: string
+          share_slug?: string | null
           total?: number
           updated_at?: string
           user_id: string
@@ -1056,6 +1157,7 @@ export type Database = {
           data?: Json
           id?: string
           name?: string
+          share_slug?: string | null
           total?: number
           updated_at?: string
           user_id?: string
