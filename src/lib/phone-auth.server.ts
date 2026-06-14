@@ -6,7 +6,10 @@ const MAX_VERIFY_ATTEMPTS = 5;
 const MAX_REQUESTS_PER_HOUR = 5;
 
 function hashCode(phone: string, code: string): string {
-  const secret = process.env.SUPABASE_SERVICE_ROLE_KEY || "fallback-otp-secret";
+  const secret = process.env.OTP_HMAC_SECRET || process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!secret) {
+    throw new Error("OTP hashing secret is not configured (OTP_HMAC_SECRET / SUPABASE_SERVICE_ROLE_KEY).");
+  }
   return createHmac("sha256", secret).update(`${phone}:${code}`).digest("hex");
 }
 
