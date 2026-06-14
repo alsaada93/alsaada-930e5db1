@@ -1,11 +1,23 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { Plus, Pencil, Trash2, ChevronUp, ChevronDown, ChevronLeft, Save, Loader2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Plus, Pencil, Trash2, ChevronUp, ChevronDown, ChevronLeft, Save, Loader2, ImagePlus, X, Smile } from "lucide-react";
 import { toast } from "sonner";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import { categories as initial, type Category, type SubCategory } from "@/data/marketplace";
 import { saveCategories } from "@/hooks/useCategories";
 import { supabase } from "@/integrations/supabase/client";
+
+async function uploadCategoryIcon(file: File): Promise<string> {
+  const ext = file.name.split(".").pop() || "png";
+  const path = `categories/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+  const { error } = await supabase.storage.from("listings").upload(path, file, { cacheControl: "3600" });
+  if (error) throw error;
+  return supabase.storage.from("listings").getPublicUrl(path).data.publicUrl;
+}
+
+function isImageIcon(icon: string | undefined): boolean {
+  return !!icon && (icon.startsWith("http") || icon.startsWith("/") || icon.startsWith("data:"));
+}
 
 export const Route = createFileRoute("/admin/categories")({
   component: AdminCategoriesPage,
