@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const inputSchema = z.object({
   lang: z.enum(["ar", "en"]),
@@ -24,6 +25,7 @@ type TranslationMap = Record<string, { title: string; description: string }>;
  * translated once per language.
  */
 export const translateListings = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => inputSchema.parse(input))
   .handler(async ({ data }): Promise<TranslationMap> => {
     const { lang, items } = data;
