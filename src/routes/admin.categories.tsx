@@ -37,6 +37,8 @@ function AdminCategoriesPage() {
   const [openGroup, setOpenGroup] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const [iconUploading, setIconUploading] = useState<string | null>(null);
+  const iconInputs = useRef<Record<string, HTMLInputElement | null>>({});
 
   useEffect(() => {
     supabase
