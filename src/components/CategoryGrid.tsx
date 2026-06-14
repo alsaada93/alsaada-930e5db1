@@ -23,6 +23,7 @@ function CategoryCard({ c }: { c: ReturnType<typeof useCategories>["categories"]
   const [open, setOpen] = useState(false);
   const Icon = icons[c.id] ?? Smartphone;
   const grad = gradients[c.id] ?? "from-primary to-accent";
+  const hasImageIcon = !!c.icon && (c.icon.startsWith("http") || c.icon.startsWith("/") || c.icon.startsWith("data:"));
 
   return (
     <div className="group relative flex flex-col items-start gap-3 overflow-hidden rounded-2xl border border-border bg-card p-4 text-start shadow-card transition-all hover:-translate-y-1 hover:border-primary/40">
