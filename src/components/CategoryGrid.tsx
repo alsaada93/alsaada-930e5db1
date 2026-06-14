@@ -23,6 +23,7 @@ function CategoryCard({ c }: { c: ReturnType<typeof useCategories>["categories"]
   const [open, setOpen] = useState(false);
   const Icon = icons[c.id] ?? Smartphone;
   const grad = gradients[c.id] ?? "from-primary to-accent";
+  const hasImageIcon = !!c.icon && (c.icon.startsWith("http") || c.icon.startsWith("/") || c.icon.startsWith("data:"));
 
   return (
     <div className="group relative flex flex-col items-start gap-3 overflow-hidden rounded-2xl border border-border bg-card p-4 text-start shadow-card transition-all hover:-translate-y-1 hover:border-primary/40">
@@ -33,8 +34,12 @@ function CategoryCard({ c }: { c: ReturnType<typeof useCategories>["categories"]
         className="flex w-full flex-col items-start gap-3"
         aria-label={lang === "ar" ? c.name : c.nameEn}
       >
-        <span className={`flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br ${grad} text-white shadow-lg transition-transform group-hover:scale-110`}>
-          <Icon className="h-8 w-8" strokeWidth={1.75} />
+        <span className={`flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br ${grad} text-white shadow-lg transition-transform group-hover:scale-110`}>
+          {hasImageIcon ? (
+            <img src={c.icon} alt={lang === "ar" ? c.name : c.nameEn} className="h-full w-full object-cover" loading="lazy" />
+          ) : (
+            <Icon className="h-8 w-8" strokeWidth={1.75} />
+          )}
         </span>
         <h3 className="font-bold text-card-foreground">{lang === "ar" ? c.name : c.nameEn}</h3>
         <p className="line-clamp-2 text-xs text-muted-foreground">

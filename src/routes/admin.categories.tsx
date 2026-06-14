@@ -1,11 +1,23 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { Plus, Pencil, Trash2, ChevronUp, ChevronDown, ChevronLeft, Save, Loader2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Plus, Pencil, Trash2, ChevronUp, ChevronDown, ChevronLeft, Save, Loader2, ImagePlus, X, Smile } from "lucide-react";
 import { toast } from "sonner";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import { categories as initial, type Category, type SubCategory } from "@/data/marketplace";
 import { saveCategories } from "@/hooks/useCategories";
 import { supabase } from "@/integrations/supabase/client";
+
+async function uploadCategoryIcon(file: File): Promise<string> {
+  const ext = file.name.split(".").pop() || "png";
+  const path = `categories/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+  const { error } = await supabase.storage.from("listings").upload(path, file, { cacheControl: "3600" });
+  if (error) throw error;
+  return supabase.storage.from("listings").getPublicUrl(path).data.publicUrl;
+}
+
+function isImageIcon(icon: string | undefined): boolean {
+  return !!icon && (icon.startsWith("http") || icon.startsWith("/") || icon.startsWith("data:"));
+}
 
 export const Route = createFileRoute("/admin/categories")({
   component: AdminCategoriesPage,
@@ -25,6 +37,8 @@ function AdminCategoriesPage() {
   const [openGroup, setOpenGroup] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const [iconUploading, setIconUploading] = useState<string | null>(null);
+  const iconInputs = useRef<Record<string, HTMLInputElement | null>>({});
 
   useEffect(() => {
     supabase
@@ -68,6 +82,28 @@ function AdminCategoriesPage() {
     if (!name) return;
     setCats((p) => p.map((x) => (x.id === id ? { ...x, name } : x)));
   };
+  const setCatIcon = (id: string, icon: string) =>
+    setCats((p) => p.map((x) => (x.id === id ? { ...x, icon } : x)));
+  const setEmojiIcon = (id: string) => {
+    const c = cats.find((x) => x.id === id);
+    const emoji = prompt("ضع رمز/إيموجي للتصنيف", isImageIcon(c?.icon) ? "📦" : c?.icon);
+    if (emoji === null) return;
+    setCatIcon(id, emoji.trim() || "📦");
+  };
+  const uploadIcon = async (id: string, file: File) => {
+    setIconUploading(id);
+    try {
+      const url = await uploadCategoryIcon(file);
+      setCatIcon(id, url);
+      toast.success("تم تحديث صورة التصنيف");
+    } catch {
+      toast.error("تعذّر رفع الصورة");
+    } finally {
+      setIconUploading(null);
+    }
+  };
+  const clearIcon = (id: string) => setCatIcon(id, "📦");
+
 
   // ---- Group (sub-category) level ----
   const updateGroups = (catId: string, fn: (g: SubCategory[]) => SubCategory[]) =>
@@ -133,12 +169,38 @@ function AdminCategoriesPage() {
                   <button onClick={() => setOpenCat(expanded ? null : c.id)} className="rounded-lg p-1.5 hover:bg-muted" aria-label="فتح">
                     <ChevronLeft className={`h-4 w-4 transition-transform ${expanded ? "-rotate-90" : ""}`} />
                   </button>
-                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent text-lg">{c.icon}</span>
+                  <div className="relative shrink-0">
+                    <span className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl bg-accent text-lg">
+                      {iconUploading === c.id ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : isImageIcon(c.icon) ? (
+                        <img src={c.icon} alt={c.name} className="h-full w-full object-cover" />
+                      ) : (
+                        c.icon
+                      )}
+                    </span>
+                    <input
+                      ref={(el) => { iconInputs.current[c.id] = el; }}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const f = e.target.files?.[0];
+                        if (f) uploadIcon(c.id, f);
+                        e.target.value = "";
+                      }}
+                    />
+                  </div>
                   <div className="min-w-0 flex-1">
                     <h3 className="font-bold text-card-foreground">{c.name}</h3>
                     <p className="truncate text-xs text-muted-foreground">{c.groups.length} تصنيف فرعي</p>
                   </div>
                   <div className="flex shrink-0 items-center gap-1">
+                    <button onClick={() => iconInputs.current[c.id]?.click()} className="rounded-lg p-1.5 text-primary hover:bg-accent" aria-label="تغيير الصورة" title="رفع صورة للتصنيف"><ImagePlus className="h-4 w-4" /></button>
+                    <button onClick={() => setEmojiIcon(c.id)} className="rounded-lg p-1.5 text-primary hover:bg-accent" aria-label="إيموجي" title="استخدام رمز/إيموجي"><Smile className="h-4 w-4" /></button>
+                    {isImageIcon(c.icon) && (
+                      <button onClick={() => clearIcon(c.id)} className="rounded-lg p-1.5 text-destructive hover:bg-destructive/10" aria-label="حذف الصورة" title="حذف الصورة"><X className="h-4 w-4" /></button>
+                    )}
                     <button onClick={() => moveCat(idx, -1)} className="rounded-lg p-1.5 hover:bg-muted" aria-label="أعلى"><ChevronUp className="h-4 w-4" /></button>
                     <button onClick={() => moveCat(idx, 1)} className="rounded-lg p-1.5 hover:bg-muted" aria-label="أسفل"><ChevronDown className="h-4 w-4" /></button>
                     <button onClick={() => renameCat(c.id)} className="rounded-lg p-1.5 text-primary hover:bg-accent" aria-label="تعديل"><Pencil className="h-4 w-4" /></button>
