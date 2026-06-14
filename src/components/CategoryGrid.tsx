@@ -1,6 +1,16 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { UtensilsCrossed, Hotel, Smartphone, Sofa, Store, Gavel, Calculator, ChevronDown, type LucideIcon } from "lucide-react";
+import {
+  UtensilsCrossed,
+  Hotel,
+  Smartphone,
+  Sofa,
+  Store,
+  Gavel,
+  Calculator,
+  ChevronDown,
+  type LucideIcon,
+} from "lucide-react";
 import { useCategories } from "@/hooks/useCategories";
 import { useLanguage } from "@/hooks/useLanguage";
 
@@ -23,7 +33,8 @@ function CategoryCard({ c }: { c: ReturnType<typeof useCategories>["categories"]
   const [open, setOpen] = useState(false);
   const Icon = icons[c.id] ?? Smartphone;
   const grad = gradients[c.id] ?? "from-primary to-accent";
-  const hasImageIcon = !!c.icon && (c.icon.startsWith("http") || c.icon.startsWith("/") || c.icon.startsWith("data:"));
+  const hasImageIcon =
+    !!c.icon && (c.icon.startsWith("http") || c.icon.startsWith("/") || c.icon.startsWith("data:"));
 
   return (
     <div className="group relative flex flex-col items-start gap-3 overflow-hidden rounded-2xl border border-border bg-card p-4 text-start shadow-card transition-all hover:-translate-y-1 hover:border-primary/40">
@@ -34,9 +45,16 @@ function CategoryCard({ c }: { c: ReturnType<typeof useCategories>["categories"]
         className="flex w-full flex-col items-start gap-3"
         aria-label={lang === "ar" ? c.name : c.nameEn}
       >
-        <span className={`flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br ${grad} text-white shadow-lg transition-transform group-hover:scale-110`}>
+        <span
+          className={`flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br ${grad} text-white shadow-lg transition-transform group-hover:scale-110`}
+        >
           {hasImageIcon ? (
-            <img src={c.icon} alt={lang === "ar" ? c.name : c.nameEn} className="h-full w-full object-cover" loading="lazy" />
+            <img
+              src={c.icon}
+              alt={lang === "ar" ? c.name : c.nameEn}
+              className="h-full w-full object-cover"
+              loading="lazy"
+            />
           ) : (
             <Icon className="h-8 w-8" strokeWidth={1.75} />
           )}
@@ -112,7 +130,9 @@ export function CategoryGrid() {
           <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500 to-red-500 text-white shadow-lg transition-transform group-hover:scale-110">
             <Store className="h-8 w-8" strokeWidth={1.75} />
           </span>
-          <h3 className="font-bold text-card-foreground">{lang === "ar" ? "أنشطة للبيع" : "Businesses for sale"}</h3>
+          <h3 className="font-bold text-card-foreground">
+            {lang === "ar" ? "أنشطة للبيع" : "Businesses for sale"}
+          </h3>
           <p className="line-clamp-2 text-xs text-muted-foreground">
             {lang === "ar"
               ? "مطاعم وأنشطة تجارية كاملة جاهزة للتشغيل"
@@ -128,7 +148,9 @@ export function CategoryGrid() {
           <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-500 text-white shadow-lg transition-transform group-hover:scale-110">
             <Gavel className="h-8 w-8" strokeWidth={1.75} />
           </span>
-          <h3 className="font-bold text-card-foreground">{lang === "ar" ? "المزادات" : "Auctions"}</h3>
+          <h3 className="font-bold text-card-foreground">
+            {lang === "ar" ? "المزادات" : "Auctions"}
+          </h3>
           <p className="line-clamp-2 text-xs text-muted-foreground">
             {lang === "ar"
               ? "زايد على أفضل الصفقات واربح بأقل الأسعار"
@@ -144,7 +166,9 @@ export function CategoryGrid() {
           <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/20 text-white shadow-lg backdrop-blur-sm transition-transform group-hover:scale-110">
             <Calculator className="h-8 w-8" strokeWidth={1.75} />
           </span>
-          <h3 className="text-lg font-extrabold">{lang === "ar" ? "🏪 حاسبة المطاعم" : "🏪 Restaurant Cost Calculator"}</h3>
+          <h3 className="text-lg font-extrabold">
+            {lang === "ar" ? "🏪 حاسبة المطاعم" : "🏪 Restaurant Cost Calculator"}
+          </h3>
           <p className="text-sm font-semibold text-white/90">
             {lang === "ar"
               ? "احسب تكلفة مشروعك خلال دقيقة واحدة"
