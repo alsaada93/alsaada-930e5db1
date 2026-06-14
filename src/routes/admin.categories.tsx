@@ -80,6 +80,28 @@ function AdminCategoriesPage() {
     if (!name) return;
     setCats((p) => p.map((x) => (x.id === id ? { ...x, name } : x)));
   };
+  const setCatIcon = (id: string, icon: string) =>
+    setCats((p) => p.map((x) => (x.id === id ? { ...x, icon } : x)));
+  const setEmojiIcon = (id: string) => {
+    const c = cats.find((x) => x.id === id);
+    const emoji = prompt("ضع رمز/إيموجي للتصنيف", isImageIcon(c?.icon) ? "📦" : c?.icon);
+    if (emoji === null) return;
+    setCatIcon(id, emoji.trim() || "📦");
+  };
+  const uploadIcon = async (id: string, file: File) => {
+    setIconUploading(id);
+    try {
+      const url = await uploadCategoryIcon(file);
+      setCatIcon(id, url);
+      toast.success("تم تحديث صورة التصنيف");
+    } catch {
+      toast.error("تعذّر رفع الصورة");
+    } finally {
+      setIconUploading(null);
+    }
+  };
+  const clearIcon = (id: string) => setCatIcon(id, "📦");
+
 
   // ---- Group (sub-category) level ----
   const updateGroups = (catId: string, fn: (g: SubCategory[]) => SubCategory[]) =>
