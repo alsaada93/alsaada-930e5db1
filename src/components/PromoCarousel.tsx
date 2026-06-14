@@ -3,7 +3,7 @@ import { useHeroSlides } from "@/hooks/useHeroSlides";
 
 /** شريط صور متحرك بين مربع البحث والتصنيفات — يتبدّل تلقائياً مع تنقّل بالنقاط. */
 export function PromoCarousel() {
-  const { slides, intervalMs } = useHeroSlides();
+  const { slides, intervalMs, loading } = useHeroSlides();
   const [current, setCurrent] = useState(0);
 
   useEffect(() => {
@@ -13,6 +13,16 @@ export function PromoCarousel() {
     }, Math.max(1500, intervalMs));
     return () => clearInterval(id);
   }, [slides.length, intervalMs]);
+
+  // Reserve the band's height while loading so content below does not jump
+  // (prevents cumulative layout shift on first paint).
+  if (loading) {
+    return (
+      <section className="mx-auto max-w-7xl px-4 pt-8">
+        <div className="aspect-[16/6] w-full animate-pulse rounded-2xl border border-border bg-muted" />
+      </section>
+    );
+  }
 
   if (slides.length === 0) return null;
 
