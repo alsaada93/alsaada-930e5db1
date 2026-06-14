@@ -34,8 +34,12 @@ function CategoryCard({ c }: { c: ReturnType<typeof useCategories>["categories"]
         className="flex w-full flex-col items-start gap-3"
         aria-label={lang === "ar" ? c.name : c.nameEn}
       >
-        <span className={`flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br ${grad} text-white shadow-lg transition-transform group-hover:scale-110`}>
-          <Icon className="h-8 w-8" strokeWidth={1.75} />
+        <span className={`flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br ${grad} text-white shadow-lg transition-transform group-hover:scale-110`}>
+          {hasImageIcon ? (
+            <img src={c.icon} alt={lang === "ar" ? c.name : c.nameEn} className="h-full w-full object-cover" loading="lazy" />
+          ) : (
+            <Icon className="h-8 w-8" strokeWidth={1.75} />
+          )}
         </span>
         <h3 className="font-bold text-card-foreground">{lang === "ar" ? c.name : c.nameEn}</h3>
         <p className="line-clamp-2 text-xs text-muted-foreground">
