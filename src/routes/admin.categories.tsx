@@ -169,12 +169,38 @@ function AdminCategoriesPage() {
                   <button onClick={() => setOpenCat(expanded ? null : c.id)} className="rounded-lg p-1.5 hover:bg-muted" aria-label="فتح">
                     <ChevronLeft className={`h-4 w-4 transition-transform ${expanded ? "-rotate-90" : ""}`} />
                   </button>
-                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent text-lg">{c.icon}</span>
+                  <div className="relative shrink-0">
+                    <span className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl bg-accent text-lg">
+                      {iconUploading === c.id ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : isImageIcon(c.icon) ? (
+                        <img src={c.icon} alt={c.name} className="h-full w-full object-cover" />
+                      ) : (
+                        c.icon
+                      )}
+                    </span>
+                    <input
+                      ref={(el) => { iconInputs.current[c.id] = el; }}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const f = e.target.files?.[0];
+                        if (f) uploadIcon(c.id, f);
+                        e.target.value = "";
+                      }}
+                    />
+                  </div>
                   <div className="min-w-0 flex-1">
                     <h3 className="font-bold text-card-foreground">{c.name}</h3>
                     <p className="truncate text-xs text-muted-foreground">{c.groups.length} تصنيف فرعي</p>
                   </div>
                   <div className="flex shrink-0 items-center gap-1">
+                    <button onClick={() => iconInputs.current[c.id]?.click()} className="rounded-lg p-1.5 text-primary hover:bg-accent" aria-label="تغيير الصورة" title="رفع صورة للتصنيف"><ImagePlus className="h-4 w-4" /></button>
+                    <button onClick={() => setEmojiIcon(c.id)} className="rounded-lg p-1.5 text-primary hover:bg-accent" aria-label="إيموجي" title="استخدام رمز/إيموجي"><Smile className="h-4 w-4" /></button>
+                    {isImageIcon(c.icon) && (
+                      <button onClick={() => clearIcon(c.id)} className="rounded-lg p-1.5 text-destructive hover:bg-destructive/10" aria-label="حذف الصورة" title="حذف الصورة"><X className="h-4 w-4" /></button>
+                    )}
                     <button onClick={() => moveCat(idx, -1)} className="rounded-lg p-1.5 hover:bg-muted" aria-label="أعلى"><ChevronUp className="h-4 w-4" /></button>
                     <button onClick={() => moveCat(idx, 1)} className="rounded-lg p-1.5 hover:bg-muted" aria-label="أسفل"><ChevronDown className="h-4 w-4" /></button>
                     <button onClick={() => renameCat(c.id)} className="rounded-lg p-1.5 text-primary hover:bg-accent" aria-label="تعديل"><Pencil className="h-4 w-4" /></button>
