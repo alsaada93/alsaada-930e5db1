@@ -3,15 +3,8 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 /** Throws unless the caller is an admin. Returns nothing. */
-async function assertAdmin(supabase: {
-  from: (t: string) => {
-    select: (c: string) => {
-      eq: (a: string, b: string) => {
-        eq: (a: string, b: string) => { maybeSingle: () => Promise<{ data: unknown }> };
-      };
-    };
-  };
-}, userId: string) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function assertAdmin(supabase: any, userId: string) {
   const { data } = await supabase
     .from("user_roles")
     .select("role")
