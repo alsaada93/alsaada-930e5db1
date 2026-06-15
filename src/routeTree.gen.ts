@@ -28,11 +28,13 @@ import { Route as AccountRouteImport } from './routes/account'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TipsIndexRouteImport } from './routes/tips.index'
+import { Route as FacebookAdsIndexRouteImport } from './routes/facebook-ads.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as TipsSlugRouteImport } from './routes/tips.$slug'
 import { Route as RestaurantManufacturingRouteImport } from './routes/restaurant.manufacturing'
 import { Route as LoginAdminRouteImport } from './routes/login.admin'
 import { Route as ListingIdRouteImport } from './routes/listing.$id'
+import { Route as FacebookAdsIdRouteImport } from './routes/facebook-ads.$id'
 import { Route as CategoryIdRouteImport } from './routes/category.$id'
 import { Route as AdminSlidesRouteImport } from './routes/admin.slides'
 import { Route as AdminSeoRouteImport } from './routes/admin.seo'
@@ -41,6 +43,7 @@ import { Route as AdminMembersRouteImport } from './routes/admin.members'
 import { Route as AdminListingsRouteImport } from './routes/admin.listings'
 import { Route as AdminImagesRouteImport } from './routes/admin.images'
 import { Route as AdminHeroRouteImport } from './routes/admin.hero'
+import { Route as AdminFacebookRouteImport } from './routes/admin.facebook'
 import { Route as AdminCategoriesRouteImport } from './routes/admin.categories'
 import { Route as AdminCalculatorRouteImport } from './routes/admin.calculator'
 import { Route as AdminBrandsRouteImport } from './routes/admin.brands'
@@ -48,6 +51,8 @@ import { Route as AdminBlogRouteImport } from './routes/admin.blog'
 import { Route as AdminAuctionsRouteImport } from './routes/admin.auctions'
 import { Route as AdminAppearanceRouteImport } from './routes/admin.appearance'
 import { Route as AdminAccessRouteImport } from './routes/admin.access'
+import { Route as ApiPublicFacebookSyncCronRouteImport } from './routes/api/public/facebook-sync-cron'
+import { Route as ApiPublicFacebookSyncRouteImport } from './routes/api/public/facebook-sync'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 
 const TermsRoute = TermsRouteImport.update({
@@ -145,6 +150,11 @@ const TipsIndexRoute = TipsIndexRouteImport.update({
   path: '/tips/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FacebookAdsIndexRoute = FacebookAdsIndexRouteImport.update({
+  id: '/facebook-ads/',
+  path: '/facebook-ads/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -168,6 +178,11 @@ const LoginAdminRoute = LoginAdminRouteImport.update({
 const ListingIdRoute = ListingIdRouteImport.update({
   id: '/listing/$id',
   path: '/listing/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FacebookAdsIdRoute = FacebookAdsIdRouteImport.update({
+  id: '/facebook-ads/$id',
+  path: '/facebook-ads/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CategoryIdRoute = CategoryIdRouteImport.update({
@@ -210,6 +225,11 @@ const AdminHeroRoute = AdminHeroRouteImport.update({
   path: '/hero',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminFacebookRoute = AdminFacebookRouteImport.update({
+  id: '/facebook',
+  path: '/facebook',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminCategoriesRoute = AdminCategoriesRouteImport.update({
   id: '/categories',
   path: '/categories',
@@ -245,6 +265,17 @@ const AdminAccessRoute = AdminAccessRouteImport.update({
   path: '/access',
   getParentRoute: () => AdminRoute,
 } as any)
+const ApiPublicFacebookSyncCronRoute =
+  ApiPublicFacebookSyncCronRouteImport.update({
+    id: '/api/public/facebook-sync-cron',
+    path: '/api/public/facebook-sync-cron',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicFacebookSyncRoute = ApiPublicFacebookSyncRouteImport.update({
+  id: '/api/public/facebook-sync',
+  path: '/api/public/facebook-sync',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LovableEmailQueueProcessRoute =
   LovableEmailQueueProcessRouteImport.update({
     id: '/lovable/email/queue/process',
@@ -278,6 +309,7 @@ export interface FileRoutesByFullPath {
   '/admin/brands': typeof AdminBrandsRoute
   '/admin/calculator': typeof AdminCalculatorRoute
   '/admin/categories': typeof AdminCategoriesRoute
+  '/admin/facebook': typeof AdminFacebookRoute
   '/admin/hero': typeof AdminHeroRoute
   '/admin/images': typeof AdminImagesRoute
   '/admin/listings': typeof AdminListingsRoute
@@ -286,12 +318,16 @@ export interface FileRoutesByFullPath {
   '/admin/seo': typeof AdminSeoRoute
   '/admin/slides': typeof AdminSlidesRoute
   '/category/$id': typeof CategoryIdRoute
+  '/facebook-ads/$id': typeof FacebookAdsIdRoute
   '/listing/$id': typeof ListingIdRoute
   '/login/admin': typeof LoginAdminRoute
   '/restaurant/manufacturing': typeof RestaurantManufacturingRoute
   '/tips/$slug': typeof TipsSlugRoute
   '/admin/': typeof AdminIndexRoute
+  '/facebook-ads/': typeof FacebookAdsIndexRoute
   '/tips/': typeof TipsIndexRoute
+  '/api/public/facebook-sync': typeof ApiPublicFacebookSyncRoute
+  '/api/public/facebook-sync-cron': typeof ApiPublicFacebookSyncCronRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRoutesByTo {
@@ -319,6 +355,7 @@ export interface FileRoutesByTo {
   '/admin/brands': typeof AdminBrandsRoute
   '/admin/calculator': typeof AdminCalculatorRoute
   '/admin/categories': typeof AdminCategoriesRoute
+  '/admin/facebook': typeof AdminFacebookRoute
   '/admin/hero': typeof AdminHeroRoute
   '/admin/images': typeof AdminImagesRoute
   '/admin/listings': typeof AdminListingsRoute
@@ -327,12 +364,16 @@ export interface FileRoutesByTo {
   '/admin/seo': typeof AdminSeoRoute
   '/admin/slides': typeof AdminSlidesRoute
   '/category/$id': typeof CategoryIdRoute
+  '/facebook-ads/$id': typeof FacebookAdsIdRoute
   '/listing/$id': typeof ListingIdRoute
   '/login/admin': typeof LoginAdminRoute
   '/restaurant/manufacturing': typeof RestaurantManufacturingRoute
   '/tips/$slug': typeof TipsSlugRoute
   '/admin': typeof AdminIndexRoute
+  '/facebook-ads': typeof FacebookAdsIndexRoute
   '/tips': typeof TipsIndexRoute
+  '/api/public/facebook-sync': typeof ApiPublicFacebookSyncRoute
+  '/api/public/facebook-sync-cron': typeof ApiPublicFacebookSyncCronRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRoutesById {
@@ -362,6 +403,7 @@ export interface FileRoutesById {
   '/admin/brands': typeof AdminBrandsRoute
   '/admin/calculator': typeof AdminCalculatorRoute
   '/admin/categories': typeof AdminCategoriesRoute
+  '/admin/facebook': typeof AdminFacebookRoute
   '/admin/hero': typeof AdminHeroRoute
   '/admin/images': typeof AdminImagesRoute
   '/admin/listings': typeof AdminListingsRoute
@@ -370,12 +412,16 @@ export interface FileRoutesById {
   '/admin/seo': typeof AdminSeoRoute
   '/admin/slides': typeof AdminSlidesRoute
   '/category/$id': typeof CategoryIdRoute
+  '/facebook-ads/$id': typeof FacebookAdsIdRoute
   '/listing/$id': typeof ListingIdRoute
   '/login/admin': typeof LoginAdminRoute
   '/restaurant/manufacturing': typeof RestaurantManufacturingRoute
   '/tips/$slug': typeof TipsSlugRoute
   '/admin/': typeof AdminIndexRoute
+  '/facebook-ads/': typeof FacebookAdsIndexRoute
   '/tips/': typeof TipsIndexRoute
+  '/api/public/facebook-sync': typeof ApiPublicFacebookSyncRoute
+  '/api/public/facebook-sync-cron': typeof ApiPublicFacebookSyncCronRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRouteTypes {
@@ -406,6 +452,7 @@ export interface FileRouteTypes {
     | '/admin/brands'
     | '/admin/calculator'
     | '/admin/categories'
+    | '/admin/facebook'
     | '/admin/hero'
     | '/admin/images'
     | '/admin/listings'
@@ -414,12 +461,16 @@ export interface FileRouteTypes {
     | '/admin/seo'
     | '/admin/slides'
     | '/category/$id'
+    | '/facebook-ads/$id'
     | '/listing/$id'
     | '/login/admin'
     | '/restaurant/manufacturing'
     | '/tips/$slug'
     | '/admin/'
+    | '/facebook-ads/'
     | '/tips/'
+    | '/api/public/facebook-sync'
+    | '/api/public/facebook-sync-cron'
     | '/lovable/email/queue/process'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -447,6 +498,7 @@ export interface FileRouteTypes {
     | '/admin/brands'
     | '/admin/calculator'
     | '/admin/categories'
+    | '/admin/facebook'
     | '/admin/hero'
     | '/admin/images'
     | '/admin/listings'
@@ -455,12 +507,16 @@ export interface FileRouteTypes {
     | '/admin/seo'
     | '/admin/slides'
     | '/category/$id'
+    | '/facebook-ads/$id'
     | '/listing/$id'
     | '/login/admin'
     | '/restaurant/manufacturing'
     | '/tips/$slug'
     | '/admin'
+    | '/facebook-ads'
     | '/tips'
+    | '/api/public/facebook-sync'
+    | '/api/public/facebook-sync-cron'
     | '/lovable/email/queue/process'
   id:
     | '__root__'
@@ -489,6 +545,7 @@ export interface FileRouteTypes {
     | '/admin/brands'
     | '/admin/calculator'
     | '/admin/categories'
+    | '/admin/facebook'
     | '/admin/hero'
     | '/admin/images'
     | '/admin/listings'
@@ -497,12 +554,16 @@ export interface FileRouteTypes {
     | '/admin/seo'
     | '/admin/slides'
     | '/category/$id'
+    | '/facebook-ads/$id'
     | '/listing/$id'
     | '/login/admin'
     | '/restaurant/manufacturing'
     | '/tips/$slug'
     | '/admin/'
+    | '/facebook-ads/'
     | '/tips/'
+    | '/api/public/facebook-sync'
+    | '/api/public/facebook-sync-cron'
     | '/lovable/email/queue/process'
   fileRoutesById: FileRoutesById
 }
@@ -526,9 +587,13 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsRoute: typeof TermsRoute
   CategoryIdRoute: typeof CategoryIdRoute
+  FacebookAdsIdRoute: typeof FacebookAdsIdRoute
   ListingIdRoute: typeof ListingIdRoute
   TipsSlugRoute: typeof TipsSlugRoute
+  FacebookAdsIndexRoute: typeof FacebookAdsIndexRoute
   TipsIndexRoute: typeof TipsIndexRoute
+  ApiPublicFacebookSyncRoute: typeof ApiPublicFacebookSyncRoute
+  ApiPublicFacebookSyncCronRoute: typeof ApiPublicFacebookSyncCronRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
 }
 
@@ -667,6 +732,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TipsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/facebook-ads/': {
+      id: '/facebook-ads/'
+      path: '/facebook-ads'
+      fullPath: '/facebook-ads/'
+      preLoaderRoute: typeof FacebookAdsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/': {
       id: '/admin/'
       path: '/'
@@ -700,6 +772,13 @@ declare module '@tanstack/react-router' {
       path: '/listing/$id'
       fullPath: '/listing/$id'
       preLoaderRoute: typeof ListingIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/facebook-ads/$id': {
+      id: '/facebook-ads/$id'
+      path: '/facebook-ads/$id'
+      fullPath: '/facebook-ads/$id'
+      preLoaderRoute: typeof FacebookAdsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/category/$id': {
@@ -758,6 +837,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminHeroRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/facebook': {
+      id: '/admin/facebook'
+      path: '/facebook'
+      fullPath: '/admin/facebook'
+      preLoaderRoute: typeof AdminFacebookRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/categories': {
       id: '/admin/categories'
       path: '/categories'
@@ -807,6 +893,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAccessRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/api/public/facebook-sync-cron': {
+      id: '/api/public/facebook-sync-cron'
+      path: '/api/public/facebook-sync-cron'
+      fullPath: '/api/public/facebook-sync-cron'
+      preLoaderRoute: typeof ApiPublicFacebookSyncCronRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/facebook-sync': {
+      id: '/api/public/facebook-sync'
+      path: '/api/public/facebook-sync'
+      fullPath: '/api/public/facebook-sync'
+      preLoaderRoute: typeof ApiPublicFacebookSyncRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/lovable/email/queue/process': {
       id: '/lovable/email/queue/process'
       path: '/lovable/email/queue/process'
@@ -825,6 +925,7 @@ interface AdminRouteChildren {
   AdminBrandsRoute: typeof AdminBrandsRoute
   AdminCalculatorRoute: typeof AdminCalculatorRoute
   AdminCategoriesRoute: typeof AdminCategoriesRoute
+  AdminFacebookRoute: typeof AdminFacebookRoute
   AdminHeroRoute: typeof AdminHeroRoute
   AdminImagesRoute: typeof AdminImagesRoute
   AdminListingsRoute: typeof AdminListingsRoute
@@ -843,6 +944,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminBrandsRoute: AdminBrandsRoute,
   AdminCalculatorRoute: AdminCalculatorRoute,
   AdminCategoriesRoute: AdminCategoriesRoute,
+  AdminFacebookRoute: AdminFacebookRoute,
   AdminHeroRoute: AdminHeroRoute,
   AdminImagesRoute: AdminImagesRoute,
   AdminListingsRoute: AdminListingsRoute,
@@ -897,21 +999,15 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsRoute: TermsRoute,
   CategoryIdRoute: CategoryIdRoute,
+  FacebookAdsIdRoute: FacebookAdsIdRoute,
   ListingIdRoute: ListingIdRoute,
   TipsSlugRoute: TipsSlugRoute,
+  FacebookAdsIndexRoute: FacebookAdsIndexRoute,
   TipsIndexRoute: TipsIndexRoute,
+  ApiPublicFacebookSyncRoute: ApiPublicFacebookSyncRoute,
+  ApiPublicFacebookSyncCronRoute: ApiPublicFacebookSyncCronRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
