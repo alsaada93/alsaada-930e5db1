@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, ClipboardCheck, FolderTree, Tags, Gavel, Images, ImageDown, Palette, ExternalLink, ShoppingCart, MonitorPlay, Search, Users, KeyRound, Calculator, Newspaper } from "lucide-react";
+import { LayoutDashboard, ClipboardCheck, FolderTree, Tags, Gavel, Images, ImageDown, Palette, ExternalLink, ShoppingCart, MonitorPlay, Search, Users, KeyRound, Calculator, Newspaper, Facebook } from "lucide-react";
 import { useAdminLayout } from "./AdminLayoutContext";
 
 const items = [
