@@ -20,7 +20,6 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PackagesRouteImport } from './routes/packages'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as FaqRouteImport } from './routes/faq'
-import { Route as FacebookAdsRouteImport } from './routes/facebook-ads'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as BuyRouteImport } from './routes/buy'
 import { Route as AdminRouteImport } from './routes/admin'
@@ -29,6 +28,7 @@ import { Route as AccountRouteImport } from './routes/account'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TipsIndexRouteImport } from './routes/tips.index'
+import { Route as FacebookAdsIndexRouteImport } from './routes/facebook-ads.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as TipsSlugRouteImport } from './routes/tips.$slug'
 import { Route as RestaurantManufacturingRouteImport } from './routes/restaurant.manufacturing'
@@ -109,11 +109,6 @@ const FaqRoute = FaqRouteImport.update({
   path: '/faq',
   getParentRoute: () => rootRouteImport,
 } as any)
-const FacebookAdsRoute = FacebookAdsRouteImport.update({
-  id: '/facebook-ads',
-  path: '/facebook-ads',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
   path: '/contact',
@@ -152,6 +147,11 @@ const IndexRoute = IndexRouteImport.update({
 const TipsIndexRoute = TipsIndexRouteImport.update({
   id: '/tips/',
   path: '/tips/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FacebookAdsIndexRoute = FacebookAdsIndexRouteImport.update({
+  id: '/facebook-ads/',
+  path: '/facebook-ads/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
@@ -285,7 +285,6 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteWithChildren
   '/buy': typeof BuyRoute
   '/contact': typeof ContactRoute
-  '/facebook-ads': typeof FacebookAdsRoute
   '/faq': typeof FaqRoute
   '/login': typeof LoginRouteWithChildren
   '/packages': typeof PackagesRoute
@@ -318,6 +317,7 @@ export interface FileRoutesByFullPath {
   '/restaurant/manufacturing': typeof RestaurantManufacturingRoute
   '/tips/$slug': typeof TipsSlugRoute
   '/admin/': typeof AdminIndexRoute
+  '/facebook-ads/': typeof FacebookAdsIndexRoute
   '/tips/': typeof TipsIndexRoute
   '/api/public/facebook-sync': typeof ApiPublicFacebookSyncRoute
   '/api/public/facebook-sync-cron': typeof ApiPublicFacebookSyncCronRoute
@@ -330,7 +330,6 @@ export interface FileRoutesByTo {
   '/add-listing': typeof AddListingRoute
   '/buy': typeof BuyRoute
   '/contact': typeof ContactRoute
-  '/facebook-ads': typeof FacebookAdsRoute
   '/faq': typeof FaqRoute
   '/login': typeof LoginRouteWithChildren
   '/packages': typeof PackagesRoute
@@ -363,6 +362,7 @@ export interface FileRoutesByTo {
   '/restaurant/manufacturing': typeof RestaurantManufacturingRoute
   '/tips/$slug': typeof TipsSlugRoute
   '/admin': typeof AdminIndexRoute
+  '/facebook-ads': typeof FacebookAdsIndexRoute
   '/tips': typeof TipsIndexRoute
   '/api/public/facebook-sync': typeof ApiPublicFacebookSyncRoute
   '/api/public/facebook-sync-cron': typeof ApiPublicFacebookSyncCronRoute
@@ -377,7 +377,6 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/buy': typeof BuyRoute
   '/contact': typeof ContactRoute
-  '/facebook-ads': typeof FacebookAdsRoute
   '/faq': typeof FaqRoute
   '/login': typeof LoginRouteWithChildren
   '/packages': typeof PackagesRoute
@@ -410,6 +409,7 @@ export interface FileRoutesById {
   '/restaurant/manufacturing': typeof RestaurantManufacturingRoute
   '/tips/$slug': typeof TipsSlugRoute
   '/admin/': typeof AdminIndexRoute
+  '/facebook-ads/': typeof FacebookAdsIndexRoute
   '/tips/': typeof TipsIndexRoute
   '/api/public/facebook-sync': typeof ApiPublicFacebookSyncRoute
   '/api/public/facebook-sync-cron': typeof ApiPublicFacebookSyncCronRoute
@@ -425,7 +425,6 @@ export interface FileRouteTypes {
     | '/admin'
     | '/buy'
     | '/contact'
-    | '/facebook-ads'
     | '/faq'
     | '/login'
     | '/packages'
@@ -458,6 +457,7 @@ export interface FileRouteTypes {
     | '/restaurant/manufacturing'
     | '/tips/$slug'
     | '/admin/'
+    | '/facebook-ads/'
     | '/tips/'
     | '/api/public/facebook-sync'
     | '/api/public/facebook-sync-cron'
@@ -470,7 +470,6 @@ export interface FileRouteTypes {
     | '/add-listing'
     | '/buy'
     | '/contact'
-    | '/facebook-ads'
     | '/faq'
     | '/login'
     | '/packages'
@@ -503,6 +502,7 @@ export interface FileRouteTypes {
     | '/restaurant/manufacturing'
     | '/tips/$slug'
     | '/admin'
+    | '/facebook-ads'
     | '/tips'
     | '/api/public/facebook-sync'
     | '/api/public/facebook-sync-cron'
@@ -516,7 +516,6 @@ export interface FileRouteTypes {
     | '/admin'
     | '/buy'
     | '/contact'
-    | '/facebook-ads'
     | '/faq'
     | '/login'
     | '/packages'
@@ -549,6 +548,7 @@ export interface FileRouteTypes {
     | '/restaurant/manufacturing'
     | '/tips/$slug'
     | '/admin/'
+    | '/facebook-ads/'
     | '/tips/'
     | '/api/public/facebook-sync'
     | '/api/public/facebook-sync-cron'
@@ -563,7 +563,6 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   BuyRoute: typeof BuyRoute
   ContactRoute: typeof ContactRoute
-  FacebookAdsRoute: typeof FacebookAdsRoute
   FaqRoute: typeof FaqRoute
   LoginRoute: typeof LoginRouteWithChildren
   PackagesRoute: typeof PackagesRoute
@@ -578,6 +577,7 @@ export interface RootRouteChildren {
   CategoryIdRoute: typeof CategoryIdRoute
   ListingIdRoute: typeof ListingIdRoute
   TipsSlugRoute: typeof TipsSlugRoute
+  FacebookAdsIndexRoute: typeof FacebookAdsIndexRoute
   TipsIndexRoute: typeof TipsIndexRoute
   ApiPublicFacebookSyncRoute: typeof ApiPublicFacebookSyncRoute
   ApiPublicFacebookSyncCronRoute: typeof ApiPublicFacebookSyncCronRoute
@@ -663,13 +663,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FaqRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/facebook-ads': {
-      id: '/facebook-ads'
-      path: '/facebook-ads'
-      fullPath: '/facebook-ads'
-      preLoaderRoute: typeof FacebookAdsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/contact': {
       id: '/contact'
       path: '/contact'
@@ -724,6 +717,13 @@ declare module '@tanstack/react-router' {
       path: '/tips'
       fullPath: '/tips/'
       preLoaderRoute: typeof TipsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/facebook-ads/': {
+      id: '/facebook-ads/'
+      path: '/facebook-ads'
+      fullPath: '/facebook-ads/'
+      preLoaderRoute: typeof FacebookAdsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/': {
@@ -967,7 +967,6 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRouteWithChildren,
   BuyRoute: BuyRoute,
   ContactRoute: ContactRoute,
-  FacebookAdsRoute: FacebookAdsRoute,
   FaqRoute: FaqRoute,
   LoginRoute: LoginRouteWithChildren,
   PackagesRoute: PackagesRoute,
@@ -982,6 +981,7 @@ const rootRouteChildren: RootRouteChildren = {
   CategoryIdRoute: CategoryIdRoute,
   ListingIdRoute: ListingIdRoute,
   TipsSlugRoute: TipsSlugRoute,
+  FacebookAdsIndexRoute: FacebookAdsIndexRoute,
   TipsIndexRoute: TipsIndexRoute,
   ApiPublicFacebookSyncRoute: ApiPublicFacebookSyncRoute,
   ApiPublicFacebookSyncCronRoute: ApiPublicFacebookSyncCronRoute,
