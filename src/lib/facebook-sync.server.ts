@@ -246,7 +246,7 @@ export async function retryFailedAndHeartbeat(): Promise<{ retried: number; reco
         .maybeSingle();
       if (ad?.status === "active") continue;
 
-      const payload = row.payload as IngestPayload | null;
+      const payload = row.payload as unknown as IngestPayload | null;
       if (!payload || !payload.post_id) continue;
       retried += 1;
       const res = await ingestPost(payload);
