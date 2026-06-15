@@ -212,3 +212,50 @@ export async function verifySecret(provided: string | null): Promise<boolean> {
   for (let i = 0; i < expected.length; i++) diff |= provided.charCodeAt(i) ^ expected.charCodeAt(i);
   return diff === 0;
 }
+
+/**
+ * Retries recently-failed create/update imports whose payload was stored.
+ * Called by the scheduled cron job and updates the heartbeat.
+ */
+export async function retryFailedAndHeartbeat(): Promise<{ retried: number; recovered: number }> {
+  let retried = 0;
+  let recovered = 0;
+  try {
+    const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const { data: failed } = await supabaseAdmin
+      .from("facebook_sync_logs")
+      .select("fb_post_id, payload, event")
+      .eq("status", "failed")
+      .in("event", ["create", "update"])
+      .not("payload", "is", null)
+      .gte("created_at", since)
+      .order("created_at", { ascending: false })
+      .limit(50);
+
+    const seen = new Set<string>();
+    for (const row of failed ?? []) {
+      const pid = row.fb_post_id as string | null;
+      if (!pid || seen.has(pid)) continue;
+      seen.add(pid);
+
+      // skip if an active ad already exists
+      const { data: ad } = await supabaseAdmin
+        .from("facebook_ads")
+        .select("status")
+        .eq("fb_post_id", pid)
+        .maybeSingle();
+      if (ad?.status === "active") continue;
+
+      const payload = row.payload as IngestPayload | null;
+      if (!payload || !payload.post_id) continue;
+      retried += 1;
+      const res = await ingestPost(payload);
+      if (res.ok) recovered += 1;
+    }
+  } catch {
+    /* never throw from cron */
+  }
+  await touchMeta("ok");
+  return { retried, recovered };
+}
+
