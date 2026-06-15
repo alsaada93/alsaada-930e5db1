@@ -42,7 +42,7 @@ async function logSync(
       fb_post_id,
       status,
       message: message.slice(0, 2000),
-      payload: payload ? (JSON.parse(JSON.stringify(payload)) as object) : null,
+      payload: (payload ? JSON.parse(JSON.stringify(payload)) : null) as never,
     });
   } catch {
     /* logging must never throw */
