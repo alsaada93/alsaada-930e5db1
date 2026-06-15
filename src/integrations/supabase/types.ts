@@ -420,6 +420,114 @@ export type Database = {
         }
         Relationships: []
       }
+      facebook_ads: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          fb_post_id: string
+          fb_published_at: string | null
+          id: string
+          images: string[]
+          phone: string | null
+          raw_text: string | null
+          seller_name: string | null
+          status: string
+          thumbnails: string[]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          fb_post_id: string
+          fb_published_at?: string | null
+          id?: string
+          images?: string[]
+          phone?: string | null
+          raw_text?: string | null
+          seller_name?: string | null
+          status?: string
+          thumbnails?: string[]
+          title?: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          fb_post_id?: string
+          fb_published_at?: string | null
+          id?: string
+          images?: string[]
+          phone?: string | null
+          raw_text?: string | null
+          seller_name?: string | null
+          status?: string
+          thumbnails?: string[]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      facebook_sync_logs: {
+        Row: {
+          created_at: string
+          event: string
+          fb_post_id: string | null
+          id: string
+          message: string | null
+          payload: Json | null
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          event: string
+          fb_post_id?: string | null
+          id?: string
+          message?: string | null
+          payload?: Json | null
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          event?: string
+          fb_post_id?: string | null
+          id?: string
+          message?: string | null
+          payload?: Json | null
+          status?: string
+        }
+        Relationships: []
+      }
+      facebook_sync_meta: {
+        Row: {
+          api_status: string
+          created_at: string
+          id: number
+          last_sync_at: string | null
+          updated_at: string
+          webhook_secret: string
+        }
+        Insert: {
+          api_status?: string
+          created_at?: string
+          id?: number
+          last_sync_at?: string | null
+          updated_at?: string
+          webhook_secret?: string
+        }
+        Update: {
+          api_status?: string
+          created_at?: string
+          id?: number
+          last_sync_at?: string | null
+          updated_at?: string
+          webhook_secret?: string
+        }
+        Relationships: []
+      }
       favorites: {
         Row: {
           created_at: string
