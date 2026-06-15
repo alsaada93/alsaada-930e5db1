@@ -5,6 +5,7 @@ import { useAdminLayout } from "./AdminLayoutContext";
 const items = [
   { title: "الإحصائيات", url: "/admin", icon: LayoutDashboard, exact: true },
   { title: "مراجعة الإعلانات", url: "/admin/listings", icon: ClipboardCheck },
+  { title: "مزامنة فيسبوك", url: "/admin/facebook", icon: Facebook },
   { title: "الأعضاء والصلاحيات", url: "/admin/members", icon: Users },
   { title: "طرق التسجيل", url: "/admin/access", icon: KeyRound },
   { title: "التصنيفات", url: "/admin/categories", icon: FolderTree },
