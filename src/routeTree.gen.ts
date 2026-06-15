@@ -48,6 +48,7 @@ import { Route as AdminBlogRouteImport } from './routes/admin.blog'
 import { Route as AdminAuctionsRouteImport } from './routes/admin.auctions'
 import { Route as AdminAppearanceRouteImport } from './routes/admin.appearance'
 import { Route as AdminAccessRouteImport } from './routes/admin.access'
+import { Route as ApiPublicFacebookSyncRouteImport } from './routes/api/public/facebook-sync'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 
 const TermsRoute = TermsRouteImport.update({
@@ -245,6 +246,11 @@ const AdminAccessRoute = AdminAccessRouteImport.update({
   path: '/access',
   getParentRoute: () => AdminRoute,
 } as any)
+const ApiPublicFacebookSyncRoute = ApiPublicFacebookSyncRouteImport.update({
+  id: '/api/public/facebook-sync',
+  path: '/api/public/facebook-sync',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LovableEmailQueueProcessRoute =
   LovableEmailQueueProcessRouteImport.update({
     id: '/lovable/email/queue/process',
@@ -292,6 +298,7 @@ export interface FileRoutesByFullPath {
   '/tips/$slug': typeof TipsSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/tips/': typeof TipsIndexRoute
+  '/api/public/facebook-sync': typeof ApiPublicFacebookSyncRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRoutesByTo {
@@ -333,6 +340,7 @@ export interface FileRoutesByTo {
   '/tips/$slug': typeof TipsSlugRoute
   '/admin': typeof AdminIndexRoute
   '/tips': typeof TipsIndexRoute
+  '/api/public/facebook-sync': typeof ApiPublicFacebookSyncRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRoutesById {
@@ -376,6 +384,7 @@ export interface FileRoutesById {
   '/tips/$slug': typeof TipsSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/tips/': typeof TipsIndexRoute
+  '/api/public/facebook-sync': typeof ApiPublicFacebookSyncRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRouteTypes {
@@ -420,6 +429,7 @@ export interface FileRouteTypes {
     | '/tips/$slug'
     | '/admin/'
     | '/tips/'
+    | '/api/public/facebook-sync'
     | '/lovable/email/queue/process'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -461,6 +471,7 @@ export interface FileRouteTypes {
     | '/tips/$slug'
     | '/admin'
     | '/tips'
+    | '/api/public/facebook-sync'
     | '/lovable/email/queue/process'
   id:
     | '__root__'
@@ -503,6 +514,7 @@ export interface FileRouteTypes {
     | '/tips/$slug'
     | '/admin/'
     | '/tips/'
+    | '/api/public/facebook-sync'
     | '/lovable/email/queue/process'
   fileRoutesById: FileRoutesById
 }
@@ -529,6 +541,7 @@ export interface RootRouteChildren {
   ListingIdRoute: typeof ListingIdRoute
   TipsSlugRoute: typeof TipsSlugRoute
   TipsIndexRoute: typeof TipsIndexRoute
+  ApiPublicFacebookSyncRoute: typeof ApiPublicFacebookSyncRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
 }
 
@@ -807,6 +820,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAccessRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/api/public/facebook-sync': {
+      id: '/api/public/facebook-sync'
+      path: '/api/public/facebook-sync'
+      fullPath: '/api/public/facebook-sync'
+      preLoaderRoute: typeof ApiPublicFacebookSyncRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/lovable/email/queue/process': {
       id: '/lovable/email/queue/process'
       path: '/lovable/email/queue/process'
@@ -900,6 +920,7 @@ const rootRouteChildren: RootRouteChildren = {
   ListingIdRoute: ListingIdRoute,
   TipsSlugRoute: TipsSlugRoute,
   TipsIndexRoute: TipsIndexRoute,
+  ApiPublicFacebookSyncRoute: ApiPublicFacebookSyncRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
 }
 export const routeTree = rootRouteImport
