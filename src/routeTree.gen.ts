@@ -20,6 +20,7 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PackagesRouteImport } from './routes/packages'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as FaqRouteImport } from './routes/faq'
+import { Route as FacebookAdsRouteImport } from './routes/facebook-ads'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as BuyRouteImport } from './routes/buy'
 import { Route as AdminRouteImport } from './routes/admin'
@@ -106,6 +107,11 @@ const LoginRoute = LoginRouteImport.update({
 const FaqRoute = FaqRouteImport.update({
   id: '/faq',
   path: '/faq',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FacebookAdsRoute = FacebookAdsRouteImport.update({
+  id: '/facebook-ads',
+  path: '/facebook-ads',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContactRoute = ContactRouteImport.update({
@@ -279,6 +285,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteWithChildren
   '/buy': typeof BuyRoute
   '/contact': typeof ContactRoute
+  '/facebook-ads': typeof FacebookAdsRoute
   '/faq': typeof FaqRoute
   '/login': typeof LoginRouteWithChildren
   '/packages': typeof PackagesRoute
@@ -323,6 +330,7 @@ export interface FileRoutesByTo {
   '/add-listing': typeof AddListingRoute
   '/buy': typeof BuyRoute
   '/contact': typeof ContactRoute
+  '/facebook-ads': typeof FacebookAdsRoute
   '/faq': typeof FaqRoute
   '/login': typeof LoginRouteWithChildren
   '/packages': typeof PackagesRoute
@@ -369,6 +377,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/buy': typeof BuyRoute
   '/contact': typeof ContactRoute
+  '/facebook-ads': typeof FacebookAdsRoute
   '/faq': typeof FaqRoute
   '/login': typeof LoginRouteWithChildren
   '/packages': typeof PackagesRoute
@@ -416,6 +425,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/buy'
     | '/contact'
+    | '/facebook-ads'
     | '/faq'
     | '/login'
     | '/packages'
@@ -460,6 +470,7 @@ export interface FileRouteTypes {
     | '/add-listing'
     | '/buy'
     | '/contact'
+    | '/facebook-ads'
     | '/faq'
     | '/login'
     | '/packages'
@@ -505,6 +516,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/buy'
     | '/contact'
+    | '/facebook-ads'
     | '/faq'
     | '/login'
     | '/packages'
@@ -551,6 +563,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   BuyRoute: typeof BuyRoute
   ContactRoute: typeof ContactRoute
+  FacebookAdsRoute: typeof FacebookAdsRoute
   FaqRoute: typeof FaqRoute
   LoginRoute: typeof LoginRouteWithChildren
   PackagesRoute: typeof PackagesRoute
@@ -648,6 +661,13 @@ declare module '@tanstack/react-router' {
       path: '/faq'
       fullPath: '/faq'
       preLoaderRoute: typeof FaqRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/facebook-ads': {
+      id: '/facebook-ads'
+      path: '/facebook-ads'
+      fullPath: '/facebook-ads'
+      preLoaderRoute: typeof FacebookAdsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contact': {
@@ -947,6 +967,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRouteWithChildren,
   BuyRoute: BuyRoute,
   ContactRoute: ContactRoute,
+  FacebookAdsRoute: FacebookAdsRoute,
   FaqRoute: FaqRoute,
   LoginRoute: LoginRouteWithChildren,
   PackagesRoute: PackagesRoute,

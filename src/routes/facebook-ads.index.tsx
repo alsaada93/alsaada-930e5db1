@@ -7,7 +7,7 @@ import { FB_CATEGORIES, categoryLabel } from "@/lib/facebook-parse";
 
 const SITE = "https://www.alsaada.sale";
 
-export const Route = createFileRoute("/facebook-ads")({
+export const Route = createFileRoute("/facebook-ads/")({
   validateSearch: (s: Record<string, unknown>): { cat?: string } => ({
     cat: typeof s.cat === "string" ? s.cat : undefined,
   }),
