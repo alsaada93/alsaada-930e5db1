@@ -48,6 +48,7 @@ import { Route as AdminBlogRouteImport } from './routes/admin.blog'
 import { Route as AdminAuctionsRouteImport } from './routes/admin.auctions'
 import { Route as AdminAppearanceRouteImport } from './routes/admin.appearance'
 import { Route as AdminAccessRouteImport } from './routes/admin.access'
+import { Route as ApiPublicFacebookSyncCronRouteImport } from './routes/api/public/facebook-sync-cron'
 import { Route as ApiPublicFacebookSyncRouteImport } from './routes/api/public/facebook-sync'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 
@@ -246,6 +247,12 @@ const AdminAccessRoute = AdminAccessRouteImport.update({
   path: '/access',
   getParentRoute: () => AdminRoute,
 } as any)
+const ApiPublicFacebookSyncCronRoute =
+  ApiPublicFacebookSyncCronRouteImport.update({
+    id: '/api/public/facebook-sync-cron',
+    path: '/api/public/facebook-sync-cron',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicFacebookSyncRoute = ApiPublicFacebookSyncRouteImport.update({
   id: '/api/public/facebook-sync',
   path: '/api/public/facebook-sync',
@@ -299,6 +306,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/tips/': typeof TipsIndexRoute
   '/api/public/facebook-sync': typeof ApiPublicFacebookSyncRoute
+  '/api/public/facebook-sync-cron': typeof ApiPublicFacebookSyncCronRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRoutesByTo {
@@ -341,6 +349,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/tips': typeof TipsIndexRoute
   '/api/public/facebook-sync': typeof ApiPublicFacebookSyncRoute
+  '/api/public/facebook-sync-cron': typeof ApiPublicFacebookSyncCronRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRoutesById {
@@ -385,6 +394,7 @@ export interface FileRoutesById {
   '/admin/': typeof AdminIndexRoute
   '/tips/': typeof TipsIndexRoute
   '/api/public/facebook-sync': typeof ApiPublicFacebookSyncRoute
+  '/api/public/facebook-sync-cron': typeof ApiPublicFacebookSyncCronRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRouteTypes {
@@ -430,6 +440,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/tips/'
     | '/api/public/facebook-sync'
+    | '/api/public/facebook-sync-cron'
     | '/lovable/email/queue/process'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -472,6 +483,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/tips'
     | '/api/public/facebook-sync'
+    | '/api/public/facebook-sync-cron'
     | '/lovable/email/queue/process'
   id:
     | '__root__'
@@ -515,6 +527,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/tips/'
     | '/api/public/facebook-sync'
+    | '/api/public/facebook-sync-cron'
     | '/lovable/email/queue/process'
   fileRoutesById: FileRoutesById
 }
@@ -542,6 +555,7 @@ export interface RootRouteChildren {
   TipsSlugRoute: typeof TipsSlugRoute
   TipsIndexRoute: typeof TipsIndexRoute
   ApiPublicFacebookSyncRoute: typeof ApiPublicFacebookSyncRoute
+  ApiPublicFacebookSyncCronRoute: typeof ApiPublicFacebookSyncCronRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
 }
 
@@ -820,6 +834,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAccessRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/api/public/facebook-sync-cron': {
+      id: '/api/public/facebook-sync-cron'
+      path: '/api/public/facebook-sync-cron'
+      fullPath: '/api/public/facebook-sync-cron'
+      preLoaderRoute: typeof ApiPublicFacebookSyncCronRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/facebook-sync': {
       id: '/api/public/facebook-sync'
       path: '/api/public/facebook-sync'
@@ -921,6 +942,7 @@ const rootRouteChildren: RootRouteChildren = {
   TipsSlugRoute: TipsSlugRoute,
   TipsIndexRoute: TipsIndexRoute,
   ApiPublicFacebookSyncRoute: ApiPublicFacebookSyncRoute,
+  ApiPublicFacebookSyncCronRoute: ApiPublicFacebookSyncCronRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
 }
 export const routeTree = rootRouteImport
