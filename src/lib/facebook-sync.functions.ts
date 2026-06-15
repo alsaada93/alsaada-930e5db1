@@ -1,4 +1,55 @@
 import { createServerFn } from "@tanstack/react-start";
+
+export interface FbAd {
+  id: string;
+  fb_post_id: string;
+  title: string;
+  description: string | null;
+  seller_name: string | null;
+  phone: string | null;
+  category: string;
+  images: string[];
+  thumbnails: string[];
+  fb_published_at: string | null;
+  created_at: string;
+}
+
+/** Public: list active imported ads, optionally filtered by category. */
+export const listFbAds = createServerFn({ method: "GET" })
+  .inputValidator((input: unknown) => {
+    const o = (input ?? {}) as { category?: string };
+    return { category: typeof o.category === "string" ? o.category.slice(0, 40) : undefined };
+  })
+  .handler(async ({ data }): Promise<FbAd[]> => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    let q = supabaseAdmin
+      .from("facebook_ads")
+      .select("id, fb_post_id, title, description, seller_name, phone, category, images, thumbnails, fb_published_at, created_at")
+      .eq("status", "active")
+      .order("fb_published_at", { ascending: false, nullsFirst: false })
+      .limit(200);
+    if (data.category && data.category !== "all") q = q.eq("category", data.category);
+    const { data: rows } = await q;
+    return (rows ?? []) as FbAd[];
+  });
+
+/** Public: fetch a single active imported ad by id. */
+export const getFbAd = createServerFn({ method: "GET" })
+  .inputValidator((input: unknown) => {
+    const o = (input ?? {}) as { id?: string };
+    return { id: String(o.id ?? "") };
+  })
+  .handler(async ({ data }): Promise<FbAd | null> => {
+    if (!data.id) return null;
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: row } = await supabaseAdmin
+      .from("facebook_ads")
+      .select("id, fb_post_id, title, description, seller_name, phone, category, images, thumbnails, fb_published_at, created_at")
+      .eq("id", data.id)
+      .eq("status", "active")
+      .maybeSingle();
+    return (row as FbAd | null) ?? null;
+  });
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
