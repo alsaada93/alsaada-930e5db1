@@ -32,16 +32,14 @@ export const Route = createFileRoute("/api/public/facebook-sync")({
 
       // Health / secret verification (used by automation tools to "test" the hook)
       GET: async ({ request }) => {
-        const url = new URL(request.url);
-        const secret = request.headers.get("x-sync-secret") ?? url.searchParams.get("secret");
+        const secret = request.headers.get("x-sync-secret");
         const { verifySecret } = await import("@/lib/facebook-sync.server");
         const ok = await verifySecret(secret);
         return json({ ok, service: "facebook-sync", status: ok ? "ready" : "unauthorized" }, ok ? 200 : 401);
       },
 
       POST: async ({ request }) => {
-        const url = new URL(request.url);
-        const secret = request.headers.get("x-sync-secret") ?? url.searchParams.get("secret");
+        const secret = request.headers.get("x-sync-secret");
 
         const { verifySecret, ingestPost, deletePostAd } = await import(
           "@/lib/facebook-sync.server"
