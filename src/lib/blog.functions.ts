@@ -58,7 +58,7 @@ export const listPublishedPosts = createServerFn({ method: "GET" }).handler(
       .eq("published", true)
       .order("published_at", { ascending: false, nullsFirst: false })
       .order("created_at", { ascending: false })
-      .limit(500);
+      .limit(2000);
     return (data ?? []).map(mapPost);
   },
 );
