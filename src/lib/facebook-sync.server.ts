@@ -286,6 +286,12 @@ export async function deletePostAd(postId: string): Promise<IngestResult> {
       .update({ status: "deleted" })
       .eq("fb_post_id", fb_post_id);
     if (error) throw error;
+    // Hide the mirrored row in the main listings feed too.
+    await supabaseAdmin
+      .from("listings")
+      .update({ status: "deleted" })
+      .eq("source", SOURCE)
+      .eq("source_ref", fb_post_id);
     await logSync("delete", fb_post_id, "success", "تم إخفاء الإعلان");
     await touchMeta("ok");
     return { ok: true, action: "deleted", fb_post_id };
