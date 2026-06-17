@@ -4,11 +4,95 @@
  * Imported only by server functions and server routes.
  */
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { parsePost } from "./facebook-parse";
+import { parsePost, categoryLabel, type FbCategorySlug } from "./facebook-parse";
 
 const BUCKET = "listings";
 const PREFIX = "facebook";
 const MAX_IMAGES = 12;
+const SOURCE = "facebook";
+
+/**
+ * Maps a detected Facebook category slug to a real site category_id used by the
+ * main listings feed. Site categories are admin-editable and stored in
+ * site_settings, so we resolve by matching the Arabic category name.
+ * Returns null when there is no matching site category (the ad still appears on
+ * the homepage and in search — it just won't be filed under a category page).
+ */
+async function resolveSiteCategoryId(slug: FbCategorySlug): Promise<string | null> {
+  try {
+    const { data } = await supabaseAdmin
+      .from("site_settings")
+      .select("value")
+      .eq("key", "categories")
+      .maybeSingle();
+    const cats = (data?.value as { id: string; name: string }[] | null) ?? [];
+    if (!Array.isArray(cats) || cats.length === 0) return null;
+
+    const arabicName = categoryLabel(slug).name;
+    // direct name match (سيارات، عقارات، إلكترونيات، أثاث ...)
+    const direct = cats.find((c) => c.name === arabicName);
+    if (direct) return direct.id;
+
+    // equipment / restaurant-style ads → the restaurant ("مطاعم") category
+    if (slug === "equipment") {
+      const r = cats.find((c) => c.id === "restaurant" || c.name.includes("مطاع"));
+      if (r) return r.id;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+/** Mirrors an imported ad into the main listings feed (published instantly). */
+async function mirrorToListings(args: {
+  fb_post_id: string;
+  title: string;
+  description: string;
+  seller_name: string | null;
+  phone: string | null;
+  category: FbCategorySlug;
+  images: string[];
+  fb_published_at: string | null;
+}): Promise<void> {
+  try {
+    const categoryId = await resolveSiteCategoryId(args.category);
+    const { data: existing } = await supabaseAdmin
+      .from("listings")
+      .select("id")
+      .eq("source", SOURCE)
+      .eq("source_ref", args.fb_post_id)
+      .maybeSingle();
+
+    const row = {
+      title: args.title || "إعلان",
+      description: args.description || null,
+      category_id: categoryId,
+      images: args.images,
+      contact_name: args.seller_name,
+      contact_phone: args.phone,
+      price: 0,
+      status: "approved" as const,
+      listing_type: "normal" as const,
+      source: SOURCE,
+      source_ref: args.fb_post_id,
+      ...(args.fb_published_at ? { published_at: args.fb_published_at } : {}),
+    };
+
+    if (existing?.id) {
+      await supabaseAdmin.from("listings").update(row).eq("id", existing.id);
+    } else {
+      await supabaseAdmin.from("listings").insert(row);
+    }
+  } catch (e) {
+    await logSync(
+      "mirror",
+      args.fb_post_id,
+      "failed",
+      `تعذّر نشر الإعلان في القائمة الرئيسية: ${e instanceof Error ? e.message : "خطأ"}`,
+    );
+  }
+}
 
 export interface IngestPayload {
   post_id: string;
