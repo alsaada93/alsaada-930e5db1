@@ -251,6 +251,19 @@ export async function ingestPost(payload: IngestPayload): Promise<IngestResult> 
       .upsert(row, { onConflict: "fb_post_id" });
     if (error) throw error;
 
+    // Mirror into the main listings feed so the ad shows on the homepage,
+    // category pages and search — not only on the dedicated Facebook page.
+    await mirrorToListings({
+      fb_post_id,
+      title: parsed.title,
+      description: parsed.description,
+      seller_name,
+      phone,
+      category,
+      images,
+      fb_published_at: (row.fb_published_at as string | undefined) ?? null,
+    });
+
     const action = existing ? "updated" : "created";
     await logSync(action === "created" ? "create" : "update", fb_post_id, "success", `تم ${action === "created" ? "إنشاء" : "تحديث"} الإعلان`);
     await touchMeta("ok");
