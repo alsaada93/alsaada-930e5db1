@@ -4,7 +4,7 @@
  * Imported only by server functions and server routes.
  */
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { parsePost, categoryLabel, type FbCategorySlug } from "./facebook-parse";
+import { parsePost, detectCategory, categoryLabel, type FbCategorySlug } from "./facebook-parse";
 
 const BUCKET = "listings";
 const PREFIX = "facebook";
