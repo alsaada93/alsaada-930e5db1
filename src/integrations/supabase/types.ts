@@ -677,6 +677,8 @@ export type Database = {
           published_at: string
           rent: number | null
           sale_reason: string | null
+          source: string | null
+          source_ref: string | null
           staff_count: number | null
           start_price: number | null
           status: string
@@ -721,6 +723,8 @@ export type Database = {
           published_at?: string
           rent?: number | null
           sale_reason?: string | null
+          source?: string | null
+          source_ref?: string | null
           staff_count?: number | null
           start_price?: number | null
           status?: string
@@ -765,6 +769,8 @@ export type Database = {
           published_at?: string
           rent?: number | null
           sale_reason?: string | null
+          source?: string | null
+          source_ref?: string | null
           staff_count?: number | null
           start_price?: number | null
           status?: string
