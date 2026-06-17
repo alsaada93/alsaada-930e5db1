@@ -4,11 +4,95 @@
  * Imported only by server functions and server routes.
  */
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { parsePost } from "./facebook-parse";
+import { parsePost, detectCategory, categoryLabel, type FbCategorySlug } from "./facebook-parse";
 
 const BUCKET = "listings";
 const PREFIX = "facebook";
 const MAX_IMAGES = 12;
+const SOURCE = "facebook";
+
+/**
+ * Maps a detected Facebook category slug to a real site category_id used by the
+ * main listings feed. Site categories are admin-editable and stored in
+ * site_settings, so we resolve by matching the Arabic category name.
+ * Returns null when there is no matching site category (the ad still appears on
+ * the homepage and in search — it just won't be filed under a category page).
+ */
+async function resolveSiteCategoryId(slug: FbCategorySlug): Promise<string | null> {
+  try {
+    const { data } = await supabaseAdmin
+      .from("site_settings")
+      .select("value")
+      .eq("key", "categories")
+      .maybeSingle();
+    const cats = (data?.value as { id: string; name: string }[] | null) ?? [];
+    if (!Array.isArray(cats) || cats.length === 0) return null;
+
+    const arabicName = categoryLabel(slug).name;
+    // direct name match (سيارات، عقارات، إلكترونيات، أثاث ...)
+    const direct = cats.find((c) => c.name === arabicName);
+    if (direct) return direct.id;
+
+    // equipment / restaurant-style ads → the restaurant ("مطاعم") category
+    if (slug === "equipment") {
+      const r = cats.find((c) => c.id === "restaurant" || c.name.includes("مطاع"));
+      if (r) return r.id;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+/** Mirrors an imported ad into the main listings feed (published instantly). */
+async function mirrorToListings(args: {
+  fb_post_id: string;
+  title: string;
+  description: string;
+  seller_name: string | null;
+  phone: string | null;
+  category: FbCategorySlug;
+  images: string[];
+  fb_published_at: string | null;
+}): Promise<void> {
+  try {
+    const categoryId = await resolveSiteCategoryId(args.category);
+    const { data: existing } = await supabaseAdmin
+      .from("listings")
+      .select("id")
+      .eq("source", SOURCE)
+      .eq("source_ref", args.fb_post_id)
+      .maybeSingle();
+
+    const row = {
+      title: args.title || "إعلان",
+      description: args.description || null,
+      category_id: categoryId,
+      images: args.images,
+      contact_name: args.seller_name,
+      contact_phone: args.phone,
+      price: 0,
+      status: "approved" as const,
+      listing_type: "normal" as const,
+      source: SOURCE,
+      source_ref: args.fb_post_id,
+      ...(args.fb_published_at ? { published_at: args.fb_published_at } : {}),
+    };
+
+    if (existing?.id) {
+      await supabaseAdmin.from("listings").update(row).eq("id", existing.id);
+    } else {
+      await supabaseAdmin.from("listings").insert(row);
+    }
+  } catch (e) {
+    await logSync(
+      "mirror",
+      args.fb_post_id,
+      "failed",
+      `تعذّر نشر الإعلان في القائمة الرئيسية: ${e instanceof Error ? e.message : "خطأ"}`,
+    );
+  }
+}
 
 export interface IngestPayload {
   post_id: string;
@@ -123,7 +207,11 @@ export async function ingestPost(payload: IngestPayload): Promise<IngestResult> 
 
     const seller_name = payload.seller_name?.trim() || parsed.seller_name;
     const phone = payload.phone?.trim() || parsed.phone;
-    const category = payload.category?.trim() ? parsed.category : parsed.category;
+    // Honor an explicit category field from the payload when present, otherwise
+    // fall back to the category auto-detected from the post text.
+    const category = payload.category?.trim()
+      ? detectCategory(rawText, payload.category)
+      : parsed.category;
 
     // existing record?
     const { data: existing } = await supabaseAdmin
@@ -163,6 +251,19 @@ export async function ingestPost(payload: IngestPayload): Promise<IngestResult> 
       .upsert(row, { onConflict: "fb_post_id" });
     if (error) throw error;
 
+    // Mirror into the main listings feed so the ad shows on the homepage,
+    // category pages and search — not only on the dedicated Facebook page.
+    await mirrorToListings({
+      fb_post_id,
+      title: parsed.title,
+      description: parsed.description,
+      seller_name,
+      phone,
+      category,
+      images,
+      fb_published_at: (row.fb_published_at as string | undefined) ?? null,
+    });
+
     const action = existing ? "updated" : "created";
     await logSync(action === "created" ? "create" : "update", fb_post_id, "success", `تم ${action === "created" ? "إنشاء" : "تحديث"} الإعلان`);
     await touchMeta("ok");
@@ -185,6 +286,12 @@ export async function deletePostAd(postId: string): Promise<IngestResult> {
       .update({ status: "deleted" })
       .eq("fb_post_id", fb_post_id);
     if (error) throw error;
+    // Hide the mirrored row in the main listings feed too.
+    await supabaseAdmin
+      .from("listings")
+      .update({ status: "deleted" })
+      .eq("source", SOURCE)
+      .eq("source_ref", fb_post_id);
     await logSync("delete", fb_post_id, "success", "تم إخفاء الإعلان");
     await touchMeta("ok");
     return { ok: true, action: "deleted", fb_post_id };
