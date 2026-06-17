@@ -207,7 +207,11 @@ export async function ingestPost(payload: IngestPayload): Promise<IngestResult> 
 
     const seller_name = payload.seller_name?.trim() || parsed.seller_name;
     const phone = payload.phone?.trim() || parsed.phone;
-    const category = payload.category?.trim() ? parsed.category : parsed.category;
+    // Honor an explicit category field from the payload when present, otherwise
+    // fall back to the category auto-detected from the post text.
+    const category = payload.category?.trim()
+      ? detectCategory(rawText, payload.category)
+      : parsed.category;
 
     // existing record?
     const { data: existing } = await supabaseAdmin
