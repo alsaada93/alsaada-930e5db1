@@ -199,3 +199,284 @@ export function parsePost(rawText: string): ParsedPost {
     description: body || firstLine,
   };
 }
+
+// ───────────────────────── Smart field extraction (bot ingest) ─────────────────────────
+
+/** Converts Arabic-Indic digits to ASCII. */
+function normDigits(t: string): string {
+  return (t ?? "").replace(/[\u0660-\u0669]/g, (d) => String(d.charCodeAt(0) - 0x0660));
+}
+
+/** Splits text into whitespace tokens (digits already normalised). */
+function toWords(t: string): string[] {
+  return normDigits(t).split(/\s+/).filter(Boolean);
+}
+
+/** Parses a money token: keeps the dot as a decimal separator. "4,500"→4500, "4500.000"→4500, "4.5K"→4500. */
+function parsePriceNum(tok: string): number | null {
+  let s = tok.toLowerCase().replace(/[^\d.,k]/g, "");
+  if (!/\d/.test(s)) return null;
+  let mult = 1;
+  if (s.endsWith("k")) {
+    mult = 1000;
+    s = s.slice(0, -1);
+  }
+  s = s.replace(/,/g, "");
+  const parts = s.split(".");
+  if (parts.length > 2) s = parts.join(""); // multiple dots → thousand separators
+  const v = Number(s);
+  return Number.isFinite(v) ? v * mult : null;
+}
+
+/** Parses an integer-ish token: strips ALL separators. "120.000"→120000, "1,500"→1500, "3"→3. */
+function parseIntNum(tok: string): number | null {
+  let s = tok.toLowerCase().replace(/[^\d k]/gi, "").replace(/\s/g, "");
+  if (!/\d/.test(s)) return null;
+  let mult = 1;
+  if (s.endsWith("k")) {
+    mult = 1000;
+    s = s.slice(0, -1);
+  }
+  s = s.replace(/[.,]/g, "");
+  const v = Number(s);
+  return Number.isFinite(v) ? v * mult : null;
+}
+
+const PRICE_KW = [
+  "price", "cost", "asking", "offer", "nego", "obo",
+  "السعر", "بسعر", "سعر", "مطلوب",
+];
+const CURRENCY = ["bd", "bhd", "kd", "kwd", "sar", "aed", "usd", "$", "دينار", "ريال", "درهم"];
+
+export interface PriceResult {
+  price: number | null;
+  detected: boolean;
+}
+
+/**
+ * Extracts the ad price with strict priority:
+ *  (a) a number within 2 words of a price keyword / currency symbol;
+ *  (b) otherwise the LAST remaining number after excluding year / mileage / phone / area;
+ *  (c) null when nothing is found with confidence.
+ */
+export function extractPriceSmart(text: string): PriceResult {
+  if (!text) return { price: null, detected: false };
+  const raw = normDigits(text);
+  const words = raw.split(/\s+/).filter(Boolean);
+
+  // (a) keyword / currency adjacency (max 2 words either side)
+  const kw = [...PRICE_KW, ...CURRENCY];
+  for (let i = 0; i < words.length; i++) {
+    const w = words[i].toLowerCase().replace(/[:：]/g, "");
+    const isKw = kw.some((k) => (k === "$" ? w.includes("$") : w === k || w === k + "." ));
+    // attached currency+number e.g "4500BD", "$4500", "BD4500"
+    if (!isKw) {
+      const attached = CURRENCY.some((c) => c !== "$" && w.includes(c)) || w.includes("$");
+      if (attached && /\d/.test(w)) {
+        const n = parsePriceNum(w);
+        if (n && n > 0) return { price: n, detected: true };
+      }
+      continue;
+    }
+    for (let d = 1; d <= 2; d++) {
+      for (const j of [i + d, i - d]) {
+        if (j >= 0 && j < words.length && /\d/.test(words[j])) {
+          const n = parsePriceNum(words[j]);
+          if (n && n > 0) return { price: n, detected: true };
+        }
+      }
+    }
+  }
+
+  // (b) exclusion-based fallback — pick the last surviving number
+  const year = new Date().getFullYear();
+  const survivors: number[] = [];
+  for (let i = 0; i < words.length; i++) {
+    if (!/\d/.test(words[i])) continue;
+    const digitsOnly = words[i].replace(/\D/g, "");
+    if (!digitsOnly) continue;
+    const around = `${words[i - 1] ?? ""} ${words[i]} ${words[i + 1] ?? ""}`.toLowerCase();
+
+    // year (1990 .. current+1)
+    if (/^\d{4}$/.test(digitsOnly)) {
+      const y = Number(digitsOnly);
+      if (y >= 1990 && y <= year + 1) continue;
+    }
+    // mileage
+    if (/\bkm\b|كم|كيلومتر|mileage/i.test(around)) continue;
+    // area
+    if (/م2|م²|متر|sqm|sq m/i.test(around)) continue;
+    // phone (8+ digits, or near a call keyword)
+    if (digitsOnly.length >= 8) continue;
+    if (/call|اتصال|جوال|واتساب|whatsapp|للتواصل/i.test(around)) continue;
+
+    const n = parsePriceNum(words[i]);
+    if (n && n > 0) survivors.push(n);
+  }
+  if (survivors.length) return { price: survivors[survivors.length - 1], detected: true };
+
+  return { price: null, detected: false };
+}
+
+/** Finds a number within `radius` words of any keyword. */
+function numberNear(words: string[], keys: string[], radius = 2): number | null {
+  const lk = keys.map((k) => k.toLowerCase());
+  for (let i = 0; i < words.length; i++) {
+    const w = words[i].toLowerCase();
+    if (!lk.some((k) => w.includes(k))) continue;
+    // same token may contain the number, e.g "150متر"
+    if (/\d/.test(words[i])) {
+      const inline = parseIntNum(words[i]);
+      if (inline !== null) return inline;
+    }
+    for (let d = 1; d <= radius; d++) {
+      for (const j of [i + d, i - d]) {
+        if (j >= 0 && j < words.length && /\d/.test(words[j])) {
+          const n = parseIntNum(words[j]);
+          if (n !== null) return n;
+        }
+      }
+    }
+  }
+  return null;
+}
+
+/** Known Bahrain regions (subset used for matching). */
+export const BAHRAIN_REGIONS = [
+  "المنامة", "الرفاع", "المحرق", "عيسى تاون", "مدينة عيسى", "حمد تاون", "مدينة حمد",
+  "سار", "الجفير", "السيف", "توبلي", "الحد", "البديع", "الزنج", "العدلية", "جدحفص",
+  "سترة", "عالي", "الدراز", "بوقوة", "سند", "الماحوز", "القضيبية", "أم الحصم",
+];
+
+export interface CarSpecs {
+  year: number | null;
+  mileage_km: number | null;
+  transmission: string | null;
+  fuel: string | null;
+  accident_free: boolean | null;
+  previous_owners: number | null;
+  brand: string | null;
+}
+
+export interface RealEstateSpecs {
+  property_type: string | null;
+  offer_type: string;
+  area_sqm: number | null;
+  bedrooms: number | null;
+  bathrooms: number | null;
+  region: string | null;
+}
+
+const CAR_BRANDS: Record<string, string> = {
+  toyota: "Toyota", تويوتا: "Toyota", nissan: "Nissan", نيسان: "Nissan",
+  honda: "Honda", هوندا: "Honda", lexus: "Lexus", لكزس: "Lexus",
+  mercedes: "Mercedes", مرسيدس: "Mercedes", bmw: "BMW", hyundai: "Hyundai",
+  هونداي: "Hyundai", kia: "Kia", كيا: "Kia", ford: "Ford", فورد: "Ford",
+  chevrolet: "Chevrolet", شفروليه: "Chevrolet", mitsubishi: "Mitsubishi",
+  ميتسوبيشي: "Mitsubishi", mazda: "Mazda", مازda: "Mazda", مازدا: "Mazda",
+};
+
+export function extractCarSpecs(text: string): CarSpecs {
+  const words = toWords(text);
+  const lower = normDigits(text).toLowerCase();
+  const year = new Date().getFullYear();
+
+  // year: near MODEL/موديل, else a standalone valid 4-digit number
+  let yr = numberNear(words, ["model", "موديل"], 2);
+  if (yr !== null && (yr < 1990 || yr > year + 1)) yr = null;
+  if (yr === null) {
+    for (const w of words) {
+      const m = w.match(/\b(\d{4})\b/);
+      if (m) {
+        const y = Number(m[1]);
+        if (y >= 1990 && y <= year + 1) {
+          yr = y;
+          break;
+        }
+      }
+    }
+  }
+
+  const mileage = numberNear(words, ["km", "كم", "كيلومتر", "mileage"], 2);
+
+  let transmission: string | null = null;
+  if (/automatic|أوتوماتيك|اوتوماتيك|اتوماتيك/i.test(lower)) transmission = "automatic";
+  else if (/manual|مانيوال|عادي/i.test(lower)) transmission = "manual";
+
+  let fuel: string | null = null;
+  if (/petrol|gasoline|بنزين/i.test(lower)) fuel = "petrol";
+  else if (/diesel|ديزل/i.test(lower)) fuel = "diesel";
+  else if (/hybrid|هايبرد|هجين/i.test(lower)) fuel = "hybrid";
+  else if (/electric|كهرباء|كهربائي/i.test(lower)) fuel = "electric";
+
+  let accident_free: boolean | null = null;
+  if (/zero accident|no accident|بدون حادث|بدون حوادث|ما فيها حوادث|وكاله|وكالة|agency/i.test(lower))
+    accident_free = true;
+  else if (/accident|حادث|حوادث/i.test(lower)) accident_free = false;
+
+  let previous_owners: number | null = numberNear(words, ["owner", "owners", "مالك", "ملاك"], 2);
+  if (previous_owners === null) {
+    if (/first owner|أول مالك|اول مالك/i.test(lower)) previous_owners = 1;
+    else if (/second owner|second owners|ثاني مالك/i.test(lower)) previous_owners = 2;
+    else if (/third owner|ثالث مالك/i.test(lower)) previous_owners = 3;
+  }
+
+  let brand: string | null = null;
+  for (const [k, v] of Object.entries(CAR_BRANDS)) {
+    if (lower.includes(k)) {
+      brand = v;
+      break;
+    }
+  }
+
+  return { year: yr, mileage_km: mileage, transmission, fuel, accident_free, previous_owners, brand };
+}
+
+export function extractRealEstateSpecs(text: string): RealEstateSpecs {
+  const words = toWords(text);
+  const lower = normDigits(text).toLowerCase();
+
+  let property_type: string | null = null;
+  if (/studio|استوديو|ستوديو/i.test(lower)) property_type = "studio";
+  else if (/apartment|شقة|شقق/i.test(lower)) property_type = "apartment";
+  else if (/villa|فيلا|فلل/i.test(lower)) property_type = "villa";
+  else if (/\bland\b|أرض|ارض/i.test(lower)) property_type = "land";
+  else if (/office|مكتب/i.test(lower)) property_type = "office";
+  else if (/\bshop\b|محل/i.test(lower)) property_type = "shop";
+
+  const offer_type = /rent|للايجار|للإيجار|إيجار|ايجار/i.test(lower) ? "rent" : "sale";
+
+  const area_sqm = numberNear(words, ["م2", "م²", "متر", "sqm", "sq"], 2);
+  const bedrooms = numberNear(words, ["غرفة", "غرف", "bedroom", "bedrooms", "bhk", "غرفة نوم"], 2);
+  const bathrooms = numberNear(words, ["حمام", "حمامات", "bathroom", "bathrooms"], 2);
+
+  let region: string | null = null;
+  for (const r of BAHRAIN_REGIONS) {
+    if (normDigits(text).includes(r)) {
+      region = r;
+      break;
+    }
+  }
+
+  return { property_type, offer_type, area_sqm, bedrooms, bathrooms, region };
+}
+
+/**
+ * Re-checks the auto-detected category. If a price was found but the category is
+ * still "other" while the text shows strong car / real-estate signals, it
+ * reclassifies to the correct section so the ad never lands in "general" by mistake.
+ */
+export function refineCategory(text: string, current: FbCategorySlug): FbCategorySlug {
+  if (current === "cars" || current === "real_estate") return current;
+  const lower = normDigits(text).toLowerCase();
+
+  const carSignal =
+    Object.keys(CAR_BRANDS).some((b) => lower.includes(b)) ||
+    /\bmodel\b|موديل|سيارة|مركبة|gear|كيلومتر|\bkm\b|أوتوماتيك|بنزين|ديزل/i.test(lower);
+  const realEstateSignal =
+    /شقة|فيلا|عقار|للايجار|للإيجار|غرفة|غرف نوم|bedroom|apartment|villa|استوديو|محل تجاري/i.test(lower);
+
+  if (realEstateSignal) return "real_estate";
+  if (carSignal) return "cars";
+  return current;
+}

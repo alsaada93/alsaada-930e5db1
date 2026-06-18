@@ -4,7 +4,16 @@
  * Imported only by server functions and server routes.
  */
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { parsePost, detectCategory, categoryLabel, type FbCategorySlug } from "./facebook-parse";
+import {
+  parsePost,
+  detectCategory,
+  categoryLabel,
+  extractPriceSmart,
+  extractCarSpecs,
+  extractRealEstateSpecs,
+  refineCategory,
+  type FbCategorySlug,
+} from "./facebook-parse";
 
 const BUCKET = "listings";
 const PREFIX = "facebook";
@@ -321,27 +330,40 @@ export interface BotIngestResult {
   message?: string;
 }
 
-/** Extracts a price (number) from free Arabic/English text, or null. */
-function extractPrice(text: string): number | null {
-  if (!text) return null;
-  // Normalize Arabic-Indic digits to ASCII
-  const normalized = text.replace(/[\u0660-\u0669]/g, (d) =>
-    String(d.charCodeAt(0) - 0x0660),
-  );
-  // Look for a number near a price keyword / currency symbol first
-  const priceRegex =
-    /(?:price|السعر|سعر|بسعر|بـ|دينار|د\.?ب|bhd|bd|\$|ر\.?س|ريال|درهم)\s*[:=]?\s*([\d.,]+)|([\d.,]+)\s*(?:دينار|د\.?ب|bhd|bd|\$|ريال|درهم)/i;
-  const m = normalized.match(priceRegex);
-  let raw = m ? m[1] || m[2] : null;
-  if (!raw) {
-    // fallback: last standalone number with 2-9 digits in the text
-    const nums = normalized.match(/\b\d{2,9}(?:[.,]\d{1,2})?\b/g);
-    raw = nums && nums.length ? nums[nums.length - 1] : null;
+/** Builds a readable Arabic specs block appended to the description. */
+function buildSpecsBlock(category: FbCategorySlug, text: string): string {
+  const lines: string[] = [];
+  if (category === "cars") {
+    const s = extractCarSpecs(text);
+    if (s.brand) lines.push(`الماركة: ${s.brand}`);
+    if (s.year) lines.push(`سنة الصنع: ${s.year}`);
+    if (s.mileage_km) lines.push(`الكيلومترات: ${s.mileage_km.toLocaleString("en-US")} كم`);
+    if (s.transmission)
+      lines.push(`ناقل الحركة: ${s.transmission === "automatic" ? "أوتوماتيك" : "مانيوال"}`);
+    if (s.fuel) {
+      const fuelAr: Record<string, string> = {
+        petrol: "بنزين", diesel: "ديزل", hybrid: "هايبرد", electric: "كهرباء",
+      };
+      lines.push(`نوع الوقود: ${fuelAr[s.fuel] ?? s.fuel}`);
+    }
+    if (s.accident_free !== null)
+      lines.push(`خلو من الحوادث: ${s.accident_free ? "نعم" : "لا"}`);
+    if (s.previous_owners) lines.push(`عدد الملاك السابقين: ${s.previous_owners}`);
+  } else if (category === "real_estate") {
+    const s = extractRealEstateSpecs(text);
+    const typeAr: Record<string, string> = {
+      apartment: "شقة", villa: "فيلا", land: "أرض", office: "مكتب", shop: "محل", studio: "استوديو",
+    };
+    if (s.property_type) lines.push(`نوع العقار: ${typeAr[s.property_type] ?? s.property_type}`);
+    lines.push(`نوع العرض: ${s.offer_type === "rent" ? "إيجار" : "بيع"}`);
+    if (s.area_sqm) lines.push(`المساحة: ${s.area_sqm} م²`);
+    if (s.bedrooms) lines.push(`غرف النوم: ${s.bedrooms}`);
+    if (s.bathrooms) lines.push(`الحمامات: ${s.bathrooms}`);
+    if (s.region) lines.push(`المنطقة: ${s.region}`);
   }
-  if (!raw) return null;
-  const value = Number(raw.replace(/,/g, ""));
-  return Number.isFinite(value) && value > 0 ? value : null;
+  return lines.length ? `\n\n— المواصفات —\n${lines.join("\n")}` : "";
 }
+
 
 /** Extracts a contact phone number (8+ digits) from text, or null. */
 function extractPhone(text: string): string | null {
@@ -426,8 +448,25 @@ export async function ingestBotPost(payload: BotPayload): Promise<BotIngestResul
       }
     }
 
-    const price = extractPrice(content);
+    // Smart extraction
+    const priceResult = extractPriceSmart(content);
     const phone = extractPhone(content);
+
+    // Categorise: detect, then refine so strong car/real-estate signals never
+    // stay in "general" by mistake. Resolve to the real site category_id.
+    const detected = detectCategory(content);
+    const category = refineCategory(content, detected);
+    const categoryId = await resolveSiteCategoryId(category);
+
+    // Field-specific specs → appended to the description + mapped to columns.
+    const specsBlock = buildSpecsBlock(category, content);
+    const carSpecs = category === "cars" ? extractCarSpecs(content) : null;
+    const reSpecs = category === "real_estate" ? extractRealEstateSpecs(content) : null;
+    const negotiable = /\bnego\b|\bobo\b|قابل للتفاوض|قابل للنقاش|قابل/i.test(content);
+
+    if (!priceResult.detected) {
+      warning = warning ? `${warning} | price_not_detected` : "price_not_detected";
+    }
 
     let publishedAt: string | null = null;
     if (payload.published_at) {
@@ -437,10 +476,17 @@ export async function ingestBotPost(payload: BotPayload): Promise<BotIngestResul
 
     const row = {
       title: title || content.slice(0, 80) || "إعلان",
-      description: content || null,
+      description: (content || "") + specsBlock || null,
+      category_id: categoryId,
       images: imageUrl ? [imageUrl] : [],
-      price: price ?? 0,
+      // price column is NOT NULL — store 0 as a placeholder when undetected and
+      // flag it with the `price_not_detected` warning for manual review.
+      price: priceResult.price ?? 0,
+      negotiable,
       contact_phone: phone,
+      ...(reSpecs?.area_sqm ? { area_sqm: reSpecs.area_sqm } : {}),
+      ...(carSpecs?.brand ? { brand: carSpecs.brand } : {}),
+      ...(reSpecs?.region ? { city: reSpecs.region } : {}),
       status: "pending" as const,
       listing_type: "normal" as const,
       source: "facebook_bot",
@@ -454,9 +500,17 @@ export async function ingestBotPost(payload: BotPayload): Promise<BotIngestResul
       .single();
     if (error) throw error;
 
-    await logSync("bot", inserted.id, "success", "تم استقبال إعلان من البوت (قيد المراجعة)");
+    await logSync(
+      "bot",
+      inserted.id,
+      "success",
+      `تم استقبال إعلان من البوت (قيد المراجعة) — التصنيف: ${categoryLabel(category).name}، السعر: ${
+        priceResult.detected ? priceResult.price : "غير محدد"
+      }`,
+    );
     await touchMeta("ok");
     return { status: "ok", id: inserted.id, ad_status: "pending", warning };
+
   } catch (e) {
     const msg = e instanceof Error ? e.message : "خطأ غير معروف";
     await logSync("bot", null, "failed", msg, payload);
