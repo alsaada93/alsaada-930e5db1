@@ -448,8 +448,25 @@ export async function ingestBotPost(payload: BotPayload): Promise<BotIngestResul
       }
     }
 
-    const price = extractPrice(content);
+    // Smart extraction
+    const priceResult = extractPriceSmart(content);
     const phone = extractPhone(content);
+
+    // Categorise: detect, then refine so strong car/real-estate signals never
+    // stay in "general" by mistake. Resolve to the real site category_id.
+    const detected = detectCategory(content);
+    const category = refineCategory(content, detected);
+    const categoryId = await resolveSiteCategoryId(category);
+
+    // Field-specific specs → appended to the description + mapped to columns.
+    const specsBlock = buildSpecsBlock(category, content);
+    const carSpecs = category === "cars" ? extractCarSpecs(content) : null;
+    const reSpecs = category === "real_estate" ? extractRealEstateSpecs(content) : null;
+    const negotiable = /\bnego\b|\bobo\b|قابل للتفاوض|قابل للنقاش|قابل/i.test(content);
+
+    if (!priceResult.detected) {
+      warning = warning ? `${warning} | price_not_detected` : "price_not_detected";
+    }
 
     let publishedAt: string | null = null;
     if (payload.published_at) {
@@ -459,10 +476,17 @@ export async function ingestBotPost(payload: BotPayload): Promise<BotIngestResul
 
     const row = {
       title: title || content.slice(0, 80) || "إعلان",
-      description: content || null,
+      description: (content || "") + specsBlock || null,
+      category_id: categoryId,
       images: imageUrl ? [imageUrl] : [],
-      price: price ?? 0,
+      // price column is NOT NULL — store 0 as a placeholder when undetected and
+      // flag it with the `price_not_detected` warning for manual review.
+      price: priceResult.price ?? 0,
+      negotiable,
       contact_phone: phone,
+      ...(reSpecs?.area_sqm ? { area_sqm: reSpecs.area_sqm } : {}),
+      ...(carSpecs?.brand ? { brand: carSpecs.brand } : {}),
+      ...(reSpecs?.region ? { city: reSpecs.region } : {}),
       status: "pending" as const,
       listing_type: "normal" as const,
       source: "facebook_bot",
@@ -476,9 +500,17 @@ export async function ingestBotPost(payload: BotPayload): Promise<BotIngestResul
       .single();
     if (error) throw error;
 
-    await logSync("bot", inserted.id, "success", "تم استقبال إعلان من البوت (قيد المراجعة)");
+    await logSync(
+      "bot",
+      inserted.id,
+      "success",
+      `تم استقبال إعلان من البوت (قيد المراجعة) — التصنيف: ${categoryLabel(category).name}، السعر: ${
+        priceResult.detected ? priceResult.price : "غير محدد"
+      }`,
+    );
     await touchMeta("ok");
     return { status: "ok", id: inserted.id, ad_status: "pending", warning };
+
   } catch (e) {
     const msg = e instanceof Error ? e.message : "خطأ غير معروف";
     await logSync("bot", null, "failed", msg, payload);
