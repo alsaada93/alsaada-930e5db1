@@ -303,6 +303,168 @@ export async function deletePostAd(postId: string): Promise<IngestResult> {
   }
 }
 
+// ───────────────────────── External bot ingest (new payload) ─────────────────────────
+
+export interface BotPayload {
+  source?: string | null;
+  title?: string | null;
+  content?: string | null;
+  image_base64?: string | null;
+  published_at?: string | null;
+}
+
+export interface BotIngestResult {
+  status: "ok" | "duplicate" | "error";
+  id?: string;
+  ad_status?: "pending" | "approved";
+  warning?: string;
+  message?: string;
+}
+
+/** Extracts a price (number) from free Arabic/English text, or null. */
+function extractPrice(text: string): number | null {
+  if (!text) return null;
+  // Normalize Arabic-Indic digits to ASCII
+  const normalized = text.replace(/[\u0660-\u0669]/g, (d) =>
+    String(d.charCodeAt(0) - 0x0660),
+  );
+  // Look for a number near a price keyword / currency symbol first
+  const priceRegex =
+    /(?:price|السعر|سعر|بسعر|بـ|دينار|د\.?ب|bhd|bd|\$|ر\.?س|ريال|درهم)\s*[:=]?\s*([\d.,]+)|([\d.,]+)\s*(?:دينار|د\.?ب|bhd|bd|\$|ريال|درهم)/i;
+  const m = normalized.match(priceRegex);
+  let raw = m ? m[1] || m[2] : null;
+  if (!raw) {
+    // fallback: last standalone number with 2-9 digits in the text
+    const nums = normalized.match(/\b\d{2,9}(?:[.,]\d{1,2})?\b/g);
+    raw = nums && nums.length ? nums[nums.length - 1] : null;
+  }
+  if (!raw) return null;
+  const value = Number(raw.replace(/,/g, ""));
+  return Number.isFinite(value) && value > 0 ? value : null;
+}
+
+/** Extracts a contact phone number (8+ digits) from text, or null. */
+function extractPhone(text: string): string | null {
+  if (!text) return null;
+  const normalized = text.replace(/[\u0660-\u0669]/g, (d) =>
+    String(d.charCodeAt(0) - 0x0660),
+  );
+  const m = normalized.match(/(\+?\d[\d\s-]{6,}\d)/g);
+  if (!m) return null;
+  for (const cand of m) {
+    const digits = cand.replace(/[^\d]/g, "");
+    if (digits.length >= 8 && digits.length <= 15) return digits;
+  }
+  return null;
+}
+
+/** Uploads a base64 (data URI or raw) image into the listings bucket. */
+async function storeBase64Image(b64: string): Promise<string | null> {
+  try {
+    let data = b64.trim();
+    let ext = "jpg";
+    let contentType = "image/jpeg";
+    const dataUri = data.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.*)$/s);
+    if (dataUri) {
+      contentType = dataUri[1];
+      data = dataUri[2];
+      ext = contentType.split("/")[1]?.replace("jpeg", "jpg") || "jpg";
+    }
+    const buf = Uint8Array.from(atob(data), (c) => c.charCodeAt(0));
+    if (buf.length === 0) return null;
+    const path = `${PREFIX}/bot/${crypto.randomUUID()}.${ext}`;
+    const { error } = await supabaseAdmin.storage
+      .from(BUCKET)
+      .upload(path, buf, { contentType, cacheControl: "31536000", upsert: true });
+    if (error) throw error;
+    return supabaseAdmin.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Ingests an ad sent by the external Facebook bot using the simple payload
+ * { source, title, content, image_base64, published_at } and writes it
+ * straight into the main `listings` table — the exact same table used for
+ * manually-added ads — so it appears, edits and deletes from the normal admin
+ * dashboard. New ads are saved as `pending` for admin review before going live.
+ */
+export async function ingestBotPost(payload: BotPayload): Promise<BotIngestResult> {
+  try {
+    const content = (payload.content ?? "").toString().trim();
+    const title = (payload.title ?? "").toString().trim();
+
+    if (!content && !title) {
+      await logSync("bot", null, "failed", "title و content مفقودان", payload);
+      return { status: "error", message: "title or content is required" };
+    }
+
+    // Deduplication: same content within the last 24h.
+    if (content) {
+      const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+      const { data: dup } = await supabaseAdmin
+        .from("listings")
+        .select("id")
+        .eq("source", "facebook_bot")
+        .eq("description", content)
+        .gte("created_at", since)
+        .maybeSingle();
+      if (dup?.id) {
+        await logSync("bot", null, "success", "تم تجاهل إعلان مكرر (نفس النص خلال 24 ساعة)");
+        return { status: "duplicate", id: dup.id, ad_status: "pending" };
+      }
+    }
+
+    let warning: string | undefined;
+    let imageUrl: string | null = null;
+    if (payload.image_base64) {
+      imageUrl = await storeBase64Image(payload.image_base64);
+      if (!imageUrl) {
+        warning = "تعذّر رفع الصورة؛ تم حفظ الإعلان بدون صورة.";
+        await logSync("bot", null, "failed", warning);
+      }
+    }
+
+    const price = extractPrice(content);
+    const phone = extractPhone(content);
+
+    let publishedAt: string | null = null;
+    if (payload.published_at) {
+      const d = new Date(payload.published_at);
+      if (!Number.isNaN(d.getTime())) publishedAt = d.toISOString();
+    }
+
+    const row = {
+      title: title || content.slice(0, 80) || "إعلان",
+      description: content || null,
+      images: imageUrl ? [imageUrl] : [],
+      price: price ?? 0,
+      contact_phone: phone,
+      status: "pending" as const,
+      listing_type: "normal" as const,
+      source: "facebook_bot",
+      ...(publishedAt ? { published_at: publishedAt } : {}),
+    };
+
+    const { data: inserted, error } = await supabaseAdmin
+      .from("listings")
+      .insert(row)
+      .select("id")
+      .single();
+    if (error) throw error;
+
+    await logSync("bot", inserted.id, "success", "تم استقبال إعلان من البوت (قيد المراجعة)");
+    await touchMeta("ok");
+    return { status: "ok", id: inserted.id, ad_status: "pending", warning };
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "خطأ غير معروف";
+    await logSync("bot", null, "failed", msg, payload);
+    await touchMeta("error");
+    return { status: "error", message: msg };
+  }
+}
+
 /** Validates the webhook secret against the stored value. */
 export async function verifySecret(provided: string | null): Promise<boolean> {
   if (!provided) return false;
