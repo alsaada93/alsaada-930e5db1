@@ -125,7 +125,11 @@ async function mirrorToListings(args: {
   fb_published_at: string | null;
 }): Promise<void> {
   try {
-    const categoryId = await resolveSiteCategoryId(args.category);
+    const cats = await loadSiteCategories();
+    const categoryId = await resolveSiteCategoryId(args.category, cats);
+    const catObj = cats.find((c) => c.id === categoryId);
+    const subText = `${args.title} ${args.description}`;
+    const { group_name, item_name } = resolveSubcategory(catObj, args.category, subText);
     const { data: existing } = await supabaseAdmin
       .from("listings")
       .select("id")
@@ -137,6 +141,8 @@ async function mirrorToListings(args: {
       title: args.title || "إعلان",
       description: args.description || null,
       category_id: categoryId,
+      group_name,
+      item_name,
       images: args.images,
       contact_name: args.seller_name,
       contact_phone: args.phone,
