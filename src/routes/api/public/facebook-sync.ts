@@ -13,7 +13,7 @@ const json = (body: unknown, status = 200) =>
     headers: { "Content-Type": "application/json", ...CORS },
   });
 
-// Legacy Zapier/automation payload (kept for backwards compatibility).
+// Legacy Zapier/automation payload
 const LegacyPayloadSchema = z.object({
   action: z.enum(["create", "update", "delete", "upsert"]).optional().default("upsert"),
   post_id: z.string().min(1).max(200),
@@ -26,7 +26,7 @@ const LegacyPayloadSchema = z.object({
   created_time: z.string().max(60).nullish(),
 });
 
-// New external-bot payload — writes straight into the main listings table.
+// New external-bot payload
 const BotPayloadSchema = z.object({
   source: z.string().max(100).nullish(),
   title: z.string().max(500).nullish(),
@@ -45,22 +45,20 @@ export const Route = createFileRoute("/api/public/facebook-sync")({
     handlers: {
       OPTIONS: async () => new Response(null, { status: 204, headers: CORS }),
 
-      // ─── GET: التحقق الأولي (بوابة الترحيب لفيسبوك ومزودي الخدمة) ───
+      // ─── GET: التحقق الأولي ───
       GET: async ({ request }) => {
         const url = new URL(request.url);
 
-        // 1. التحقق الرسمي من مطوري فيسبوك (Meta Challenge)
         const mode = url.searchParams.get("hub.mode");
         const token = url.searchParams.get("hub.verify_token");
         const challenge = url.searchParams.get("hub.challenge");
 
-        const VERIFY_TOKEN = "alsaada2026"; // الكلمة السرية التي ستضعها في لوحة فيسبوك
+        const VERIFY_TOKEN = "alsaada2026";
 
         if (mode === "subscribe" && token === VERIFY_TOKEN) {
           return new Response(challenge, { status: 200 });
         }
 
-        // 2. التحقق القديم (لأدوات الأتمتة)
         const secret = request.headers.get("x-sync-secret");
         const { verifySecret } = await import("@/lib/facebook-sync.server");
         const ok = await verifySecret(secret);
@@ -69,7 +67,6 @@ export const Route = createFileRoute("/api/public/facebook-sync")({
 
       // ─── POST: استقبال المنشورات الجديدة ───
       POST: async ({ request }) => {
-        // نقرأ محتوى الطلب مرة واحدة كنص
         const rawBody = await request.text();
         let body: any;
 
@@ -79,31 +76,30 @@ export const Route = createFileRoute("/api/public/facebook-sync")({
           return json({ status: "error", message: "Invalid JSON format" }, 400);
         }
 
-        // استدعاء الدوال الأساسية من قاعدة بياناتك
+        // أضفنا هذا السطر لنرى في السجلات (Logs) ما الذي يرسله فيسبوك بالضبط
+        console.log("🚨 [Facebook Webhook] تم استلام طلب جديد:", JSON.stringify(body, null, 2));
+
         const { verifySecret, ingestPost, deletePostAd, ingestBotPost } = await import("@/lib/facebook-sync.server");
 
         // ====================================================================
-        // الجزء الأول: التعامل مع تنسيق فيسبوك الرسمي (Meta Graph API Webhook)
+        // الجزء الأول: التعامل مع تنسيق فيسبوك الرسمي (Meta Webhook)
         // ====================================================================
         if (body.object === "group" || body.object === "page") {
-          // استخراج المصفوفات المتداخلة التي يرسلها فيسبوك
           for (const entry of body.entry || []) {
             for (const change of entry.changes || []) {
-              // نهتم فقط بالمنشورات الجديدة (verb: add)
               if (change.field === "feed" && change.value && change.value.verb === "add") {
                 const post = change.value;
 
-                // تجاهل المنشورات الفارغة (التي لا تحتوي على نص)
-                if (!post.message) continue;
+                // التعديل الأهم: بدلاً من تجاهل المنشور إذا كان بدون نص، نضع نصاً افتراضياً
+                const contentText = post.message || post.story || "منشور مرفق بصورة بدون نص";
 
-                // محاولة استخراج الصور من المرفقات إذا أرسلها فيسبوك
-                const extractedImages: string[] = [];
+                // استخراج الصور العميق
+                let extractedImages: string[] = [];
                 if (post.attachments && post.attachments.data) {
                   for (const attachment of post.attachments.data) {
                     if (attachment.media?.image?.src) {
                       extractedImages.push(attachment.media.image.src);
                     }
-                    // في حال كان المنشور عبارة عن ألبوم صور
                     if (attachment.subattachments && attachment.subattachments.data) {
                       for (const sub of attachment.subattachments.data) {
                         if (sub.media?.image?.src) {
@@ -114,42 +110,47 @@ export const Route = createFileRoute("/api/public/facebook-sync")({
                   }
                 }
 
-                // تحويل بيانات فيسبوك المعقدة إلى التنسيق البسيط الذي يفهمه موقعك (BotPayload)
+                // جلب رابط الصورة المباشرة كبديل إضافي
+                if (post.item === "photo" && post.link && extractedImages.length === 0) {
+                  extractedImages.push(post.link);
+                }
+
+                // تنظيف الصور المكررة
+                const uniqueImages = [...new Set(extractedImages)];
+
                 const mappedPayload = {
                   source: "facebook_official",
-                  title: "منشور من مجموعة فيسبوك",
-                  content: post.message,
-                  author_name: post.from?.name || "عضو في المجموعة",
-                  // تحويل الوقت من ثواني إلى صيغة ISO
+                  title: "منشور من فيسبوك",
+                  content: contentText,
+                  author_name: post.from?.name || "عضو في الصفحة",
                   published_at: post.created_time
                     ? new Date(post.created_time * 1000).toISOString()
                     : new Date().toISOString(),
-                  images: extractedImages.length > 0 ? extractedImages : null,
+                  images: uniqueImages.length > 0 ? uniqueImages : null,
                 };
 
-                // إرسال البيانات لدالة المعالجة الذكية في موقعك لتستخرج السعر ورقم الهاتف وتنشره
+                // طباعة البيانات قبل الحفظ للتأكد من سلامتها
+                console.log("✅ [Facebook Webhook] سيتم حفظ هذه البيانات:", mappedPayload);
+
                 await ingestBotPost(mappedPayload);
               }
             }
           }
 
-          // يجب الرد على فيسبوك بـ 200 OK فوراً وإلا سيعتبر أن موقعك معطل ويوقف إرسال المنشورات
           return new Response("EVENT_RECEIVED", { status: 200 });
         }
 
         // ====================================================================
-        // الجزء الثاني: التعامل مع البوتات وأدوات الأتمتة (Make/Zapier/Custom Bots)
+        // الجزء الثاني: التعامل مع البوتات وأدوات الأتمتة
         // ====================================================================
         const secret = request.headers.get("x-sync-secret");
 
-        // التحقق من المفتاح السري للبوتات
         if (!(await verifySecret(secret))) {
           return json({ status: "error", message: "Unauthorized" }, 401);
         }
 
         const isLegacy = typeof body === "object" && body !== null && "post_id" in (body as Record<string, unknown>);
 
-        // تنسيق البوت الجديد (BotPayloadSchema)
         if (!isLegacy) {
           const parsed = BotPayloadSchema.safeParse(body);
           if (!parsed.success) {
@@ -160,7 +161,6 @@ export const Route = createFileRoute("/api/public/facebook-sync")({
           return json(result, code);
         }
 
-        // ── تنسيق البوت القديم (Legacy path) ──
         const parsed = LegacyPayloadSchema.safeParse(body);
         if (!parsed.success) {
           return json({ status: "error", message: "Invalid payload", details: parsed.error.flatten() }, 422);
