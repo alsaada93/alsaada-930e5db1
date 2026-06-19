@@ -45,20 +45,36 @@ function CategoryCard({ c }: { c: ReturnType<typeof useCategories>["categories"]
         className="flex w-full flex-col items-start gap-3"
         aria-label={lang === "ar" ? c.name : c.nameEn}
       >
-        <span
-          className={`flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br ${grad} text-white shadow-lg transition-transform group-hover:scale-110`}
-        >
-          {hasImageIcon ? (
+        {c.image ? (
+          <div className="relative -mx-4 -mt-4 mb-1 w-[calc(100%+2rem)] overflow-hidden">
             <img
-              src={c.icon}
+              src={c.image}
               alt={lang === "ar" ? c.name : c.nameEn}
-              className="h-full w-full object-cover"
+              className="h-28 w-full object-cover transition-transform duration-500 group-hover:scale-105"
               loading="lazy"
+              width={1024}
+              height={284}
             />
-          ) : (
-            <Icon className="h-8 w-8" strokeWidth={1.75} />
-          )}
-        </span>
+            <span className="absolute bottom-2 start-3 text-2xl drop-shadow-lg">
+              {!hasImageIcon && c.icon ? c.icon : ""}
+            </span>
+          </div>
+        ) : (
+          <span
+            className={`flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br ${grad} text-white shadow-lg transition-transform group-hover:scale-110`}
+          >
+            {hasImageIcon ? (
+              <img
+                src={c.icon}
+                alt={lang === "ar" ? c.name : c.nameEn}
+                className="h-full w-full object-cover"
+                loading="lazy"
+              />
+            ) : (
+              <Icon className="h-8 w-8" strokeWidth={1.75} />
+            )}
+          </span>
+        )}
         <h3 className="font-bold text-card-foreground">{lang === "ar" ? c.name : c.nameEn}</h3>
         <p className="line-clamp-2 text-xs text-muted-foreground">
           {lang === "ar" ? c.description : c.descriptionEn}
