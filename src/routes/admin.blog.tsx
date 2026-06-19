@@ -161,6 +161,45 @@ function AdminBlogPage() {
     }
   };
 
+  const generate100 = async () => {
+    if (genProgress !== null) return;
+    if (!confirm("سيتم توليد 100 مقال SEO تلقائياً بالعربية والإنجليزية وحفظها في المدونة. متابعة؟"))
+      return;
+    const TARGET = 100;
+    const BATCH = 5;
+    let total = 0;
+    setGenProgress(0);
+    try {
+      for (let i = 0; i < Math.ceil(TARGET / BATCH); i++) {
+        const remaining = TARGET - total;
+        const count = Math.min(BATCH, remaining);
+        if (count <= 0) break;
+        try {
+          const r = await generate({ data: { count, seed: `${Date.now()}-${i}` } });
+          total += r.created;
+          setGenProgress(Math.min(TARGET, total));
+        } catch (e) {
+          const msg = e instanceof Error ? e.message : "";
+          if (msg.includes("rate_limited")) {
+            toast.message("تم الوصول لحد الطلبات، جاري الانتظار قليلاً...");
+            await new Promise((res) => setTimeout(res, 8000));
+            i -= 1; // retry this batch
+            continue;
+          }
+          if (msg.includes("credits_exhausted")) {
+            toast.error("نفد رصيد الذكاء الاصطناعي. أضف رصيداً ثم أعد المحاولة.");
+            break;
+          }
+          toast.error("تعذّر توليد بعض المقالات، جاري المتابعة...");
+        }
+      }
+      toast.success(`تم توليد ${total} مقال جديد`);
+      await load();
+    } finally {
+      setGenProgress(null);
+    }
+  };
+
   return (
     <>
       <AdminHeader title="إدارة المدونة" subtitle="إضافة وتعديل المقالات وتحسين SEO" />
@@ -175,10 +214,25 @@ function AdminBlogPage() {
               className="w-64 pe-9"
             />
           </div>
-          <Button onClick={() => setEditing({ ...EMPTY })}>
-            <Plus className="h-4 w-4" />
-            مقال جديد
-          </Button>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button variant="secondary" onClick={generate100} disabled={genProgress !== null}>
+              {genProgress !== null ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  جاري التوليد… {genProgress}/100
+                </>
+              ) : (
+                <>
+                  <Sparkles className="h-4 w-4" />
+                  توليد 100 مقال
+                </>
+              )}
+            </Button>
+            <Button onClick={() => setEditing({ ...EMPTY })}>
+              <Plus className="h-4 w-4" />
+              مقال جديد
+            </Button>
+          </div>
         </div>
 
         {loading ? (
