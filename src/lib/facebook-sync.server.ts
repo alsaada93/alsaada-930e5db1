@@ -318,7 +318,12 @@ export interface BotPayload {
   source?: string | null;
   title?: string | null;
   content?: string | null;
+  author_name?: string | null;
+  contact_phone?: string | null;
+  price?: string | number | null;
   image_base64?: string | null;
+  images?: string[] | null;
+  category?: string | null;
   published_at?: string | null;
 }
 
@@ -364,6 +369,18 @@ function buildSpecsBlock(category: FbCategorySlug, text: string): string {
   return lines.length ? `\n\n— المواصفات —\n${lines.join("\n")}` : "";
 }
 
+
+/** Parses an explicit price from the payload (number or string), or null. */
+function parsePayloadPrice(raw: string | number | null | undefined): number | null {
+  if (raw === null || raw === undefined) return null;
+  if (typeof raw === "number") return Number.isFinite(raw) && raw > 0 ? raw : null;
+  const normalized = raw
+    .replace(/[\u0660-\u0669]/g, (d) => String(d.charCodeAt(0) - 0x0660))
+    .replace(/[^\d.]/g, "");
+  if (!normalized) return null;
+  const n = parseFloat(normalized);
+  return Number.isFinite(n) && n > 0 ? n : null;
+}
 
 /** Extracts a contact phone number (8+ digits) from text, or null. */
 function extractPhone(text: string): string | null {
@@ -422,40 +439,67 @@ export async function ingestBotPost(payload: BotPayload): Promise<BotIngestResul
       return { status: "error", message: "title or content is required" };
     }
 
-    // Deduplication: same content within the last 24h.
-    if (content) {
+    const authorName = (payload.author_name ?? "").toString().trim() || null;
+
+    // Deduplication: reject an exact match on description, OR on the
+    // author_name + title combination, within the last 24h (spam guard).
+    {
       const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-      const { data: dup } = await supabaseAdmin
-        .from("listings")
-        .select("id")
-        .eq("source", "facebook_bot")
-        .eq("description", content)
-        .gte("created_at", since)
-        .maybeSingle();
-      if (dup?.id) {
-        await logSync("bot", null, "success", "تم تجاهل إعلان مكرر (نفس النص خلال 24 ساعة)");
-        return { status: "duplicate", id: dup.id, ad_status: "pending" };
+      if (content) {
+        const { data: dup } = await supabaseAdmin
+          .from("listings")
+          .select("id")
+          .eq("source", "facebook_bot")
+          .eq("description", content)
+          .gte("created_at", since)
+          .maybeSingle();
+        if (dup?.id) {
+          await logSync("bot", null, "success", "تم تجاهل إعلان مكرر (نفس النص خلال 24 ساعة)");
+          return { status: "duplicate", id: dup.id, ad_status: "pending" };
+        }
+      }
+      if (authorName && title) {
+        const { data: dup } = await supabaseAdmin
+          .from("listings")
+          .select("id")
+          .eq("source", "facebook_bot")
+          .eq("contact_name", authorName)
+          .eq("title", title)
+          .gte("created_at", since)
+          .maybeSingle();
+        if (dup?.id) {
+          await logSync("bot", null, "success", "تم تجاهل إعلان مكرر (نفس البائع والعنوان خلال 24 ساعة)");
+          return { status: "duplicate", id: dup.id, ad_status: "pending" };
+        }
       }
     }
 
     let warning: string | undefined;
-    let imageUrl: string | null = null;
+    // Primary image: decode the base64 string, upload to storage, keep its URL.
+    let images: string[] = [];
     if (payload.image_base64) {
-      imageUrl = await storeBase64Image(payload.image_base64);
-      if (!imageUrl) {
+      const imageUrl = await storeBase64Image(payload.image_base64);
+      if (imageUrl) {
+        images = [imageUrl];
+      } else {
         warning = "تعذّر رفع الصورة؛ تم حفظ الإعلان بدون صورة.";
         await logSync("bot", null, "failed", warning);
       }
     }
+    // Fallback: when no base64 image, store the external image URLs instead.
+    if (images.length === 0 && Array.isArray(payload.images) && payload.images.length > 0) {
+      images = await storeImages(`bot_${crypto.randomUUID()}`, payload.images);
+    }
 
-    // Smart extraction
+    // Smart extraction (text-derived). Explicit payload fields take priority.
     const priceResult = extractPriceSmart(content);
-    const phone = extractPhone(content);
+    const explicitPrice = parsePayloadPrice(payload.price);
+    const phone = (payload.contact_phone ?? "").toString().trim() || extractPhone(content);
 
-    // Categorise: detect, then refine so strong car/real-estate signals never
-    // stay in "general" by mistake. Resolve to the real site category_id.
-    const detected = detectCategory(content);
-    const category = refineCategory(content, detected);
+    // Categorise: honor the explicit Arabic category when provided, otherwise
+    // detect + refine from the text. Resolve to the real site category_id.
+    const detected = detectCategory(content, payload.category);
+    const category = payload.category ? detected : refineCategory(content, detected);
     const categoryId = await resolveSiteCategoryId(category);
 
     // Field-specific specs → appended to the description + mapped to columns.
@@ -464,7 +508,8 @@ export async function ingestBotPost(payload: BotPayload): Promise<BotIngestResul
     const reSpecs = category === "real_estate" ? extractRealEstateSpecs(content) : null;
     const negotiable = /\bnego\b|\bobo\b|قابل للتفاوض|قابل للنقاش|قابل/i.test(content);
 
-    if (!priceResult.detected) {
+    const finalPrice = explicitPrice ?? priceResult.price ?? 0;
+    if (explicitPrice === null && !priceResult.detected) {
       warning = warning ? `${warning} | price_not_detected` : "price_not_detected";
     }
 
@@ -478,11 +523,12 @@ export async function ingestBotPost(payload: BotPayload): Promise<BotIngestResul
       title: title || content.slice(0, 80) || "إعلان",
       description: (content || "") + specsBlock || null,
       category_id: categoryId,
-      images: imageUrl ? [imageUrl] : [],
+      images,
       // price column is NOT NULL — store 0 as a placeholder when undetected and
       // flag it with the `price_not_detected` warning for manual review.
-      price: priceResult.price ?? 0,
+      price: finalPrice,
       negotiable,
+      contact_name: authorName,
       contact_phone: phone,
       ...(reSpecs?.area_sqm ? { area_sqm: reSpecs.area_sqm } : {}),
       ...(carSpecs?.brand ? { brand: carSpecs.brand } : {}),
