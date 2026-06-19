@@ -12,6 +12,7 @@ import {
   extractCarSpecs,
   extractRealEstateSpecs,
   refineCategory,
+  detectSubcategory,
   type FbCategorySlug,
 } from "./facebook-parse";
 
@@ -20,37 +21,96 @@ const PREFIX = "facebook";
 const MAX_IMAGES = 12;
 const SOURCE = "facebook";
 
+interface SiteCategory {
+  id: string;
+  name: string;
+  nameEn?: string;
+  groups?: { name: string; items?: string[] }[];
+}
+
 /**
- * Maps a detected Facebook category slug to a real site category_id used by the
- * main listings feed. Site categories are admin-editable and stored in
- * site_settings, so we resolve by matching the Arabic category name.
- * Returns null when there is no matching site category (the ad still appears on
- * the homepage and in search — it just won't be filed under a category page).
+ * Per-slug aliases used to find the right site category robustly — by id, by
+ * Arabic name fragment or by English name fragment. This keeps classification
+ * working even after a category's *display* name changes (e.g. سيارات → مركبات),
+ * because the underlying id never changes.
  */
-async function resolveSiteCategoryId(slug: FbCategorySlug): Promise<string | null> {
+const SLUG_ALIASES: Record<FbCategorySlug, { names: string[]; en: string[] }> = {
+  cars: { names: ["مركب", "سيار", "مركبات"], en: ["vehicle", "car"] },
+  real_estate: { names: ["عقار"], en: ["real estate", "property"] },
+  electronics: { names: ["إلكترون", "الكترون", "كهربائ"], en: ["electronic"] },
+  furniture: { names: ["أثاث", "اثاث"], en: ["furniture"] },
+  equipment: { names: ["مطاع", "معدات"], en: ["restaurant", "equipment"] },
+  jobs: { names: ["وظائف", "وظيفة"], en: ["job"] },
+  services: { names: ["خدمات", "خدمة"], en: ["service"] },
+  other: { names: [], en: [] },
+};
+
+async function loadSiteCategories(): Promise<SiteCategory[]> {
   try {
     const { data } = await supabaseAdmin
       .from("site_settings")
       .select("value")
       .eq("key", "categories")
       .maybeSingle();
-    const cats = (data?.value as { id: string; name: string }[] | null) ?? [];
-    if (!Array.isArray(cats) || cats.length === 0) return null;
-
-    const arabicName = categoryLabel(slug).name;
-    // direct name match (سيارات، عقارات، إلكترونيات، أثاث ...)
-    const direct = cats.find((c) => c.name === arabicName);
-    if (direct) return direct.id;
-
-    // equipment / restaurant-style ads → the restaurant ("مطاعم") category
-    if (slug === "equipment") {
-      const r = cats.find((c) => c.id === "restaurant" || c.name.includes("مطاع"));
-      if (r) return r.id;
-    }
-    return null;
+    const cats = (data?.value as SiteCategory[] | null) ?? [];
+    return Array.isArray(cats) ? cats : [];
   } catch {
-    return null;
+    return [];
   }
+}
+
+/**
+ * Maps a detected Facebook category slug to a real site category_id used by the
+ * main listings feed. Resolves by stable aliases (id / name fragment) so it
+ * never silently falls back to "no category".
+ * Returns null only when there is truly no matching site category.
+ */
+async function resolveSiteCategoryId(
+  slug: FbCategorySlug,
+  cats?: SiteCategory[],
+): Promise<string | null> {
+  const list = cats ?? (await loadSiteCategories());
+  if (list.length === 0) return null;
+
+  const alias = SLUG_ALIASES[slug] ?? SLUG_ALIASES.other;
+
+  // exact label name match (legacy behaviour) takes priority
+  const arabicName = categoryLabel(slug).name;
+  const direct = list.find((c) => c.name === arabicName);
+  if (direct) return direct.id;
+
+  // alias match by Arabic / English name fragment
+  const byAlias = list.find(
+    (c) =>
+      alias.names.some((n) => (c.name ?? "").includes(n)) ||
+      alias.en.some((e) => (c.nameEn ?? "").toLowerCase().includes(e)),
+  );
+  if (byAlias) return byAlias.id;
+
+  return null;
+}
+
+/**
+ * Resolves the subcategory (group_name + item_name) for an ad, validating the
+ * detected names against the actual group/item names stored on the category so
+ * we never write a subcategory the category page can't display.
+ */
+function resolveSubcategory(
+  category: SiteCategory | undefined,
+  slug: FbCategorySlug,
+  text: string,
+): { group_name: string | null; item_name: string | null } {
+  const detected = detectSubcategory(slug, text);
+  if (!category || !Array.isArray(category.groups) || category.groups.length === 0) {
+    return { group_name: detected.group_name, item_name: detected.item_name };
+  }
+  const group = category.groups.find((g) => g.name === detected.group_name);
+  if (!group) return { group_name: null, item_name: null };
+  const item =
+    detected.item_name && (group.items ?? []).includes(detected.item_name)
+      ? detected.item_name
+      : null;
+  return { group_name: group.name, item_name: item };
 }
 
 /** Mirrors an imported ad into the main listings feed (published instantly). */
