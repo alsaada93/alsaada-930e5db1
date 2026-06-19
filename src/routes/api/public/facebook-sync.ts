@@ -1,3 +1,18 @@
+// 1. دالة التحقق الخاصة بفيسبوك
+export async function GET(req) {
+  const url = new URL(req.url);
+  const mode = url.searchParams.get("hub.mode");
+  const token = url.searchParams.get("hub.verify_token");
+  const challenge = url.searchParams.get("hub.challenge");
+
+  // التحقق من التوكن الخاص بك
+  if (mode === "subscribe" && token === "alsaada2026") {
+    return new Response(challenge, { status: 200 });
+  }
+  return new Response("Forbidden", { status: 403 });
+}
+
+// 2. دالة استقبال المنشورات والصور
 export async function POST(req) {
   try {
     const body = await req.json();
@@ -61,7 +76,7 @@ export async function POST(req) {
               console.log("- روابط الصور:", uniqueImages);
 
               // -------------------------------------------------------------
-              // كود الإدخال في قاعدة بيانات Supabase يستمر هنا...
+              // كود الإدخال في قاعدة بيانات Supabase يوضع هنا
               // يمكنك الآن حفظ المصفوفة (uniqueImages) بالكامل.
               // -------------------------------------------------------------
             }
