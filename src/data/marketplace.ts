@@ -11,6 +11,8 @@ export interface Category {
   name: string;
   nameEn: string;
   icon: string;
+  /** Optional cover image URL shown on the category card. */
+  image?: string;
   count: number;
   description: string;
   descriptionEn: string;
