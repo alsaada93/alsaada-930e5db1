@@ -86,24 +86,28 @@ export const Route = createFileRoute("/api/public/facebook-sync")({
         // الجزء الأول: التعامل مع تنسيق فيسبوك الرسمي (Meta Graph API Webhook)
         // ====================================================================
         if (body.object === "group" || body.object === "page") {
-          // استخراج المصفوفات المتداخلة التي يرسلها فيسبوك
           for (const entry of body.entry || []) {
             for (const change of entry.changes || []) {
-              // نهتم فقط بالمنشورات الجديدة (verb: add)
+              // نهتم فقط بمنشورات الصفحة (feed) الجديدة (verb: add)
               if (change.field === "feed" && change.value && change.value.verb === "add") {
                 const post = change.value;
 
-                // تجاهل المنشورات الفارغة (التي لا تحتوي على نص)
+                // تجاهل المنشورات الفارغة
                 if (!post.message) continue;
 
-                // محاولة استخراج الصور من المرفقات إذا أرسلها فيسبوك
-                const extractedImages: string[] = [];
+                // --- بداية خوارزمية الاستخراج العميق للصور التي أضفناها ---
+                let extractedImages: string[] = [];
+
+                // أ. التحقق من الصور المباشرة
+                if (post.full_picture) extractedImages.push(post.full_picture);
+                else if (post.picture) extractedImages.push(post.picture);
+
+                // ب. الغوص في المرفقات والصور المتعددة (الألبومات)
                 if (post.attachments && post.attachments.data) {
                   for (const attachment of post.attachments.data) {
                     if (attachment.media?.image?.src) {
                       extractedImages.push(attachment.media.image.src);
                     }
-                    // في حال كان المنشور عبارة عن ألبوم صور
                     if (attachment.subattachments && attachment.subattachments.data) {
                       for (const sub of attachment.subattachments.data) {
                         if (sub.media?.image?.src) {
@@ -114,26 +118,34 @@ export const Route = createFileRoute("/api/public/facebook-sync")({
                   }
                 }
 
-                // تحويل بيانات فيسبوك المعقدة إلى التنسيق البسيط الذي يفهمه موقعك (BotPayload)
+                // ج. حل بديل للروابط
+                if (post.item === "photo" && post.link && extractedImages.length === 0) {
+                  extractedImages.push(post.link);
+                }
+
+                // تنظيف الصور المكررة
+                const uniqueImages = [...new Set(extractedImages)];
+                // --- نهاية خوارزمية استخراج الصور ---
+
+                // تحويل بيانات فيسبوك إلى التنسيق الذي يفهمه موقعك
                 const mappedPayload = {
                   source: "facebook_official",
-                  title: "منشور من مجموعة فيسبوك",
+                  title: "منشور من فيسبوك",
                   content: post.message,
-                  author_name: post.from?.name || "عضو في المجموعة",
-                  // تحويل الوقت من ثواني إلى صيغة ISO
+                  author_name: post.from?.name || "عضو في الصفحة",
                   published_at: post.created_time
                     ? new Date(post.created_time * 1000).toISOString()
                     : new Date().toISOString(),
-                  images: extractedImages.length > 0 ? extractedImages : null,
+                  images: uniqueImages.length > 0 ? uniqueImages : null,
                 };
 
-                // إرسال البيانات لدالة المعالجة الذكية في موقعك لتستخرج السعر ورقم الهاتف وتنشره
+                // إرسال البيانات لقاعدة بياناتك
                 await ingestBotPost(mappedPayload);
               }
             }
           }
 
-          // يجب الرد على فيسبوك بـ 200 OK فوراً وإلا سيعتبر أن موقعك معطل ويوقف إرسال المنشورات
+          // يجب الرد على فيسبوك بـ 200 OK فوراً
           return new Response("EVENT_RECEIVED", { status: 200 });
         }
 
@@ -142,14 +154,12 @@ export const Route = createFileRoute("/api/public/facebook-sync")({
         // ====================================================================
         const secret = request.headers.get("x-sync-secret");
 
-        // التحقق من المفتاح السري للبوتات
         if (!(await verifySecret(secret))) {
           return json({ status: "error", message: "Unauthorized" }, 401);
         }
 
         const isLegacy = typeof body === "object" && body !== null && "post_id" in (body as Record<string, unknown>);
 
-        // تنسيق البوت الجديد (BotPayloadSchema)
         if (!isLegacy) {
           const parsed = BotPayloadSchema.safeParse(body);
           if (!parsed.success) {
@@ -160,7 +170,6 @@ export const Route = createFileRoute("/api/public/facebook-sync")({
           return json(result, code);
         }
 
-        // ── تنسيق البوت القديم (Legacy path) ──
         const parsed = LegacyPayloadSchema.safeParse(body);
         if (!parsed.success) {
           return json({ status: "error", message: "Invalid payload", details: parsed.error.flatten() }, 422);
