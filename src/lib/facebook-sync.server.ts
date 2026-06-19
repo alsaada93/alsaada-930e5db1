@@ -370,6 +370,18 @@ function buildSpecsBlock(category: FbCategorySlug, text: string): string {
 }
 
 
+/** Parses an explicit price from the payload (number or string), or null. */
+function parsePayloadPrice(raw: string | number | null | undefined): number | null {
+  if (raw === null || raw === undefined) return null;
+  if (typeof raw === "number") return Number.isFinite(raw) && raw > 0 ? raw : null;
+  const normalized = raw
+    .replace(/[\u0660-\u0669]/g, (d) => String(d.charCodeAt(0) - 0x0660))
+    .replace(/[^\d.]/g, "");
+  if (!normalized) return null;
+  const n = parseFloat(normalized);
+  return Number.isFinite(n) && n > 0 ? n : null;
+}
+
 /** Extracts a contact phone number (8+ digits) from text, or null. */
 function extractPhone(text: string): string | null {
   if (!text) return null;
