@@ -596,6 +596,8 @@ export async function ingestBotPost(payload: BotPayload): Promise<BotIngestResul
       title: title || content.slice(0, 80) || "إعلان",
       description: (content || "") + specsBlock || null,
       category_id: categoryId,
+      group_name,
+      item_name,
       images,
       // price column is NOT NULL — store 0 as a placeholder when undetected and
       // flag it with the `price_not_detected` warning for manual review.
