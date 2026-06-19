@@ -480,3 +480,76 @@ export function refineCategory(text: string, current: FbCategorySlug): FbCategor
   if (carSignal) return "cars";
   return current;
 }
+
+// ───────────────────────── Subcategory detection ─────────────────────────
+
+export interface SubCategoryResult {
+  /** Top-level group name as stored on the category (maps to listings.group_name). */
+  group_name: string | null;
+  /** Leaf item name (maps to listings.item_name). */
+  item_name: string | null;
+}
+
+/**
+ * Detects the most appropriate subcategory (group + item) for an ad based on its
+ * detected main category and free text. Returns the group/item *names* exactly as
+ * stored in the site category tree so the ad files under the right subcategory page.
+ */
+export function detectSubcategory(slug: FbCategorySlug, text: string): SubCategoryResult {
+  const t = normDigits(text).toLowerCase();
+  const has = (...kw: string[]) => kw.some((k) => t.includes(k.toLowerCase()));
+
+  if (slug === "cars") {
+    // Vehicle type first (trucks/buses/motorcycles/boats/heavy equipment)
+    if (has("شاحنة", "شاحنات", "truck", "تريلا", "قلاب", "lorry"))
+      return { group_name: "شاحنات", item_name: "شاحنات" };
+    if (has("باص", "باصات", "حافلة", "bus", "ميني باص"))
+      return { group_name: "باصات", item_name: "باصات" };
+    if (has("دباب", "دراجة نارية", "دراجة ناريه", "موتور", "motorcycle", "bike", "هارلي"))
+      return { group_name: "دراجات نارية", item_name: "دراجات نارية" };
+    if (has("قارب", "قوارب", "boat", "جيتسكي", "يخت", "لنش"))
+      return { group_name: "قوارب", item_name: "قوارب" };
+    if (has("معدات ثقيلة", "حفار", "بوكلين", "شيول", "رافعة", "كرين", "excavator", "forklift", "رافعة شوكية"))
+      return { group_name: "معدات ثقيلة", item_name: "معدات ثقيلة" };
+    if (has("خدمة", "خدمات", "صيانة", "ورشة", "بنشر", "ميكانيكي", "غسيل سيارات", "service"))
+      return { group_name: "خدمات السيارات", item_name: "خدمات السيارات" };
+    // Spare parts & accessories
+    if (has("قطع غيار", "قطعة غيار", "spare", "spare parts")) {
+      if (has("إطار", "اطار", "اطارات", "tyre", "tire", "كفر")) return { group_name: "قطع غيار", item_name: "إطارات" };
+      if (has("بطارية", "battery", "بطاريات")) return { group_name: "قطع غيار", item_name: "بطاريات" };
+      if (has("زيت", "زيوت", "oil")) return { group_name: "قطع غيار", item_name: "زيوت" };
+      return { group_name: "قطع غيار", item_name: "إكسسوارات" };
+    }
+    if (has("إطار", "اطارات", "tyre", "tire")) return { group_name: "قطع غيار", item_name: "إطارات" };
+    if (has("بطارية", "battery")) return { group_name: "قطع غيار", item_name: "بطاريات" };
+    if (has("زيت محرك", "زيوت", "engine oil")) return { group_name: "قطع غيار", item_name: "زيوت" };
+    if (has("إكسسوار", "اكسسوار", "accessory", "accessories")) return { group_name: "قطع غيار", item_name: "إكسسوارات" };
+    // Cars
+    if (has("للايجار", "للإيجار", "إيجار", "ايجار", "for rent", "rent", "rental"))
+      return { group_name: "سيارات", item_name: "سيارات للإيجار" };
+    if (has("جديدة", "جديد", "زيرو", "brand new", "0km", "صفر"))
+      return { group_name: "سيارات", item_name: "سيارات جديدة" };
+    if (has("مستعملة", "مستعمل", "used", "ماشية", "ممشى"))
+      return { group_name: "سيارات", item_name: "سيارات مستعملة" };
+    return { group_name: "سيارات", item_name: "سيارات للبيع" };
+  }
+
+  if (slug === "real_estate") {
+    const re = extractRealEstateSpecs(text);
+    const group = re.offer_type === "rent" ? "للإيجار" : "للبيع";
+    const typeAr: Record<string, string> = {
+      villa: "فلل", apartment: "شقق", studio: "استوديو", office: "مكاتب", shop: "محلات", land: "أراضٍ",
+    };
+    let item = re.property_type ? typeAr[re.property_type] ?? null : null;
+    // 'أراضٍ' only exists under 'للبيع'
+    if (item === "أراضٍ" && group === "للإيجار") item = null;
+    if (!item) {
+      if (has("منزل", "بيت", "house")) item = "منازل";
+      else if (has("عمارة", "بناية", "building")) item = "عمارات";
+      else if (has("مستودع", "مخزن", "warehouse", "store")) item = "مستودعات";
+    }
+    return { group_name: group, item_name: item };
+  }
+
+  return { group_name: null, item_name: null };
+}
