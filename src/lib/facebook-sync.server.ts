@@ -318,7 +318,12 @@ export interface BotPayload {
   source?: string | null;
   title?: string | null;
   content?: string | null;
+  author_name?: string | null;
+  contact_phone?: string | null;
+  price?: string | number | null;
   image_base64?: string | null;
+  images?: string[] | null;
+  category?: string | null;
   published_at?: string | null;
 }
 
