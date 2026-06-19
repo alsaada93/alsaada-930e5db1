@@ -566,7 +566,14 @@ export async function ingestBotPost(payload: BotPayload): Promise<BotIngestResul
     // detect + refine from the text. Resolve to the real site category_id.
     const detected = detectCategory(content, payload.category);
     const category = payload.category ? detected : refineCategory(content, detected);
-    const categoryId = await resolveSiteCategoryId(category);
+    const cats = await loadSiteCategories();
+    const categoryId = await resolveSiteCategoryId(category, cats);
+    const catObj = cats.find((c) => c.id === categoryId);
+    const { group_name, item_name } = resolveSubcategory(
+      catObj,
+      category,
+      `${title} ${content}`,
+    );
 
     // Field-specific specs → appended to the description + mapped to columns.
     const specsBlock = buildSpecsBlock(category, content);
