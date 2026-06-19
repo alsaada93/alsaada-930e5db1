@@ -31,7 +31,12 @@ const BotPayloadSchema = z.object({
   source: z.string().max(100).nullish(),
   title: z.string().max(500).nullish(),
   content: z.string().max(20000).nullish(),
+  author_name: z.string().max(200).nullish(),
+  contact_phone: z.string().max(50).nullish(),
+  price: z.union([z.string().max(50), z.number()]).nullish(),
   image_base64: z.string().max(15_000_000).nullish(),
+  images: z.array(z.string().url().max(2000)).max(20).nullish(),
+  category: z.string().max(100).nullish(),
   published_at: z.string().max(60).nullish(),
 });
 
