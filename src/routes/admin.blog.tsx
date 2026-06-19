@@ -62,12 +62,14 @@ function AdminBlogPage() {
   const list = useServerFn(adminListPosts);
   const upsert = useServerFn(adminUpsertPost);
   const remove = useServerFn(adminDeletePost);
+  const generate = useServerFn(adminGenerateArticles);
 
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [editing, setEditing] = useState<FormState | null>(null);
   const [saving, setSaving] = useState(false);
+  const [genProgress, setGenProgress] = useState<number | null>(null);
 
   const load = async () => {
     setLoading(true);
