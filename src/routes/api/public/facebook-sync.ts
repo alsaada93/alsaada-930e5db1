@@ -45,8 +45,24 @@ export const Route = createFileRoute("/api/public/facebook-sync")({
     handlers: {
       OPTIONS: async () => new Response(null, { status: 204, headers: CORS }),
 
-      // Health / secret verification (used by automation tools to "test" the hook)
+      // Health / secret verification & Meta Official Webhook Verification
       GET: async ({ request }) => {
+        const url = new URL(request.url);
+
+        // --- 1. تحقق الويب هوك الرسمي من فيسبوك (Meta Webhook Challenge) ---
+        const mode = url.searchParams.get("hub.mode");
+        const token = url.searchParams.get("hub.verify_token");
+        const challenge = url.searchParams.get("hub.challenge");
+
+        // الكلمة السرية التي ستضعها في لوحة فيسبوك
+        const VERIFY_TOKEN = "alsaada2026";
+
+        if (mode === "subscribe" && token === VERIFY_TOKEN) {
+          // يجب أن نرد برقم الـ challenge كنص عادي لكي يقبل فيسبوك الربط
+          return new Response(challenge, { status: 200 });
+        }
+
+        // --- 2. التحقق القديم الخاص بالبوتات والأتمتة ---
         const secret = request.headers.get("x-sync-secret");
         const { verifySecret } = await import("@/lib/facebook-sync.server");
         const ok = await verifySecret(secret);
@@ -56,9 +72,7 @@ export const Route = createFileRoute("/api/public/facebook-sync")({
       POST: async ({ request }) => {
         const secret = request.headers.get("x-sync-secret");
 
-        const { verifySecret, ingestPost, deletePostAd, ingestBotPost } = await import(
-          "@/lib/facebook-sync.server"
-        );
+        const { verifySecret, ingestPost, deletePostAd, ingestBotPost } = await import("@/lib/facebook-sync.server");
 
         // Security: reject any request without a matching secret before processing.
         if (!(await verifySecret(secret))) {
@@ -73,16 +87,12 @@ export const Route = createFileRoute("/api/public/facebook-sync")({
         }
 
         // Route by payload shape: the new bot format has title/content and no post_id.
-        const isLegacy =
-          typeof body === "object" && body !== null && "post_id" in (body as Record<string, unknown>);
+        const isLegacy = typeof body === "object" && body !== null && "post_id" in (body as Record<string, unknown>);
 
         if (!isLegacy) {
           const parsed = BotPayloadSchema.safeParse(body);
           if (!parsed.success) {
-            return json(
-              { status: "error", message: "Invalid payload", details: parsed.error.flatten() },
-              400,
-            );
+            return json({ status: "error", message: "Invalid payload", details: parsed.error.flatten() }, 400);
           }
           const result = await ingestBotPost(parsed.data);
           const code = result.status === "error" ? 500 : 200;
