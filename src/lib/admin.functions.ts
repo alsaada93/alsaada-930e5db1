@@ -109,7 +109,7 @@ export const adminSetListingStatus = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-/** Updates editable fields of a listing (title, price, old_price, featured). */
+/** Updates editable fields of a listing (full edit, incl. moving categories). */
 export const adminUpdateListing = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) =>
@@ -117,9 +117,20 @@ export const adminUpdateListing = createServerFn({ method: "POST" })
       .object({
         id: z.string().uuid(),
         title: z.string().min(1).max(300).optional(),
+        description: z.string().max(8000).nullable().optional(),
         price: z.number().min(0).max(100000000).optional(),
         old_price: z.number().min(0).max(100000000).nullable().optional(),
         featured: z.boolean().optional(),
+        condition: z.string().max(40).nullable().optional(),
+        city: z.string().max(120).nullable().optional(),
+        category_id: z.string().max(120).nullable().optional(),
+        group_name: z.string().max(160).nullable().optional(),
+        item_name: z.string().max(160).nullable().optional(),
+        brand: z.string().max(160).nullable().optional(),
+        status: z.enum(["approved", "rejected", "suspended", "pending"]).optional(),
+        negotiable_flag: z.boolean().optional(),
+        delivery_available: z.boolean().optional(),
+        images: z.array(z.string().url()).max(30).optional(),
       })
       .parse(input),
   )
@@ -135,6 +146,19 @@ export const adminUpdateListing = createServerFn({ method: "POST" })
     const { error } = await supabaseAdmin.from("listings").update(patch as never).eq("id", id);
     if (error) throw error;
     return { ok: true };
+  });
+
+/** Auto re-classifies existing listings into the correct site category. */
+export const adminReclassifyListings = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z.object({ onlyUncategorized: z.boolean().optional() }).parse(input ?? {}),
+  )
+  .handler(async ({ context, data }) => {
+    const { supabase, userId } = context;
+    await assertAdmin(supabase, userId);
+    const { reclassifyExistingListings } = await import("@/lib/facebook-sync.server");
+    return reclassifyExistingListings(Boolean(data.onlyUncategorized));
   });
 
 /** Permanently deletes a listing. */
