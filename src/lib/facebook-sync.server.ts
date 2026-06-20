@@ -18,7 +18,7 @@ import {
 
 const BUCKET = "listings";
 const PREFIX = "facebook";
-const MAX_IMAGES = 12;
+const MAX_IMAGES = 20; // تم التعديل للسماح بعدد أكبر من الصور
 const SOURCE = "facebook";
 
 interface SiteCategory {
@@ -47,11 +47,7 @@ const SLUG_ALIASES: Record<FbCategorySlug, { names: string[]; en: string[] }> = 
 
 async function loadSiteCategories(): Promise<SiteCategory[]> {
   try {
-    const { data } = await supabaseAdmin
-      .from("site_settings")
-      .select("value")
-      .eq("key", "categories")
-      .maybeSingle();
+    const { data } = await supabaseAdmin.from("site_settings").select("value").eq("key", "categories").maybeSingle();
     const cats = (data?.value as SiteCategory[] | null) ?? [];
     return Array.isArray(cats) ? cats : [];
   } catch {
@@ -65,10 +61,7 @@ async function loadSiteCategories(): Promise<SiteCategory[]> {
  * never silently falls back to "no category".
  * Returns null only when there is truly no matching site category.
  */
-async function resolveSiteCategoryId(
-  slug: FbCategorySlug,
-  cats?: SiteCategory[],
-): Promise<string | null> {
+async function resolveSiteCategoryId(slug: FbCategorySlug, cats?: SiteCategory[]): Promise<string | null> {
   const list = cats ?? (await loadSiteCategories());
   if (list.length === 0) return null;
 
@@ -106,10 +99,7 @@ function resolveSubcategory(
   }
   const group = category.groups.find((g) => g.name === detected.group_name);
   if (!group) return { group_name: null, item_name: null };
-  const item =
-    detected.item_name && (group.items ?? []).includes(detected.item_name)
-      ? detected.item_name
-      : null;
+  const item = detected.item_name && (group.items ?? []).includes(detected.item_name) ? detected.item_name : null;
   return { group_name: group.name, item_name: item };
 }
 
@@ -239,22 +229,15 @@ async function storeImages(postId: string, urls: string[]): Promise<string[]> {
       const ext = guessExt(contentType, url);
       const buf = new Uint8Array(await res.arrayBuffer());
       const path = `${PREFIX}/${safeId}/${i}.${ext}`;
-      const { error } = await supabaseAdmin.storage
-        .from(BUCKET)
-        .upload(path, buf, {
-          contentType: contentType ?? "image/jpeg",
-          cacheControl: "31536000",
-          upsert: true,
-        });
+      const { error } = await supabaseAdmin.storage.from(BUCKET).upload(path, buf, {
+        contentType: contentType ?? "image/jpeg",
+        cacheControl: "31536000",
+        upsert: true,
+      });
       if (error) throw error;
       stored.push(supabaseAdmin.storage.from(BUCKET).getPublicUrl(path).data.publicUrl);
     } catch (e) {
-      await logSync(
-        "image",
-        postId,
-        "failed",
-        `فشل تخزين صورة: ${e instanceof Error ? e.message : "خطأ"} (${url})`,
-      );
+      await logSync("image", postId, "failed", `فشل تخزين صورة: ${e instanceof Error ? e.message : "خطأ"} (${url})`);
     }
   }
   return stored;
@@ -282,13 +265,8 @@ export async function ingestPost(payload: IngestPayload): Promise<IngestResult> 
 
     const seller_name = payload.seller_name?.trim() || parsed.seller_name;
     const phone = payload.phone?.trim() || parsed.phone;
-    // Honor an explicit category field from the payload when present, otherwise
-    // fall back to the category auto-detected from the post text.
-    const category = payload.category?.trim()
-      ? detectCategory(rawText, payload.category)
-      : parsed.category;
+    const category = payload.category?.trim() ? detectCategory(rawText, payload.category) : parsed.category;
 
-    // existing record?
     const { data: existing } = await supabaseAdmin
       .from("facebook_ads")
       .select("id, images")
@@ -297,7 +275,6 @@ export async function ingestPost(payload: IngestPayload): Promise<IngestResult> 
 
     const incomingImages = Array.isArray(payload.images) ? payload.images : [];
     let images: string[] = (existing?.images as string[] | undefined) ?? [];
-    // only re-download when new images are provided
     if (incomingImages.length > 0) {
       images = await storeImages(fb_post_id, incomingImages);
     }
@@ -321,13 +298,9 @@ export async function ingestPost(payload: IngestPayload): Promise<IngestResult> 
       status: "active" as const,
     };
 
-    const { error } = await supabaseAdmin
-      .from("facebook_ads")
-      .upsert(row, { onConflict: "fb_post_id" });
+    const { error } = await supabaseAdmin.from("facebook_ads").upsert(row, { onConflict: "fb_post_id" });
     if (error) throw error;
 
-    // Mirror into the main listings feed so the ad shows on the homepage,
-    // category pages and search — not only on the dedicated Facebook page.
     await mirrorToListings({
       fb_post_id,
       title: parsed.title,
@@ -340,7 +313,12 @@ export async function ingestPost(payload: IngestPayload): Promise<IngestResult> 
     });
 
     const action = existing ? "updated" : "created";
-    await logSync(action === "created" ? "create" : "update", fb_post_id, "success", `تم ${action === "created" ? "إنشاء" : "تحديث"} الإعلان`);
+    await logSync(
+      action === "created" ? "create" : "update",
+      fb_post_id,
+      "success",
+      `تم ${action === "created" ? "إنشاء" : "تحديث"} الإعلان`,
+    );
     await touchMeta("ok");
     return { ok: true, action: action === "created" ? "created" : "updated", fb_post_id };
   } catch (e) {
@@ -361,7 +339,6 @@ export async function deletePostAd(postId: string): Promise<IngestResult> {
       .update({ status: "deleted" })
       .eq("fb_post_id", fb_post_id);
     if (error) throw error;
-    // Hide the mirrored row in the main listings feed too.
     await supabaseAdmin
       .from("listings")
       .update({ status: "deleted" })
@@ -409,21 +386,27 @@ function buildSpecsBlock(category: FbCategorySlug, text: string): string {
     if (s.brand) lines.push(`الماركة: ${s.brand}`);
     if (s.year) lines.push(`سنة الصنع: ${s.year}`);
     if (s.mileage_km) lines.push(`الكيلومترات: ${s.mileage_km.toLocaleString("en-US")} كم`);
-    if (s.transmission)
-      lines.push(`ناقل الحركة: ${s.transmission === "automatic" ? "أوتوماتيك" : "مانيوال"}`);
+    if (s.transmission) lines.push(`ناقل الحركة: ${s.transmission === "automatic" ? "أوتوماتيك" : "مانيوال"}`);
     if (s.fuel) {
       const fuelAr: Record<string, string> = {
-        petrol: "بنزين", diesel: "ديزل", hybrid: "هايبرد", electric: "كهرباء",
+        petrol: "بنزين",
+        diesel: "ديزل",
+        hybrid: "هايبرد",
+        electric: "كهرباء",
       };
       lines.push(`نوع الوقود: ${fuelAr[s.fuel] ?? s.fuel}`);
     }
-    if (s.accident_free !== null)
-      lines.push(`خلو من الحوادث: ${s.accident_free ? "نعم" : "لا"}`);
+    if (s.accident_free !== null) lines.push(`خلو من الحوادث: ${s.accident_free ? "نعم" : "لا"}`);
     if (s.previous_owners) lines.push(`عدد الملاك السابقين: ${s.previous_owners}`);
   } else if (category === "real_estate") {
     const s = extractRealEstateSpecs(text);
     const typeAr: Record<string, string> = {
-      apartment: "شقة", villa: "فيلا", land: "أرض", office: "مكتب", shop: "محل", studio: "استوديو",
+      apartment: "شقة",
+      villa: "فيلا",
+      land: "أرض",
+      office: "مكتب",
+      shop: "محل",
+      studio: "استوديو",
     };
     if (s.property_type) lines.push(`نوع العقار: ${typeAr[s.property_type] ?? s.property_type}`);
     lines.push(`نوع العرض: ${s.offer_type === "rent" ? "إيجار" : "بيع"}`);
@@ -435,14 +418,11 @@ function buildSpecsBlock(category: FbCategorySlug, text: string): string {
   return lines.length ? `\n\n— المواصفات —\n${lines.join("\n")}` : "";
 }
 
-
 /** Parses an explicit price from the payload (number or string), or null. */
 function parsePayloadPrice(raw: string | number | null | undefined): number | null {
   if (raw === null || raw === undefined) return null;
   if (typeof raw === "number") return Number.isFinite(raw) && raw > 0 ? raw : null;
-  const normalized = raw
-    .replace(/[\u0660-\u0669]/g, (d) => String(d.charCodeAt(0) - 0x0660))
-    .replace(/[^\d.]/g, "");
+  const normalized = raw.replace(/[\u0660-\u0669]/g, (d) => String(d.charCodeAt(0) - 0x0660)).replace(/[^\d.]/g, "");
   if (!normalized) return null;
   const n = parseFloat(normalized);
   return Number.isFinite(n) && n > 0 ? n : null;
@@ -451,9 +431,7 @@ function parsePayloadPrice(raw: string | number | null | undefined): number | nu
 /** Extracts a contact phone number (8+ digits) from text, or null. */
 function extractPhone(text: string): string | null {
   if (!text) return null;
-  const normalized = text.replace(/[\u0660-\u0669]/g, (d) =>
-    String(d.charCodeAt(0) - 0x0660),
-  );
+  const normalized = text.replace(/[\u0660-\u0669]/g, (d) => String(d.charCodeAt(0) - 0x0660));
   const m = normalized.match(/(\+?\d[\d\s-]{6,}\d)/g);
   if (!m) return null;
   for (const cand of m) {
@@ -491,9 +469,7 @@ async function storeBase64Image(b64: string): Promise<string | null> {
 /**
  * Ingests an ad sent by the external Facebook bot using the simple payload
  * { source, title, content, image_base64, published_at } and writes it
- * straight into the main `listings` table — the exact same table used for
- * manually-added ads — so it appears, edits and deletes from the normal admin
- * dashboard. New ads are saved as `pending` for admin review before going live.
+ * straight into the main `listings` table.
  */
 export async function ingestBotPost(payload: BotPayload): Promise<BotIngestResult> {
   try {
@@ -507,8 +483,7 @@ export async function ingestBotPost(payload: BotPayload): Promise<BotIngestResul
 
     const authorName = (payload.author_name ?? "").toString().trim() || null;
 
-    // Deduplication: reject an exact match on description, OR on the
-    // author_name + title combination, within the last 24h (spam guard).
+    // Deduplication
     {
       const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
       if (content) {
@@ -541,41 +516,42 @@ export async function ingestBotPost(payload: BotPayload): Promise<BotIngestResul
     }
 
     let warning: string | undefined;
-    // Primary image: decode the base64 string, upload to storage, keep its URL.
     let images: string[] = [];
+
+    // 1. رفع الصورة الأساسية (Base64)
     if (payload.image_base64) {
       const imageUrl = await storeBase64Image(payload.image_base64);
       if (imageUrl) {
-        images = [imageUrl];
+        images.push(imageUrl);
       } else {
-        warning = "تعذّر رفع الصورة؛ تم حفظ الإعلان بدون صورة.";
-        await logSync("bot", null, "failed", warning);
+        warning = "تعذّر رفع الصورة الأساسية؛ ";
       }
     }
-    // Fallback: when no base64 image, store the external image URLs instead.
-    if (images.length === 0 && Array.isArray(payload.images) && payload.images.length > 0) {
-      images = await storeImages(`bot_${crypto.randomUUID()}`, payload.images);
+
+    // 2. سحب ودمج باقي الصور
+    if (Array.isArray(payload.images) && payload.images.length > 0) {
+      const urlsToFetch = payload.image_base64 ? payload.images.slice(1) : payload.images;
+      if (urlsToFetch.length > 0) {
+        const storedUrls = await storeImages(`bot_${crypto.randomUUID()}`, urlsToFetch);
+        images = [...images, ...storedUrls];
+      }
     }
 
-    // Smart extraction (text-derived). Explicit payload fields take priority.
+    if (images.length === 0 && warning) {
+      await logSync("bot", null, "failed", warning + "تم حفظ الإعلان بدون صور.");
+    }
+
     const priceResult = extractPriceSmart(content);
     const explicitPrice = parsePayloadPrice(payload.price);
     const phone = (payload.contact_phone ?? "").toString().trim() || extractPhone(content);
 
-    // Categorise: honor the explicit Arabic category when provided, otherwise
-    // detect + refine from the text. Resolve to the real site category_id.
     const detected = detectCategory(content, payload.category);
     const category = payload.category ? detected : refineCategory(content, detected);
     const cats = await loadSiteCategories();
     const categoryId = await resolveSiteCategoryId(category, cats);
     const catObj = cats.find((c) => c.id === categoryId);
-    const { group_name, item_name } = resolveSubcategory(
-      catObj,
-      category,
-      `${title} ${content}`,
-    );
+    const { group_name, item_name } = resolveSubcategory(catObj, category, `${title} ${content}`);
 
-    // Field-specific specs → appended to the description + mapped to columns.
     const specsBlock = buildSpecsBlock(category, content);
     const carSpecs = category === "cars" ? extractCarSpecs(content) : null;
     const reSpecs = category === "real_estate" ? extractRealEstateSpecs(content) : null;
@@ -598,9 +574,7 @@ export async function ingestBotPost(payload: BotPayload): Promise<BotIngestResul
       category_id: categoryId,
       group_name,
       item_name,
-      images,
-      // price column is NOT NULL — store 0 as a placeholder when undetected and
-      // flag it with the `price_not_detected` warning for manual review.
+      images, // إرسال كافة الصور
       price: finalPrice,
       negotiable,
       contact_name: authorName,
@@ -614,24 +588,19 @@ export async function ingestBotPost(payload: BotPayload): Promise<BotIngestResul
       ...(publishedAt ? { published_at: publishedAt } : {}),
     };
 
-    const { data: inserted, error } = await supabaseAdmin
-      .from("listings")
-      .insert(row)
-      .select("id")
-      .single();
+    const { data: inserted, error } = await supabaseAdmin.from("listings").insert(row).select("id").single();
     if (error) throw error;
 
     await logSync(
       "bot",
       inserted.id,
       "success",
-      `تم استقبال إعلان من البوت (قيد المراجعة) — التصنيف: ${categoryLabel(category).name}، السعر: ${
+      `تم استقبال إعلان من البوت — التصنيف: ${categoryLabel(category).name}، السعر: ${
         priceResult.detected ? priceResult.price : "غير محدد"
       }`,
     );
     await touchMeta("ok");
     return { status: "ok", id: inserted.id, ad_status: "pending", warning };
-
   } catch (e) {
     const msg = e instanceof Error ? e.message : "خطأ غير معروف";
     await logSync("bot", null, "failed", msg, payload);
@@ -643,14 +612,9 @@ export async function ingestBotPost(payload: BotPayload): Promise<BotIngestResul
 /** Validates the webhook secret against the stored value. */
 export async function verifySecret(provided: string | null): Promise<boolean> {
   if (!provided) return false;
-  const { data } = await supabaseAdmin
-    .from("facebook_sync_meta")
-    .select("webhook_secret")
-    .eq("id", 1)
-    .maybeSingle();
+  const { data } = await supabaseAdmin.from("facebook_sync_meta").select("webhook_secret").eq("id", 1).maybeSingle();
   const expected = data?.webhook_secret;
   if (!expected) return false;
-  // constant-time-ish compare
   if (provided.length !== expected.length) return false;
   let diff = 0;
   for (let i = 0; i < expected.length; i++) diff |= provided.charCodeAt(i) ^ expected.charCodeAt(i);
@@ -682,7 +646,6 @@ export async function retryFailedAndHeartbeat(): Promise<{ retried: number; reco
       if (!pid || seen.has(pid)) continue;
       seen.add(pid);
 
-      // skip if an active ad already exists
       const { data: ad } = await supabaseAdmin
         .from("facebook_ads")
         .select("status")
@@ -703,12 +666,8 @@ export async function retryFailedAndHeartbeat(): Promise<{ retried: number; reco
   return { retried, recovered };
 }
 
-
 /**
- * Re-classifies existing listings into the correct site category using the same
- * detection pipeline as the Facebook importer. Applies to all listings
- * (manual + imported). When onlyUncategorized is true, only touches rows that
- * currently have no category_id.
+ * Re-classifies existing listings into the correct site category.
  */
 export async function reclassifyExistingListings(
   onlyUncategorized = false,
