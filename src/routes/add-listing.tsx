@@ -937,8 +937,8 @@ function AddListingPage() {
 
           </div>
 
-          {/* ===== Step 2: Category, brand, country, region, map ===== */}
-          <div className={step === 2 ? "space-y-5" : "hidden"}>
+          {/* ===== Step 1: Category, brand, country, region, map ===== */}
+          <div className={step === 1 ? "space-y-5" : "hidden"}>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
               <div>
                 <label className="mb-1 block text-sm font-semibold">{t("add.mainCat")}</label>
