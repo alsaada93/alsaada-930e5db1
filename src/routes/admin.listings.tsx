@@ -267,6 +267,7 @@ function AdminListingsPage() {
       {editing && (
         <EditDialog
           item={editing}
+          categories={categories}
           onClose={() => setEditing(null)}
           onSave={async (patch) => {
             try {
@@ -284,57 +285,210 @@ function AdminListingsPage() {
   );
 }
 
+interface EditPatch {
+  title?: string;
+  description?: string | null;
+  price?: number;
+  old_price?: number | null;
+  condition?: string | null;
+  city?: string | null;
+  category_id?: string | null;
+  group_name?: string | null;
+  item_name?: string | null;
+  brand?: string | null;
+  status?: "approved" | "rejected" | "suspended" | "pending";
+  negotiable_flag?: boolean;
+  delivery_available?: boolean;
+  images?: string[];
+}
+
 function EditDialog({
   item,
+  categories,
   onClose,
   onSave,
 }: {
   item: AdminListingRow;
+  categories: Category[];
   onClose: () => void;
-  onSave: (patch: { title?: string; price?: number; old_price?: number | null }) => void;
+  onSave: (patch: EditPatch) => void;
 }) {
   const [title, setTitle] = useState(item.title);
+  const [description, setDescription] = useState(item.description ?? "");
   const [price, setPrice] = useState(String(item.price));
   const [oldPrice, setOldPrice] = useState(item.old_price != null ? String(item.old_price) : "");
+  const [condition, setCondition] = useState(item.condition ?? "مستعمل");
+  const [city, setCity] = useState(item.city ?? "");
+  const [brand, setBrand] = useState(item.brand ?? "");
+  const [categoryId, setCategoryId] = useState(item.category_id ?? "");
+  const [groupName, setGroupName] = useState(item.group_name ?? "");
+  const [itemName, setItemName] = useState(item.item_name ?? "");
+  const [status, setStatus] = useState(item.status);
+  const [negotiable, setNegotiable] = useState(item.negotiable_flag);
+  const [delivery, setDelivery] = useState(item.delivery_available);
+  const [images, setImages] = useState<string[]>(item.images ?? []);
   const [saving, setSaving] = useState(false);
 
+  const activeCat = categories.find((c) => c.id === categoryId);
+  const activeGroup = activeCat?.groups.find((g) => g.name === groupName);
+
+  const field =
+    "mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary";
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
-      <div className="w-full max-w-md rounded-2xl bg-card p-6 shadow-card" onClick={(e) => e.stopPropagation()}>
-        <h3 className="mb-4 text-lg font-bold text-card-foreground">تعديل الإعلان</h3>
-        <div className="space-y-3">
-          <label className="block text-sm font-semibold text-card-foreground">
+    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-auto bg-black/50 p-4" onClick={onClose}>
+      <div className="my-8 w-full max-w-2xl rounded-2xl bg-card p-6 shadow-card" onClick={(e) => e.stopPropagation()}>
+        <h3 className="mb-4 text-lg font-bold text-card-foreground">تعديل شامل للإعلان</h3>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <label className="block text-sm font-semibold text-card-foreground sm:col-span-2">
             العنوان
-            <input
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-            />
+            <input value={title} onChange={(e) => setTitle(e.target.value)} className={field} />
+          </label>
+          <label className="block text-sm font-semibold text-card-foreground sm:col-span-2">
+            الوصف
+            <textarea rows={4} value={description} onChange={(e) => setDescription(e.target.value)} className={field} />
           </label>
           <label className="block text-sm font-semibold text-card-foreground">
             السعر الحالي (د.ب)
-            <input
-              type="number"
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-            />
+            <input type="number" value={price} onChange={(e) => setPrice(e.target.value)} className={field} />
           </label>
           <label className="block text-sm font-semibold text-card-foreground">
-            السعر السابق (اختياري — للخصم)
-            <input
-              type="number"
-              value={oldPrice}
-              onChange={(e) => setOldPrice(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-            />
+            السعر السابق (اختياري)
+            <input type="number" value={oldPrice} onChange={(e) => setOldPrice(e.target.value)} className={field} />
+          </label>
+
+          <label className="block text-sm font-semibold text-card-foreground">
+            القسم الرئيسي (نقل)
+            <select
+              value={categoryId}
+              onChange={(e) => {
+                setCategoryId(e.target.value);
+                setGroupName("");
+                setItemName("");
+              }}
+              className={field}
+            >
+              <option value="">— بدون قسم —</option>
+              {categories.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.icon} {c.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="block text-sm font-semibold text-card-foreground">
+            القسم الفرعي
+            <select
+              value={groupName}
+              disabled={!activeCat}
+              onChange={(e) => {
+                setGroupName(e.target.value);
+                setItemName("");
+              }}
+              className={`${field} disabled:opacity-50`}
+            >
+              <option value="">— بدون —</option>
+              {activeCat?.groups.map((g) => (
+                <option key={g.name} value={g.name}>
+                  {g.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="block text-sm font-semibold text-card-foreground">
+            النوع
+            <select
+              value={itemName}
+              disabled={!activeGroup}
+              onChange={(e) => setItemName(e.target.value)}
+              className={`${field} disabled:opacity-50`}
+            >
+              <option value="">— بدون —</option>
+              {activeGroup?.items.map((it) => (
+                <option key={it} value={it}>
+                  {it}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="block text-sm font-semibold text-card-foreground">
+            الماركة
+            <input value={brand} onChange={(e) => setBrand(e.target.value)} className={field} />
+          </label>
+          <label className="block text-sm font-semibold text-card-foreground">
+            الموقع / المدينة
+            <input value={city} onChange={(e) => setCity(e.target.value)} className={field} />
+          </label>
+          <label className="block text-sm font-semibold text-card-foreground">
+            الحالة (جديد/مستعمل)
+            <select value={condition} onChange={(e) => setCondition(e.target.value)} className={field}>
+              <option value="جديد">جديد</option>
+              <option value="مستعمل">مستعمل</option>
+            </select>
+          </label>
+          <label className="block text-sm font-semibold text-card-foreground">
+            حالة النشر
+            <select value={status} onChange={(e) => setStatus(e.target.value)} className={field}>
+              <option value="pending">قيد المراجعة</option>
+              <option value="approved">مقبول</option>
+              <option value="rejected">مرفوض</option>
+              <option value="suspended">موقوف</option>
+            </select>
+          </label>
+          <label className="flex items-center justify-between rounded-lg border border-input bg-background px-3 py-2 text-sm font-semibold">
+            قابل للتفاوض
+            <input type="checkbox" checked={negotiable} onChange={(e) => setNegotiable(e.target.checked)} className="h-4 w-4 accent-primary" />
+          </label>
+          <label className="flex items-center justify-between rounded-lg border border-input bg-background px-3 py-2 text-sm font-semibold">
+            التوصيل متاح
+            <input type="checkbox" checked={delivery} onChange={(e) => setDelivery(e.target.checked)} className="h-4 w-4 accent-primary" />
           </label>
         </div>
+
+        {images.length > 0 && (
+          <div className="mt-4">
+            <span className="text-sm font-semibold text-card-foreground">الصور</span>
+            <div className="mt-2 grid grid-cols-4 gap-2 sm:grid-cols-6">
+              {images.map((url, i) => (
+                <div key={url + i} className="group relative aspect-square overflow-hidden rounded-lg border border-border">
+                  <img src={url} alt={`صورة ${i + 1}`} className="h-full w-full object-cover" />
+                  {i === 0 && (
+                    <span className="absolute bottom-1 right-1 rounded bg-primary/90 px-1 text-[9px] font-bold text-primary-foreground">
+                      الغلاف
+                    </span>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setImages((p) => p.filter((_, idx) => idx !== i))}
+                    className="absolute left-1 top-1 rounded-full bg-destructive p-1 text-destructive-foreground"
+                    aria-label="حذف الصورة"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                  {i !== 0 && (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setImages((p) => {
+                          const arr = [...p];
+                          const [m] = arr.splice(i, 1);
+                          arr.unshift(m);
+                          return arr;
+                        })
+                      }
+                      className="absolute bottom-1 left-1 rounded bg-primary/90 px-1 text-[9px] font-bold text-primary-foreground"
+                    >
+                      للغلاف
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="mt-6 flex justify-end gap-2">
-          <button
-            onClick={onClose}
-            className="rounded-lg bg-secondary px-4 py-2 text-sm font-semibold text-secondary-foreground hover:bg-muted"
-          >
+          <button onClick={onClose} className="rounded-lg bg-secondary px-4 py-2 text-sm font-semibold text-secondary-foreground hover:bg-muted">
             إلغاء
           </button>
           <button
@@ -343,13 +497,24 @@ function EditDialog({
               setSaving(true);
               onSave({
                 title: title.trim(),
+                description: description.trim() || null,
                 price: Number(price) || 0,
                 old_price: oldPrice.trim() === "" ? null : Number(oldPrice),
+                condition,
+                city: city.trim() || null,
+                brand: brand.trim() || null,
+                category_id: categoryId || null,
+                group_name: groupName || null,
+                item_name: itemName || null,
+                status: status as EditPatch["status"],
+                negotiable_flag: negotiable,
+                delivery_available: delivery,
+                images,
               });
             }}
             className="flex items-center gap-1 rounded-lg bg-gradient-primary px-4 py-2 text-sm font-bold text-primary-foreground shadow-glow disabled:opacity-50"
           >
-            {saving && <Loader2 className="h-4 w-4 animate-spin" />} حفظ
+            {saving && <Loader2 className="h-4 w-4 animate-spin" />} حفظ كل التعديلات
           </button>
         </div>
       </div>
