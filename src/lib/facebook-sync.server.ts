@@ -703,3 +703,51 @@ export async function retryFailedAndHeartbeat(): Promise<{ retried: number; reco
   return { retried, recovered };
 }
 
+
+/**
+ * Re-classifies existing listings into the correct site category using the same
+ * detection pipeline as the Facebook importer. Applies to all listings
+ * (manual + imported). When onlyUncategorized is true, only touches rows that
+ * currently have no category_id.
+ */
+export async function reclassifyExistingListings(
+  onlyUncategorized = false,
+): Promise<{ scanned: number; updated: number }> {
+  const cats = await loadSiteCategories();
+  if (cats.length === 0) return { scanned: 0, updated: 0 };
+
+  let query = supabaseAdmin
+    .from("listings")
+    .select("id, title, description, category_id, group_name, item_name")
+    .limit(5000);
+  if (onlyUncategorized) query = query.is("category_id", null);
+
+  const { data: rows } = await query;
+  let updated = 0;
+  const list = rows ?? [];
+
+  for (const row of list) {
+    const text = `${(row as any).title ?? ""}\n${(row as any).description ?? ""}`.trim();
+    if (!text) continue;
+    const detected = detectCategory(text);
+    const slug = refineCategory(text, detected);
+    const categoryId = await resolveSiteCategoryId(slug, cats);
+    if (!categoryId) continue;
+    const catObj = cats.find((c) => c.id === categoryId);
+    const sub = resolveSubcategory(catObj, slug, text);
+
+    const patch: Record<string, unknown> = {};
+    if ((row as any).category_id !== categoryId) patch.category_id = categoryId;
+    if ((row as any).group_name !== sub.group_name) patch.group_name = sub.group_name;
+    if ((row as any).item_name !== sub.item_name) patch.item_name = sub.item_name;
+    if (Object.keys(patch).length === 0) continue;
+
+    const { error } = await supabaseAdmin
+      .from("listings")
+      .update(patch as never)
+      .eq("id", (row as any).id);
+    if (!error) updated += 1;
+  }
+
+  return { scanned: list.length, updated };
+}
