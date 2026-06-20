@@ -756,8 +756,8 @@ function AddListingPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="mt-6 space-y-5">
-          {/* ===== Step 1: Title, Description, Images ===== */}
-          <div className={step === 1 ? "space-y-5" : "hidden"}>
+          {/* ===== Step 2: Title, Description, Images ===== */}
+          <div className={step === 2 ? "space-y-5" : "hidden"}>
             <div>
               <label className="mb-1 block text-sm font-semibold">{t("add.adTitle")}</label>
               <input
