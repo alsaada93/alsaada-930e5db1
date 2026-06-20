@@ -2,15 +2,18 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Check, X, Search, MapPin, Trash2, Pause, Star, Loader2, Pencil } from "lucide-react";
+import { Check, X, Search, MapPin, Trash2, Pause, Star, Loader2, Pencil, FolderSync } from "lucide-react";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import {
   adminListListings,
   adminSetListingStatus,
   adminUpdateListing,
   adminDeleteListing,
+  adminReclassifyListings,
   type AdminListingRow,
 } from "@/lib/admin.functions";
+import { useCategories } from "@/hooks/useCategories";
+import type { Category } from "@/data/marketplace";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/listings")({
