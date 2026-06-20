@@ -703,8 +703,8 @@ function AddListingPage() {
     listingType === "auction" ? t("add.publishAuction") : listingType === "business" ? t("add.publishBusiness") : t("add.publish");
 
   const stepNames = ar
-    ? ["التفاصيل والصور", "التصنيف والموقع", "السعر", "النشر"]
-    : ["Details & photos", "Category & location", "Price", "Publish"];
+    ? ["التصنيف والموقع", "التفاصيل والصور", "السعر", "النشر"]
+    : ["Category & location", "Details & photos", "Price", "Publish"];
 
   const fieldCls =
     "h-11 w-full rounded-lg border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary";
