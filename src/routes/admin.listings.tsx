@@ -43,6 +43,8 @@ function AdminListingsPage() {
   const setStatusFn = useServerFn(adminSetListingStatus);
   const updateFn = useServerFn(adminUpdateListing);
   const deleteFn = useServerFn(adminDeleteListing);
+  const reclassifyFn = useServerFn(adminReclassifyListings);
+  const { categories } = useCategories();
 
   const { data: items = [], isLoading } = useQuery({
     queryKey: ["admin-listings"],
@@ -53,8 +55,23 @@ function AdminListingsPage() {
   const [query, setQuery] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
   const [editing, setEditing] = useState<AdminListingRow | null>(null);
+  const [reclassifying, setReclassifying] = useState(false);
 
   const refresh = () => qc.invalidateQueries({ queryKey: ["admin-listings"] });
+
+  const doReclassify = async () => {
+    if (!confirm("إعادة تصنيف جميع الإعلانات تلقائياً ووضع كل إعلان في قسمه الصحيح؟")) return;
+    setReclassifying(true);
+    try {
+      const res = await reclassifyFn({ data: { onlyUncategorized: false } });
+      toast.success(`تمت إعادة تصنيف ${res.updated.toLocaleString("ar")} إعلان من ${res.scanned.toLocaleString("ar")}`);
+      refresh();
+    } catch {
+      toast.error("تعذّرت إعادة التصنيف");
+    } finally {
+      setReclassifying(false);
+    }
+  };
 
   const filtered = useMemo(
     () =>
