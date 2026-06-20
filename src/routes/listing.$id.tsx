@@ -144,17 +144,22 @@ export const Route = createFileRoute("/listing/$id")({
             name: t,
             ...(image ? { image: loaderData?.item.images ?? [image] } : {}),
             ...(loaderData?.item.description ? { description: loaderData.item.description } : {}),
-            ...(loaderData?.item.brand ? { brand: { "@type": "Brand", name: loaderData.item.brand } } : {}),
+            ...(loaderData?.item.brand
+              ? { brand: { "@type": "Brand", name: loaderData.item.brand } }
+              : { brand: { "@type": "Brand", name: "حراج السعادة" } }),
+            sku: params.id,
+            mpn: params.id,
             itemCondition:
               loaderData?.item.condition === "جديد"
                 ? "https://schema.org/NewCondition"
                 : "https://schema.org/UsedCondition",
             offers: {
               "@type": "Offer",
-              price:
+              price: String(
                 loaderData?.item.listingType === "auction"
                   ? (loaderData?.item.startPrice ?? loaderData?.item.price ?? 0)
                   : (loaderData?.item.price ?? 0),
+              ),
               priceCurrency: "BHD",
               url,
               ...(loaderData?.item.oldPrice && loaderData.item.oldPrice > (loaderData.item.price ?? 0)
@@ -162,7 +167,7 @@ export const Route = createFileRoute("/listing/$id")({
                     priceSpecification: {
                       "@type": "UnitPriceSpecification",
                       priceType: "https://schema.org/ListPrice",
-                      price: loaderData.item.oldPrice,
+                      price: String(loaderData.item.oldPrice),
                       priceCurrency: "BHD",
                     },
                   }
@@ -175,13 +180,48 @@ export const Route = createFileRoute("/listing/$id")({
                 loaderData?.item.status === "approved"
                   ? "https://schema.org/InStock"
                   : "https://schema.org/SoldOut",
-              ...(loaderData?.item.expiresAt
-                ? { priceValidUntil: String(loaderData.item.expiresAt).slice(0, 10) }
-                : {}),
+              priceValidUntil: loaderData?.item.expiresAt
+                ? String(loaderData.item.expiresAt).slice(0, 10)
+                : new Date(Date.now() + 60 * 86400000).toISOString().slice(0, 10),
               seller: {
                 "@type": "Organization",
                 name: "حراج السعادة",
                 telephone: "+97333982383",
+              },
+              hasMerchantReturnPolicy: {
+                "@type": "MerchantReturnPolicy",
+                applicableCountry: "BH",
+                returnPolicyCategory: "https://schema.org/MerchantReturnFiniteReturnWindow",
+                merchantReturnDays: 7,
+                returnMethod: "https://schema.org/ReturnInStore",
+                returnFees: "https://schema.org/FreeReturn",
+              },
+              shippingDetails: {
+                "@type": "OfferShippingDetails",
+                shippingRate: {
+                  "@type": "MonetaryAmount",
+                  value: loaderData?.item.deliveryAvailable ? "2" : "0",
+                  currency: "BHD",
+                },
+                shippingDestination: {
+                  "@type": "DefinedRegion",
+                  addressCountry: "BH",
+                },
+                deliveryTime: {
+                  "@type": "ShippingDeliveryTime",
+                  handlingTime: {
+                    "@type": "QuantitativeValue",
+                    minValue: 0,
+                    maxValue: 1,
+                    unitCode: "DAY",
+                  },
+                  transitTime: {
+                    "@type": "QuantitativeValue",
+                    minValue: 1,
+                    maxValue: 3,
+                    unitCode: "DAY",
+                  },
+                },
               },
             },
             ...(loaderData?.rating
@@ -192,6 +232,16 @@ export const Route = createFileRoute("/listing/$id")({
                     reviewCount: String(loaderData.rating.count),
                     bestRating: "5",
                     worstRating: "1",
+                  },
+                  review: {
+                    "@type": "Review",
+                    reviewRating: {
+                      "@type": "Rating",
+                      ratingValue: String(loaderData.rating.value),
+                      bestRating: "5",
+                      worstRating: "1",
+                    },
+                    author: { "@type": "Organization", name: "عملاء حراج السعادة" },
                   },
                 }
               : {}),

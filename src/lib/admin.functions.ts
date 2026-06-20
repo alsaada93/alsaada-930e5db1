@@ -15,13 +15,21 @@ async function assertAdmin(supabase: any, userId: string) {
 export interface AdminListingRow {
   id: string;
   title: string;
+  description: string | null;
   price: number;
   old_price: number | null;
   category_id: string | null;
+  group_name: string | null;
+  item_name: string | null;
+  brand: string | null;
+  condition: string | null;
   city: string | null;
   contact_name: string | null;
   contact_phone: string | null;
   image: string | null;
+  images: string[];
+  negotiable_flag: boolean;
+  delivery_available: boolean;
   status: string;
   listing_type: string;
   featured: boolean;
@@ -39,7 +47,7 @@ export const adminListListings = createServerFn({ method: "GET" })
     const { data } = await supabaseAdmin
       .from("listings")
       .select(
-        "id,title,price,old_price,category_id,city,contact_name,contact_phone,images,status,listing_type,featured,created_at",
+        "id,title,description,price,old_price,category_id,group_name,item_name,brand,condition,city,contact_name,contact_phone,images,negotiable_flag,delivery_available,status,listing_type,featured,created_at",
       )
       .order("created_at", { ascending: false })
       .limit(1000);
@@ -47,13 +55,21 @@ export const adminListListings = createServerFn({ method: "GET" })
     return (data ?? []).map((d: any) => ({
       id: String(d.id),
       title: String(d.title ?? ""),
+      description: d.description ?? null,
       price: Number(d.price ?? 0),
       old_price: d.old_price != null ? Number(d.old_price) : null,
       category_id: d.category_id ?? null,
+      group_name: d.group_name ?? null,
+      item_name: d.item_name ?? null,
+      brand: d.brand ?? null,
+      condition: d.condition ?? null,
       city: d.city ?? null,
       contact_name: d.contact_name ?? null,
       contact_phone: d.contact_phone ?? null,
       image: (d.images as string[] | null)?.[0] ?? null,
+      images: (d.images as string[] | null) ?? [],
+      negotiable_flag: Boolean(d.negotiable_flag),
+      delivery_available: Boolean(d.delivery_available),
       status: String(d.status ?? "pending"),
       listing_type: String(d.listing_type ?? "normal"),
       featured: Boolean(d.featured),
@@ -109,7 +125,7 @@ export const adminSetListingStatus = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-/** Updates editable fields of a listing (title, price, old_price, featured). */
+/** Updates editable fields of a listing (full edit, incl. moving categories). */
 export const adminUpdateListing = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) =>
@@ -117,9 +133,20 @@ export const adminUpdateListing = createServerFn({ method: "POST" })
       .object({
         id: z.string().uuid(),
         title: z.string().min(1).max(300).optional(),
+        description: z.string().max(8000).nullable().optional(),
         price: z.number().min(0).max(100000000).optional(),
         old_price: z.number().min(0).max(100000000).nullable().optional(),
         featured: z.boolean().optional(),
+        condition: z.string().max(40).nullable().optional(),
+        city: z.string().max(120).nullable().optional(),
+        category_id: z.string().max(120).nullable().optional(),
+        group_name: z.string().max(160).nullable().optional(),
+        item_name: z.string().max(160).nullable().optional(),
+        brand: z.string().max(160).nullable().optional(),
+        status: z.enum(["approved", "rejected", "suspended", "pending"]).optional(),
+        negotiable_flag: z.boolean().optional(),
+        delivery_available: z.boolean().optional(),
+        images: z.array(z.string().url()).max(30).optional(),
       })
       .parse(input),
   )
@@ -135,6 +162,19 @@ export const adminUpdateListing = createServerFn({ method: "POST" })
     const { error } = await supabaseAdmin.from("listings").update(patch as never).eq("id", id);
     if (error) throw error;
     return { ok: true };
+  });
+
+/** Auto re-classifies existing listings into the correct site category. */
+export const adminReclassifyListings = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z.object({ onlyUncategorized: z.boolean().optional() }).parse(input ?? {}),
+  )
+  .handler(async ({ context, data }) => {
+    const { supabase, userId } = context;
+    await assertAdmin(supabase, userId);
+    const { reclassifyExistingListings } = await import("@/lib/facebook-sync.server");
+    return reclassifyExistingListings(Boolean(data.onlyUncategorized));
   });
 
 /** Permanently deletes a listing. */

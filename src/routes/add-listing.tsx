@@ -451,14 +451,14 @@ function AddListingPage() {
   // ---- Step validation ----
   const validateStep = (s: number): boolean => {
     if (s === 1) {
-      if (!titleText.trim()) return fail(ar ? "اكتب عنوان الإعلان" : "Enter a title");
-      if (!descText.trim()) return fail(ar ? "اكتب وصف الإعلان" : "Enter a description");
-      if (media.length === 0) return fail(t("toast.needImage"));
+      if (!categoryId) return fail(t("toast.pickCat"));
+      if (!region) return fail(t("toast.pickRegion"));
       return true;
     }
     if (s === 2) {
-      if (!categoryId) return fail(t("toast.pickCat"));
-      if (!region) return fail(t("toast.pickRegion"));
+      if (!titleText.trim()) return fail(ar ? "اكتب عنوان الإعلان" : "Enter a title");
+      if (!descText.trim()) return fail(ar ? "اكتب وصف الإعلان" : "Enter a description");
+      if (media.length === 0) return fail(t("toast.needImage"));
       return true;
     }
     if (s === 3) {
@@ -703,8 +703,8 @@ function AddListingPage() {
     listingType === "auction" ? t("add.publishAuction") : listingType === "business" ? t("add.publishBusiness") : t("add.publish");
 
   const stepNames = ar
-    ? ["التفاصيل والصور", "التصنيف والموقع", "السعر", "النشر"]
-    : ["Details & photos", "Category & location", "Price", "Publish"];
+    ? ["التصنيف والموقع", "التفاصيل والصور", "السعر", "النشر"]
+    : ["Category & location", "Details & photos", "Price", "Publish"];
 
   const fieldCls =
     "h-11 w-full rounded-lg border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary";
@@ -756,8 +756,8 @@ function AddListingPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="mt-6 space-y-5">
-          {/* ===== Step 1: Title, Description, Images ===== */}
-          <div className={step === 1 ? "space-y-5" : "hidden"}>
+          {/* ===== Step 2: Title, Description, Images ===== */}
+          <div className={step === 2 ? "space-y-5" : "hidden"}>
             <div>
               <label className="mb-1 block text-sm font-semibold">{t("add.adTitle")}</label>
               <input
@@ -937,8 +937,8 @@ function AddListingPage() {
 
           </div>
 
-          {/* ===== Step 2: Category, brand, country, region, map ===== */}
-          <div className={step === 2 ? "space-y-5" : "hidden"}>
+          {/* ===== Step 1: Category, brand, country, region, map ===== */}
+          <div className={step === 1 ? "space-y-5" : "hidden"}>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
               <div>
                 <label className="mb-1 block text-sm font-semibold">{t("add.mainCat")}</label>
