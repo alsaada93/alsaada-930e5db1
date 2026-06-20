@@ -451,14 +451,14 @@ function AddListingPage() {
   // ---- Step validation ----
   const validateStep = (s: number): boolean => {
     if (s === 1) {
-      if (!titleText.trim()) return fail(ar ? "اكتب عنوان الإعلان" : "Enter a title");
-      if (!descText.trim()) return fail(ar ? "اكتب وصف الإعلان" : "Enter a description");
-      if (media.length === 0) return fail(t("toast.needImage"));
+      if (!categoryId) return fail(t("toast.pickCat"));
+      if (!region) return fail(t("toast.pickRegion"));
       return true;
     }
     if (s === 2) {
-      if (!categoryId) return fail(t("toast.pickCat"));
-      if (!region) return fail(t("toast.pickRegion"));
+      if (!titleText.trim()) return fail(ar ? "اكتب عنوان الإعلان" : "Enter a title");
+      if (!descText.trim()) return fail(ar ? "اكتب وصف الإعلان" : "Enter a description");
+      if (media.length === 0) return fail(t("toast.needImage"));
       return true;
     }
     if (s === 3) {
