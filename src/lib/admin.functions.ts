@@ -15,13 +15,21 @@ async function assertAdmin(supabase: any, userId: string) {
 export interface AdminListingRow {
   id: string;
   title: string;
+  description: string | null;
   price: number;
   old_price: number | null;
   category_id: string | null;
+  group_name: string | null;
+  item_name: string | null;
+  brand: string | null;
+  condition: string | null;
   city: string | null;
   contact_name: string | null;
   contact_phone: string | null;
   image: string | null;
+  images: string[];
+  negotiable_flag: boolean;
+  delivery_available: boolean;
   status: string;
   listing_type: string;
   featured: boolean;
@@ -39,7 +47,7 @@ export const adminListListings = createServerFn({ method: "GET" })
     const { data } = await supabaseAdmin
       .from("listings")
       .select(
-        "id,title,price,old_price,category_id,city,contact_name,contact_phone,images,status,listing_type,featured,created_at",
+        "id,title,description,price,old_price,category_id,group_name,item_name,brand,condition,city,contact_name,contact_phone,images,negotiable_flag,delivery_available,status,listing_type,featured,created_at",
       )
       .order("created_at", { ascending: false })
       .limit(1000);
@@ -47,13 +55,21 @@ export const adminListListings = createServerFn({ method: "GET" })
     return (data ?? []).map((d: any) => ({
       id: String(d.id),
       title: String(d.title ?? ""),
+      description: d.description ?? null,
       price: Number(d.price ?? 0),
       old_price: d.old_price != null ? Number(d.old_price) : null,
       category_id: d.category_id ?? null,
+      group_name: d.group_name ?? null,
+      item_name: d.item_name ?? null,
+      brand: d.brand ?? null,
+      condition: d.condition ?? null,
       city: d.city ?? null,
       contact_name: d.contact_name ?? null,
       contact_phone: d.contact_phone ?? null,
       image: (d.images as string[] | null)?.[0] ?? null,
+      images: (d.images as string[] | null) ?? [],
+      negotiable_flag: Boolean(d.negotiable_flag),
+      delivery_available: Boolean(d.delivery_available),
       status: String(d.status ?? "pending"),
       listing_type: String(d.listing_type ?? "normal"),
       featured: Boolean(d.featured),
