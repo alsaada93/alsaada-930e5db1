@@ -884,7 +884,7 @@ function ListingPage() {
 
         {/* هاشتاقات تلقائية أسفل الخريطة */}
         <ListingHashtags
-          tags={[cat?.name, item.groupName, item.itemName, item.city, item.condition]}
+          tags={[cat?.name, item.groupName, item.itemName, item.city, showsCondition(cat?.name, cat?.nameEn) ? item.condition : undefined]}
           className="mt-4"
         />
 
