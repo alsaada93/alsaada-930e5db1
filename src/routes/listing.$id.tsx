@@ -38,6 +38,7 @@ import { useViewBoost, boostViews } from "@/hooks/useViewBoost";
 import { countryByName } from "@/data/countries";
 import { cityCenter, displayCity } from "@/data/bahrainCities";
 import { brandInfo } from "@/data/brandsCatalog";
+import { showsCondition } from "@/lib/category-kind";
 
 const EXPIRY_DAYS = 60;
 
