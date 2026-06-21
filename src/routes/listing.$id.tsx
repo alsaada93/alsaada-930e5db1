@@ -523,7 +523,9 @@ function ListingPage() {
   const publishedAt = item.publishedAt ?? item.createdAt;
   const expired = expiresAt != null && expiresAt < Date.now();
 
-  const cat = categories.find((c) => c.id === item.categoryId);
+  const cat =
+    dynCategories.find((c) => c.id === item.categoryId) ??
+    categories.find((c) => c.id === item.categoryId);
 
   const handleRepost = async () => {
     setReposting(true);
