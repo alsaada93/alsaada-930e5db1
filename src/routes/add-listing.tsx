@@ -1069,6 +1069,23 @@ function AddListingPage() {
               </div>
             )}
 
+            {/* إدخال اسم الماركة يدوياً عند اختيار "أخرى" */}
+            {brand === "أخرى" && (
+              <div>
+                <label className="mb-1 block text-sm font-semibold">
+                  {ar ? "اكتب اسم الماركة" : "Type the brand name"}
+                </label>
+                <input
+                  value={customBrand}
+                  onChange={(e) => setCustomBrand(e.target.value)}
+                  placeholder={ar ? "مثال: ماركة غير مدرجة" : "e.g. a brand not listed"}
+                  className={fieldCls}
+                />
+              </div>
+            )}
+
+
+
 
 
             {/* Country */}
