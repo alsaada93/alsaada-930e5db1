@@ -121,6 +121,11 @@ function AddListingPage() {
     () => activeCategory?.groups.find((g) => g.name === groupName),
     [activeCategory, groupName],
   );
+  // وسم الحالة (جديد/مستعمل) يُخفى في السيارات والعقارات
+  const showCondition = useMemo(
+    () => showsCondition(activeCategory?.name ?? categoryId, activeCategory?.nameEn),
+    [activeCategory, categoryId],
+  );
 
   // Region search
   const [region, setRegion] = useState("");
