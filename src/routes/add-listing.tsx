@@ -1189,7 +1189,7 @@ function AddListingPage() {
                     className={fieldCls}
                   />
                 </div>
-              ) : (
+              ) : showCondition ? (
                 <div>
                   <label className="mb-1 block text-sm font-semibold">{t("add.condition")}</label>
                   <select value={condition} onChange={(e) => setCondition(e.target.value)} className={fieldCls}>
@@ -1197,7 +1197,7 @@ function AddListingPage() {
                     <option value="مستعمل">{t("add.used")}</option>
                   </select>
                 </div>
-              )}
+              ) : null}
             </div>
 
             <button
