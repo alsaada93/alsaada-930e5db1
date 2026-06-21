@@ -586,7 +586,6 @@ export async function ingestBotPost(payload: BotPayload): Promise<BotIngestResul
       published_at: publishedAt ?? new Date().toISOString(),
       listing_type: "normal" as const,
       source: "facebook_bot",
-      ...(publishedAt ? { published_at: publishedAt } : {}),
     };
 
     const { data: inserted, error } = await supabaseAdmin.from("listings").insert(row).select("id").single();
