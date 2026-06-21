@@ -1,0 +1,24 @@
+/**
+ * يحدّد نوع التصنيف (مركبات / عقارات / غير ذلك) اعتماداً على الاسم أو المعرّف.
+ * يُستخدم لإخفاء وسم الحالة (جديد/مستعمل) في العقارات والسيارات.
+ */
+export type CategoryKind = "vehicle" | "realestate" | "other";
+
+/** معرّفات التصنيفات المعروفة في قاعدة البيانات. */
+const VEHICLE_IDS = new Set(["ea7fe359-6b22-49e8-8249-2db1d1610913"]);
+const REALESTATE_IDS = new Set(["b7e8cb10-8df5-489e-829d-3ca28e71487f"]);
+
+export function categoryKind(name?: string | null, nameEn?: string | null): CategoryKind {
+  const raw = `${name ?? ""}`.trim();
+  if (VEHICLE_IDS.has(raw)) return "vehicle";
+  if (REALESTATE_IDS.has(raw)) return "realestate";
+  const s = `${name ?? ""} ${nameEn ?? ""}`.toLowerCase();
+  if (/مركب|سيار|vehicle|car|truck|شاحن|دراج/.test(s)) return "vehicle";
+  if (/عقار|real ?estate|propert/.test(s)) return "realestate";
+  return "other";
+}
+
+/** هل يُعرض وسم الحالة (جديد/مستعمل) لهذا التصنيف؟ — يُخفى للسيارات والعقارات. */
+export function showsCondition(name?: string | null, nameEn?: string | null): boolean {
+  return categoryKind(name, nameEn) === "other";
+}

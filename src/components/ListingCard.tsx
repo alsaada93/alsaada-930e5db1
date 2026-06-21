@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { MapPin, Eye, Star, BadgeCheck, MessageCircle, Phone, Tag } from "lucide-react";
-import type { Listing } from "@/data/marketplace";
+import { categories, type Listing } from "@/data/marketplace";
+import { showsCondition } from "@/lib/category-kind";
 import { displayCity } from "@/data/bahrainCities";
 import { useSellers } from "@/hooks/useSellers";
 import { useLanguage } from "@/hooks/useLanguage";
@@ -26,6 +27,8 @@ export function ListingCard({ item, displayTitle }: { item: Listing; displayTitl
   const verified = seller?.verified ?? item.sellerVerified ?? false;
   const title = displayTitle || item.title;
   const condLabel = item.condition === "جديد" ? t("cond.new") : t("cond.used");
+  const cat = categories.find((c) => c.id === item.category);
+  const showCond = showsCondition(cat?.name ?? item.category, cat?.nameEn);
 
   const waLink = whatsappLink({ phone, listingTitle: title, listingId: item.id });
 
@@ -46,9 +49,11 @@ export function ListingCard({ item, displayTitle }: { item: Listing; displayTitl
               {t("card.featured")}
             </span>
           )}
-          <span className="absolute left-2 top-2 rounded-full bg-navy/80 px-2 py-0.5 text-[11px] font-semibold text-navy-foreground">
-            {condLabel}
-          </span>
+          {showCond && (
+            <span className="absolute left-2 top-2 rounded-full bg-navy/80 px-2 py-0.5 text-[11px] font-semibold text-navy-foreground">
+              {condLabel}
+            </span>
+          )}
         </div>
       </Link>
       <div className="p-3">

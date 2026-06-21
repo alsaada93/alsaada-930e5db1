@@ -26,6 +26,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { AuctionBidBox } from "@/components/AuctionBidBox";
 import { SellerReviews } from "@/components/SellerReviews";
 import { categories } from "@/data/marketplace";
+import { useCategories } from "@/hooks/useCategories";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { logContactAttempt, whatsappLink, telLink } from "@/lib/contact";
@@ -38,6 +39,7 @@ import { useViewBoost, boostViews } from "@/hooks/useViewBoost";
 import { countryByName } from "@/data/countries";
 import { cityCenter, displayCity } from "@/data/bahrainCities";
 import { brandInfo } from "@/data/brandsCatalog";
+import { showsCondition } from "@/lib/category-kind";
 
 const EXPIRY_DAYS = 60;
 
@@ -422,6 +424,7 @@ function ListingPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { boost } = useViewBoost();
+  const { categories: dynCategories } = useCategories();
   const { data: seller } = useSeller(item.sellerId);
   const { data: sellerPhone } = useSellerPhone(item.sellerId);
   const [reposting, setReposting] = useState(false);
@@ -522,7 +525,9 @@ function ListingPage() {
   const publishedAt = item.publishedAt ?? item.createdAt;
   const expired = expiresAt != null && expiresAt < Date.now();
 
-  const cat = categories.find((c) => c.id === item.categoryId);
+  const cat =
+    dynCategories.find((c) => c.id === item.categoryId) ??
+    categories.find((c) => c.id === item.categoryId);
 
   const handleRepost = async () => {
     setReposting(true);
@@ -616,14 +621,21 @@ function ListingPage() {
           </div>
         )}
 
+        {isOwner && (
+          <SchemaCheckBar item={item} hasRating={!!ratingData} />
+        )}
+
+
         <div className="grid gap-6 lg:grid-cols-2">
           <Gallery images={item.images} video={item.video} title={item.title} />
 
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <span className="rounded-full bg-navy/80 px-2 py-0.5 text-[11px] font-semibold text-navy-foreground">
-                {item.condition}
-              </span>
+              {showsCondition(cat?.name, cat?.nameEn) && (
+                <span className="rounded-full bg-navy/80 px-2 py-0.5 text-[11px] font-semibold text-navy-foreground">
+                  {item.condition}
+                </span>
+              )}
               {item.featured && (
                 <span className="rounded-full bg-gradient-primary px-2 py-0.5 text-[11px] font-bold text-primary-foreground">
                   مميّز
@@ -877,7 +889,7 @@ function ListingPage() {
 
         {/* هاشتاقات تلقائية أسفل الخريطة */}
         <ListingHashtags
-          tags={[cat?.name, item.groupName, item.itemName, item.city, item.condition]}
+          tags={[cat?.name, item.groupName, item.itemName, item.city, showsCondition(cat?.name, cat?.nameEn) ? item.condition : undefined]}
           className="mt-4"
         />
 
@@ -907,6 +919,60 @@ function Detail({ label, value }: { label: string; value: string }) {
     <div>
       <p className="text-xs text-muted-foreground">{label}</p>
       <p className="font-bold text-card-foreground">{value}</p>
+    </div>
+  );
+}
+
+/** شريط تحقق سريع يعرض اكتمال حقول Schema (offers / aggregateRating / review) لصاحب الإعلان. */
+function SchemaCheckBar({
+  item,
+  hasRating,
+}: {
+  item: { price?: number; images?: string[]; description?: string; brand?: string };
+  hasRating: boolean;
+}) {
+  const checks: { label: string; ok: boolean }[] = [
+    { label: "السعر والعملة (offers.price + BHD)", ok: (item.price ?? 0) > 0 },
+    { label: "توفر المنتج (availability: InStock)", ok: true },
+    { label: "سياسة الإرجاع (hasMerchantReturnPolicy)", ok: true },
+    { label: "تفاصيل الشحن (shippingDetails)", ok: true },
+    { label: "صورة المنتج (image)", ok: (item.images?.length ?? 0) > 0 },
+    { label: "الوصف (description)", ok: !!item.description?.trim() },
+    { label: "الماركة (brand)", ok: !!item.brand?.trim() },
+    { label: "التقييم (aggregateRating + review)", ok: hasRating },
+  ];
+  const passed = checks.filter((c) => c.ok).length;
+  return (
+    <div className="mb-4 rounded-2xl border border-border bg-card p-3">
+      <div className="mb-2 flex items-center justify-between">
+        <span className="text-sm font-bold text-card-foreground">
+          فحص Schema للإعلان (متطلبات Google)
+        </span>
+        <span
+          className={`rounded-full px-2 py-0.5 text-xs font-bold ${
+            passed === checks.length
+              ? "bg-green-600/15 text-green-700"
+              : "bg-amber-500/15 text-amber-700"
+          }`}
+        >
+          {passed}/{checks.length} مكتمل
+        </span>
+      </div>
+      <ul className="grid grid-cols-1 gap-1 sm:grid-cols-2">
+        {checks.map((c) => (
+          <li key={c.label} className="flex items-center gap-2 text-xs">
+            <span className={c.ok ? "text-green-600" : "text-amber-600"}>
+              {c.ok ? "✓" : "⚠"}
+            </span>
+            <span className={c.ok ? "text-foreground" : "text-muted-foreground"}>{c.label}</span>
+          </li>
+        ))}
+      </ul>
+      {!hasRating && (
+        <p className="mt-2 text-[11px] text-muted-foreground">
+          ملاحظة: تظهر حقول التقييم (aggregateRating/review) في الكود البنيوي تلقائياً عند توفر تقييم واحد على الأقل لصاحب الإعلان.
+        </p>
+      )}
     </div>
   );
 }

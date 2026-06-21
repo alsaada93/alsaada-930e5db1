@@ -35,6 +35,8 @@ import { useLanguage } from "@/hooks/useLanguage";
 import { supabase } from "@/integrations/supabase/client";
 import { compressImage } from "@/lib/image-compress";
 import { matchesAr } from "@/lib/text";
+import { showsCondition } from "@/lib/category-kind";
+import { countryByName } from "@/data/countries";
 
 interface AddListingSearch {
   edit?: string;
@@ -107,6 +109,7 @@ function AddListingPage() {
   const [brand, setBrand] = useState("");
   const [brandQuery, setBrandQuery] = useState("");
   const [brandOpen, setBrandOpen] = useState(false);
+  const [customBrand, setCustomBrand] = useState("");
 
   // Country of manufacture
   const [country, setCountry] = useState<Country | null>(null);
@@ -121,6 +124,22 @@ function AddListingPage() {
     () => activeCategory?.groups.find((g) => g.name === groupName),
     [activeCategory, groupName],
   );
+  // وسم الحالة (جديد/مستعمل) يُخفى في السيارات والعقارات
+  const showCondition = useMemo(
+    () => showsCondition(activeCategory?.name ?? categoryId, activeCategory?.nameEn),
+    [activeCategory, categoryId],
+  );
+  // عند اختيار ماركة لها بلد منشأ معروف، يُختار بلد الصنع تلقائياً
+  useEffect(() => {
+    if (!brand) return;
+    const info = brandInfo(brand);
+    if (info?.country) {
+      const c = countryByName(info.country);
+      if (c) setCountry(c);
+    }
+  }, [brand]);
+
+
 
   // Region search
   const [region, setRegion] = useState("");
@@ -515,7 +534,7 @@ function AddListingPage() {
         price: Number(price) || 0,
         condition,
         category_id: categoryId || null,
-        brand: brand || null,
+        brand: (brand === "أخرى" ? customBrand.trim() : brand) || null,
         country_of_origin: country ? country.ar : null,
         group_name: groupName || null,
         item_name: itemName || null,
@@ -1050,6 +1069,23 @@ function AddListingPage() {
               </div>
             )}
 
+            {/* إدخال اسم الماركة يدوياً عند اختيار "أخرى" */}
+            {brand === "أخرى" && (
+              <div>
+                <label className="mb-1 block text-sm font-semibold">
+                  {ar ? "اكتب اسم الماركة" : "Type the brand name"}
+                </label>
+                <input
+                  value={customBrand}
+                  onChange={(e) => setCustomBrand(e.target.value)}
+                  placeholder={ar ? "مثال: ماركة غير مدرجة" : "e.g. a brand not listed"}
+                  className={fieldCls}
+                />
+              </div>
+            )}
+
+
+
 
 
             {/* Country */}
@@ -1189,7 +1225,7 @@ function AddListingPage() {
                     className={fieldCls}
                   />
                 </div>
-              ) : (
+              ) : showCondition ? (
                 <div>
                   <label className="mb-1 block text-sm font-semibold">{t("add.condition")}</label>
                   <select value={condition} onChange={(e) => setCondition(e.target.value)} className={fieldCls}>
@@ -1197,7 +1233,7 @@ function AddListingPage() {
                     <option value="مستعمل">{t("add.used")}</option>
                   </select>
                 </div>
-              )}
+              ) : null}
             </div>
 
             <button
