@@ -533,7 +533,7 @@ function AddListingPage() {
         price: Number(price) || 0,
         condition,
         category_id: categoryId || null,
-        brand: brand || null,
+        brand: (brand === "أخرى" ? customBrand.trim() : brand) || null,
         country_of_origin: country ? country.ar : null,
         group_name: groupName || null,
         item_name: itemName || null,
