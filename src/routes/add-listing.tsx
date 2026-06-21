@@ -109,6 +109,7 @@ function AddListingPage() {
   const [brand, setBrand] = useState("");
   const [brandQuery, setBrandQuery] = useState("");
   const [brandOpen, setBrandOpen] = useState(false);
+  const [customBrand, setCustomBrand] = useState("");
 
   // Country of manufacture
   const [country, setCountry] = useState<Country | null>(null);
