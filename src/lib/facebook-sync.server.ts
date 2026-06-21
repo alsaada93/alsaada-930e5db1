@@ -600,7 +600,7 @@ export async function ingestBotPost(payload: BotPayload): Promise<BotIngestResul
       }`,
     );
     await touchMeta("ok");
-    return { status: "ok", id: inserted.id, ad_status: "pending", warning };
+    return { status: "ok", id: inserted.id, ad_status: "approved", warning };
   } catch (e) {
     const msg = e instanceof Error ? e.message : "خطأ غير معروف";
     await logSync("bot", null, "failed", msg, payload);
