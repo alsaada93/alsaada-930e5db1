@@ -922,3 +922,57 @@ function Detail({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
+
+/** شريط تحقق سريع يعرض اكتمال حقول Schema (offers / aggregateRating / review) لصاحب الإعلان. */
+function SchemaCheckBar({
+  item,
+  hasRating,
+}: {
+  item: { price?: number; images?: string[]; description?: string; brand?: string };
+  hasRating: boolean;
+}) {
+  const checks: { label: string; ok: boolean }[] = [
+    { label: "السعر والعملة (offers.price + BHD)", ok: (item.price ?? 0) > 0 },
+    { label: "توفر المنتج (availability: InStock)", ok: true },
+    { label: "سياسة الإرجاع (hasMerchantReturnPolicy)", ok: true },
+    { label: "تفاصيل الشحن (shippingDetails)", ok: true },
+    { label: "صورة المنتج (image)", ok: (item.images?.length ?? 0) > 0 },
+    { label: "الوصف (description)", ok: !!item.description?.trim() },
+    { label: "الماركة (brand)", ok: !!item.brand?.trim() },
+    { label: "التقييم (aggregateRating + review)", ok: hasRating },
+  ];
+  const passed = checks.filter((c) => c.ok).length;
+  return (
+    <div className="mb-4 rounded-2xl border border-border bg-card p-3">
+      <div className="mb-2 flex items-center justify-between">
+        <span className="text-sm font-bold text-card-foreground">
+          فحص Schema للإعلان (متطلبات Google)
+        </span>
+        <span
+          className={`rounded-full px-2 py-0.5 text-xs font-bold ${
+            passed === checks.length
+              ? "bg-green-600/15 text-green-700"
+              : "bg-amber-500/15 text-amber-700"
+          }`}
+        >
+          {passed}/{checks.length} مكتمل
+        </span>
+      </div>
+      <ul className="grid grid-cols-1 gap-1 sm:grid-cols-2">
+        {checks.map((c) => (
+          <li key={c.label} className="flex items-center gap-2 text-xs">
+            <span className={c.ok ? "text-green-600" : "text-amber-600"}>
+              {c.ok ? "✓" : "⚠"}
+            </span>
+            <span className={c.ok ? "text-foreground" : "text-muted-foreground"}>{c.label}</span>
+          </li>
+        ))}
+      </ul>
+      {!hasRating && (
+        <p className="mt-2 text-[11px] text-muted-foreground">
+          ملاحظة: تظهر حقول التقييم (aggregateRating/review) في الكود البنيوي تلقائياً عند توفر تقييم واحد على الأقل لصاحب الإعلان.
+        </p>
+      )}
+    </div>
+  );
+}
