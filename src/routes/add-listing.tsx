@@ -35,6 +35,8 @@ import { useLanguage } from "@/hooks/useLanguage";
 import { supabase } from "@/integrations/supabase/client";
 import { compressImage } from "@/lib/image-compress";
 import { matchesAr } from "@/lib/text";
+import { showsCondition } from "@/lib/category-kind";
+import { countryByName } from "@/data/countries";
 
 interface AddListingSearch {
   edit?: string;
