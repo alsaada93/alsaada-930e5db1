@@ -128,6 +128,17 @@ function AddListingPage() {
     () => showsCondition(activeCategory?.name ?? categoryId, activeCategory?.nameEn),
     [activeCategory, categoryId],
   );
+  // عند اختيار ماركة لها بلد منشأ معروف، يُختار بلد الصنع تلقائياً
+  useEffect(() => {
+    if (!brand) return;
+    const info = brandInfo(brand);
+    if (info?.country) {
+      const c = countryByName(info.country);
+      if (c) setCountry(c);
+    }
+  }, [brand]);
+
+
 
   // Region search
   const [region, setRegion] = useState("");
