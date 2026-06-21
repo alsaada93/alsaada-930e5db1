@@ -26,6 +26,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { AuctionBidBox } from "@/components/AuctionBidBox";
 import { SellerReviews } from "@/components/SellerReviews";
 import { categories } from "@/data/marketplace";
+import { useCategories } from "@/hooks/useCategories";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { logContactAttempt, whatsappLink, telLink } from "@/lib/contact";
