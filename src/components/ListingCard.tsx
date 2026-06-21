@@ -49,9 +49,11 @@ export function ListingCard({ item, displayTitle }: { item: Listing; displayTitl
               {t("card.featured")}
             </span>
           )}
-          <span className="absolute left-2 top-2 rounded-full bg-navy/80 px-2 py-0.5 text-[11px] font-semibold text-navy-foreground">
-            {condLabel}
-          </span>
+          {showCond && (
+            <span className="absolute left-2 top-2 rounded-full bg-navy/80 px-2 py-0.5 text-[11px] font-semibold text-navy-foreground">
+              {condLabel}
+            </span>
+          )}
         </div>
       </Link>
       <div className="p-3">
