@@ -423,6 +423,7 @@ function ListingPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { boost } = useViewBoost();
+  const { categories: dynCategories } = useCategories();
   const { data: seller } = useSeller(item.sellerId);
   const { data: sellerPhone } = useSellerPhone(item.sellerId);
   const [reposting, setReposting] = useState(false);
