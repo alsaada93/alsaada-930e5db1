@@ -621,9 +621,11 @@ function ListingPage() {
 
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <span className="rounded-full bg-navy/80 px-2 py-0.5 text-[11px] font-semibold text-navy-foreground">
-                {item.condition}
-              </span>
+              {showsCondition(cat?.name, cat?.nameEn) && (
+                <span className="rounded-full bg-navy/80 px-2 py-0.5 text-[11px] font-semibold text-navy-foreground">
+                  {item.condition}
+                </span>
+              )}
               {item.featured && (
                 <span className="rounded-full bg-gradient-primary px-2 py-0.5 text-[11px] font-bold text-primary-foreground">
                   مميّز
