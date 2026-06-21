@@ -26,6 +26,8 @@ export function ListingCard({ item, displayTitle }: { item: Listing; displayTitl
   const verified = seller?.verified ?? item.sellerVerified ?? false;
   const title = displayTitle || item.title;
   const condLabel = item.condition === "جديد" ? t("cond.new") : t("cond.used");
+  const cat = categories.find((c) => c.id === item.category);
+  const showCond = showsCondition(cat?.name ?? item.category, cat?.nameEn);
 
   const waLink = whatsappLink({ phone, listingTitle: title, listingId: item.id });
 
