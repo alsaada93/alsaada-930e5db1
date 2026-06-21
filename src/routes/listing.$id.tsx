@@ -621,6 +621,11 @@ function ListingPage() {
           </div>
         )}
 
+        {isOwner && (
+          <SchemaCheckBar item={item} hasRating={!!ratingData} />
+        )}
+
+
         <div className="grid gap-6 lg:grid-cols-2">
           <Gallery images={item.images} video={item.video} title={item.title} />
 
