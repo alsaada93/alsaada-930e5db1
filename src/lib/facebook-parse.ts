@@ -611,6 +611,11 @@ export function buildAdTitle(args: BuildTitleArgs): string {
     const brand = (args.brand || specs.brand || "").toString().trim();
     if (brand && !parts.join(" ").includes(brand)) parts.push(brand);
     if (specs.year) parts.push(String(specs.year));
+  } else if (args.slug === "real_estate") {
+    // type already includes offer (شقق/فلل) — append the offer group + region for clarity
+    if (args.groupName && !parts.join(" ").includes(args.groupName)) parts.push(args.groupName);
+    const re = extractRealEstateSpecs(args.text);
+    if (re.region && !parts.join(" ").includes(re.region)) parts.push(re.region);
   } else {
     const brand = (args.brand || "").toString().trim();
     if (brand && brand !== "أخرى" && !parts.join(" ").includes(brand)) parts.push(brand);
