@@ -13,6 +13,7 @@ import {
   extractRealEstateSpecs,
   refineCategory,
   detectSubcategory,
+  buildAdTitle,
   type FbCategorySlug,
 } from "./facebook-parse";
 
