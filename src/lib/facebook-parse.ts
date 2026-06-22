@@ -84,12 +84,21 @@ export function detectCategory(text: string, explicit?: string | null): FbCatego
     if (direct) return direct.slug;
   }
 
+  // Tokenize once so short keywords match whole words only (avoids "مستعمل" ⊃ "عمل").
+  const tokens = new Set(haystack.split(/[^\p{L}\p{N}]+/u).filter(Boolean));
+  const matches = (kw: string): boolean => {
+    const k = kw.toLowerCase();
+    if (k.includes(" ")) return haystack.includes(k); // multi-word phrase
+    if (tokens.has(k)) return true; // exact word
+    return k.length >= 5 && haystack.includes(k); // long stems may appear inflected
+  };
+
   let best: FbCategorySlug = "other";
   let bestScore = 0;
   for (const [slug, words] of Object.entries(CATEGORY_KEYWORDS)) {
     let score = 0;
     for (const w of words) {
-      if (haystack.includes(w.toLowerCase())) score += 1;
+      if (matches(w)) score += 1;
     }
     if (score > bestScore) {
       bestScore = score;
@@ -534,6 +543,10 @@ export function detectSubcategory(slug: FbCategorySlug, text: string): SubCatego
     return { group_name: "سيارات", item_name: "سيارات للبيع" };
   }
 
+  if (slug === "services") {
+    return { group_name: null, item_name: null };
+  }
+
   if (slug === "real_estate") {
     const re = extractRealEstateSpecs(text);
     const group = re.offer_type === "rent" ? "للإيجار" : "للبيع";
@@ -553,3 +566,68 @@ export function detectSubcategory(slug: FbCategorySlug, text: string): SubCatego
 
   return { group_name: null, item_name: null };
 }
+
+// ───────────────────────── Professional title builder ─────────────────────────
+
+/** Strips emojis, hashtags, phone numbers, repeated punctuation and excess whitespace. */
+function cleanTitlePart(s: string): string {
+  return normDigits(s)
+    .replace(/[#﹟＃][^\s#]+/g, " ") // hashtags
+    .replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE00}-\u{FE0F}\u{2190}-\u{21FF}]/gu, " ") // emojis/symbols
+    .replace(/(\+?\d[\d\s\-]{6,})/g, " ") // phone-like numbers
+    .replace(/[^\p{L}\p{N}\s\-]/gu, " ") // keep letters/numbers/space/dash
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+export interface BuildTitleArgs {
+  slug: FbCategorySlug;
+  /** Resolved subcategory item name (most specific product type). */
+  itemName?: string | null;
+  /** Resolved group name (fallback product type). */
+  groupName?: string | null;
+  /** Arabic category label fallback. */
+  categoryName: string;
+  /** Detected/declared brand. */
+  brand?: string | null;
+  /** Raw post text — used to derive model/year for vehicles. */
+  text: string;
+  /** A human-written title from the bot, if any. */
+  rawTitle?: string | null;
+}
+
+/**
+ * Composes a clean, ordered ad title following the house rule:
+ *   نوع الصنف/المنتج  ←  الماركة (←  الموديل/السنة للسيارات)
+ * Specs and free description are kept OUT of the title (they belong in the body).
+ */
+export function buildAdTitle(args: BuildTitleArgs): string {
+  const productType = (args.itemName || args.groupName || args.categoryName || "").trim();
+  const parts: string[] = [];
+  if (productType) parts.push(productType);
+
+  if (args.slug === "cars") {
+    const specs = extractCarSpecs(args.text);
+    const brand = (args.brand || specs.brand || "").toString().trim();
+    if (brand && !parts.join(" ").includes(brand)) parts.push(brand);
+    if (specs.year) parts.push(String(specs.year));
+  } else if (args.slug === "real_estate") {
+    // type already includes offer (شقق/فلل) — append the offer group + region for clarity
+    if (args.groupName && !parts.join(" ").includes(args.groupName)) parts.push(args.groupName);
+    const re = extractRealEstateSpecs(args.text);
+    if (re.region && !parts.join(" ").includes(re.region)) parts.push(re.region);
+  } else {
+    const brand = (args.brand || "").toString().trim();
+    if (brand && brand !== "أخرى" && !parts.join(" ").includes(brand)) parts.push(brand);
+  }
+
+  let title = cleanTitlePart(parts.join(" "));
+
+  // Fallback to a cleaned raw title or category label if we produced nothing usable.
+  if (title.length < 3) {
+    const raw = cleanTitlePart(args.rawTitle ?? "");
+    title = raw.length >= 3 ? raw : (productType || args.categoryName || "إعلان");
+  }
+  return title.slice(0, 80).trim() || "إعلان";
+}
+

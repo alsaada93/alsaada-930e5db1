@@ -13,6 +13,7 @@ import {
   extractRealEstateSpecs,
   refineCategory,
   detectSubcategory,
+  buildAdTitle,
   type FbCategorySlug,
 } from "./facebook-parse";
 
@@ -568,8 +569,18 @@ export async function ingestBotPost(payload: BotPayload): Promise<BotIngestResul
       if (!Number.isNaN(d.getTime())) publishedAt = d.toISOString();
     }
 
+    const autoTitle = buildAdTitle({
+      slug: category,
+      itemName: item_name,
+      groupName: group_name,
+      categoryName: catObj?.name ?? categoryLabel(category).name,
+      brand: carSpecs?.brand ?? null,
+      text: `${title} ${content}`,
+      rawTitle: title,
+    });
+
     const row = {
-      title: title || content.slice(0, 80) || "إعلان",
+      title: autoTitle,
       description: (content || "") + specsBlock || null,
       category_id: categoryId,
       group_name,
