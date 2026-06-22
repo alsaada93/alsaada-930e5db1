@@ -534,6 +534,10 @@ export function detectSubcategory(slug: FbCategorySlug, text: string): SubCatego
     return { group_name: "سيارات", item_name: "سيارات للبيع" };
   }
 
+  if (slug === "services") {
+    return { group_name: null, item_name: null };
+  }
+
   if (slug === "real_estate") {
     const re = extractRealEstateSpecs(text);
     const group = re.offer_type === "rent" ? "للإيجار" : "للبيع";
