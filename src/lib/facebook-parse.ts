@@ -84,12 +84,21 @@ export function detectCategory(text: string, explicit?: string | null): FbCatego
     if (direct) return direct.slug;
   }
 
+  // Tokenize once so short keywords match whole words only (avoids "مستعمل" ⊃ "عمل").
+  const tokens = new Set(haystack.split(/[^\p{L}\p{N}]+/u).filter(Boolean));
+  const matches = (kw: string): boolean => {
+    const k = kw.toLowerCase();
+    if (k.includes(" ")) return haystack.includes(k); // multi-word phrase
+    if (tokens.has(k)) return true; // exact word
+    return k.length >= 5 && haystack.includes(k); // long stems may appear inflected
+  };
+
   let best: FbCategorySlug = "other";
   let bestScore = 0;
   for (const [slug, words] of Object.entries(CATEGORY_KEYWORDS)) {
     let score = 0;
     for (const w of words) {
-      if (haystack.includes(w.toLowerCase())) score += 1;
+      if (matches(w)) score += 1;
     }
     if (score > bestScore) {
       bestScore = score;
