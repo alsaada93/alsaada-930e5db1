@@ -43,7 +43,7 @@ const SLUG_ALIASES: Record<FbCategorySlug, { names: string[]; en: string[] }> = 
   equipment: { names: ["مطاع", "معدات"], en: ["restaurant", "equipment"] },
   jobs: { names: ["وظائف", "وظيفة"], en: ["job"] },
   services: { names: ["خدمات", "خدمة"], en: ["service"] },
-  other: { names: [], en: [] },
+  other: { names: ["عام", "أخرى", "اخرى"], en: ["general", "other", "misc"] },
 };
 
 async function loadSiteCategories(): Promise<SiteCategory[]> {
