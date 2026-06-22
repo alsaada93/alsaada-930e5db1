@@ -2,7 +2,11 @@ import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import {
   UtensilsCrossed,
-  Hotel,
+  Car,
+  Building2,
+  Wrench,
+  Briefcase,
+  Package,
   Smartphone,
   Sofa,
   Store,
@@ -16,16 +20,24 @@ import { useLanguage } from "@/hooks/useLanguage";
 
 const icons: Record<string, LucideIcon> = {
   restaurant: UtensilsCrossed,
-  hotels: Hotel,
   electronics: Smartphone,
   furniture: Sofa,
+  "ea7fe359-6b22-49e8-8249-2db1d1610913": Car,
+  "b7e8cb10-8df5-489e-829d-3ca28e71487f": Building2,
+  "5cbdb034-bd93-4aae-813c-5fb9987c4c1b": Wrench,
+  "72eca8dc-d743-4f8f-ab67-77a5d91f94da": Briefcase,
+  "0f9ea3d0-c9bd-4e9f-9e70-c082f4f3e2cd": Package,
 };
 
 const gradients: Record<string, string> = {
   restaurant: "from-orange-500 to-rose-500",
-  hotels: "from-sky-500 to-cyan-500",
   electronics: "from-violet-500 to-indigo-500",
   furniture: "from-emerald-500 to-teal-500",
+  "ea7fe359-6b22-49e8-8249-2db1d1610913": "from-sky-500 to-blue-600",
+  "b7e8cb10-8df5-489e-829d-3ca28e71487f": "from-amber-500 to-orange-600",
+  "5cbdb034-bd93-4aae-813c-5fb9987c4c1b": "from-cyan-500 to-teal-600",
+  "72eca8dc-d743-4f8f-ab67-77a5d91f94da": "from-fuchsia-500 to-purple-600",
+  "0f9ea3d0-c9bd-4e9f-9e70-c082f4f3e2cd": "from-slate-500 to-gray-600",
 };
 
 function CategoryCard({ c }: { c: ReturnType<typeof useCategories>["categories"][number] }) {
