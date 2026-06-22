@@ -557,3 +557,63 @@ export function detectSubcategory(slug: FbCategorySlug, text: string): SubCatego
 
   return { group_name: null, item_name: null };
 }
+
+// ───────────────────────── Professional title builder ─────────────────────────
+
+/** Strips emojis, hashtags, phone numbers, repeated punctuation and excess whitespace. */
+function cleanTitlePart(s: string): string {
+  return normDigits(s)
+    .replace(/[#﹟＃][^\s#]+/g, " ") // hashtags
+    .replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE00}-\u{FE0F}\u{2190}-\u{21FF}]/gu, " ") // emojis/symbols
+    .replace(/(\+?\d[\d\s\-]{6,})/g, " ") // phone-like numbers
+    .replace(/[^\p{L}\p{N}\s\-]/gu, " ") // keep letters/numbers/space/dash
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+export interface BuildTitleArgs {
+  slug: FbCategorySlug;
+  /** Resolved subcategory item name (most specific product type). */
+  itemName?: string | null;
+  /** Resolved group name (fallback product type). */
+  groupName?: string | null;
+  /** Arabic category label fallback. */
+  categoryName: string;
+  /** Detected/declared brand. */
+  brand?: string | null;
+  /** Raw post text — used to derive model/year for vehicles. */
+  text: string;
+  /** A human-written title from the bot, if any. */
+  rawTitle?: string | null;
+}
+
+/**
+ * Composes a clean, ordered ad title following the house rule:
+ *   نوع الصنف/المنتج  ←  الماركة (←  الموديل/السنة للسيارات)
+ * Specs and free description are kept OUT of the title (they belong in the body).
+ */
+export function buildAdTitle(args: BuildTitleArgs): string {
+  const productType = (args.itemName || args.groupName || args.categoryName || "").trim();
+  const parts: string[] = [];
+  if (productType) parts.push(productType);
+
+  if (args.slug === "cars") {
+    const specs = extractCarSpecs(args.text);
+    const brand = (args.brand || specs.brand || "").toString().trim();
+    if (brand && !parts.join(" ").includes(brand)) parts.push(brand);
+    if (specs.year) parts.push(String(specs.year));
+  } else {
+    const brand = (args.brand || "").toString().trim();
+    if (brand && brand !== "أخرى" && !parts.join(" ").includes(brand)) parts.push(brand);
+  }
+
+  let title = cleanTitlePart(parts.join(" "));
+
+  // Fallback to a cleaned raw title or category label if we produced nothing usable.
+  if (title.length < 3) {
+    const raw = cleanTitlePart(args.rawTitle ?? "");
+    title = raw.length >= 3 ? raw : (productType || args.categoryName || "إعلان");
+  }
+  return title.slice(0, 80).trim() || "إعلان";
+}
+
