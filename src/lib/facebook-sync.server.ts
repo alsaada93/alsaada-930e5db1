@@ -579,18 +579,40 @@ export async function ingestBotPost(payload: BotPayload): Promise<BotIngestResul
       if (!Number.isNaN(d.getTime())) publishedAt = d.toISOString();
     }
 
-    const autoTitle = buildAdTitle({
-      slug: category,
-      itemName: item_name,
-      groupName: group_name,
-      categoryName: catObj?.name ?? categoryLabel(category).name,
-      brand: carSpecs?.brand ?? null,
-      text: `${title} ${content}`,
-      rawTitle: title,
-    });
+    // Does the bot provide a real, human ad name? Ads without one go to manual review.
+    const namedByBot = hasMeaningfulTitle(title);
+
+    let finalTitle: string;
+    if (namedByBot) {
+      finalTitle = buildAdTitle({
+        slug: category,
+        itemName: item_name,
+        groupName: group_name,
+        categoryName: catObj?.name ?? categoryLabel(category).name,
+        brand: carSpecs?.brand ?? null,
+        text: `${title} ${content}`,
+        rawTitle: title,
+      });
+    } else {
+      // No ad name supplied: never relabel it "عام/أخرى" — keep a descriptive
+      // title derived from the body so a human can review and approve it.
+      finalTitle =
+        firstMeaningfulLine(content) ||
+        buildAdTitle({
+          slug: category,
+          itemName: item_name,
+          groupName: group_name,
+          categoryName: catObj?.name ?? categoryLabel(category).name,
+          brand: carSpecs?.brand ?? null,
+          text: content,
+          rawTitle: null,
+        });
+    }
+
+    const adStatus: "approved" | "pending" = namedByBot ? "approved" : "pending";
 
     const row = {
-      title: autoTitle,
+      title: finalTitle,
       description: (content || "") + specsBlock || null,
       category_id: categoryId,
       group_name,
@@ -603,7 +625,7 @@ export async function ingestBotPost(payload: BotPayload): Promise<BotIngestResul
       ...(reSpecs?.area_sqm ? { area_sqm: reSpecs.area_sqm } : {}),
       ...(carSpecs?.brand ? { brand: carSpecs.brand } : {}),
       ...(reSpecs?.region ? { city: reSpecs.region } : {}),
-      status: "approved" as const,
+      status: adStatus,
       published_at: publishedAt ?? new Date().toISOString(),
       listing_type: "normal" as const,
       source: "facebook_bot",
@@ -616,12 +638,12 @@ export async function ingestBotPost(payload: BotPayload): Promise<BotIngestResul
       "bot",
       inserted.id,
       "success",
-      `تم استقبال إعلان من البوت — التصنيف: ${categoryLabel(category).name}، السعر: ${
-        priceResult.detected ? priceResult.price : "غير محدد"
-      }`,
+      `تم استقبال إعلان من البوت — التصنيف: ${categoryLabel(category).name}، الحالة: ${
+        adStatus === "approved" ? "منشور" : "بانتظار المراجعة (بدون اسم إعلان)"
+      }، السعر: ${priceResult.detected ? priceResult.price : "غير محدد"}`,
     );
     await touchMeta("ok");
-    return { status: "ok", id: inserted.id, ad_status: "approved", warning };
+    return { status: "ok", id: inserted.id, ad_status: adStatus, warning };
   } catch (e) {
     const msg = e instanceof Error ? e.message : "خطأ غير معروف";
     await logSync("bot", null, "failed", msg, payload);
