@@ -1,0 +1,60 @@
+/**
+ * Car brand logos. Maps a brand name (English, as stored across the app) to a
+ * monochrome SVG logo served from the free simpleicons CDN. Returns null when a
+ * logo is unavailable so callers can fall back to a generic car icon.
+ */
+const SLUGS: Record<string, string> = {
+  Toyota: "toyota",
+  Nissan: "nissan",
+  Honda: "honda",
+  Lexus: "lexus",
+  Mercedes: "mercedes",
+  "Mercedes-Benz": "mercedes",
+  BMW: "bmw",
+  Hyundai: "hyundai",
+  Kia: "kia",
+  Ford: "ford",
+  Chevrolet: "chevrolet",
+  Mitsubishi: "mitsubishi",
+  Mazda: "mazda",
+  GMC: "gmc",
+  Jeep: "jeep",
+  Dodge: "dodge",
+  Audi: "audi",
+  Volkswagen: "volkswagen",
+  Porsche: "porsche",
+  "Land Rover": "landrover",
+  "Range Rover": "landrover",
+  Suzuki: "suzuki",
+  Subaru: "subaru",
+  Peugeot: "peugeot",
+  Renault: "renault",
+  Chrysler: "chrysler",
+  Cadillac: "cadillac",
+  Infiniti: "infiniti",
+  Genesis: "genesis",
+  Jaguar: "jaguar",
+  MG: "mg",
+  Changan: "changan",
+  Geely: "geely",
+  Chery: "chery",
+  Haval: "haval",
+  Volvo: "volvo",
+  Isuzu: "isuzu",
+  Daihatsu: "daihatsu",
+  Tesla: "tesla",
+  Hummer: "hummer",
+  Bentley: "bentley",
+  "Rolls Royce": "rollsroyce",
+  Ferrari: "ferrari",
+  Lamborghini: "lamborghini",
+  Maserati: "maserati",
+  Skoda: "skoda",
+};
+
+/** Returns a logo URL for a car brand, or null when none is mapped. */
+export function carBrandLogo(brand: string | null | undefined): string | null {
+  if (!brand) return null;
+  const slug = SLUGS[brand.trim()];
+  return slug ? `https://cdn.simpleicons.org/${slug}` : null;
+}
