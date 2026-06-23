@@ -399,6 +399,16 @@ function buildSpecsBlock(category: FbCategorySlug, text: string): string {
     }
     if (s.accident_free !== null) lines.push(`خلو من الحوادث: ${s.accident_free ? "نعم" : "لا"}`);
     if (s.previous_owners) lines.push(`عدد الملاك السابقين: ${s.previous_owners}`);
+    if (s.engine_cc) lines.push(`سعة المحرك: ${s.engine_cc.toLocaleString("en-US")} سي سي`);
+    if (s.cylinders) lines.push(`عدد السلندرات: ${s.cylinders}`);
+    if (s.body_type) {
+      const bodyAr: Record<string, string> = {
+        sedan: "سيدان", suv: "دفع رباعي (جيب)", coupe: "كوبيه",
+        hatchback: "هاتشباك", pickup: "بيك أب", van: "فان",
+      };
+      lines.push(`نوع الهيكل: ${bodyAr[s.body_type] ?? s.body_type}`);
+    }
+    if (s.color) lines.push(`اللون: ${s.color}`);
   } else if (category === "real_estate") {
     const s = extractRealEstateSpecs(text);
     const typeAr: Record<string, string> = {
