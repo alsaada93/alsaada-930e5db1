@@ -544,9 +544,47 @@ export function refineCategory(text: string, current: FbCategorySlug): FbCategor
   const realEstateSignal =
     /شقة|فيلا|عقار|للايجار|للإيجار|غرفة|غرف نوم|bedroom|apartment|villa|استوديو|محل تجاري/i.test(lower);
 
+  // strong signals for the remaining sections — keeps ads out of "general/other"
+  const electronicsSignal =
+    /جوال|ايفون|آيفون|موبايل|هاتف|لابتوب|كمبيوتر|تلفزيون|شاشة|بلايستيشن|سماعة|كاميرا|تابلت|ايباد|iphone|laptop|samsung|سامسونج/i.test(lower);
+  const equipmentSignal =
+    /مطعم|مطبخ صناعي|ثلاجة عرض|فرن|ماكينة|معدات مطاعم|كوفي|باريستا|قهوة|عجان|شواية/i.test(lower);
+  const furnitureSignal =
+    /أثاث|اثاث|كنب|كنبة|سرير|دولاب|طاولة|كرسي|مجلس|خزانة|ديكور|sofa/i.test(lower);
+  const servicesSignal =
+    /صيانة|تنظيف|نقل عفش|تركيب|توصيل|سباك|كهربائي|نجار|دهان|خدمة تنظيف/i.test(lower);
+  const jobsSignal =
+    /مطلوب موظف|مطلوب عامل|مطلوب عاملة|توظيف|وظيفة شاغرة|راتب شهري|سيرة ذاتية|hiring/i.test(lower);
+
   if (realEstateSignal) return "real_estate";
   if (carSignal) return "cars";
+  if (current !== "other") return current;
+  if (equipmentSignal) return "equipment";
+  if (electronicsSignal) return "electronics";
+  if (furnitureSignal) return "furniture";
+  if (servicesSignal) return "services";
+  if (jobsSignal) return "jobs";
   return current;
+}
+
+/** Strips noise from a candidate ad name and returns "" when nothing usable remains. */
+export function cleanAdName(s: string | null | undefined): string {
+  return cleanTitlePart((s ?? "").toString());
+}
+
+/** True when the bot supplied a real, human ad name (not empty / not noise). */
+export function hasMeaningfulTitle(rawTitle: string | null | undefined): boolean {
+  return cleanAdName(rawTitle).length >= 3;
+}
+
+/** Derives a descriptive title from the first meaningful line of the body. */
+export function firstMeaningfulLine(text: string | null | undefined): string {
+  const lines = (text ?? "").toString().replace(/\r/g, "").split("\n");
+  for (const line of lines) {
+    const cleaned = cleanTitlePart(line);
+    if (cleaned.length >= 3) return cleaned.slice(0, 80).trim();
+  }
+  return "";
 }
 
 // ───────────────────────── Subcategory detection ─────────────────────────
