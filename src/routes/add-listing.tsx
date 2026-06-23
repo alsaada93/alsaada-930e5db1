@@ -1040,21 +1040,32 @@ function AddListingPage() {
               </div>
               {brandOpen && activeCategory && filteredBrands.length > 0 && (
                 <ul className="absolute z-20 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-border bg-popover p-1 shadow-card">
-                  {filteredBrands.map((b) => (
-                    <li key={b}>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setBrand(b);
-                          setBrandQuery("");
-                          setBrandOpen(false);
-                        }}
-                        className="w-full rounded-md px-3 py-2 text-start text-sm hover:bg-accent"
-                      >
-                        {brandLabel(b, lang)}
-                      </button>
-                    </li>
-                  ))}
+                  {filteredBrands.map((b) => {
+                    const logo = isVehicleCat ? carBrandLogo(b) : null;
+                    return (
+                      <li key={b}>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setBrand(b);
+                            setBrandQuery("");
+                            setBrandOpen(false);
+                          }}
+                          className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-start text-sm hover:bg-accent"
+                        >
+                          {logo && (
+                            <img
+                              src={logo}
+                              alt=""
+                              loading="lazy"
+                              className="h-5 w-5 shrink-0 object-contain"
+                            />
+                          )}
+                          <span>{brandLabel(b, lang)}</span>
+                        </button>
+                      </li>
+                    );
+                  })}
                 </ul>
               )}
             </div>
