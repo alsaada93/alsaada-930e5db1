@@ -14,6 +14,8 @@ import {
   refineCategory,
   detectSubcategory,
   buildAdTitle,
+  hasMeaningfulTitle,
+  firstMeaningfulLine,
   type FbCategorySlug,
 } from "./facebook-parse";
 
@@ -399,6 +401,16 @@ function buildSpecsBlock(category: FbCategorySlug, text: string): string {
     }
     if (s.accident_free !== null) lines.push(`خلو من الحوادث: ${s.accident_free ? "نعم" : "لا"}`);
     if (s.previous_owners) lines.push(`عدد الملاك السابقين: ${s.previous_owners}`);
+    if (s.engine_cc) lines.push(`سعة المحرك: ${s.engine_cc.toLocaleString("en-US")} سي سي`);
+    if (s.cylinders) lines.push(`عدد السلندرات: ${s.cylinders}`);
+    if (s.body_type) {
+      const bodyAr: Record<string, string> = {
+        sedan: "سيدان", suv: "دفع رباعي (جيب)", coupe: "كوبيه",
+        hatchback: "هاتشباك", pickup: "بيك أب", van: "فان",
+      };
+      lines.push(`نوع الهيكل: ${bodyAr[s.body_type] ?? s.body_type}`);
+    }
+    if (s.color) lines.push(`اللون: ${s.color}`);
   } else if (category === "real_estate") {
     const s = extractRealEstateSpecs(text);
     const typeAr: Record<string, string> = {
@@ -569,18 +581,40 @@ export async function ingestBotPost(payload: BotPayload): Promise<BotIngestResul
       if (!Number.isNaN(d.getTime())) publishedAt = d.toISOString();
     }
 
-    const autoTitle = buildAdTitle({
-      slug: category,
-      itemName: item_name,
-      groupName: group_name,
-      categoryName: catObj?.name ?? categoryLabel(category).name,
-      brand: carSpecs?.brand ?? null,
-      text: `${title} ${content}`,
-      rawTitle: title,
-    });
+    // Does the bot provide a real, human ad name? Ads without one go to manual review.
+    const namedByBot = hasMeaningfulTitle(title);
+
+    let finalTitle: string;
+    if (namedByBot) {
+      finalTitle = buildAdTitle({
+        slug: category,
+        itemName: item_name,
+        groupName: group_name,
+        categoryName: catObj?.name ?? categoryLabel(category).name,
+        brand: carSpecs?.brand ?? null,
+        text: `${title} ${content}`,
+        rawTitle: title,
+      });
+    } else {
+      // No ad name supplied: never relabel it "عام/أخرى" — keep a descriptive
+      // title derived from the body so a human can review and approve it.
+      finalTitle =
+        firstMeaningfulLine(content) ||
+        buildAdTitle({
+          slug: category,
+          itemName: item_name,
+          groupName: group_name,
+          categoryName: catObj?.name ?? categoryLabel(category).name,
+          brand: carSpecs?.brand ?? null,
+          text: content,
+          rawTitle: null,
+        });
+    }
+
+    const adStatus: "approved" | "pending" = namedByBot ? "approved" : "pending";
 
     const row = {
-      title: autoTitle,
+      title: finalTitle,
       description: (content || "") + specsBlock || null,
       category_id: categoryId,
       group_name,
@@ -593,7 +627,7 @@ export async function ingestBotPost(payload: BotPayload): Promise<BotIngestResul
       ...(reSpecs?.area_sqm ? { area_sqm: reSpecs.area_sqm } : {}),
       ...(carSpecs?.brand ? { brand: carSpecs.brand } : {}),
       ...(reSpecs?.region ? { city: reSpecs.region } : {}),
-      status: "approved" as const,
+      status: adStatus,
       published_at: publishedAt ?? new Date().toISOString(),
       listing_type: "normal" as const,
       source: "facebook_bot",
@@ -606,12 +640,12 @@ export async function ingestBotPost(payload: BotPayload): Promise<BotIngestResul
       "bot",
       inserted.id,
       "success",
-      `تم استقبال إعلان من البوت — التصنيف: ${categoryLabel(category).name}، السعر: ${
-        priceResult.detected ? priceResult.price : "غير محدد"
-      }`,
+      `تم استقبال إعلان من البوت — التصنيف: ${categoryLabel(category).name}، الحالة: ${
+        adStatus === "approved" ? "منشور" : "بانتظار المراجعة (بدون اسم إعلان)"
+      }، السعر: ${priceResult.detected ? priceResult.price : "غير محدد"}`,
     );
     await touchMeta("ok");
-    return { status: "ok", id: inserted.id, ad_status: "approved", warning };
+    return { status: "ok", id: inserted.id, ad_status: adStatus, warning };
   } catch (e) {
     const msg = e instanceof Error ? e.message : "خطأ غير معروف";
     await logSync("bot", null, "failed", msg, payload);

@@ -365,6 +365,10 @@ export interface CarSpecs {
   accident_free: boolean | null;
   previous_owners: number | null;
   brand: string | null;
+  engine_cc: number | null;
+  cylinders: number | null;
+  body_type: string | null;
+  color: string | null;
 }
 
 export interface RealEstateSpecs {
@@ -379,10 +383,28 @@ export interface RealEstateSpecs {
 const CAR_BRANDS: Record<string, string> = {
   toyota: "Toyota", تويوتا: "Toyota", nissan: "Nissan", نيسان: "Nissan",
   honda: "Honda", هوندا: "Honda", lexus: "Lexus", لكزس: "Lexus",
-  mercedes: "Mercedes", مرسيدس: "Mercedes", bmw: "BMW", hyundai: "Hyundai",
-  هونداي: "Hyundai", kia: "Kia", كيا: "Kia", ford: "Ford", فورد: "Ford",
-  chevrolet: "Chevrolet", شفروليه: "Chevrolet", mitsubishi: "Mitsubishi",
-  ميتسوبيشي: "Mitsubishi", mazda: "Mazda", مازda: "Mazda", مازدا: "Mazda",
+  mercedes: "Mercedes", مرسيدس: "Mercedes", bmw: "BMW", "بي ام": "BMW", "بي إم": "BMW",
+  hyundai: "Hyundai", هونداي: "Hyundai", هيونداي: "Hyundai", kia: "Kia", كيا: "Kia",
+  ford: "Ford", فورد: "Ford", chevrolet: "Chevrolet", شفروليه: "Chevrolet", شيفروليه: "Chevrolet",
+  mitsubishi: "Mitsubishi", ميتسوبيشي: "Mitsubishi", mazda: "Mazda", مازدا: "Mazda",
+  gmc: "GMC", "جي ام سي": "GMC", "جمس": "GMC", jeep: "Jeep", جيب: "Jeep",
+  dodge: "Dodge", دودج: "Dodge", audi: "Audi", اودي: "Audi", أودي: "Audi",
+  volkswagen: "Volkswagen", فولكس: "Volkswagen", "فولكس واجن": "Volkswagen",
+  porsche: "Porsche", بورش: "Porsche", بورشه: "Porsche",
+  "land rover": "Land Rover", "لاند روفر": "Land Rover", "رنج روفر": "Range Rover", "range rover": "Range Rover",
+  suzuki: "Suzuki", سوزوكي: "Suzuki", subaru: "Subaru", سوبارو: "Subaru",
+  peugeot: "Peugeot", بيجو: "Peugeot", renault: "Renault", رينو: "Renault",
+  chrysler: "Chrysler", كرايسلر: "Chrysler", cadillac: "Cadillac", كاديلاك: "Cadillac",
+  infiniti: "Infiniti", انفنيتي: "Infiniti", إنفينيتي: "Infiniti",
+  genesis: "Genesis", جينيسيس: "Genesis", jaguar: "Jaguar", جاكوار: "Jaguar",
+  mg: "MG", "ام جي": "MG", changan: "Changan", شانجان: "Changan", تشانجان: "Changan",
+  geely: "Geely", جيلي: "Geely", chery: "Chery", شيري: "Chery",
+  haval: "Haval", هافال: "Haval", volvo: "Volvo", فولفو: "Volvo",
+  isuzu: "Isuzu", ايسوزو: "Isuzu", إيسوزو: "Isuzu", daihatsu: "Daihatsu", دايهاتسو: "Daihatsu",
+  tesla: "Tesla", تسلا: "Tesla", hummer: "Hummer", همر: "Hummer",
+  bentley: "Bentley", بنتلي: "Bentley", "rolls royce": "Rolls Royce", "رولز رويس": "Rolls Royce",
+  ferrari: "Ferrari", فيراري: "Ferrari", lamborghini: "Lamborghini", لامبورغيني: "Lamborghini",
+  maserati: "Maserati", مازيراتي: "Maserati", skoda: "Skoda", سكودا: "Skoda",
 };
 
 export function extractCarSpecs(text: string): CarSpecs {
@@ -438,7 +460,44 @@ export function extractCarSpecs(text: string): CarSpecs {
     }
   }
 
-  return { year: yr, mileage_km: mileage, transmission, fuel, accident_free, previous_owners, brand };
+  // engine capacity: "2.0L", "2000cc", "سعة 1600"
+  let engine_cc: number | null = null;
+  const litreMatch = lower.match(/(\d(?:\.\d)?)\s*(?:l\b|liter|litre|لتر)/);
+  if (litreMatch) engine_cc = Math.round(parseFloat(litreMatch[1]) * 1000);
+  if (engine_cc === null) {
+    const ccMatch = lower.match(/(\d{3,4})\s*(?:cc|سي سي)/);
+    if (ccMatch) engine_cc = Number(ccMatch[1]);
+  }
+  if (engine_cc === null) engine_cc = numberNear(words, ["سعة", "محرك", "engine"], 2);
+  if (engine_cc !== null && (engine_cc < 600 || engine_cc > 9000)) engine_cc = null;
+
+  let cylinders: number | null = numberNear(words, ["سلندر", "اسطوانة", "cylinder", "cyl"], 2);
+  if (cylinders !== null && (cylinders < 2 || cylinders > 16)) cylinders = null;
+
+  let body_type: string | null = null;
+  if (/sedan|سيدان|صالون/i.test(lower)) body_type = "sedan";
+  else if (/\bsuv\b|جيب|دفع رباعي|دبل/i.test(lower)) body_type = "suv";
+  else if (/coupe|كوبيه/i.test(lower)) body_type = "coupe";
+  else if (/hatchback|هاتشباك/i.test(lower)) body_type = "hatchback";
+  else if (/pickup|بيك اب|بيكب|وانيت/i.test(lower)) body_type = "pickup";
+  else if (/van\b|فان/i.test(lower)) body_type = "van";
+
+  let color: string | null = null;
+  const colorMap: Array<[RegExp, string]> = [
+    [/أبيض|ابيض|white/i, "أبيض"], [/أسود|اسود|black/i, "أسود"],
+    [/فضي|silver/i, "فضي"], [/رمادي|gray|grey/i, "رمادي"],
+    [/أحمر|احمر|red/i, "أحمر"], [/أزرق|ازرق|blue/i, "أزرق"],
+    [/أخضر|اخضر|green/i, "أخضر"], [/ذهبي|gold/i, "ذهبي"],
+    [/بني|brown/i, "بني"], [/بيج|beige/i, "بيج"],
+  ];
+  for (const [re, name] of colorMap) {
+    if (re.test(lower)) { color = name; break; }
+  }
+
+  return {
+    year: yr, mileage_km: mileage, transmission, fuel, accident_free,
+    previous_owners, brand, engine_cc, cylinders, body_type, color,
+  };
 }
 
 export function extractRealEstateSpecs(text: string): RealEstateSpecs {
@@ -485,9 +544,47 @@ export function refineCategory(text: string, current: FbCategorySlug): FbCategor
   const realEstateSignal =
     /شقة|فيلا|عقار|للايجار|للإيجار|غرفة|غرف نوم|bedroom|apartment|villa|استوديو|محل تجاري/i.test(lower);
 
+  // strong signals for the remaining sections — keeps ads out of "general/other"
+  const electronicsSignal =
+    /جوال|ايفون|آيفون|موبايل|هاتف|لابتوب|كمبيوتر|تلفزيون|شاشة|بلايستيشن|سماعة|كاميرا|تابلت|ايباد|iphone|laptop|samsung|سامسونج/i.test(lower);
+  const equipmentSignal =
+    /مطعم|مطبخ صناعي|ثلاجة عرض|فرن|ماكينة|معدات مطاعم|كوفي|باريستا|قهوة|عجان|شواية/i.test(lower);
+  const furnitureSignal =
+    /أثاث|اثاث|كنب|كنبة|سرير|دولاب|طاولة|كرسي|مجلس|خزانة|ديكور|sofa/i.test(lower);
+  const servicesSignal =
+    /صيانة|تنظيف|نقل عفش|تركيب|توصيل|سباك|كهربائي|نجار|دهان|خدمة تنظيف/i.test(lower);
+  const jobsSignal =
+    /مطلوب موظف|مطلوب عامل|مطلوب عاملة|توظيف|وظيفة شاغرة|راتب شهري|سيرة ذاتية|hiring/i.test(lower);
+
   if (realEstateSignal) return "real_estate";
   if (carSignal) return "cars";
+  if (current !== "other") return current;
+  if (equipmentSignal) return "equipment";
+  if (electronicsSignal) return "electronics";
+  if (furnitureSignal) return "furniture";
+  if (servicesSignal) return "services";
+  if (jobsSignal) return "jobs";
   return current;
+}
+
+/** Strips noise from a candidate ad name and returns "" when nothing usable remains. */
+export function cleanAdName(s: string | null | undefined): string {
+  return cleanTitlePart((s ?? "").toString());
+}
+
+/** True when the bot supplied a real, human ad name (not empty / not noise). */
+export function hasMeaningfulTitle(rawTitle: string | null | undefined): boolean {
+  return cleanAdName(rawTitle).length >= 3;
+}
+
+/** Derives a descriptive title from the first meaningful line of the body. */
+export function firstMeaningfulLine(text: string | null | undefined): string {
+  const lines = (text ?? "").toString().replace(/\r/g, "").split("\n");
+  for (const line of lines) {
+    const cleaned = cleanTitlePart(line);
+    if (cleaned.length >= 3) return cleaned.slice(0, 80).trim();
+  }
+  return "";
 }
 
 // ───────────────────────── Subcategory detection ─────────────────────────

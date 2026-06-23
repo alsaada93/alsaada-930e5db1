@@ -35,7 +35,8 @@ import { useLanguage } from "@/hooks/useLanguage";
 import { supabase } from "@/integrations/supabase/client";
 import { compressImage } from "@/lib/image-compress";
 import { matchesAr } from "@/lib/text";
-import { showsCondition } from "@/lib/category-kind";
+import { showsCondition, categoryKind } from "@/lib/category-kind";
+import { carBrandLogo } from "@/data/carBrandLogos";
 import { countryByName } from "@/data/countries";
 
 interface AddListingSearch {
@@ -127,6 +128,11 @@ function AddListingPage() {
   // وسم الحالة (جديد/مستعمل) يُخفى في السيارات والعقارات
   const showCondition = useMemo(
     () => showsCondition(activeCategory?.name ?? categoryId, activeCategory?.nameEn),
+    [activeCategory, categoryId],
+  );
+  // هل التصنيف الحالي مركبات؟ — لعرض شعارات الماركات وحقول السيارة
+  const isVehicleCat = useMemo(
+    () => categoryKind(activeCategory?.name ?? categoryId, activeCategory?.nameEn) === "vehicle",
     [activeCategory, categoryId],
   );
   // عند اختيار ماركة لها بلد منشأ معروف، يُختار بلد الصنع تلقائياً
@@ -1018,6 +1024,13 @@ function AddListingPage() {
               <label className="mb-1 block text-sm font-semibold">{ar ? "الماركة" : "Brand"}</label>
               <div className="relative">
                 <Search className="absolute end-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                {isVehicleCat && brand && carBrandLogo(brand) && (
+                  <img
+                    src={carBrandLogo(brand)!}
+                    alt=""
+                    className="absolute start-3 top-1/2 h-5 w-5 -translate-y-1/2 object-contain"
+                  />
+                )}
                 <input
                   value={brand ? brandLabel(brand, lang) : brandQuery}
                   disabled={!activeCategory}
@@ -1029,26 +1042,39 @@ function AddListingPage() {
                   onFocus={() => setBrandOpen(true)}
                   onBlur={() => setTimeout(() => setBrandOpen(false), 150)}
                   placeholder={ar ? "ابحث واختر الماركة" : "Search and choose brand"}
-                  className={`${fieldCls} pe-10 disabled:opacity-50`}
+                  className={`${fieldCls} pe-10 disabled:opacity-50 ${
+                    isVehicleCat && brand && carBrandLogo(brand) ? "ps-10" : ""
+                  }`}
                 />
               </div>
               {brandOpen && activeCategory && filteredBrands.length > 0 && (
                 <ul className="absolute z-20 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-border bg-popover p-1 shadow-card">
-                  {filteredBrands.map((b) => (
-                    <li key={b}>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setBrand(b);
-                          setBrandQuery("");
-                          setBrandOpen(false);
-                        }}
-                        className="w-full rounded-md px-3 py-2 text-start text-sm hover:bg-accent"
-                      >
-                        {brandLabel(b, lang)}
-                      </button>
-                    </li>
-                  ))}
+                  {filteredBrands.map((b) => {
+                    const logo = isVehicleCat ? carBrandLogo(b) : null;
+                    return (
+                      <li key={b}>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setBrand(b);
+                            setBrandQuery("");
+                            setBrandOpen(false);
+                          }}
+                          className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-start text-sm hover:bg-accent"
+                        >
+                          {logo && (
+                            <img
+                              src={logo}
+                              alt=""
+                              loading="lazy"
+                              className="h-5 w-5 shrink-0 object-contain"
+                            />
+                          )}
+                          <span>{brandLabel(b, lang)}</span>
+                        </button>
+                      </li>
+                    );
+                  })}
                 </ul>
               )}
             </div>
