@@ -365,6 +365,10 @@ export interface CarSpecs {
   accident_free: boolean | null;
   previous_owners: number | null;
   brand: string | null;
+  engine_cc: number | null;
+  cylinders: number | null;
+  body_type: string | null;
+  color: string | null;
 }
 
 export interface RealEstateSpecs {
