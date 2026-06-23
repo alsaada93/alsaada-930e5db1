@@ -1024,6 +1024,13 @@ function AddListingPage() {
               <label className="mb-1 block text-sm font-semibold">{ar ? "الماركة" : "Brand"}</label>
               <div className="relative">
                 <Search className="absolute end-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                {isVehicleCat && brand && carBrandLogo(brand) && (
+                  <img
+                    src={carBrandLogo(brand)!}
+                    alt=""
+                    className="absolute start-3 top-1/2 h-5 w-5 -translate-y-1/2 object-contain"
+                  />
+                )}
                 <input
                   value={brand ? brandLabel(brand, lang) : brandQuery}
                   disabled={!activeCategory}
@@ -1035,7 +1042,9 @@ function AddListingPage() {
                   onFocus={() => setBrandOpen(true)}
                   onBlur={() => setTimeout(() => setBrandOpen(false), 150)}
                   placeholder={ar ? "ابحث واختر الماركة" : "Search and choose brand"}
-                  className={`${fieldCls} pe-10 disabled:opacity-50`}
+                  className={`${fieldCls} pe-10 disabled:opacity-50 ${
+                    isVehicleCat && brand && carBrandLogo(brand) ? "ps-10" : ""
+                  }`}
                 />
               </div>
               {brandOpen && activeCategory && filteredBrands.length > 0 && (
