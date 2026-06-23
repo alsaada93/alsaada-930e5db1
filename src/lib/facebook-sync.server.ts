@@ -14,6 +14,8 @@ import {
   refineCategory,
   detectSubcategory,
   buildAdTitle,
+  hasMeaningfulTitle,
+  firstMeaningfulLine,
   type FbCategorySlug,
 } from "./facebook-parse";
 
