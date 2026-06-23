@@ -129,6 +129,11 @@ function AddListingPage() {
     () => showsCondition(activeCategory?.name ?? categoryId, activeCategory?.nameEn),
     [activeCategory, categoryId],
   );
+  // هل التصنيف الحالي مركبات؟ — لعرض شعارات الماركات وحقول السيارة
+  const isVehicleCat = useMemo(
+    () => categoryKind(activeCategory?.name ?? categoryId, activeCategory?.nameEn) === "vehicle",
+    [activeCategory, categoryId],
+  );
   // عند اختيار ماركة لها بلد منشأ معروف، يُختار بلد الصنع تلقائياً
   useEffect(() => {
     if (!brand) return;
