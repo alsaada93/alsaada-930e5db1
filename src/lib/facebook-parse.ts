@@ -460,7 +460,44 @@ export function extractCarSpecs(text: string): CarSpecs {
     }
   }
 
-  return { year: yr, mileage_km: mileage, transmission, fuel, accident_free, previous_owners, brand };
+  // engine capacity: "2.0L", "2000cc", "سعة 1600"
+  let engine_cc: number | null = null;
+  const litreMatch = lower.match(/(\d(?:\.\d)?)\s*(?:l\b|liter|litre|لتر)/);
+  if (litreMatch) engine_cc = Math.round(parseFloat(litreMatch[1]) * 1000);
+  if (engine_cc === null) {
+    const ccMatch = lower.match(/(\d{3,4})\s*(?:cc|سي سي)/);
+    if (ccMatch) engine_cc = Number(ccMatch[1]);
+  }
+  if (engine_cc === null) engine_cc = numberNear(words, ["سعة", "محرك", "engine"], 2);
+  if (engine_cc !== null && (engine_cc < 600 || engine_cc > 9000)) engine_cc = null;
+
+  let cylinders: number | null = numberNear(words, ["سلندر", "اسطوانة", "cylinder", "cyl"], 2);
+  if (cylinders !== null && (cylinders < 2 || cylinders > 16)) cylinders = null;
+
+  let body_type: string | null = null;
+  if (/sedan|سيدان|صالون/i.test(lower)) body_type = "sedan";
+  else if (/\bsuv\b|جيب|دفع رباعي|دبل/i.test(lower)) body_type = "suv";
+  else if (/coupe|كوبيه/i.test(lower)) body_type = "coupe";
+  else if (/hatchback|هاتشباك/i.test(lower)) body_type = "hatchback";
+  else if (/pickup|بيك اب|بيكب|وانيت/i.test(lower)) body_type = "pickup";
+  else if (/van\b|فان/i.test(lower)) body_type = "van";
+
+  let color: string | null = null;
+  const colorMap: Array<[RegExp, string]> = [
+    [/أبيض|ابيض|white/i, "أبيض"], [/أسود|اسود|black/i, "أسود"],
+    [/فضي|silver/i, "فضي"], [/رمادي|gray|grey/i, "رمادي"],
+    [/أحمر|احمر|red/i, "أحمر"], [/أزرق|ازرق|blue/i, "أزرق"],
+    [/أخضر|اخضر|green/i, "أخضر"], [/ذهبي|gold/i, "ذهبي"],
+    [/بني|brown/i, "بني"], [/بيج|beige/i, "بيج"],
+  ];
+  for (const [re, name] of colorMap) {
+    if (re.test(lower)) { color = name; break; }
+  }
+
+  return {
+    year: yr, mileage_km: mileage, transmission, fuel, accident_free,
+    previous_owners, brand, engine_cc, cylinders, body_type, color,
+  };
 }
 
 export function extractRealEstateSpecs(text: string): RealEstateSpecs {
