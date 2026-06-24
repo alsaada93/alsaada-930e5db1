@@ -499,9 +499,17 @@ export function extractCarSpecs(text: string): CarSpecs {
     if (re.test(lower)) { color = name; break; }
   }
 
+  // عدد المقاعد: "7 مقاعد", "5 seats", "7 seater", "ركاب"
+  let seats: number | null = numberNear(words, ["مقعد", "مقاعد", "راكب", "ركاب", "seat", "seats", "seater"], 2);
+  if (seats === null) {
+    const seatM = lower.match(/(\d{1,2})\s*(?:مقاعد|مقعد|seats?|seater|راكب|ركاب)/);
+    if (seatM) seats = Number(seatM[1]);
+  }
+  if (seats !== null && (seats < 2 || seats > 50)) seats = null;
+
   return {
     year: yr, mileage_km: mileage, transmission, fuel, accident_free,
-    previous_owners, brand, engine_cc, cylinders, body_type, color,
+    previous_owners, brand, engine_cc, cylinders, body_type, color, seats,
   };
 }
 
