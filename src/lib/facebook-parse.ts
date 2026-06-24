@@ -373,6 +373,7 @@ export interface CarSpecs {
   cylinders: number | null;
   body_type: string | null;
   color: string | null;
+  seats: number | null;
 }
 
 export interface RealEstateSpecs {
