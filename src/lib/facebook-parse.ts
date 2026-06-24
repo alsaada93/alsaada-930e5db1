@@ -415,7 +415,7 @@ const CAR_BRANDS: Record<string, string> = {
   fiat: "Fiat", فيات: "Fiat", "alfa romeo": "Alfa Romeo", "الفا روميو": "Alfa Romeo",
   seat: "Seat", سيات: "Seat", opel: "Opel", اوبل: "Opel", أوبل: "Opel",
   citroen: "Citroen", ستروين: "Citroen", سيتروين: "Citroen",
-  ssangyong: "SsangYong", سانغ يونغ: "SsangYong", byd: "BYD", "بي واي دي": "BYD",
+  ssangyong: "SsangYong", "سانغ يونغ": "SsangYong", byd: "BYD", "بي واي دي": "BYD",
   "aston martin": "Aston Martin", "استون مارتن": "Aston Martin",
   mclaren: "McLaren", مكلارين: "McLaren", مكلارن: "McLaren",
   mahindra: "Mahindra", مهيندرا: "Mahindra", tata: "Tata", تاتا: "Tata",
