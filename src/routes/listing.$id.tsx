@@ -358,6 +358,11 @@ function Gallery({ images, video, title }: { images: string[]; video: string | n
         ) : (
           <video src={active.url} controls className="aspect-[4/3] w-full bg-black object-contain" />
         )}
+        {active.type === "image" && (
+          <span className="pointer-events-none absolute bottom-2 right-2 select-none text-xs font-bold text-white/90 drop-shadow-[0_1px_2px_rgba(0,0,0,0.7)]">
+            حراج السعادة
+          </span>
+        )}
 
         {slides.length > 1 && (
           <>
