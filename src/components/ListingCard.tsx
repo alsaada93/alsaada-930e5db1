@@ -34,6 +34,9 @@ export function ListingCard({ item, displayTitle }: { item: Listing; displayTitl
 
   const waLink = whatsappLink({ phone, listingTitle: title, listingId: item.id });
 
+  const brand = detectBrand(`${item.title} ${item.description ?? ""}`);
+  const brandLogo = carBrandLogo(brand);
+
   return (
     <article className="group overflow-hidden rounded-2xl border border-border bg-card shadow-card transition-all hover:-translate-y-1">
       <Link to="/listing/$id" params={{ id: item.id }} className="block">
