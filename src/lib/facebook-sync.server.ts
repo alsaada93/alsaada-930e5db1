@@ -403,6 +403,7 @@ function buildSpecsBlock(category: FbCategorySlug, text: string): string {
     if (s.previous_owners) lines.push(`عدد الملاك السابقين: ${s.previous_owners}`);
     if (s.engine_cc) lines.push(`سعة المحرك: ${s.engine_cc.toLocaleString("en-US")} سي سي`);
     if (s.cylinders) lines.push(`عدد السلندرات: ${s.cylinders}`);
+    if (s.seats) lines.push(`عدد المقاعد: ${s.seats}`);
     if (s.body_type) {
       const bodyAr: Record<string, string> = {
         sedan: "سيدان", suv: "دفع رباعي (جيب)", coupe: "كوبيه",

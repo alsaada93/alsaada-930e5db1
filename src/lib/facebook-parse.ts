@@ -373,6 +373,7 @@ export interface CarSpecs {
   cylinders: number | null;
   body_type: string | null;
   color: string | null;
+  seats: number | null;
 }
 
 export interface RealEstateSpecs {
@@ -409,6 +410,18 @@ const CAR_BRANDS: Record<string, string> = {
   bentley: "Bentley", بنتلي: "Bentley", "rolls royce": "Rolls Royce", "رولز رويس": "Rolls Royce",
   ferrari: "Ferrari", فيراري: "Ferrari", lamborghini: "Lamborghini", لامبورغيني: "Lamborghini",
   maserati: "Maserati", مازيراتي: "Maserati", skoda: "Skoda", سكودا: "Skoda",
+  acura: "Acura", اكورا: "Acura", أكورا: "Acura", lincoln: "Lincoln", لينكون: "Lincoln",
+  buick: "Buick", بويك: "Buick", mini: "Mini", ميني: "Mini",
+  fiat: "Fiat", فيات: "Fiat", "alfa romeo": "Alfa Romeo", "الفا روميو": "Alfa Romeo",
+  seat: "Seat", سيات: "Seat", opel: "Opel", اوبل: "Opel", أوبل: "Opel",
+  citroen: "Citroen", ستروين: "Citroen", سيتروين: "Citroen",
+  ssangyong: "SsangYong", "سانغ يونغ": "SsangYong", byd: "BYD", "بي واي دي": "BYD",
+  "aston martin": "Aston Martin", "استون مارتن": "Aston Martin",
+  mclaren: "McLaren", مكلارين: "McLaren", مكلارن: "McLaren",
+  mahindra: "Mahindra", مهيندرا: "Mahindra", tata: "Tata", تاتا: "Tata",
+  jetour: "Jetour", جيتور: "Jetour", "great wall": "Great Wall", "جريت وول": "Great Wall",
+  lucid: "Lucid", لوسيد: "Lucid", rivian: "Rivian", ريفيان: "Rivian",
+  proton: "Proton", بروتون: "Proton", baic: "BAIC", "بايك": "BAIC",
 };
 
 export function extractCarSpecs(text: string): CarSpecs {
@@ -498,9 +511,17 @@ export function extractCarSpecs(text: string): CarSpecs {
     if (re.test(lower)) { color = name; break; }
   }
 
+  // عدد المقاعد: "7 مقاعد", "5 seats", "7 seater", "ركاب"
+  let seats: number | null = numberNear(words, ["مقعد", "مقاعد", "راكب", "ركاب", "seat", "seats", "seater"], 2);
+  if (seats === null) {
+    const seatM = lower.match(/(\d{1,2})\s*(?:مقاعد|مقعد|seats?|seater|راكب|ركاب)/);
+    if (seatM) seats = Number(seatM[1]);
+  }
+  if (seats !== null && (seats < 2 || seats > 50)) seats = null;
+
   return {
     year: yr, mileage_km: mileage, transmission, fuel, accident_free,
-    previous_owners, brand, engine_cc, cylinders, body_type, color,
+    previous_owners, brand, engine_cc, cylinders, body_type, color, seats,
   };
 }
 
