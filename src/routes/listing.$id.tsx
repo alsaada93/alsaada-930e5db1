@@ -749,37 +749,41 @@ function ListingPage() {
             )}
 
             {/* أيقونات التواصل */}
-            <div className="mt-4 grid grid-cols-3 gap-2">
-              <a
-                href={waLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() =>
-                  logContactAttempt({
-                    recipientId: item.userId,
-                    listingId: item.id,
-                    method: "whatsapp",
-                    listingTitle: item.title,
-                  })
-                }
-                className="inline-flex items-center justify-center gap-1 rounded-xl bg-[#25D366] px-3 py-2.5 text-sm font-bold text-white transition-opacity hover:opacity-90"
-              >
-                <MessageCircle className="h-4 w-4" /> {lang === "ar" ? "واتساب" : "WhatsApp"}
-              </a>
-              <a
-                href={telLink(phone)}
-                onClick={() =>
-                  logContactAttempt({
-                    recipientId: item.userId,
-                    listingId: item.id,
-                    method: "call",
-                    listingTitle: item.title,
-                  })
-                }
-                className="inline-flex items-center justify-center gap-1 rounded-xl bg-primary px-3 py-2.5 text-sm font-bold text-primary-foreground transition-opacity hover:opacity-90"
-              >
-                <Phone className="h-4 w-4" /> {lang === "ar" ? "اتصال" : "Call"}
-              </a>
+            <div className={`mt-4 grid gap-2 ${phone ? "grid-cols-3" : "grid-cols-1"}`}>
+              {phone && waLink && (
+                <a
+                  href={waLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() =>
+                    logContactAttempt({
+                      recipientId: item.userId,
+                      listingId: item.id,
+                      method: "whatsapp",
+                      listingTitle: item.title,
+                    })
+                  }
+                  className="inline-flex items-center justify-center gap-1 rounded-xl bg-[#25D366] px-3 py-2.5 text-sm font-bold text-white transition-opacity hover:opacity-90"
+                >
+                  <MessageCircle className="h-4 w-4" /> {lang === "ar" ? "واتساب" : "WhatsApp"}
+                </a>
+              )}
+              {phone && (
+                <a
+                  href={telLink(phone)}
+                  onClick={() =>
+                    logContactAttempt({
+                      recipientId: item.userId,
+                      listingId: item.id,
+                      method: "call",
+                      listingTitle: item.title,
+                    })
+                  }
+                  className="inline-flex items-center justify-center gap-1 rounded-xl bg-primary px-3 py-2.5 text-sm font-bold text-primary-foreground transition-opacity hover:opacity-90"
+                >
+                  <Phone className="h-4 w-4" /> {lang === "ar" ? "اتصال" : "Call"}
+                </a>
+              )}
               <button
                 type="button"
                 onClick={() => setOfferOpen(true)}
