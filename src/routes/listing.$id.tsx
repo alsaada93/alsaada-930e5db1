@@ -50,7 +50,7 @@ export const Route = createFileRoute("/listing/$id")({
 
     // تقييم حقيقي للبائع المرتبط بالإعلان (لا تُختلق التقييمات لمحركات البحث)
     let rating: { value: number; count: number } | null = null;
-    const sellerKey = (data.user_id as string | null) ?? null;
+    const sellerKey = ((data.user_id as string | null) ?? data.id) || null;
     if (sellerKey) {
       const { data: revs } = await supabase
         .from("seller_reviews")
@@ -900,11 +900,9 @@ function ListingPage() {
         />
 
         {/* تقييمات المعلن — أي مستخدم مسجّل يمكنه تقييم صاحب الإعلان */}
-        {item.userId && (
-          <div className="mt-10">
-            <SellerReviews sellerId={item.userId} sellerName={sellerName} />
-          </div>
-        )}
+        <div className="mt-10">
+          <SellerReviews sellerId={item.userId ?? item.id} sellerName={sellerName} />
+        </div>
       </main>
       <Footer />
       {offerOpen && (
