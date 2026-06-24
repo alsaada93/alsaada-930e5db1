@@ -554,7 +554,7 @@ function AddListingPage() {
         contact_name: user
           ? ((user.user_metadata?.full_name as string | undefined)?.trim() || null)
           : guestName.trim(),
-        contact_phone: user ? null : guestPhone.trim(),
+        contact_phone: user ? (contactPhone.trim() || null) : guestPhone.trim(),
         status: "pending",
         start_price: isAuction ? Number(price) || 0 : null,
         auction_ends_at: isAuction ? new Date(Date.now() + auctionHours * 3600_000).toISOString() : null,
