@@ -1257,7 +1257,7 @@ function AddListingPage() {
               <button
                 type="button"
                 onClick={useMyLocation}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-background px-4 py-2 text-sm font-semibold hover:bg-accent"
+                className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl border border-border bg-background px-4 py-3 text-sm font-bold hover:bg-accent"
               >
                 <MapPin className="h-4 w-4 text-primary" />
                 {locating ? t("add.locating") : coords ? t("add.updateLocation") : t("add.useMyLocation")}
