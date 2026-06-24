@@ -98,6 +98,8 @@ function AddListingPage() {
   // Guest contact (required if not logged in)
   const [guestName, setGuestName] = useState("");
   const [guestPhone, setGuestPhone] = useState("");
+  // رقم هاتف المعلن المسجَّل (مرتبط بزر الاتصال وواتساب في صفحة الإعلان)
+  const [contactPhone, setContactPhone] = useState("");
 
   // Title + description (controlled so they persist across steps)
   const [titleText, setTitleText] = useState("");
