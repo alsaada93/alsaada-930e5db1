@@ -587,12 +587,21 @@ export async function ingestBotPost(payload: BotPayload): Promise<BotIngestResul
     // نُبقي النص كما هو دون إزالة الأرقام
     const cleanContent = content;
 
-    const detected = detectCategory(content, payload.category);
-    const category = payload.category ? detected : refineCategory(content, detected);
+    // Does the bot provide a real, human ad name? Ads without one go to manual review.
+    const namedByBot = hasMeaningfulTitle(title);
+
+    // إذا لم يصل عنوان حقيقي: لا نكتب "عام/أخرى"، بل نسحب أول سطر مفيد من الوصف
+    // ونستخدمه كعنوان، ثم نُصنّف الإعلان بناءً على هذا العنوان المشتق.
+    const derivedName = namedByBot ? title : firstMeaningfulLine(cleanContent) || "";
+    // النص المستخدم للتصنيف: نُعطي العنوان (المُرسل أو المشتق من أول سطر) وزناً أكبر.
+    const classifyText = `${derivedName} ${derivedName} ${content}`.trim();
+
+    const detected = detectCategory(classifyText, payload.category);
+    const category = payload.category ? detected : refineCategory(classifyText, detected);
     const cats = await loadSiteCategories();
     const categoryId = await resolveSiteCategoryId(category, cats);
     const catObj = cats.find((c) => c.id === categoryId);
-    const { group_name, item_name } = resolveSubcategory(catObj, category, `${title} ${content}`);
+    const { group_name, item_name } = resolveSubcategory(catObj, category, `${derivedName} ${content}`);
 
     const specsBlock = buildSpecsBlock(category, content);
     const carSpecs = category === "cars" ? extractCarSpecs(content) : null;
@@ -610,9 +619,6 @@ export async function ingestBotPost(payload: BotPayload): Promise<BotIngestResul
       if (!Number.isNaN(d.getTime())) publishedAt = d.toISOString();
     }
 
-    // Does the bot provide a real, human ad name? Ads without one go to manual review.
-    const namedByBot = hasMeaningfulTitle(title);
-
     let finalTitle: string;
     if (namedByBot) {
       finalTitle = buildAdTitle({
@@ -625,10 +631,10 @@ export async function ingestBotPost(payload: BotPayload): Promise<BotIngestResul
         rawTitle: title,
       });
     } else {
-      // No ad name supplied: never relabel it "عام/أخرى" — keep a descriptive
-      // title derived from the body so a human can review and approve it.
+      // No ad name supplied: use the first meaningful line of the body as the
+      // title — never relabel it "عام/أخرى".
       finalTitle =
-        firstMeaningfulLine(cleanContent) ||
+        derivedName ||
         buildAdTitle({
           slug: category,
           itemName: item_name,
