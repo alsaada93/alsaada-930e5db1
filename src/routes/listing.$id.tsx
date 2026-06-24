@@ -793,6 +793,11 @@ function ListingPage() {
               </button>
             </div>
 
+            {/* تقييمات المعلن — أسفل أزرار التواصل مباشرة */}
+            <div className="mt-5">
+              <SellerReviews sellerId={item.userId ?? item.id} sellerName={sellerName} />
+            </div>
+
             {/* بيانات البائع ووقت النشر أسفل الصورة المعروضة */}
             <div className="mt-5 rounded-2xl border border-border bg-card p-4">
               <div className="flex items-center justify-between">
@@ -898,11 +903,6 @@ function ListingPage() {
           tags={[cat?.name, item.groupName, item.itemName, item.city, showsCondition(cat?.name, cat?.nameEn) ? item.condition : undefined]}
           className="mt-4"
         />
-
-        {/* تقييمات المعلن — أي مستخدم مسجّل يمكنه تقييم صاحب الإعلان */}
-        <div className="mt-10">
-          <SellerReviews sellerId={item.userId ?? item.id} sellerName={sellerName} />
-        </div>
       </main>
       <Footer />
       {offerOpen && (
