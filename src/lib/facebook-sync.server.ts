@@ -619,7 +619,7 @@ export async function ingestBotPost(payload: BotPayload): Promise<BotIngestResul
         groupName: group_name,
         categoryName: catObj?.name ?? categoryLabel(category).name,
         brand: carSpecs?.brand ?? null,
-        text: `${title} ${content}`,
+        text: `${title} ${cleanContent}`,
         rawTitle: title,
       });
     } else {
