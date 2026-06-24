@@ -44,12 +44,9 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   const { t } = useLanguage();
-  const { listings } = useListings();
-  const [visibleCount, setVisibleCount] = useState(12);
-  const normal = listings.filter((l) => (l.listingType ?? "normal") === "normal");
-  const featured = normal.filter((l) => l.featured);
-  const latest = normal.slice(0, visibleCount);
-  const hasMore = normal.length > visibleCount;
+  // التحميل التدريجي: نجلب أول 12 إعلان فقط ثم نجلب الباقي عند الضغط على "عرض المزيد"
+  const { listings: latest, loadMore, loadingMore, hasMore } = useListings({ pageSize: 12, onlyNormal: true });
+  const featured = latest.filter((l) => l.featured);
 
   return (
     <div className="min-h-screen bg-background">
