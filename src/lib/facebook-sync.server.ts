@@ -579,11 +579,13 @@ export async function ingestBotPost(payload: BotPayload): Promise<BotIngestResul
 
     const priceResult = extractPriceSmart(content);
     const explicitPrice = parsePayloadPrice(payload.price);
-    // سياسة: أي إعلان يصل من فيسبوك ويحتوي على رقم هاتف يُحذف الرقم ويُترك فارغاً.
-    void extractPhone; // (مُبقى للتوافق) لم نعد نخزّن رقم المعلن القادم من فيسبوك
-    const phone: string | null = null;
-    // نص الإعلان بعد إزالة أرقام الهواتف لعرضه في الوصف
-    const cleanContent = stripPhoneNumbers(content);
+    // سياسة جديدة: لا نحذف أي رقم. نحتفظ برقم المعلن إن وُجد، ونحوّل الإعلان
+    // إلى «بانتظار المراجعة» إذا لم يوجد هاتف أو لم يوجد اسم/عنوان للإعلان.
+    void stripPhoneNumbers; // (مُبقى للتوافق) لم نعد نحذف الأرقام
+    const phone: string | null =
+      (payload.contact_phone ?? "").toString().trim() || extractPhone(content) || null;
+    // نُبقي النص كما هو دون إزالة الأرقام
+    const cleanContent = content;
 
     const detected = detectCategory(content, payload.category);
     const category = payload.category ? detected : refineCategory(content, detected);
@@ -638,7 +640,8 @@ export async function ingestBotPost(payload: BotPayload): Promise<BotIngestResul
         });
     }
 
-    const adStatus: "approved" | "pending" = namedByBot ? "approved" : "pending";
+    // يُقبل تلقائياً فقط الإعلان الذي يحمل اسماً وهاتفاً معاً؛ غير ذلك يذهب للمراجعة اليدوية.
+    const adStatus: "approved" | "pending" = namedByBot && !!phone ? "approved" : "pending";
 
     const row = {
       title: finalTitle,
@@ -668,7 +671,9 @@ export async function ingestBotPost(payload: BotPayload): Promise<BotIngestResul
       inserted.id,
       "success",
       `تم استقبال إعلان من البوت — التصنيف: ${categoryLabel(category).name}، الحالة: ${
-        adStatus === "approved" ? "منشور" : "بانتظار المراجعة (بدون اسم إعلان)"
+        adStatus === "approved"
+          ? "منشور"
+          : `بانتظار المراجعة (${!namedByBot ? "بدون اسم إعلان" : "بدون رقم هاتف"})`
       }، السعر: ${priceResult.detected ? priceResult.price : "غير محدد"}`,
     );
     await touchMeta("ok");
