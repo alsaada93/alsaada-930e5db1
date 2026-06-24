@@ -579,7 +579,11 @@ export async function ingestBotPost(payload: BotPayload): Promise<BotIngestResul
 
     const priceResult = extractPriceSmart(content);
     const explicitPrice = parsePayloadPrice(payload.price);
-    const phone = (payload.contact_phone ?? "").toString().trim() || extractPhone(content);
+    // سياسة: أي إعلان يصل من فيسبوك ويحتوي على رقم هاتف يُحذف الرقم ويُترك فارغاً.
+    void extractPhone; // (مُبقى للتوافق) لم نعد نخزّن رقم المعلن القادم من فيسبوك
+    const phone: string | null = null;
+    // نص الإعلان بعد إزالة أرقام الهواتف لعرضه في الوصف
+    const cleanContent = stripPhoneNumbers(content);
 
     const detected = detectCategory(content, payload.category);
     const category = payload.category ? detected : refineCategory(content, detected);
