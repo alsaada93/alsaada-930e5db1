@@ -1326,8 +1326,28 @@ function AddListingPage() {
                 </div>
               </div>
             ) : (
-              <div className="rounded-lg border border-border bg-muted/40 px-4 py-3 text-sm">
-                {t("add.postingAs")} <span className="font-bold">{user.email}</span>
+              <div className="space-y-3">
+                <div className="rounded-lg border border-border bg-muted/40 px-4 py-3 text-sm">
+                  {t("add.postingAs")} <span className="font-bold">{user.email}</span>
+                </div>
+                <div>
+                  <label className="mb-1 block text-sm font-semibold">
+                    {ar ? "رقم الهاتف (للاتصال والواتساب)" : "Phone number (call & WhatsApp)"}
+                  </label>
+                  <input
+                    type="tel"
+                    inputMode="tel"
+                    value={contactPhone}
+                    onChange={(e) => setContactPhone(e.target.value)}
+                    placeholder={ar ? "مثال: 3XXXXXXX" : "e.g. 3XXXXXXX"}
+                    className={fieldCls}
+                  />
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {ar
+                      ? "سيظهر هذا الرقم كزر اتصال وواتساب في صفحة إعلانك. اتركه فارغاً لإخفاء أزرار التواصل."
+                      : "Shown as call & WhatsApp buttons on your listing. Leave empty to hide contact buttons."}
+                  </p>
+                </div>
               </div>
             )}
           </div>
