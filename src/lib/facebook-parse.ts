@@ -558,13 +558,13 @@ export function refineCategory(text: string, current: FbCategorySlug): FbCategor
   const jobsSignal =
     /مطلوب موظف|مطلوب عامل|مطلوب عاملة|توظيف|وظيفة شاغرة|راتب شهري|سيرة ذاتية|hiring/i.test(lower);
 
+  if (servicesSignal && !carSignal) return "services";
   if (realEstateSignal) return "real_estate";
   if (carSignal) return "cars";
   if (current !== "other") return current;
   if (equipmentSignal) return "equipment";
   if (electronicsSignal) return "electronics";
   if (furnitureSignal) return "furniture";
-  if (servicesSignal) return "services";
   if (jobsSignal) return "jobs";
   return current;
 }
