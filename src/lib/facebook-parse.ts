@@ -410,6 +410,18 @@ const CAR_BRANDS: Record<string, string> = {
   bentley: "Bentley", بنتلي: "Bentley", "rolls royce": "Rolls Royce", "رولز رويس": "Rolls Royce",
   ferrari: "Ferrari", فيراري: "Ferrari", lamborghini: "Lamborghini", لامبورغيني: "Lamborghini",
   maserati: "Maserati", مازيراتي: "Maserati", skoda: "Skoda", سكودا: "Skoda",
+  acura: "Acura", اكورا: "Acura", أكورا: "Acura", lincoln: "Lincoln", لينكون: "Lincoln",
+  buick: "Buick", بويك: "Buick", mini: "Mini", ميني: "Mini",
+  fiat: "Fiat", فيات: "Fiat", "alfa romeo": "Alfa Romeo", "الفا روميو": "Alfa Romeo",
+  seat: "Seat", سيات: "Seat", opel: "Opel", اوبل: "Opel", أوبل: "Opel",
+  citroen: "Citroen", ستروين: "Citroen", سيتروين: "Citroen",
+  ssangyong: "SsangYong", سانغ يونغ: "SsangYong", byd: "BYD", "بي واي دي": "BYD",
+  "aston martin": "Aston Martin", "استون مارتن": "Aston Martin",
+  mclaren: "McLaren", مكلارين: "McLaren", مكلارن: "McLaren",
+  mahindra: "Mahindra", مهيندرا: "Mahindra", tata: "Tata", تاتا: "Tata",
+  jetour: "Jetour", جيتور: "Jetour", "great wall": "Great Wall", "جريت وول": "Great Wall",
+  lucid: "Lucid", لوسيد: "Lucid", rivian: "Rivian", ريفيان: "Rivian",
+  proton: "Proton", بروتون: "Proton", baic: "BAIC", "بايك": "BAIC",
 };
 
 export function extractCarSpecs(text: string): CarSpecs {
