@@ -80,7 +80,7 @@ function AddListingPage() {
   const ar = lang === "ar";
   const { edit: editId } = Route.useSearch();
   const isEdit = !!editId;
-  const [listingType, setListingType] = useState<ListingType | null>(null);
+  const [listingType, setListingType] = useState<ListingType | null>("normal");
   const [submitted, setSubmitted] = useState(false);
   const [step, setStep] = useState(1);
   const [showPreview, setShowPreview] = useState(false);
@@ -319,7 +319,7 @@ function AddListingPage() {
       const raw = localStorage.getItem(DRAFT_KEY);
       if (raw) {
         const d = JSON.parse(raw);
-        setListingType(d.listingType ?? null);
+        setListingType(d.listingType ?? "normal");
         setTitleText(d.titleText ?? "");
         setDescText(d.descText ?? "");
         setCategoryId(d.categoryId ?? "");
@@ -725,14 +725,29 @@ function AddListingPage() {
     );
   }
 
-  const heading =
-    listingType === "auction" ? t("add.newAuction") : listingType === "business" ? t("add.newBusiness") : t("add.newAd");
   const submitLabel =
     listingType === "auction" ? t("add.publishAuction") : listingType === "business" ? t("add.publishBusiness") : t("add.publish");
 
   const stepNames = ar
-    ? ["التصنيف والموقع", "التفاصيل والصور", "السعر", "النشر"]
-    : ["Category & location", "Details & photos", "Price", "Publish"];
+    ? ["التصنيف والموقع", "تفاصيل الإعلان", "السعر والحالة", "المراجعة والنشر"]
+    : ["Category & location", "Listing details", "Price & condition", "Review & publish"];
+  const stepPct = step * 25;
+
+  // قوة الإعلان — تُحسب مباشرة من اكتمال الحقول
+  const adPower = (() => {
+    let p = 0;
+    const tl = titleText.trim().length;
+    if (tl >= 12) p += 20; else if (tl > 0) p += 10;
+    const dl = descText.trim().length;
+    if (dl >= 40) p += 20; else if (dl > 0) p += 10;
+    if (Number(price) > 0) p += 15;
+    if (region) p += 15;
+    if ((user ? contactPhone : guestPhone).trim()) p += 15;
+    if (media.length >= 3) p += 15; else if (media.length >= 1) p += 10;
+    return Math.min(100, p);
+  })();
+  const powerLabel = adPower >= 90 ? (ar ? "ممتاز" : "Excellent") : adPower >= 70 ? (ar ? "قوي" : "Strong") : adPower >= 40 ? (ar ? "جيد" : "Good") : (ar ? "ضعيف" : "Weak");
+  const powerColor = adPower >= 90 ? "bg-emerald-500" : adPower >= 70 ? "bg-primary" : adPower >= 40 ? "bg-amber-500" : "bg-destructive";
 
   const fieldCls =
     "h-11 w-full rounded-lg border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary";
@@ -740,61 +755,88 @@ function AddListingPage() {
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
-      <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-8">
-        <button
-          onClick={() => setListingType(null)}
-          className="mb-4 inline-flex items-center gap-1 text-sm font-semibold text-primary hover:underline"
-        >
-          <ArrowRight className="h-4 w-4" /> {t("add.changeType")}
-        </button>
+      <main className="mx-auto w-full max-w-2xl flex-1 px-4 pb-28 pt-4">
+        {/* شريط التقدم العلوي الثابت + بطاقة قوة الإعلان */}
+        <div className="sticky top-0 z-30 -mx-4 mb-5 border-b border-border bg-background/95 px-4 py-3 backdrop-blur">
+          <div className="flex items-center justify-between gap-2">
+            <h1 className="text-base font-extrabold sm:text-lg">{ar ? "أضف إعلان جديد" : "Add new listing"}</h1>
+            <span className="text-xs font-bold text-primary">{stepPct}%</span>
+          </div>
 
-        <h1 className="text-2xl font-extrabold">{heading}</h1>
-        <p className="text-sm text-muted-foreground">{t("add.formSub")}</p>
-
-        {/* Stepper */}
-        <div className="mt-5 flex items-center gap-2">
-          {stepNames.map((name, i) => {
-            const n = i + 1;
-            const active = step === n;
-            const done = step > n;
-            return (
-              <div key={name} className="flex flex-1 flex-col items-center gap-1">
-                <div className="flex w-full items-center">
-                  <span
-                    className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-extrabold ${
-                      active
-                        ? "bg-primary text-primary-foreground"
-                        : done
-                          ? "bg-primary/20 text-primary"
-                          : "bg-muted text-muted-foreground"
-                    }`}
-                  >
-                    {done ? <Check className="h-4 w-4" /> : n}
-                  </span>
-                  {n < stepNames.length && (
-                    <span className={`mx-1 h-0.5 flex-1 rounded ${done ? "bg-primary" : "bg-muted"}`} />
-                  )}
-                </div>
-                <span className={`text-center text-[10px] font-semibold ${active ? "text-primary" : "text-muted-foreground"}`}>
+          {/* مراحل التقدم */}
+          <div className="mt-2 flex items-center gap-1.5">
+            {stepNames.map((name, i) => {
+              const n = i + 1;
+              const reached = step >= n;
+              return <div key={name} className={`h-1.5 flex-1 rounded-full transition-colors ${reached ? "bg-primary" : "bg-muted"}`} />;
+            })}
+          </div>
+          <div className="mt-1.5 flex items-start gap-1">
+            {stepNames.map((name, i) => {
+              const n = i + 1;
+              const done = step > n;
+              const active = step === n;
+              return (
+                <span
+                  key={name}
+                  className={`flex flex-1 items-center justify-center gap-0.5 text-center text-[10px] font-semibold leading-tight ${
+                    active ? "text-primary" : done ? "text-foreground" : "text-muted-foreground"
+                  }`}
+                >
+                  {done && <Check className="h-3 w-3 shrink-0" />}
                   {name}
                 </span>
+              );
+            })}
+          </div>
+
+          {/* بطاقة قوة الإعلان */}
+          <div className="mt-3 rounded-xl border border-border bg-card p-3">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-muted-foreground">{ar ? "قوة الإعلان" : "Ad strength"}</span>
+              <span className="text-xs font-bold">{powerLabel}</span>
+            </div>
+            <div className="mt-1.5 flex items-center gap-2">
+              <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
+                <div className={`h-full rounded-full transition-all ${powerColor}`} style={{ width: `${adPower}%` }} />
               </div>
-            );
-          })}
+              <span className="text-sm font-extrabold tabular-nums">{adPower}%</span>
+            </div>
+            {adPower > 90 && (
+              <p className="mt-1.5 text-[11px] font-semibold text-emerald-600">
+                {ar ? "إعلانك مكتمل وجاهز للنشر" : "Your ad is complete and ready to publish"}
+              </p>
+            )}
+          </div>
+          <p className="mt-2 text-center text-[10px] text-muted-foreground">
+            {ar ? "يتم حفظ بياناتك تلقائياً" : "Your data is saved automatically"}
+          </p>
         </div>
 
         <form onSubmit={handleSubmit} className="mt-6 space-y-5">
           {/* ===== Step 2: Title, Description, Images ===== */}
           <div className={step === 2 ? "space-y-5" : "hidden"}>
             <div>
-              <label className="mb-1 block text-sm font-semibold">{t("add.adTitle")}</label>
+              <label className="mb-1 flex items-center justify-between text-base font-extrabold">
+                <span>{t("add.adTitle")}</span>
+                <span className="text-xs font-semibold text-muted-foreground">{titleText.trim().length}/80</span>
+              </label>
               <input
                 type="text"
                 value={titleText}
                 onChange={(e) => setTitleText(e.target.value)}
+                maxLength={80}
                 placeholder={t("add.adTitlePh")}
-                className={fieldCls}
+                className="h-14 w-full rounded-xl border border-border bg-background px-4 text-lg font-bold focus:outline-none focus:ring-2 focus:ring-primary"
               />
+              <p className="mt-1 text-xs text-muted-foreground">
+                {ar ? "مثال: آيفون 13 برو 256 جيجا بحالة ممتازة" : "e.g. iPhone 13 Pro 256GB, excellent condition"}
+              </p>
+              {titleText.trim().length > 0 && (
+                <p className={`mt-1 text-xs font-semibold ${titleText.trim().length >= 12 ? "text-emerald-600" : "text-amber-600"}`}>
+                  {titleText.trim().length >= 12 ? (ar ? "عنوان جيد ✓" : "Good title ✓") : (ar ? "أضف تفاصيل أكثر للعنوان" : "Add more detail to the title")}
+                </p>
+              )}
               {titleSuggestions.length > 0 && (
                 <div className="mt-2">
                   <span className="text-xs font-semibold text-muted-foreground">{t("add.suggestTitle")}</span>
@@ -815,13 +857,19 @@ function AddListingPage() {
             </div>
 
             <div>
-              <label className="mb-1 block text-sm font-semibold">{t("add.description")}</label>
+              <label className="mb-1 flex items-center justify-between text-sm font-semibold">
+                <span>{t("add.description")}</span>
+                <span className="text-xs font-normal text-muted-foreground">
+                  {descText.trim() ? descText.trim().split(/\s+/).length : 0} {ar ? "كلمة" : "words"} · {descText.length}/1200
+                </span>
+              </label>
               <textarea
-                rows={5}
+                rows={6}
+                maxLength={1200}
                 value={descText}
                 onChange={(e) => setDescText(e.target.value)}
                 placeholder={t("add.descPh")}
-                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
 
@@ -831,8 +879,8 @@ function AddListingPage() {
               </label>
               <p className="mb-2 text-xs text-muted-foreground">
                 {ar
-                  ? "أول صورة هي الغلاف. استخدم الأسهم لتغيير الترتيب."
-                  : "First image is the cover. Use the arrows to reorder."}
+                  ? "أول صورة هي الغلاف · اسحب الأسهم لإعادة الترتيب · الإعلانات المصوّرة تحصل على تفاعل أعلى"
+                  : "First image is the cover · use arrows to reorder · listings with photos get more engagement"}
               </p>
               <input ref={imgInput} type="file" accept="image/*" multiple hidden onChange={(e) => handleImages(e.target.files)} />
               <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
@@ -1229,73 +1277,102 @@ function AddListingPage() {
 
           {/* ===== Step 3: Price, condition, AI, business ===== */}
           <div className={step === 3 ? "space-y-5" : "hidden"}>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div>
-                <label className="mb-1 block text-sm font-semibold">
-                  {listingType === "auction" ? t("add.startPrice") : t("add.price")}
-                </label>
+            {/* السعر */}
+            <div>
+              <label className="mb-1 block text-sm font-semibold">
+                {listingType === "auction" ? t("add.startPrice") : t("add.price")}
+              </label>
+              <div className="relative">
                 <input
                   type="number"
                   min={0}
                   value={price}
                   onChange={(e) => setPrice(e.target.value)}
                   placeholder="0"
-                  className={fieldCls}
+                  className="h-16 w-full rounded-xl border border-border bg-background ps-4 pe-16 text-2xl font-extrabold focus:outline-none focus:ring-2 focus:ring-primary"
                 />
+                <span className="absolute end-4 top-1/2 -translate-y-1/2 text-sm font-bold text-muted-foreground">
+                  {ar ? "د.ب" : "BHD"}
+                </span>
               </div>
-              {listingType === "auction" ? (
-                <div>
-                  <label className="mb-1 block text-sm font-semibold">{t("add.auctionDuration")}</label>
-                  <input
-                    type="number"
-                    min={1}
-                    value={auctionDuration}
-                    onChange={(e) => setAuctionDuration(e.target.value)}
-                    className={fieldCls}
-                  />
-                </div>
-              ) : showCondition ? (
-                <div>
-                  <label className="mb-1 block text-sm font-semibold">{t("add.condition")}</label>
-                  <select value={condition} onChange={(e) => setCondition(e.target.value)} className={fieldCls}>
-                    <option value="جديد">{t("add.new")}</option>
-                    <option value="مستعمل">{t("add.used")}</option>
-                  </select>
-                </div>
-              ) : null}
             </div>
 
-
-
+            {listingType === "auction" ? (
+              <div>
+                <label className="mb-1 block text-sm font-semibold">{t("add.auctionDuration")}</label>
+                <input type="number" min={1} value={auctionDuration} onChange={(e) => setAuctionDuration(e.target.value)} className={fieldCls} />
+              </div>
+            ) : showCondition ? (
+              <div>
+                <label className="mb-1 block text-sm font-semibold">{t("add.condition")}</label>
+                <select value={condition} onChange={(e) => setCondition(e.target.value)} className={fieldCls}>
+                  <option value="جديد">{t("add.new")}</option>
+                  <option value="مستعمل">{t("add.used")}</option>
+                </select>
+              </div>
+            ) : null}
 
             {listingType !== "auction" && (
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <label className="flex cursor-pointer items-center justify-between rounded-xl border border-border bg-card px-4 py-3 text-sm font-semibold shadow-card">
-                  {ar ? "السعر قابل للتفاوض" : "Negotiable price"}
-                  <input
-                    type="checkbox"
-                    checked={negotiable}
-                    onChange={(e) => setNegotiable(e.target.checked)}
-                    className="h-5 w-5 rounded border-border accent-primary"
-                  />
-                </label>
-                <label className="flex cursor-pointer items-center justify-between rounded-xl border border-border bg-card px-4 py-3 text-sm font-semibold shadow-card">
-                  {ar ? "خدمة التوصيل متاحة" : "Delivery available"}
-                  <input
-                    type="checkbox"
-                    checked={delivery}
-                    onChange={(e) => setDelivery(e.target.checked)}
-                    className="h-5 w-5 rounded border-border accent-primary"
-                  />
-                </label>
+              <div className="space-y-2">
+                <Toggle label={ar ? "السعر قابل للتفاوض" : "Negotiable price"} checked={negotiable} onChange={setNegotiable} />
+                <Toggle label={ar ? "خدمة التوصيل متاحة" : "Delivery available"} checked={delivery} onChange={setDelivery} />
               </div>
             )}
+
+            {/* ملخص مباشر */}
+            <div className="rounded-xl border border-border bg-card p-4">
+              <h3 className="mb-2 text-sm font-extrabold">{ar ? "ملخص" : "Summary"}</h3>
+              <div className="grid grid-cols-2 gap-2">
+                <Stat label={ar ? "السعر" : "Price"} value={`${Number(price || 0).toLocaleString(ar ? "ar" : "en")} ${ar ? "د.ب" : "BHD"}`} />
+                {showCondition && <Stat label={ar ? "الحالة" : "Condition"} value={condition} />}
+                <Stat label={ar ? "التوصيل" : "Delivery"} value={delivery ? (ar ? "متاح" : "Yes") : (ar ? "غير متاح" : "No")} />
+                <Stat label={ar ? "التفاوض" : "Negotiable"} value={negotiable ? (ar ? "نعم" : "Yes") : (ar ? "لا" : "No")} />
+              </div>
+            </div>
 
             {listingType === "business" && <BusinessFields t={t} biz={biz} setBiz={setBiz} />}
           </div>
 
           {/* ===== Step 4: Contact / login ===== */}
           <div className={step === 4 ? "space-y-5" : "hidden"}>
+            {/* معاينة حقيقية للإعلان */}
+            <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-card">
+              {media[0] ? (
+                <img src={media[0].url} alt={titleText} className="aspect-[4/3] w-full object-cover" />
+              ) : (
+                <div className="flex aspect-[4/3] w-full items-center justify-center bg-muted text-muted-foreground">
+                  <ImagePlus className="h-8 w-8" />
+                </div>
+              )}
+              <div className="p-4">
+                <h3 className="text-lg font-extrabold">{titleText || (ar ? "بدون عنوان" : "Untitled")}</h3>
+                <div className="mt-1 flex items-baseline gap-1">
+                  <span className="text-2xl font-extrabold text-primary">{Number(price || 0).toLocaleString(ar ? "ar" : "en")}</span>
+                  <span className="text-sm text-muted-foreground">{ar ? "د.ب" : "BHD"}</span>
+                </div>
+                <div className="mt-2 flex flex-wrap gap-1.5 text-xs font-semibold">
+                  {activeCategory && <span className="rounded-full bg-accent px-2.5 py-1">{ar ? activeCategory.name : activeCategory.nameEn}</span>}
+                  {region && (
+                    <span className="inline-flex items-center gap-0.5 rounded-full bg-accent px-2.5 py-1">
+                      <MapPin className="h-3 w-3" />
+                      {region}
+                    </span>
+                  )}
+                  {showCondition && <span className="rounded-full bg-accent px-2.5 py-1">{condition}</span>}
+                </div>
+                {(user ? contactPhone : guestPhone).trim() && (
+                  <p className="mt-2 text-sm font-bold">
+                    {ar ? "الهاتف: " : "Phone: "}
+                    {(user ? contactPhone : guestPhone).trim()}
+                  </p>
+                )}
+                {descText && <p className="mt-2 line-clamp-3 whitespace-pre-line text-sm text-muted-foreground">{descText}</p>}
+              </div>
+            </div>
+            <div className="rounded-xl border border-primary/30 bg-accent/40 p-3 text-xs font-semibold text-foreground">
+              {ar ? "سيظهر رقم الهاتف للمشترين في صفحة الإعلان." : "Your phone number will be visible to buyers on the listing page."}
+            </div>
+
             {!user ? (
               <div className="rounded-2xl border border-border bg-muted/40 p-4">
                 <div className="mb-3 flex items-center justify-between">
@@ -1352,51 +1429,55 @@ function AddListingPage() {
             )}
           </div>
 
-          {/* ===== Navigation buttons ===== */}
-          <div className="flex items-center gap-3">
-            {step > 1 && (
-              <button
-                type="button"
-                onClick={back}
-                className="rounded-full border border-border px-6 py-3 font-bold hover:bg-muted"
-              >
-                {ar ? "السابق" : "Back"}
-              </button>
-            )}
-            {step < 4 ? (
-              <button
-                type="button"
-                onClick={next}
-                className="flex-1 rounded-full bg-gradient-primary px-6 py-3 font-bold text-primary-foreground shadow-glow transition-transform hover:scale-[1.01]"
-              >
-                {ar ? "التالي" : "Next"}
-              </button>
-            ) : (
-              <>
+          {/* شريط الأزرار السفلي الثابت */}
+          <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background/95 px-4 py-3 backdrop-blur">
+            <div className="mx-auto flex max-w-2xl items-center gap-2">
+              {step > 1 && (
                 <button
                   type="button"
-                  onClick={() => setShowPreview(true)}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-primary/40 px-5 py-3 font-bold text-primary hover:bg-accent"
+                  onClick={back}
+                  className="rounded-xl border border-border px-5 py-3 text-sm font-bold hover:bg-muted"
                 >
-                  <Eye className="h-4 w-4" /> {ar ? "معاينة" : "Preview"}
+                  {ar ? "السابق" : "Back"}
                 </button>
+              )}
+              {step < 4 ? (
                 <button
-                  type="submit"
-                  disabled={saving}
-                  className="flex-1 rounded-full bg-gradient-primary px-6 py-3 font-bold text-primary-foreground shadow-glow transition-transform hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60"
+                  type="button"
+                  onClick={next}
+                  className="flex-1 rounded-xl bg-primary px-6 py-3 text-sm font-bold text-primary-foreground transition-transform hover:scale-[1.01]"
                 >
-                  {saving
-                    ? ar
-                      ? "جارٍ الحفظ..."
-                      : "Saving..."
-                    : isEdit
-                      ? ar
-                        ? "حفظ التعديلات"
-                        : "Save changes"
-                      : submitLabel}
+                  {ar ? "التالي" : "Next"}
                 </button>
-              </>
-            )}
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => setShowPreview(true)}
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-primary/40 px-4 py-3 text-sm font-bold text-primary hover:bg-accent"
+                  >
+                    <Eye className="h-4 w-4" /> {ar ? "معاينة" : "Preview"}
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={saving}
+                    className="flex-1 rounded-xl bg-primary px-6 py-3 text-sm font-bold text-primary-foreground transition-transform hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {saving
+                      ? ar
+                        ? "جارٍ النشر..."
+                        : "Publishing..."
+                      : isEdit
+                        ? ar
+                          ? "حفظ التعديلات"
+                          : "Save changes"
+                        : ar
+                          ? "نشر الإعلان الآن"
+                          : "Publish now"}
+                  </button>
+                </>
+              )}
+            </div>
           </div>
         </form>
       </main>
@@ -1550,9 +1631,40 @@ function BusinessFields({
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="text-center">
+    <div className="rounded-lg bg-muted/40 px-3 py-2">
       <p className="text-xs text-muted-foreground">{label}</p>
       <p className="mt-0.5 text-sm font-bold text-card-foreground">{value}</p>
     </div>
+  );
+}
+
+function Toggle({
+  label,
+  checked,
+  onChange,
+}: {
+  label: string;
+  checked: boolean;
+  onChange: (v: boolean) => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={() => onChange(!checked)}
+      className="flex w-full items-center justify-between rounded-xl border border-border bg-card px-4 py-3 text-sm font-semibold shadow-card"
+    >
+      <span>{label}</span>
+      <span
+        className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${
+          checked ? "bg-primary" : "bg-muted"
+        }`}
+      >
+        <span
+          className={`inline-block h-5 w-5 transform rounded-full bg-background shadow transition-transform ${
+            checked ? "ltr:translate-x-5 rtl:-translate-x-5" : "translate-x-0.5"
+          }`}
+        />
+      </span>
+    </button>
   );
 }
