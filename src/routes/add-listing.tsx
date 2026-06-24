@@ -1262,23 +1262,8 @@ function AddListingPage() {
               ) : null}
             </div>
 
-            <button
-              type="button"
-              onClick={estimatePrice}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-primary/40 bg-accent px-4 py-2 text-sm font-bold text-accent-foreground hover:bg-accent/70"
-            >
-              <Sparkles className="h-4 w-4" />
-              {estimating ? t("add.analyzing") : t("add.aiSuggest")}
-            </button>
 
-            {estimate && (
-              <div className="grid grid-cols-2 gap-3 rounded-2xl border border-border bg-card p-4 shadow-card sm:grid-cols-4">
-                <Stat label={t("add.avgPrice")} value={`${estimate.average} ${ar ? "د.ب" : "BHD"}`} />
-                <Stat label={t("add.suggestedPrice")} value={`${estimate.suggested} ${ar ? "د.ب" : "BHD"}`} />
-                <Stat label={t("add.sellSpeed")} value={estimate.speed} />
-                <Stat label={t("add.marketCompare")} value={estimate.market} />
-              </div>
-            )}
+
 
             {listingType !== "auction" && (
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
