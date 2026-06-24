@@ -424,6 +424,16 @@ const CAR_BRANDS: Record<string, string> = {
   proton: "Proton", بروتون: "Proton", baic: "BAIC", "بايك": "BAIC",
 };
 
+/** Detects a known car brand (English name) from free text, or null. */
+export function detectBrand(text: string | null | undefined): string | null {
+  if (!text) return null;
+  const lower = text.toLowerCase();
+  for (const [k, v] of Object.entries(CAR_BRANDS)) {
+    if (lower.includes(k)) return v;
+  }
+  return null;
+}
+
 export function extractCarSpecs(text: string): CarSpecs {
   const words = toWords(text);
   const lower = normDigits(text).toLowerCase();
