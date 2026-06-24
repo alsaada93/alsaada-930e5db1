@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+
 import { Header } from "@/components/Header";
 import { WeBuyBanner } from "@/components/WeBuyBanner";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
