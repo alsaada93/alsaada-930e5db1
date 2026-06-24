@@ -67,9 +67,19 @@ function Index() {
                 type="button"
                 onClick={() => loadMore()}
                 disabled={loadingMore}
-                className="inline-flex items-center justify-center rounded-full bg-gradient-primary px-8 py-3 text-sm font-bold text-primary-foreground shadow-glow transition-opacity hover:opacity-90 disabled:opacity-60"
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-primary px-8 py-3 text-sm font-bold text-primary-foreground shadow-glow transition-opacity hover:opacity-90 disabled:opacity-60"
               >
-                {loadingMore ? (t("common.loading") || "جارٍ التحميل…") : (t("sec.more") || "عرض المزيد")}
+                {loadingMore ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    {t("common.loading") || "جارٍ التحميل…"}
+                  </>
+                ) : (
+                  <>
+                    <ChevronDown className="h-4 w-4" />
+                    {t("sec.more") || "عرض المزيد"}
+                  </>
+                )}
               </button>
             </div>
           )}
