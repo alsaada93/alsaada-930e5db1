@@ -642,7 +642,7 @@ export async function ingestBotPost(payload: BotPayload): Promise<BotIngestResul
 
     const row = {
       title: finalTitle,
-      description: (content || "") + specsBlock || null,
+      description: (cleanContent || "") + specsBlock || null,
       category_id: categoryId,
       group_name,
       item_name,
