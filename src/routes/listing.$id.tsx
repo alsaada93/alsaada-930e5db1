@@ -546,7 +546,7 @@ function ListingPage() {
     navigate({ to: "/listing/$id", params: { id: item.id } });
   };
 
-  const waLink = whatsappLink({ phone, listingTitle: item.title, listingId: item.id });
+  const waLink = phone ? whatsappLink({ phone, listingTitle: item.title, listingId: item.id }) : null;
 
   // نقطة الخريطة: إحداثيات المعلن إن وُجدت، وإلا مركز المدينة المختارة
   const exactPoint = item.lat != null && item.lng != null ? { lat: item.lat, lng: item.lng } : null;
