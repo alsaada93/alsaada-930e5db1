@@ -598,7 +598,8 @@ function AddListingPage() {
     if (!files || !files[0] || !newId) return;
     setVideoSaving(true);
     try {
-      const url = await uploadFile(files[0], "videos");
+      const compressed = await compressVideo(files[0]);
+      const url = await uploadFile(compressed, "videos");
       const { error } = await supabase.from("listings").update({ video: url }).eq("id", newId);
       if (error) throw error;
       setVideoDone(true);
