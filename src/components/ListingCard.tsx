@@ -52,6 +52,13 @@ export function ListingCard({ item, displayTitle }: { item: Listing; displayTitl
             حراج السعادة
           </span>
 
+          {brandLogo && (
+            <span className="absolute left-2 bottom-2 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 p-1 shadow-md ring-1 ring-black/5">
+              <img src={brandLogo} alt={brand ?? ""} loading="lazy" className="h-full w-full object-contain" />
+            </span>
+          )}
+
+
           {item.featured && (
             <span className="absolute right-2 top-2 rounded-full bg-gradient-primary px-2 py-0.5 text-[11px] font-bold text-primary-foreground shadow-glow">
               {t("card.featured")}
