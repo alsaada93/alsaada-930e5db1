@@ -44,12 +44,12 @@ export function categoryLabel(slug: string): FbCategory {
 const CATEGORY_KEYWORDS: Record<Exclude<FbCategorySlug, "other">, string[]> = {
   cars: [
     "سيارة", "سيارات", "مركبة", "تويوتا", "نيسان", "هوندا", "لكزس", "مرسيدس",
-    "بي ام", "هونداي", "كيا", "موديل", "ماشي", "ممشى", "جيب", "دباب", "car", "cars",
+    "بي ام", "هونداي", "كيا", "رينو", "سوزوكي", "مازيراتي", "موديل", "ماشي", "ممشى", "جيب", "دباب", "car", "cars",
   ],
   real_estate: [
     "عقار", "عقارات", "شقة", "شقق", "فيلا", "فلل", "بيت", "منزل", "أرض", "ارض",
-    "للايجار", "للإيجار", "للبيع ارض", "محل", "عمارة", "ستوديو", "غرفة", "إيجار",
-    "real estate", "apartment", "villa",
+    "للايجار", "للإيجار", "للبيع ارض", "محل", "عمارة", "ستوديو", "استوديو", "غرفة", "إيجار",
+    "مستودع", "مخزن", "real estate", "apartment", "villa", "studio", "flat", "room", "warehouse",
   ],
   jobs: [
     "وظيفة", "وظائف", "مطلوب موظف", "مطلوب عامل", "مطلوب عاملة", "توظيف", "عمل",
@@ -57,20 +57,22 @@ const CATEGORY_KEYWORDS: Record<Exclude<FbCategorySlug, "other">, string[]> = {
   ],
   equipment: [
     "معدات", "معدة", "ماكينة", "ماكينات", "ثلاجة عرض", "فرن", "مطعم", "مطبخ صناعي",
-    "كمبروسر", "مولد", "رافعة", "عدة", "equipment",
+    "كمبروسر", "مولد", "رافعة", "عدة", "equipment", "commercial kitchen", "coffee shop", "cafe",
   ],
   electronics: [
     "جوال", "ايفون", "آيفون", "موبايل", "هاتف", "لابتوب", "كمبيوتر", "تلفزيون",
     "شاشة", "بلايستيشن", "سماعة", "كاميرا", "تابلت", "ايباد", "phone", "iphone",
-    "laptop", "electronics",
+    "laptop", "electronics", "dell", "hp", "lenovo", "acer", "asus", "macbook", "desktop", "computer",
+    "powerbank", "charger", "samsung", "galaxy", "tablet", "ipad", "playstation", "printer", "hard disk",
   ],
   furniture: [
     "أثاث", "اثاث", "كنب", "كنبة", "سرير", "دولاب", "طاولة", "كرسي", "مجلس",
-    "خزانة", "ديكور", "furniture", "sofa",
+    "خزانة", "ديكور", "furniture", "sofa", "trolley", "jewellery", "jewelry", "ring", "stone",
   ],
   services: [
     "خدمة", "خدمات", "صيانة", "تنظيف", "نقل عفش", "تركيب", "توصيل", "سباك",
-    "كهربائي", "نجار", "دهان", "service", "services",
+    "كهربائي", "نجار", "دهان", "service", "services", "repair", "maintenance", "shifting", "movers",
+    "packers", "delivery", "clearance", "cpr", "scrap", "recycling", "course", "diploma",
   ],
 };
 
@@ -540,19 +542,19 @@ export function refineCategory(text: string, current: FbCategorySlug): FbCategor
 
   const carSignal =
     Object.keys(CAR_BRANDS).some((b) => lower.includes(b)) ||
-    /\bmodel\b|موديل|سيارة|مركبة|gear|كيلومتر|\bkm\b|أوتوماتيك|بنزين|ديزل/i.test(lower);
+    /موديل|سيارة|مركبة|\bcar\b|\bcars\b|gear|engine|odometer|mileage|كيلومتر|\bkm\b|أوتوماتيك|بنزين|ديزل/i.test(lower);
   const realEstateSignal =
-    /شقة|فيلا|عقار|للايجار|للإيجار|غرفة|غرف نوم|bedroom|apartment|villa|استوديو|محل تجاري/i.test(lower);
+    /شقة|فيلا|عقار|للايجار|للإيجار|غرفة|غرف نوم|bedroom|apartment|villa|استوديو|ستوديو|محل تجاري|studio flat|\bflat\b|\broom\b|warehouse|مستودع|مخزن/i.test(lower);
 
   // strong signals for the remaining sections — keeps ads out of "general/other"
   const electronicsSignal =
-    /جوال|ايفون|آيفون|موبايل|هاتف|لابتوب|كمبيوتر|تلفزيون|شاشة|بلايستيشن|سماعة|كاميرا|تابلت|ايباد|iphone|laptop|samsung|سامسونج/i.test(lower);
+    /جوال|ايفون|آيفون|موبايل|هاتف|لابتوب|كمبيوتر|تلفزيون|شاشة|بلايستيشن|سماعة|كاميرا|تابلت|ايباد|iphone|laptop|dell|\bhp\b|lenovo|acer|asus|macbook|desktop|computer|powerbank|charger|samsung|galaxy|سامسونج|tablet|ipad|printer|hard disk|core i\d/i.test(lower);
   const equipmentSignal =
     /مطعم|مطبخ صناعي|ثلاجة عرض|فرن|ماكينة|معدات مطاعم|كوفي|باريستا|قهوة|عجان|شواية/i.test(lower);
   const furnitureSignal =
-    /أثاث|اثاث|كنب|كنبة|سرير|دولاب|طاولة|كرسي|مجلس|خزانة|ديكور|sofa/i.test(lower);
+    /أثاث|اثاث|كنب|كنبة|سرير|دولاب|طاولة|كرسي|مجلس|خزانة|ديكور|sofa|trolley|jewellery|jewelry|ring|stone/i.test(lower);
   const servicesSignal =
-    /صيانة|تنظيف|نقل عفش|تركيب|توصيل|سباك|كهربائي|نجار|دهان|خدمة تنظيف/i.test(lower);
+    /صيانة|تنظيف|نقل عفش|تركيب|توصيل|سباك|كهربائي|نجار|دهان|خدمة تنظيف|repair|maintenance|shifting|movers|packers|pick and drop|document clearance|cpr|scrap|recycling|course|diploma/i.test(lower);
   const jobsSignal =
     /مطلوب موظف|مطلوب عامل|مطلوب عاملة|توظيف|وظيفة شاغرة|راتب شهري|سيرة ذاتية|hiring/i.test(lower);
 
@@ -574,7 +576,9 @@ export function cleanAdName(s: string | null | undefined): string {
 
 /** True when the bot supplied a real, human ad name (not empty / not noise). */
 export function hasMeaningfulTitle(rawTitle: string | null | undefined): boolean {
-  return cleanAdName(rawTitle).length >= 3;
+  const title = cleanAdName(rawTitle).toLowerCase();
+  if (title.length < 3) return false;
+  return !/^(عام|أخرى|اخرى|عام وأخرى|general|other|misc|for sale|item for sale|good|available)$/.test(title);
 }
 
 /** Derives a descriptive title from the first meaningful line of the body. */
@@ -641,7 +645,59 @@ export function detectSubcategory(slug: FbCategorySlug, text: string): SubCatego
   }
 
   if (slug === "services") {
-    return { group_name: null, item_name: null };
+    if (has("air conditioner", "ac repair", "a/c", "مكيف", "مكيفات"))
+      return { group_name: "صيانة وتركيب", item_name: "صيانة مكيفات" };
+    if (has("appliance", "washing machine", "غسالة", "أجهزة"))
+      return { group_name: "صيانة وتركيب", item_name: "صيانة أجهزة" };
+    if (has("movers", "packers", "shifting", "house shift", "نقل عفش"))
+      return { group_name: "نقل وتوصيل", item_name: "نقل عفش" };
+    if (has("delivery", "pick and drop", "توصيل"))
+      return { group_name: "نقل وتوصيل", item_name: "توصيل طلبات" };
+    if (has("design", "printing", "تصميم", "طباعة"))
+      return { group_name: "خدمات تجارية", item_name: "تصميم وطباعة" };
+    return { group_name: "خدمات تجارية", item_name: null };
+  }
+
+  if (slug === "electronics") {
+    if (has("laptop", "لابتوب", "notebook", "macbook", "latitude")) return { group_name: "كمبيوتر وألعاب", item_name: "لابتوبات" };
+    if (has("desktop", "optiplex", "computer set", "كمبيوتر مكتبي")) return { group_name: "كمبيوتر وألعاب", item_name: "أجهزة مكتبية" };
+    if (has("monitor", "شاشة كمبيوتر")) return { group_name: "كمبيوتر وألعاب", item_name: "شاشات كمبيوتر" };
+    if (has("playstation", "ps4", "ps5", "xbox", "nintendo", "ألعاب")) return { group_name: "كمبيوتر وألعاب", item_name: "أجهزة ألعاب" };
+    if (has("printer", "طابعة")) return { group_name: "كمبيوتر وألعاب", item_name: "طابعات" };
+    if (has("powerbank", "charger", "hard disk", "ram", "keyboard", "mouse", "ملحقات")) return { group_name: "كمبيوتر وألعاب", item_name: "ملحقات كمبيوتر" };
+    if (has("iphone", "samsung", "galaxy", "mobile", "phone", "هاتف", "جوال", "موبايل")) return { group_name: "موبايلات وأجهزة لوحية", item_name: "هواتف ذكية" };
+    if (has("tablet", "ipad", "tab", "تابلت", "ايباد")) return { group_name: "موبايلات وأجهزة لوحية", item_name: "أجهزة لوحية" };
+    if (has("tv", "television", "تلفزيون")) return { group_name: "تلفزيونات وشاشات", item_name: "تلفزيونات" };
+    if (has("projector", "بروجكتر")) return { group_name: "تلفزيونات وشاشات", item_name: "بروجكتر" };
+    if (has("ac", "a/c", "air conditioner", "مكيف")) return { group_name: "مكيفات وتبريد", item_name: "مكيفات سبليت" };
+    if (has("washing machine", "dryer", "غسالة", "مجفف")) return { group_name: "أجهزة منزلية", item_name: "غسالات ومجففات" };
+    if (has("cooking range", "oven", "microwave", "فرن")) return { group_name: "أجهزة منزلية", item_name: "أفران ومايكروويف" };
+    if (has("camera", "كاميرا")) return { group_name: "صوتيات وكاميرات", item_name: "كاميرات" };
+    if (has("speaker", "headphone", "سماعة", "سماعات")) return { group_name: "صوتيات وكاميرات", item_name: "سماعات" };
+    return { group_name: "كمبيوتر وألعاب", item_name: null };
+  }
+
+  if (slug === "furniture") {
+    if (has("sofa", "كنب", "كنبة")) return { group_name: "أثاث", item_name: "غرف معيشة" };
+    if (has("bed", "bedroom", "سرير", "غرفة نوم")) return { group_name: "أثاث", item_name: "غرف نوم" };
+    if (has("table", "chair", "كرسي", "طاولة")) return { group_name: "أثاث", item_name: "غرف طعام" };
+    if (has("trolley", "gas cylinder", "أواني", "مطبخ")) return { group_name: "أدوات منزلية", item_name: "أواني طبخ" };
+    if (has("jewellery", "jewelry", "ring", "stone", "مجوهرات", "خاتم")) return { group_name: "إكسسوارات", item_name: "مجوهرات" };
+    return { group_name: "أثاث", item_name: null };
+  }
+
+  if (slug === "jobs") {
+    return has("job", "work", "مطلوب", "عامل", "موظف")
+      ? { group_name: "باحث عن عمل", item_name: null }
+      : { group_name: "مطلوب موظفين", item_name: null };
+  }
+
+  if (slug === "equipment") {
+    if (has("oven", "cooking range", "فرن", "طباخ")) return { group_name: "معدات طهي", item_name: "طباخات" };
+    if (has("grill", "شواية")) return { group_name: "معدات طهي", item_name: "شوايات" };
+    if (has("coffee", "espresso", "قهوة")) return { group_name: "قهوة ومشروبات", item_name: "مكائن قهوة" };
+    if (has("fridge", "freezer", "ثلاجة", "فريزر")) return { group_name: "معدات تبريد", item_name: "ثلاجات" };
+    return { group_name: "معدات متنوعة (أخرى)", item_name: null };
   }
 
   if (slug === "real_estate") {
