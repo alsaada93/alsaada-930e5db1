@@ -223,6 +223,7 @@ function AddListingPage() {
         setDelivery(Boolean(data.delivery_available));
         setMedia((((data.images as string[] | null) ?? []).map((url) => ({ id: url, url }))));
         setExistingVideo((data.video as string | null) ?? null);
+        setContactPhone((data.contact_phone as string | null) ?? "");
         if (data.lat != null && data.lng != null) {
           setCoords({ lat: Number(data.lat), lng: Number(data.lng) });
         }
