@@ -45,6 +45,7 @@ const CATEGORY_KEYWORDS: Record<Exclude<FbCategorySlug, "other">, string[]> = {
   cars: [
     "سيارة", "سيارات", "مركبة", "تويوتا", "نيسان", "هوندا", "لكزس", "مرسيدس",
     "بي ام", "هونداي", "كيا", "رينو", "سوزوكي", "مازيراتي", "موديل", "ماشي", "ممشى", "جيب", "دباب", "car", "cars",
+    "scooter", "bicycle", "bike", "e-scooter",
   ],
   real_estate: [
     "عقار", "عقارات", "شقة", "شقق", "فيلا", "فلل", "بيت", "منزل", "أرض", "ارض",
@@ -68,7 +69,7 @@ const CATEGORY_KEYWORDS: Record<Exclude<FbCategorySlug, "other">, string[]> = {
   ],
   furniture: [
     "أثاث", "اثاث", "كنب", "كنبة", "سرير", "دولاب", "طاولة", "كرسي", "مجلس",
-    "خزانة", "ديكور", "furniture", "sofa", "trolley", "jewellery", "jewelry", "ring", "stone",
+    "خزانة", "ديكور", "furniture", "sofa", "trolley", "jewellery", "jewelry", "ring", "stone", "gas cylinder",
   ],
   services: [
     "خدمة", "خدمات", "صيانة", "تنظيف", "نقل عفش", "تركيب", "توصيل", "سباك",
@@ -542,7 +543,7 @@ export function refineCategory(text: string, current: FbCategorySlug): FbCategor
 
   const carSignal =
     Object.keys(CAR_BRANDS).some((b) => lower.includes(b)) ||
-    /موديل|سيارة|مركبة|\bcar\b|\bcars\b|gear|engine|odometer|mileage|كيلومتر|\bkm\b|أوتوماتيك|بنزين|ديزل/i.test(lower);
+    /موديل|سيارة|مركبة|\bcar\b|\bcars\b|scooter|bicycle|\bbike\b|gear|engine|odometer|mileage|كيلومتر|\bkm\b|أوتوماتيك|بنزين|ديزل/i.test(lower);
   const realEstateSignal =
     /شقة|فيلا|عقار|للايجار|للإيجار|غرفة|غرف نوم|bedroom|apartment|villa|استوديو|ستوديو|محل تجاري|studio flat|\bflat\b|\broom\b|warehouse|مستودع|مخزن/i.test(lower);
 
