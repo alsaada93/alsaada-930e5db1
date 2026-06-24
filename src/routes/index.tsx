@@ -64,10 +64,11 @@ function Index() {
             <div className="mx-auto max-w-7xl px-4 pb-4 text-center">
               <button
                 type="button"
-                onClick={() => setVisibleCount((c) => c + 6)}
-                className="inline-flex items-center justify-center rounded-full bg-gradient-primary px-8 py-3 text-sm font-bold text-primary-foreground shadow-glow transition-opacity hover:opacity-90"
+                onClick={() => loadMore()}
+                disabled={loadingMore}
+                className="inline-flex items-center justify-center rounded-full bg-gradient-primary px-8 py-3 text-sm font-bold text-primary-foreground shadow-glow transition-opacity hover:opacity-90 disabled:opacity-60"
               >
-                {t("sec.more") || "عرض المزيد"}
+                {loadingMore ? (t("common.loading") || "جارٍ التحميل…") : (t("sec.more") || "عرض المزيد")}
               </button>
             </div>
           )}
