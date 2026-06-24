@@ -454,6 +454,29 @@ function extractPhone(text: string): string | null {
   return null;
 }
 
+/**
+ * يزيل أرقام الهواتف من نص الإعلان القادم من فيسبوك (أرقام إنجليزية أو عربية،
+ * بصيغ مختلفة) ويترك المكان فارغاً حتى لا تظهر أرقام المعلن الأصلي.
+ */
+function stripPhoneNumbers(text: string): string {
+  if (!text) return text;
+  // وحّد الأرقام العربية ثم احذف أي تسلسل رقمي طوله 8 خانات فأكثر (مع رموز الهاتف الشائعة)
+  const out = text.replace(
+    /(\+?\d[\d\u0660-\u0669][\d\u0660-\u0669\s\-()]{6,}[\d\u0660-\u0669])/g,
+    (match) => {
+      const digits = match.replace(/[^\d\u0660-\u0669]/g, "");
+      return digits.length >= 8 && digits.length <= 15 ? " " : match;
+    },
+  );
+  // نظّف الأسطر التي أصبحت فارغة بعد إزالة الرقم
+  return out
+    .split("\n")
+    .map((l) => l.replace(/\s{2,}/g, " ").trimEnd())
+    .join("\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
 /** Uploads a base64 (data URI or raw) image into the listings bucket. */
 async function storeBase64Image(b64: string): Promise<string | null> {
   try {
