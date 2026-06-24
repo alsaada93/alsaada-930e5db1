@@ -15,6 +15,7 @@ import { Testimonials } from "@/components/Testimonials";
 import { Footer } from "@/components/Footer";
 import { useListings } from "@/hooks/useListings";
 import { useLanguage } from "@/hooks/useLanguage";
+import { ChevronDown, Loader2 } from "lucide-react";
 
 
 export const Route = createFileRoute("/")({
