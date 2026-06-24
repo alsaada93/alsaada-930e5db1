@@ -509,14 +509,16 @@ function ListingPage() {
   };
 
 
-  const phone = sellerPhone ?? item.phone ?? "33982383";
+  // رقم التواصل: رقم المعلن إن وُجد. لا يُستخدم رقم الموقع العام إلا في قسم المطاعم.
+  const isRestaurant = item.categoryId === "restaurant";
+  const phone = sellerPhone ?? item.phone ?? (isRestaurant ? "33982383" : null);
   const sellerName = item.sellerName?.trim() || seller?.name || "المعلن";
   const rating = ratingData?.value ?? seller?.rating ?? 0;
   const reviews = ratingData?.count ?? seller?.reviews_count ?? 0;
   const deals = seller?.deals_count ?? 0;
   const verified = seller?.verified ?? false;
 
-  const isOwner = !!user && !!item.userId && user.id === item.userId;
+  const isOwner = (!!user && !!item.userId && user.id === item.userId) || isAdmin;
   const expiresAt = item.expiresAt
     ? new Date(item.expiresAt).getTime()
     : item.createdAt
