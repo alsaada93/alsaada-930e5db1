@@ -9,6 +9,8 @@ import { useLanguage } from "@/hooks/useLanguage";
 import { logContactAttempt, whatsappLink, telLink } from "@/lib/contact";
 import { PriceOfferDialog } from "@/components/PriceOfferDialog";
 import { useViewBoost, boostViews } from "@/hooks/useViewBoost";
+import { detectBrand } from "@/lib/facebook-parse";
+import { carBrandLogo } from "@/data/carBrandLogos";
 
 const DEFAULT_PHONE = "33982383"; // الرقم المحلي البحريني
 
