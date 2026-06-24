@@ -1359,15 +1359,7 @@ export type Database = {
           reviewer_id?: string
           seller_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "seller_reviews_seller_id_fkey"
-            columns: ["seller_id"]
-            isOneToOne: false
-            referencedRelation: "sellers"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       sellers: {
         Row: {

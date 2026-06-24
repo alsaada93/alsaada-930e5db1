@@ -454,6 +454,29 @@ function extractPhone(text: string): string | null {
   return null;
 }
 
+/**
+ * يزيل أرقام الهواتف من نص الإعلان القادم من فيسبوك (أرقام إنجليزية أو عربية،
+ * بصيغ مختلفة) ويترك المكان فارغاً حتى لا تظهر أرقام المعلن الأصلي.
+ */
+function stripPhoneNumbers(text: string): string {
+  if (!text) return text;
+  // وحّد الأرقام العربية ثم احذف أي تسلسل رقمي طوله 8 خانات فأكثر (مع رموز الهاتف الشائعة)
+  const out = text.replace(
+    /(\+?\d[\d\u0660-\u0669][\d\u0660-\u0669\s\-()]{6,}[\d\u0660-\u0669])/g,
+    (match) => {
+      const digits = match.replace(/[^\d\u0660-\u0669]/g, "");
+      return digits.length >= 8 && digits.length <= 15 ? " " : match;
+    },
+  );
+  // نظّف الأسطر التي أصبحت فارغة بعد إزالة الرقم
+  return out
+    .split("\n")
+    .map((l) => l.replace(/\s{2,}/g, " ").trimEnd())
+    .join("\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
 /** Uploads a base64 (data URI or raw) image into the listings bucket. */
 async function storeBase64Image(b64: string): Promise<string | null> {
   try {
@@ -556,7 +579,11 @@ export async function ingestBotPost(payload: BotPayload): Promise<BotIngestResul
 
     const priceResult = extractPriceSmart(content);
     const explicitPrice = parsePayloadPrice(payload.price);
-    const phone = (payload.contact_phone ?? "").toString().trim() || extractPhone(content);
+    // سياسة: أي إعلان يصل من فيسبوك ويحتوي على رقم هاتف يُحذف الرقم ويُترك فارغاً.
+    void extractPhone; // (مُبقى للتوافق) لم نعد نخزّن رقم المعلن القادم من فيسبوك
+    const phone: string | null = null;
+    // نص الإعلان بعد إزالة أرقام الهواتف لعرضه في الوصف
+    const cleanContent = stripPhoneNumbers(content);
 
     const detected = detectCategory(content, payload.category);
     const category = payload.category ? detected : refineCategory(content, detected);
@@ -592,21 +619,21 @@ export async function ingestBotPost(payload: BotPayload): Promise<BotIngestResul
         groupName: group_name,
         categoryName: catObj?.name ?? categoryLabel(category).name,
         brand: carSpecs?.brand ?? null,
-        text: `${title} ${content}`,
+        text: `${title} ${cleanContent}`,
         rawTitle: title,
       });
     } else {
       // No ad name supplied: never relabel it "عام/أخرى" — keep a descriptive
       // title derived from the body so a human can review and approve it.
       finalTitle =
-        firstMeaningfulLine(content) ||
+        firstMeaningfulLine(cleanContent) ||
         buildAdTitle({
           slug: category,
           itemName: item_name,
           groupName: group_name,
           categoryName: catObj?.name ?? categoryLabel(category).name,
           brand: carSpecs?.brand ?? null,
-          text: content,
+          text: cleanContent,
           rawTitle: null,
         });
     }
@@ -615,7 +642,7 @@ export async function ingestBotPost(payload: BotPayload): Promise<BotIngestResul
 
     const row = {
       title: finalTitle,
-      description: (content || "") + specsBlock || null,
+      description: (cleanContent || "") + specsBlock || null,
       category_id: categoryId,
       group_name,
       item_name,
