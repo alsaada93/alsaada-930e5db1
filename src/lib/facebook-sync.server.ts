@@ -640,7 +640,8 @@ export async function ingestBotPost(payload: BotPayload): Promise<BotIngestResul
         });
     }
 
-    const adStatus: "approved" | "pending" = namedByBot ? "approved" : "pending";
+    // يُقبل تلقائياً فقط الإعلان الذي يحمل اسماً وهاتفاً معاً؛ غير ذلك يذهب للمراجعة اليدوية.
+    const adStatus: "approved" | "pending" = namedByBot && !!phone ? "approved" : "pending";
 
     const row = {
       title: finalTitle,
