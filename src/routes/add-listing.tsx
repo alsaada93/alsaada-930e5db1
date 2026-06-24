@@ -525,7 +525,8 @@ function AddListingPage() {
       let videoUrl: string | null = isEdit ? existingVideo : null;
       if (videoFile) {
         try {
-          videoUrl = await uploadFile(videoFile, "videos");
+          const compressedVideo = await compressVideo(videoFile);
+          videoUrl = await uploadFile(compressedVideo, "videos");
         } catch (e) {
           console.error("video upload failed", e);
           toast.error(ar ? "تعذّر رفع الفيديو، سيُنشر الإعلان بدون فيديو" : "Video upload failed; listing will publish without it");
