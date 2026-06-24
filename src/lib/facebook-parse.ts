@@ -58,6 +58,7 @@ const CATEGORY_KEYWORDS: Record<Exclude<FbCategorySlug, "other">, string[]> = {
   equipment: [
     "معدات", "معدة", "ماكينة", "ماكينات", "ثلاجة عرض", "فرن", "مطعم", "مطبخ صناعي",
     "كمبروسر", "مولد", "رافعة", "عدة", "equipment", "commercial kitchen", "coffee shop", "cafe",
+    "cooking range", "burner", "oven", "grill",
   ],
   electronics: [
     "جوال", "ايفون", "آيفون", "موبايل", "هاتف", "لابتوب", "كمبيوتر", "تلفزيون",
@@ -537,7 +538,6 @@ export function extractRealEstateSpecs(text: string): RealEstateSpecs {
  * reclassifies to the correct section so the ad never lands in "general" by mistake.
  */
 export function refineCategory(text: string, current: FbCategorySlug): FbCategorySlug {
-  if (current === "cars" || current === "real_estate") return current;
   const lower = normDigits(text).toLowerCase();
 
   const carSignal =
@@ -558,6 +558,9 @@ export function refineCategory(text: string, current: FbCategorySlug): FbCategor
   const jobsSignal =
     /مطلوب موظف|مطلوب عامل|مطلوب عاملة|توظيف|وظيفة شاغرة|راتب شهري|سيرة ذاتية|hiring/i.test(lower);
 
+  const strongServiceSignal = /shifting|movers|packers|house shift|office shift|flat shifting|villa shifting|pick and drop|document clearance|cpr services|scrap|recycling|course|diploma/i.test(lower);
+  if (strongServiceSignal) return "services";
+  if (current === "cars" || current === "real_estate") return current;
   if (servicesSignal && !carSignal) return "services";
   if (realEstateSignal) return "real_estate";
   if (carSignal) return "cars";
