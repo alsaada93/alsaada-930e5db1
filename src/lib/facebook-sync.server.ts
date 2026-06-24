@@ -671,7 +671,9 @@ export async function ingestBotPost(payload: BotPayload): Promise<BotIngestResul
       inserted.id,
       "success",
       `تم استقبال إعلان من البوت — التصنيف: ${categoryLabel(category).name}، الحالة: ${
-        adStatus === "approved" ? "منشور" : "بانتظار المراجعة (بدون اسم إعلان)"
+        adStatus === "approved"
+          ? "منشور"
+          : `بانتظار المراجعة (${!namedByBot ? "بدون اسم إعلان" : "بدون رقم هاتف"})`
       }، السعر: ${priceResult.detected ? priceResult.price : "غير محدد"}`,
     );
     await touchMeta("ok");
