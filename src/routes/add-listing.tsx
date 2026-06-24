@@ -34,6 +34,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/hooks/useLanguage";
 import { supabase } from "@/integrations/supabase/client";
 import { compressImage } from "@/lib/image-compress";
+import { compressVideo } from "@/lib/video-compress";
 import { matchesAr } from "@/lib/text";
 import { showsCondition, categoryKind } from "@/lib/category-kind";
 import { carBrandLogo } from "@/data/carBrandLogos";
