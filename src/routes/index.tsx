@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+
 import { Header } from "@/components/Header";
 import { WeBuyBanner } from "@/components/WeBuyBanner";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
@@ -44,12 +44,9 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   const { t } = useLanguage();
-  const { listings } = useListings();
-  const [visibleCount, setVisibleCount] = useState(12);
-  const normal = listings.filter((l) => (l.listingType ?? "normal") === "normal");
-  const featured = normal.filter((l) => l.featured);
-  const latest = normal.slice(0, visibleCount);
-  const hasMore = normal.length > visibleCount;
+  // التحميل التدريجي: نجلب أول 12 إعلان فقط ثم نجلب الباقي عند الضغط على "عرض المزيد"
+  const { listings: latest, loadMore, loadingMore, hasMore } = useListings({ pageSize: 12, onlyNormal: true });
+  const featured = latest.filter((l) => l.featured);
 
   return (
     <div className="min-h-screen bg-background">
@@ -67,10 +64,11 @@ function Index() {
             <div className="mx-auto max-w-7xl px-4 pb-4 text-center">
               <button
                 type="button"
-                onClick={() => setVisibleCount((c) => c + 6)}
-                className="inline-flex items-center justify-center rounded-full bg-gradient-primary px-8 py-3 text-sm font-bold text-primary-foreground shadow-glow transition-opacity hover:opacity-90"
+                onClick={() => loadMore()}
+                disabled={loadingMore}
+                className="inline-flex items-center justify-center rounded-full bg-gradient-primary px-8 py-3 text-sm font-bold text-primary-foreground shadow-glow transition-opacity hover:opacity-90 disabled:opacity-60"
               >
-                {t("sec.more") || "عرض المزيد"}
+                {loadingMore ? (t("common.loading") || "جارٍ التحميل…") : (t("sec.more") || "عرض المزيد")}
               </button>
             </div>
           )}
