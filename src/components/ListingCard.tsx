@@ -9,6 +9,8 @@ import { useLanguage } from "@/hooks/useLanguage";
 import { logContactAttempt, whatsappLink, telLink } from "@/lib/contact";
 import { PriceOfferDialog } from "@/components/PriceOfferDialog";
 import { useViewBoost, boostViews } from "@/hooks/useViewBoost";
+import { detectBrand } from "@/lib/facebook-parse";
+import { carBrandLogo } from "@/data/carBrandLogos";
 
 const DEFAULT_PHONE = "33982383"; // الرقم المحلي البحريني
 
@@ -32,6 +34,9 @@ export function ListingCard({ item, displayTitle }: { item: Listing; displayTitl
 
   const waLink = whatsappLink({ phone, listingTitle: title, listingId: item.id });
 
+  const brand = detectBrand(`${item.title} ${item.description ?? ""}`);
+  const brandLogo = carBrandLogo(brand);
+
   return (
     <article className="group overflow-hidden rounded-2xl border border-border bg-card shadow-card transition-all hover:-translate-y-1">
       <Link to="/listing/$id" params={{ id: item.id }} className="block">
@@ -46,6 +51,13 @@ export function ListingCard({ item, displayTitle }: { item: Listing; displayTitl
           <span className="pointer-events-none absolute bottom-1.5 right-1.5 select-none text-[10px] font-bold text-white/90 drop-shadow-[0_1px_2px_rgba(0,0,0,0.7)]">
             حراج السعادة
           </span>
+
+          {brandLogo && (
+            <span className="absolute left-2 bottom-2 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 p-1 shadow-md ring-1 ring-black/5">
+              <img src={brandLogo} alt={brand ?? ""} loading="lazy" className="h-full w-full object-contain" />
+            </span>
+          )}
+
 
           {item.featured && (
             <span className="absolute right-2 top-2 rounded-full bg-gradient-primary px-2 py-0.5 text-[11px] font-bold text-primary-foreground shadow-glow">
