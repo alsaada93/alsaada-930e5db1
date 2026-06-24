@@ -626,14 +626,14 @@ export async function ingestBotPost(payload: BotPayload): Promise<BotIngestResul
       // No ad name supplied: never relabel it "عام/أخرى" — keep a descriptive
       // title derived from the body so a human can review and approve it.
       finalTitle =
-        firstMeaningfulLine(content) ||
+        firstMeaningfulLine(cleanContent) ||
         buildAdTitle({
           slug: category,
           itemName: item_name,
           groupName: group_name,
           categoryName: catObj?.name ?? categoryLabel(category).name,
           brand: carSpecs?.brand ?? null,
-          text: content,
+          text: cleanContent,
           rawTitle: null,
         });
     }
