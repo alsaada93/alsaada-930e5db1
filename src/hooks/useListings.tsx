@@ -47,9 +47,12 @@ export function useListings() {
     let active = true;
     supabase
       .from("listings")
-      .select("*")
+      .select(
+        "id,title,price,start_price,negotiable,condition,city,category_id,group_name,images,featured,views,contact_phone,user_id,description,contact_name,listing_type,auction_ends_at,monthly_revenue,area_sqm,staff_count,created_at",
+      )
       .eq("status", "approved")
       .order("created_at", { ascending: false })
+      .limit(300)
       .then(({ data }) => {
         if (!active) return;
         setListings((data ?? []).map(mapRow));

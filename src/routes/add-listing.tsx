@@ -34,6 +34,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/hooks/useLanguage";
 import { supabase } from "@/integrations/supabase/client";
 import { compressImage } from "@/lib/image-compress";
+import { compressVideo } from "@/lib/video-compress";
 import { matchesAr } from "@/lib/text";
 import { showsCondition, categoryKind } from "@/lib/category-kind";
 import { carBrandLogo } from "@/data/carBrandLogos";
@@ -524,7 +525,8 @@ function AddListingPage() {
       let videoUrl: string | null = isEdit ? existingVideo : null;
       if (videoFile) {
         try {
-          videoUrl = await uploadFile(videoFile, "videos");
+          const compressedVideo = await compressVideo(videoFile);
+          videoUrl = await uploadFile(compressedVideo, "videos");
         } catch (e) {
           console.error("video upload failed", e);
           toast.error(ar ? "تعذّر رفع الفيديو، سيُنشر الإعلان بدون فيديو" : "Video upload failed; listing will publish without it");
@@ -598,7 +600,8 @@ function AddListingPage() {
     if (!files || !files[0] || !newId) return;
     setVideoSaving(true);
     try {
-      const url = await uploadFile(files[0], "videos");
+      const compressed = await compressVideo(files[0]);
+      const url = await uploadFile(compressed, "videos");
       const { error } = await supabase.from("listings").update({ video: url }).eq("id", newId);
       if (error) throw error;
       setVideoDone(true);
