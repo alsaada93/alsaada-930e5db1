@@ -12,6 +12,7 @@ import { useViewBoost, boostViews } from "@/hooks/useViewBoost";
 import { detectBrand } from "@/lib/facebook-parse";
 import { carBrandLogo } from "@/data/carBrandLogos";
 import { listingRating } from "@/lib/rating";
+import { optimizedImage, optimizedSrcSet } from "@/lib/image-url";
 
 const DEFAULT_PHONE = "33982383"; // الرقم المحلي البحريني
 
