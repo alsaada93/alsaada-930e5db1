@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useHeroSlides } from "@/hooks/useHeroSlides";
+import { optimizedImage, optimizedSrcSet } from "@/lib/image-url";
 
 /** شريط صور متحرك بين مربع البحث والتصنيفات — يتبدّل تلقائياً مع تنقّل بالنقاط. */
 export function PromoCarousel() {
@@ -38,7 +39,7 @@ export function PromoCarousel() {
                 i === current ? "opacity-100" : "pointer-events-none opacity-0"
               }`}
             >
-              <img src={s.image_url} alt={s.title ?? "عرض"} loading="lazy" decoding="async" className="h-full w-full object-cover" />
+              <img src={optimizedImage(s.image_url, 1200, 70)} srcSet={optimizedSrcSet(s.image_url, [640, 960, 1280], 70)} sizes="(max-width: 1280px) 100vw, 1216px" alt={s.title ?? "عرض"} loading={i === 0 ? "eager" : "lazy"} fetchPriority={i === 0 ? "high" : undefined} decoding="async" className="h-full w-full object-cover" />
               {(s.title || s.subtitle) && (
                 <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-4 text-white">
                   {s.title && <p className="text-lg font-extrabold">{s.title}</p>}

@@ -41,6 +41,7 @@ import { cityCenter, displayCity } from "@/data/bahrainCities";
 import { brandInfo } from "@/data/brandsCatalog";
 import { showsCondition } from "@/lib/category-kind";
 import { listingRating, listingReviewCount } from "@/lib/rating";
+import { optimizedImage, optimizedSrcSet } from "@/lib/image-url";
 
 const EXPIRY_DAYS = 60;
 
@@ -348,8 +349,12 @@ function Gallery({ images, video, title }: { images: string[]; video: string | n
       <div className="relative overflow-hidden rounded-2xl border border-border bg-muted">
         {active.type === "image" ? (
           <img
-            src={active.url}
+            src={optimizedImage(active.url, 800, 70)}
+            srcSet={optimizedSrcSet(active.url, [400, 800, 1200], 70)}
+            sizes="(max-width: 1024px) 100vw, 640px"
             alt={title}
+            width={800}
+            height={600}
             onClick={() => setLightbox(true)}
             loading="eager"
             fetchPriority="high"
@@ -402,7 +407,7 @@ function Gallery({ images, video, title }: { images: string[]; video: string | n
               }`}
             >
               {s.type === "image" ? (
-                <img src={s.url} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />
+                <img src={optimizedImage(s.url, 120)} alt="" width={64} height={64} loading="lazy" decoding="async" className="h-full w-full object-cover" />
               ) : (
                 <span className="flex h-full w-full items-center justify-center bg-black text-white">
                   <Play className="h-5 w-5" />
