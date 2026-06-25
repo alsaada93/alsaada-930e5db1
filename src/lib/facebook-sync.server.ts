@@ -663,7 +663,7 @@ export async function ingestBotPost(payload: BotPayload): Promise<BotIngestResul
       contact_name: authorName,
       contact_phone: phone,
       ...(reSpecs?.area_sqm ? { area_sqm: reSpecs.area_sqm } : {}),
-      ...(carSpecs?.brand ? { brand: carSpecs.brand } : {}),
+      brand: carSpecs?.brand ?? "ماركة أخرى",
       ...(reSpecs?.region ? { city: reSpecs.region } : {}),
       status: adStatus,
       published_at: publishedAt ?? new Date().toISOString(),
