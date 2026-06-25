@@ -24,7 +24,6 @@ type TranslationMap = Record<string, { title: string; description: string }>;
  * translated once per language.
  */
 export const translateListings = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => inputSchema.parse(input))
   .handler(async ({ data }): Promise<TranslationMap> => {
     const { lang, items } = data;
