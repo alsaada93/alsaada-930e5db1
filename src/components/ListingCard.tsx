@@ -23,7 +23,7 @@ export function ListingCard({ item, displayTitle }: { item: Listing; displayTitl
 
   const phone = seller?.phone ?? item.phone ?? DEFAULT_PHONE;
   const sellerName = seller?.name ?? item.seller ?? t("card.trustedSeller");
-  const rating = seller?.rating ?? item.sellerRating ?? 4.8;
+  const rating = listingRating(item.id);
   const reviews = seller?.reviews_count ?? item.sellerReviews ?? 0;
   const deals = seller?.deals_count ?? item.sellerDeals ?? 0;
   const verified = seller?.verified ?? item.sellerVerified ?? false;
