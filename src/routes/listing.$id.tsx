@@ -349,8 +349,12 @@ function Gallery({ images, video, title }: { images: string[]; video: string | n
       <div className="relative overflow-hidden rounded-2xl border border-border bg-muted">
         {active.type === "image" ? (
           <img
-            src={active.url}
+            src={optimizedImage(active.url, 800, 70)}
+            srcSet={optimizedSrcSet(active.url, [400, 800, 1200], 70)}
+            sizes="(max-width: 1024px) 100vw, 640px"
             alt={title}
+            width={800}
+            height={600}
             onClick={() => setLightbox(true)}
             loading="eager"
             fetchPriority="high"
