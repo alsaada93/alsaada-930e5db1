@@ -1,4 +1,5 @@
 import { useHomeBanners, type BannerPosition } from "@/hooks/useHomeBanners";
+import { optimizedImage } from "@/lib/image-url";
 
 /** Renders admin-managed image banners for a given home-page position. */
 export function HomeBanners({ position }: { position: BannerPosition }) {
