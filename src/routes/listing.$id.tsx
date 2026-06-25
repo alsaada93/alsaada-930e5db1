@@ -40,7 +40,7 @@ import { countryByName } from "@/data/countries";
 import { cityCenter, displayCity } from "@/data/bahrainCities";
 import { brandInfo } from "@/data/brandsCatalog";
 import { showsCondition } from "@/lib/category-kind";
-import { listingRating } from "@/lib/rating";
+import { listingRating, listingReviewCount } from "@/lib/rating";
 
 const EXPIRY_DAYS = 60;
 
