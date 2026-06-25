@@ -11,3 +11,16 @@ export function listingRating(id: string): number {
   const steps = h % 16; // 0..15
   return Math.round((3 + steps * 0.1) * 10) / 10;
 }
+
+/**
+ * عدد تقييمات وهمي ثابت لكل إعلان (بين 3 و 27) حتى يظهر للإعلان تقييم دائماً
+ * حتى لو لم تكن هناك مراجعات فعلية.
+ */
+export function listingReviewCount(id: string): number {
+  let h = 0;
+  for (let i = 0; i < id.length; i++) {
+    h = (h * 17 + id.charCodeAt(i) + 7) >>> 0;
+  }
+  return 3 + (h % 25); // 3..27
+}
+
