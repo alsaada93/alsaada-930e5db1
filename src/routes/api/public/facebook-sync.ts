@@ -55,7 +55,7 @@ export const Route = createFileRoute("/api/public/facebook-sync")({
 
         const VERIFY_TOKEN = process.env.FB_WEBHOOK_VERIFY_TOKEN;
 
-        if (mode === "subscribe" && token === VERIFY_TOKEN) {
+        if (mode === "subscribe" && VERIFY_TOKEN && token === VERIFY_TOKEN) {
           return new Response(challenge, { status: 200 });
         }
 
