@@ -276,6 +276,20 @@ export function extractPriceSmart(text: string): PriceResult {
   if (!text) return { price: null, detected: false };
   const raw = normDigits(text);
   const words = raw.split(/\s+/).filter(Boolean);
+  const curYear = new Date().getFullYear();
+
+  // A bare 4-digit number in the model-year range is a year, NOT a price.
+  const isYearValue = (n: number, tok: string): boolean => {
+    const digitsOnly = tok.replace(/\D/g, "");
+    if (digitsOnly.length !== 4) return false;
+    return Number.isInteger(n) && n >= 1980 && n <= curYear + 1;
+  };
+  const hasCurrency = (tok: string): boolean => {
+    const w = tok.toLowerCase();
+    return CURRENCY.some((c) => (c === "$" ? w.includes("$") : w.includes(c)));
+  };
+  // Tokens that signal the number is a model year, not a price.
+  const yearContext = (tok: string): boolean => /موديل|model|سنة|سنه|year/i.test(tok);
 
   // (a) keyword / currency adjacency (max 2 words either side)
   const kw = [...PRICE_KW, ...CURRENCY];
@@ -294,15 +308,19 @@ export function extractPriceSmart(text: string): PriceResult {
     for (let d = 1; d <= 2; d++) {
       for (const j of [i + d, i - d]) {
         if (j >= 0 && j < words.length && /\d/.test(words[j])) {
+          // skip years that sit next to a model/year word (e.g. "موديل 2020")
+          if (yearContext(words[i]) || yearContext(words[j - 1] ?? "") || yearContext(words[j + 1] ?? "")) continue;
           const n = parsePriceNum(words[j]);
-          if (n && n > 0) return { price: n, detected: true };
+          if (!n || n <= 0) continue;
+          // a bare year with no currency is not a price
+          if (isYearValue(n, words[j]) && !hasCurrency(words[j])) continue;
+          return { price: n, detected: true };
         }
       }
     }
   }
 
   // (b) exclusion-based fallback — pick the last surviving number
-  const year = new Date().getFullYear();
   const survivors: number[] = [];
   for (let i = 0; i < words.length; i++) {
     if (!/\d/.test(words[i])) continue;
@@ -310,11 +328,13 @@ export function extractPriceSmart(text: string): PriceResult {
     if (!digitsOnly) continue;
     const around = `${words[i - 1] ?? ""} ${words[i]} ${words[i + 1] ?? ""}`.toLowerCase();
 
-    // year (1990 .. current+1)
-    if (/^\d{4}$/.test(digitsOnly)) {
+    // year (1980 .. current+1) unless an explicit currency is attached to the token
+    if (digitsOnly.length === 4) {
       const y = Number(digitsOnly);
-      if (y >= 1990 && y <= year + 1) continue;
+      if (y >= 1980 && y <= curYear + 1 && !hasCurrency(words[i])) continue;
     }
+    // model/year context word adjacent → treat as year, skip
+    if (/موديل|model|سنة الصنع|year/i.test(around)) continue;
     // mileage
     if (/\bkm\b|كم|كيلومتر|mileage/i.test(around)) continue;
     // area
@@ -330,6 +350,7 @@ export function extractPriceSmart(text: string): PriceResult {
 
   return { price: null, detected: false };
 }
+
 
 /** Finds a number within `radius` words of any keyword. */
 function numberNear(words: string[], keys: string[], radius = 2): number | null {
@@ -616,15 +637,20 @@ export function hasMeaningfulTitle(rawTitle: string | null | undefined): boolean
   return !/^(عام|أخرى|اخرى|عام وأخرى|general|other|misc|for sale|item for sale|good|available)$/.test(title);
 }
 
+/** Generic, non-descriptive words that must never stand alone as an ad title. */
+const GENERIC_TITLE_WORDS =
+  /^(عام|أخرى|اخرى|عام وأخرى|للبيع|للايجار|للإيجار|سيارات?|عقار|عقارات|اعلان|إعلان|متوفر|available|for sale|item for sale|sale|new|used|general|other|misc)$/i;
+
 /** Derives a descriptive title from the first meaningful line of the body. */
 export function firstMeaningfulLine(text: string | null | undefined): string {
   const lines = (text ?? "").toString().replace(/\r/g, "").split("\n");
   for (const line of lines) {
     const cleaned = cleanTitlePart(line);
-    if (cleaned.length >= 3) return cleaned.slice(0, 80).trim();
+    if (cleaned.length >= 3 && !GENERIC_TITLE_WORDS.test(cleaned)) return cleaned.slice(0, 80).trim();
   }
   return "";
 }
+
 
 // ───────────────────────── Subcategory detection ─────────────────────────
 
