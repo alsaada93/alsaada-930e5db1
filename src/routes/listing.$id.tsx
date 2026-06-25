@@ -41,6 +41,7 @@ import { cityCenter, displayCity } from "@/data/bahrainCities";
 import { brandInfo } from "@/data/brandsCatalog";
 import { showsCondition } from "@/lib/category-kind";
 import { listingRating, listingReviewCount } from "@/lib/rating";
+import { optimizedImage, optimizedSrcSet } from "@/lib/image-url";
 
 const EXPIRY_DAYS = 60;
 
