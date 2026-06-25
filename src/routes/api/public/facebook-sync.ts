@@ -53,9 +53,9 @@ export const Route = createFileRoute("/api/public/facebook-sync")({
         const token = url.searchParams.get("hub.verify_token");
         const challenge = url.searchParams.get("hub.challenge");
 
-        const VERIFY_TOKEN = "alsaada2026";
+        const VERIFY_TOKEN = process.env.FB_WEBHOOK_VERIFY_TOKEN;
 
-        if (mode === "subscribe" && token === VERIFY_TOKEN) {
+        if (mode === "subscribe" && VERIFY_TOKEN && token === VERIFY_TOKEN) {
           return new Response(challenge, { status: 200 });
         }
 
@@ -85,6 +85,24 @@ export const Route = createFileRoute("/api/public/facebook-sync")({
         // الجزء الأول: التعامل مع تنسيق فيسبوك الرسمي (Meta Webhook)
         // ====================================================================
         if (body.object === "group" || body.object === "page") {
+          // التحقق من توقيع فيسبوك (X-Hub-Signature-256) قبل معالجة أي بيانات
+          const appSecret = process.env.FB_APP_SECRET;
+          if (!appSecret) {
+            console.error("[Facebook Webhook] FB_APP_SECRET غير مهيأ — تم رفض الطلب");
+            return json({ status: "error", message: "Webhook not configured" }, 503);
+          }
+          const sigHeader = request.headers.get("x-hub-signature-256");
+          if (!sigHeader) {
+            return json({ status: "error", message: "Missing signature" }, 401);
+          }
+          const { createHmac, timingSafeEqual } = await import("node:crypto");
+          const expected = "sha256=" + createHmac("sha256", appSecret).update(rawBody).digest("hex");
+          const sigBuf = Buffer.from(sigHeader);
+          const expBuf = Buffer.from(expected);
+          if (sigBuf.length !== expBuf.length || !timingSafeEqual(sigBuf, expBuf)) {
+            return json({ status: "error", message: "Invalid signature" }, 403);
+          }
+
           for (const entry of body.entry || []) {
             for (const change of entry.changes || []) {
               if (change.field === "feed" && change.value && change.value.verb === "add") {
