@@ -637,15 +637,20 @@ export function hasMeaningfulTitle(rawTitle: string | null | undefined): boolean
   return !/^(عام|أخرى|اخرى|عام وأخرى|general|other|misc|for sale|item for sale|good|available)$/.test(title);
 }
 
+/** Generic, non-descriptive words that must never stand alone as an ad title. */
+const GENERIC_TITLE_WORDS =
+  /^(عام|أخرى|اخرى|عام وأخرى|للبيع|للايجار|للإيجار|سيارات?|عقار|عقارات|اعلان|إعلان|متوفر|available|for sale|item for sale|sale|new|used|general|other|misc)$/i;
+
 /** Derives a descriptive title from the first meaningful line of the body. */
 export function firstMeaningfulLine(text: string | null | undefined): string {
   const lines = (text ?? "").toString().replace(/\r/g, "").split("\n");
   for (const line of lines) {
     const cleaned = cleanTitlePart(line);
-    if (cleaned.length >= 3) return cleaned.slice(0, 80).trim();
+    if (cleaned.length >= 3 && !GENERIC_TITLE_WORDS.test(cleaned)) return cleaned.slice(0, 80).trim();
   }
   return "";
 }
+
 
 // ───────────────────────── Subcategory detection ─────────────────────────
 
