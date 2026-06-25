@@ -161,7 +161,12 @@ export const adminUpdateListing = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin.from("listings").update(patch as never).eq("id", id);
     if (error) throw error;
+    // عند تغيير العنوان أو الوصف، أبطل ذاكرة الترجمة المخزّنة حتى تظهر القيم الجديدة فوراً
+    if ("title" in patch || "description" in patch) {
+      await supabaseAdmin.from("listing_translations").delete().eq("listing_id", id);
+    }
     return { ok: true };
+
   });
 
 /** Auto re-classifies existing listings into the correct site category. */
