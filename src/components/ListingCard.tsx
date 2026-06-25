@@ -44,8 +44,12 @@ export function ListingCard({ item, displayTitle }: { item: Listing; displayTitl
       <Link to="/listing/$id" params={{ id: item.id }} className="block">
         <div className="relative aspect-[4/3] overflow-hidden bg-muted">
           <img
-            src={item.image}
+            src={optimizedImage(item.image, 400)}
+            srcSet={optimizedSrcSet(item.image, [200, 400, 600])}
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 280px"
             alt={title}
+            width={400}
+            height={300}
             loading="lazy"
             decoding="async"
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
