@@ -462,11 +462,17 @@ function AddListingPage() {
   };
 
   const uploadFile = async (file: File, kind: string) => {
-    const ext = file.name.split(".").pop() || "bin";
+    let ext = (file.name.split(".").pop() || "").toLowerCase();
+    // التخزين يقبل صيغ صور محددة فقط؛ نضمن امتداداً آمناً للصور
+    if (kind === "images" && !["jpg", "jpeg", "png", "webp", "gif", "avif"].includes(ext)) {
+      ext = "jpg";
+    }
+    if (!ext) ext = "bin";
     const path = `${kind}/${crypto.randomUUID()}.${ext}`;
     const { error } = await supabase.storage.from("listings").upload(path, file, {
       cacheControl: "3600",
       upsert: false,
+      contentType: file.type || (kind === "images" ? "image/jpeg" : undefined),
     });
     if (error) throw error;
     return supabase.storage.from("listings").getPublicUrl(path).data.publicUrl;
