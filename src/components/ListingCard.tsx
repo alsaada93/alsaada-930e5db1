@@ -76,10 +76,17 @@ export function ListingCard({ item, displayTitle }: { item: Listing; displayTitl
           <h3 className="line-clamp-1 font-bold text-card-foreground hover:text-primary">{title}</h3>
         </Link>
         <div className="mt-1 flex items-baseline gap-1">
-          <span className="text-lg font-extrabold text-primary">{item.price.toLocaleString("ar")}</span>
-          <span className="text-xs font-semibold text-muted-foreground">د.ب</span>
-          {item.negotiable && <span className="text-[11px] text-muted-foreground">• {t("card.negotiable")}</span>}
+          {item.price > 0 ? (
+            <>
+              <span className="text-lg font-extrabold text-primary">{item.price.toLocaleString("ar")}</span>
+              <span className="text-xs font-semibold text-muted-foreground">د.ب</span>
+              {item.negotiable && <span className="text-[11px] text-muted-foreground">• {t("card.negotiable")}</span>}
+            </>
+          ) : (
+            <span className="text-sm font-bold text-muted-foreground">بدون سعر</span>
+          )}
         </div>
+
 
         <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
           {verified && (
