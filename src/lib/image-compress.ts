@@ -29,6 +29,37 @@ function drawWatermark(ctx: CanvasRenderingContext2D, width: number, height: num
   ctx.shadowOffsetY = 0;
 }
 
+/** يحاول فك تشفير الصورة عبر createImageBitmap ثم يعود لاستخدام <img> كحل بديل (يدعم HEIC على سفاري). */
+async function decodeImage(file: File): Promise<{ source: CanvasImageSource; width: number; height: number } | null> {
+  const bitmap = await createImageBitmap(file).catch(() => null);
+  if (bitmap) return { source: bitmap, width: bitmap.width, height: bitmap.height };
+
+  // حل بديل: تحميل الصورة في عنصر <img> (يعالج بعض الصيغ التي يفشل فيها createImageBitmap مثل HEIC)
+  return await new Promise((resolve) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      resolve({ source: img, width: img.naturalWidth, height: img.naturalHeight });
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      resolve(null);
+    };
+    img.src = url;
+  });
+}
+
+/** يضمن أن اسم الملف ينتهي بامتداد صورة مقبول في التخزين. */
+function safeImageFile(file: File): File {
+  const ext = (file.name.split(".").pop() || "").toLowerCase();
+  const allowed = ["jpg", "jpeg", "png", "webp", "gif", "avif"];
+  if (allowed.includes(ext)) return file;
+  // إعادة تسمية الملفات غير المدعومة (مثل HEIC) لامتداد آمن حتى لا يرفضها التخزين
+  const base = file.name.replace(/\.[^.]+$/, "") || "image";
+  return new File([file], `${base}.jpg`, { type: file.type || "image/jpeg" });
+}
+
 export async function compressImage(
   file: File,
   maxDim = 1600,
@@ -36,12 +67,13 @@ export async function compressImage(
   watermark = true,
 ): Promise<File> {
   try {
-    if (!file.type.startsWith("image/") || file.type === "image/gif") return file;
+    if (!file.type.startsWith("image/") || file.type === "image/gif") return safeImageFile(file);
 
-    const bitmap = await createImageBitmap(file).catch(() => null);
-    if (!bitmap) return file;
+    const decoded = await decodeImage(file);
+    if (!decoded) return safeImageFile(file);
 
-    let { width, height } = bitmap;
+    let { width, height } = decoded;
+    if (!width || !height) return safeImageFile(file);
     const scale = Math.min(1, maxDim / Math.max(width, height));
     width = Math.round(width * scale);
     height = Math.round(height * scale);
@@ -50,20 +82,20 @@ export async function compressImage(
     canvas.width = width;
     canvas.height = height;
     const ctx = canvas.getContext("2d");
-    if (!ctx) return file;
-    ctx.drawImage(bitmap, 0, 0, width, height);
-    bitmap.close?.();
+    if (!ctx) return safeImageFile(file);
+    ctx.drawImage(decoded.source, 0, 0, width, height);
+    if ("close" in decoded.source) (decoded.source as ImageBitmap).close?.();
 
     if (watermark) drawWatermark(ctx, width, height);
 
     const blob = await new Promise<Blob | null>((resolve) =>
       canvas.toBlob(resolve, "image/jpeg", quality),
     );
-    if (!blob) return file;
+    if (!blob) return safeImageFile(file);
 
     const base = file.name.replace(/\.[^.]+$/, "") || "image";
     return new File([blob], `${base}.jpg`, { type: "image/jpeg" });
   } catch {
-    return file;
+    return safeImageFile(file);
   }
 }
