@@ -34,7 +34,7 @@ export function HomeBanners({ position }: { position: BannerPosition }) {
             href={b.link || "#"}
             className="block overflow-hidden rounded-2xl border border-border shadow-card"
           >
-            <img src={b.imageUrl} alt="إعلان" className="h-full w-full object-cover" loading="lazy" />
+            <img src={optimizedImage(b.imageUrl, 700)} alt="إعلان" className="h-full w-full object-cover" loading="lazy" decoding="async" />
           </a>
         ))}
       </div>
