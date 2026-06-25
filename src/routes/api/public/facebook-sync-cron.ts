@@ -4,16 +4,17 @@ import { createFileRoute } from "@tanstack/react-router";
  * Scheduled sync job — called every 5 minutes by pg_cron.
  * Retries recently-failed imports and refreshes the sync heartbeat.
  *
- * Authentication: the caller must present the project anon key in the
- * `apikey` header (the same value pg_cron is configured to send). This
- * prevents anonymous abuse of the database/storage work this route performs.
+ * Authentication: the caller must present a dedicated random secret
+ * (`CRON_SECRET`) in the `Authorization: Bearer <secret>` header (or the
+ * `x-cron-secret` header). This secret is server-side only and never shipped
+ * to the browser, unlike the publishable anon key.
  */
 function isAuthorized(request: Request): boolean {
-  const expected = process.env.SUPABASE_PUBLISHABLE_KEY ?? process.env.SUPABASE_ANON_KEY;
+  const expected = process.env.CRON_SECRET;
   if (!expected) return false;
   const provided =
-    request.headers.get("apikey") ??
     request.headers.get("authorization")?.replace(/^Bearer\s+/i, "") ??
+    request.headers.get("x-cron-secret") ??
     null;
   if (!provided || provided.length !== expected.length) return false;
   let diff = 0;
