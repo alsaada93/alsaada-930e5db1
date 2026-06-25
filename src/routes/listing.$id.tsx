@@ -407,7 +407,7 @@ function Gallery({ images, video, title }: { images: string[]; video: string | n
               }`}
             >
               {s.type === "image" ? (
-                <img src={s.url} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />
+                <img src={optimizedImage(s.url, 120)} alt="" width={64} height={64} loading="lazy" decoding="async" className="h-full w-full object-cover" />
               ) : (
                 <span className="flex h-full w-full items-center justify-center bg-black text-white">
                   <Play className="h-5 w-5" />
