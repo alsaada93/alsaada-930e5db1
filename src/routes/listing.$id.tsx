@@ -518,7 +518,7 @@ function ListingPage() {
   const isRestaurant = item.categoryId === "restaurant";
   const phone = sellerPhone ?? item.phone ?? (isRestaurant ? "33982383" : null);
   const sellerName = item.sellerName?.trim() || seller?.name || "المعلن";
-  const rating = ratingData?.value ?? seller?.rating ?? 0;
+  const rating = ratingData?.value ?? listingRating(item.id);
   const reviews = ratingData?.count ?? seller?.reviews_count ?? 0;
   const deals = seller?.deals_count ?? 0;
   const verified = seller?.verified ?? false;
