@@ -53,7 +53,7 @@ export const Route = createFileRoute("/api/public/facebook-sync")({
         const token = url.searchParams.get("hub.verify_token");
         const challenge = url.searchParams.get("hub.challenge");
 
-        const VERIFY_TOKEN = "alsaada2026";
+        const VERIFY_TOKEN = process.env.FB_WEBHOOK_VERIFY_TOKEN;
 
         if (mode === "subscribe" && token === VERIFY_TOKEN) {
           return new Response(challenge, { status: 200 });
