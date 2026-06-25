@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useHeroSlides } from "@/hooks/useHeroSlides";
+import { optimizedImage, optimizedSrcSet } from "@/lib/image-url";
 
 /** شريط صور متحرك بين مربع البحث والتصنيفات — يتبدّل تلقائياً مع تنقّل بالنقاط. */
 export function PromoCarousel() {
