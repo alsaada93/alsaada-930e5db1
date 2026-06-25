@@ -609,7 +609,8 @@ export async function ingestBotPost(payload: BotPayload): Promise<BotIngestResul
     const reSpecs = category === "real_estate" ? extractRealEstateSpecs(content) : null;
     const negotiable = /\bnego\b|\bobo\b|قابل للتفاوض|قابل للنقاش|قابل/i.test(content);
 
-    const finalPrice = explicitPrice ?? priceResult.price ?? 0;
+    let finalPrice = explicitPrice ?? priceResult.price ?? 0;
+    if (!finalPrice || finalPrice <= 0) finalPrice = 1; // أي إعلان بدون سعر يُسعّر بـ 1 د.ب
     if (explicitPrice === null && !priceResult.detected) {
       warning = warning ? `${warning} | price_not_detected` : "price_not_detected";
     }
