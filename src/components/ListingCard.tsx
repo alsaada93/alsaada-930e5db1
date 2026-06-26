@@ -8,13 +8,14 @@ import { useSellers } from "@/hooks/useSellers";
 import { useLanguage } from "@/hooks/useLanguage";
 import { logContactAttempt, whatsappLink, telLink } from "@/lib/contact";
 import { PriceOfferDialog } from "@/components/PriceOfferDialog";
+import { SafetyModal } from "@/components/SafetyModal";
 import { useViewBoost, boostViews } from "@/hooks/useViewBoost";
 import { detectBrand } from "@/lib/facebook-parse";
 import { carBrandLogo } from "@/data/carBrandLogos";
 import { listingRating } from "@/lib/rating";
 import { optimizedImage, optimizedSrcSet } from "@/lib/image-url";
 
-const DEFAULT_PHONE = "33982383"; // الرقم المحلي البحريني
+const DEFAULT_PHONE = "33982383"; // الرقم المحلي البحريني (قسم المطاعم فقط)
 
 export function ListingCard({ item, displayTitle }: { item: Listing; displayTitle?: string }) {
   const { byId } = useSellers();
@@ -22,8 +23,10 @@ export function ListingCard({ item, displayTitle }: { item: Listing; displayTitl
   const { boost } = useViewBoost();
   const seller = item.sellerId ? byId.get(item.sellerId) : undefined;
   const [offerOpen, setOfferOpen] = useState(false);
+  const [safety, setSafety] = useState<null | { label: string; run: () => void }>(null);
 
-  const phone = seller?.phone ?? item.phone ?? DEFAULT_PHONE;
+  const isRestaurant = item.category === "restaurant";
+  const phone = seller?.phone ?? item.phone ?? (isRestaurant ? DEFAULT_PHONE : null);
   const sellerName = seller?.name ?? item.seller ?? t("card.trustedSeller");
   const rating = listingRating(item.id);
   const reviews = seller?.reviews_count ?? item.sellerReviews ?? 0;
@@ -34,7 +37,7 @@ export function ListingCard({ item, displayTitle }: { item: Listing; displayTitl
   const cat = categories.find((c) => c.id === item.category);
   const showCond = showsCondition(cat?.name ?? item.category, cat?.nameEn);
 
-  const waLink = whatsappLink({ phone, listingTitle: title, listingId: item.id });
+  const waLink = phone ? whatsappLink({ phone, listingTitle: title, listingId: item.id }) : null;
 
   const brand = detectBrand(`${item.title} ${item.description ?? ""}`);
   const brandLogo = carBrandLogo(brand);
@@ -116,36 +119,56 @@ export function ListingCard({ item, displayTitle }: { item: Listing; displayTitl
           </span>
         </div>
 
-        <div className="mt-3 grid grid-cols-3 gap-1.5">
-          <a
-            href={waLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={(e) => {
-              e.stopPropagation();
-              logContactAttempt({ recipientId: item.userId, listingId: item.id, method: "whatsapp", listingTitle: item.title });
-            }}
-            className="inline-flex items-center justify-center gap-1 rounded-lg bg-[#25D366] px-2 py-1.5 text-xs font-bold text-white transition-opacity hover:opacity-90"
-            aria-label={t("card.whatsapp")}
-          >
-            <MessageCircle className="h-3.5 w-3.5" /> {t("card.whatsapp")}
-          </a>
-          <a
-            href={telLink(phone)}
-            onClick={(e) => {
-              e.stopPropagation();
-              logContactAttempt({ recipientId: item.userId, listingId: item.id, method: "call", listingTitle: item.title });
-            }}
-            className="inline-flex items-center justify-center gap-1 rounded-lg bg-primary px-2 py-1.5 text-xs font-bold text-primary-foreground transition-opacity hover:opacity-90"
-            aria-label={t("card.call")}
-          >
-            <Phone className="h-3.5 w-3.5" /> {t("card.call")}
-          </a>
+        <div className={`mt-3 grid gap-1.5 ${phone ? "grid-cols-3" : "grid-cols-1"}`}>
+          {phone && waLink && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                setSafety({
+                  label: lang === "ar" ? "متابعة إلى واتساب" : "Continue to WhatsApp",
+                  run: () => {
+                    logContactAttempt({ recipientId: item.userId, listingId: item.id, method: "whatsapp", listingTitle: item.title });
+                    window.open(waLink, "_blank", "noopener,noreferrer");
+                  },
+                });
+              }}
+              className="inline-flex items-center justify-center gap-1 rounded-lg bg-[#25D366] px-2 py-1.5 text-xs font-bold text-white transition-opacity hover:opacity-90"
+              aria-label={t("card.whatsapp")}
+            >
+              <MessageCircle className="h-3.5 w-3.5" /> {t("card.whatsapp")}
+            </button>
+          )}
+          {phone && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                setSafety({
+                  label: lang === "ar" ? "متابعة إلى الاتصال" : "Continue to Call",
+                  run: () => {
+                    logContactAttempt({ recipientId: item.userId, listingId: item.id, method: "call", listingTitle: item.title });
+                    window.location.href = telLink(phone);
+                  },
+                });
+              }}
+              className="inline-flex items-center justify-center gap-1 rounded-lg bg-primary px-2 py-1.5 text-xs font-bold text-primary-foreground transition-opacity hover:opacity-90"
+              aria-label={t("card.call")}
+            >
+              <Phone className="h-3.5 w-3.5" /> {t("card.call")}
+            </button>
+          )}
           <button
             type="button"
             onClick={(e) => {
               e.stopPropagation();
-              setOfferOpen(true);
+              e.preventDefault();
+              setSafety({
+                label: lang === "ar" ? "متابعة لتقديم عرض" : "Continue to Offer",
+                run: () => setOfferOpen(true),
+              });
             }}
             className="inline-flex items-center justify-center gap-1 rounded-lg border border-border bg-muted px-2 py-1.5 text-xs font-bold text-foreground transition-colors hover:bg-accent"
           >
@@ -164,6 +187,13 @@ export function ListingCard({ item, displayTitle }: { item: Listing; displayTitl
           onClose={() => setOfferOpen(false)}
         />
       )}
+
+      <SafetyModal
+        open={safety != null}
+        continueLabel={safety?.label ?? ""}
+        onClose={() => setSafety(null)}
+        onContinue={() => safety?.run()}
+      />
     </article>
   );
 }
