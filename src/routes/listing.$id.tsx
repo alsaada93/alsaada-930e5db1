@@ -943,6 +943,13 @@ function ListingPage() {
         />
       </main>
       <Footer />
+      <SafetyModal
+        open={safety != null}
+        continueLabel={safety?.label ?? ""}
+        onClose={() => setSafety(null)}
+        onContinue={() => safety?.run()}
+      />
+
       {offerOpen && (
         <PriceOfferDialog
           listingId={item.id}
