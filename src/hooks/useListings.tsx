@@ -97,11 +97,3 @@ export function useListings(opts: UseListingsOpts = {}) {
 
   return { listings, loading, loadMore, loadingMore, hasMore };
 }
-
-useEffect(() => {
-  console.log("Listing Mounted", item.id);
-
-  return () => {
-    console.log("Listing Unmounted", item.id);
-  };
-}, []);
