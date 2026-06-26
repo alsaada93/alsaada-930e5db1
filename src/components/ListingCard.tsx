@@ -187,6 +187,13 @@ export function ListingCard({ item, displayTitle }: { item: Listing; displayTitl
           onClose={() => setOfferOpen(false)}
         />
       )}
+
+      <SafetyModal
+        open={safety != null}
+        continueLabel={safety?.label ?? ""}
+        onClose={() => setSafety(null)}
+        onContinue={() => safety?.run()}
+      />
     </article>
   );
 }
