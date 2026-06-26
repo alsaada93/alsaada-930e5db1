@@ -442,6 +442,8 @@ function ListingPage() {
   const [reposting, setReposting] = useState(false);
   const [isFav, setIsFav] = useState(false);
   const [offerOpen, setOfferOpen] = useState(false);
+  // نافذة إرشادات السلامة قبل أي تواصل + الإجراء المعلّق بعد الموافقة
+  const [safety, setSafety] = useState<null | { label: string; run: () => void }>(null);
   // لتفادي اختلاف وقت العرض بين الخادم والمتصفّح (hydration)
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
