@@ -67,7 +67,6 @@ export function ListingCard({ item, displayTitle }: { item: Listing; displayTitl
             </span>
           )}
 
-
           {item.featured && (
             <span className="absolute right-2 top-2 rounded-full bg-gradient-primary px-2 py-0.5 text-[11px] font-bold text-primary-foreground shadow-glow">
               {t("card.featured")}
@@ -96,7 +95,6 @@ export function ListingCard({ item, displayTitle }: { item: Listing; displayTitl
           )}
         </div>
 
-
         <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
           {verified && (
             <span className="inline-flex items-center gap-0.5 font-semibold text-primary">
@@ -106,8 +104,14 @@ export function ListingCard({ item, displayTitle }: { item: Listing; displayTitl
           <span className="inline-flex items-center gap-0.5 font-semibold text-amber-500">
             <Star className="h-3.5 w-3.5 fill-amber-500" /> {rating.toLocaleString("ar")}
           </span>
-          <span className="text-muted-foreground">({reviews.toLocaleString("ar")} {t("card.reviews")})</span>
-          {deals > 0 && <span className="text-muted-foreground">• {deals.toLocaleString("ar")} {t("card.deal")}</span>}
+          <span className="text-muted-foreground">
+            ({reviews.toLocaleString("ar")} {t("card.reviews")})
+          </span>
+          {deals > 0 && (
+            <span className="text-muted-foreground">
+              • {deals.toLocaleString("ar")} {t("card.deal")}
+            </span>
+          )}
         </div>
 
         <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
@@ -129,7 +133,12 @@ export function ListingCard({ item, displayTitle }: { item: Listing; displayTitl
                 setSafety({
                   label: lang === "ar" ? "متابعة إلى واتساب" : "Continue to WhatsApp",
                   run: () => {
-                    logContactAttempt({ recipientId: item.userId, listingId: item.id, method: "whatsapp", listingTitle: item.title });
+                    logContactAttempt({
+                      recipientId: item.userId,
+                      listingId: item.id,
+                      method: "whatsapp",
+                      listingTitle: item.title,
+                    });
                     window.open(waLink, "_blank", "noopener,noreferrer");
                   },
                 });
@@ -149,7 +158,12 @@ export function ListingCard({ item, displayTitle }: { item: Listing; displayTitl
                 setSafety({
                   label: lang === "ar" ? "متابعة إلى الاتصال" : "Continue to Call",
                   run: () => {
-                    logContactAttempt({ recipientId: item.userId, listingId: item.id, method: "call", listingTitle: item.title });
+                    logContactAttempt({
+                      recipientId: item.userId,
+                      listingId: item.id,
+                      method: "call",
+                      listingTitle: item.title,
+                    });
                     window.location.href = telLink(phone);
                   },
                 });
@@ -177,7 +191,6 @@ export function ListingCard({ item, displayTitle }: { item: Listing; displayTitl
         </div>
       </div>
 
-
       {offerOpen && (
         <PriceOfferDialog
           listingId={item.id}
@@ -197,3 +210,11 @@ export function ListingCard({ item, displayTitle }: { item: Listing; displayTitl
     </article>
   );
 }
+
+useEffect(() => {
+  console.log("Listing Mounted", item.id);
+
+  return () => {
+    console.log("Listing Unmounted", item.id);
+  };
+}, []);
