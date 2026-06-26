@@ -37,7 +37,7 @@ export function ListingCard({ item, displayTitle }: { item: Listing; displayTitl
   const cat = categories.find((c) => c.id === item.category);
   const showCond = showsCondition(cat?.name ?? item.category, cat?.nameEn);
 
-  const waLink = whatsappLink({ phone, listingTitle: title, listingId: item.id });
+  const waLink = phone ? whatsappLink({ phone, listingTitle: title, listingId: item.id }) : null;
 
   const brand = detectBrand(`${item.title} ${item.description ?? ""}`);
   const brandLogo = carBrandLogo(brand);
