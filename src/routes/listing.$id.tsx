@@ -31,6 +31,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { logContactAttempt, whatsappLink, telLink } from "@/lib/contact";
 import { PriceOfferDialog } from "@/components/PriceOfferDialog";
+import { SafetyModal } from "@/components/SafetyModal";
 import { ListingHashtags } from "@/components/ListingHashtags";
 import { ShareButtons } from "@/components/ShareButtons";
 import { useListingTranslations } from "@/hooks/useListingTranslations";
@@ -441,6 +442,8 @@ function ListingPage() {
   const [reposting, setReposting] = useState(false);
   const [isFav, setIsFav] = useState(false);
   const [offerOpen, setOfferOpen] = useState(false);
+  // نافذة إرشادات السلامة قبل أي تواصل + الإجراء المعلّق بعد الموافقة
+  const [safety, setSafety] = useState<null | { label: string; run: () => void }>(null);
   // لتفادي اختلاف وقت العرض بين الخادم والمتصفّح (hydration)
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
@@ -767,50 +770,66 @@ function ListingPage() {
               />
             )}
 
-            {/* أيقونات التواصل */}
+            {/* أيقونات التواصل — تظهر نافذة إرشادات السلامة قبل التوجيه */}
             <div className={`mt-4 grid gap-2 ${phone ? "grid-cols-3" : "grid-cols-1"}`}>
               {phone && waLink && (
-                <a
-                  href={waLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <button
+                  type="button"
                   onClick={() =>
-                    logContactAttempt({
-                      recipientId: item.userId,
-                      listingId: item.id,
-                      method: "whatsapp",
-                      listingTitle: item.title,
+                    setSafety({
+                      label: lang === "ar" ? "متابعة إلى واتساب" : "Continue to WhatsApp",
+                      run: () => {
+                        logContactAttempt({
+                          recipientId: item.userId,
+                          listingId: item.id,
+                          method: "whatsapp",
+                          listingTitle: item.title,
+                        });
+                        window.open(waLink, "_blank", "noopener,noreferrer");
+                      },
                     })
                   }
                   className="inline-flex items-center justify-center gap-1 rounded-xl bg-[#25D366] px-3 py-2.5 text-sm font-bold text-white transition-opacity hover:opacity-90"
                 >
                   <MessageCircle className="h-4 w-4" /> {lang === "ar" ? "واتساب" : "WhatsApp"}
-                </a>
+                </button>
               )}
               {phone && (
-                <a
-                  href={telLink(phone)}
+                <button
+                  type="button"
                   onClick={() =>
-                    logContactAttempt({
-                      recipientId: item.userId,
-                      listingId: item.id,
-                      method: "call",
-                      listingTitle: item.title,
+                    setSafety({
+                      label: lang === "ar" ? "متابعة إلى الاتصال" : "Continue to Call",
+                      run: () => {
+                        logContactAttempt({
+                          recipientId: item.userId,
+                          listingId: item.id,
+                          method: "call",
+                          listingTitle: item.title,
+                        });
+                        window.location.href = telLink(phone);
+                      },
                     })
                   }
                   className="inline-flex items-center justify-center gap-1 rounded-xl bg-primary px-3 py-2.5 text-sm font-bold text-primary-foreground transition-opacity hover:opacity-90"
                 >
                   <Phone className="h-4 w-4" /> {lang === "ar" ? "اتصال" : "Call"}
-                </a>
+                </button>
               )}
               <button
                 type="button"
-                onClick={() => setOfferOpen(true)}
+                onClick={() =>
+                  setSafety({
+                    label: lang === "ar" ? "متابعة إلى المراسلة" : "Continue to Chat",
+                    run: () => setOfferOpen(true),
+                  })
+                }
                 className="inline-flex items-center justify-center gap-1 rounded-xl border border-border bg-muted px-3 py-2.5 text-sm font-bold text-foreground transition-colors hover:bg-accent"
               >
                 <Tag className="h-4 w-4" /> {lang === "ar" ? "عرض سعر" : "Offer"}
               </button>
             </div>
+
 
             {/* تقييمات المعلن — أسفل أزرار التواصل مباشرة */}
             <div className="mt-5">
@@ -924,6 +943,13 @@ function ListingPage() {
         />
       </main>
       <Footer />
+      <SafetyModal
+        open={safety != null}
+        continueLabel={safety?.label ?? ""}
+        onClose={() => setSafety(null)}
+        onContinue={() => safety?.run()}
+      />
+
       {offerOpen && (
         <PriceOfferDialog
           listingId={item.id}
