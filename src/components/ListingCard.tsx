@@ -119,36 +119,56 @@ export function ListingCard({ item, displayTitle }: { item: Listing; displayTitl
           </span>
         </div>
 
-        <div className="mt-3 grid grid-cols-3 gap-1.5">
-          <a
-            href={waLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={(e) => {
-              e.stopPropagation();
-              logContactAttempt({ recipientId: item.userId, listingId: item.id, method: "whatsapp", listingTitle: item.title });
-            }}
-            className="inline-flex items-center justify-center gap-1 rounded-lg bg-[#25D366] px-2 py-1.5 text-xs font-bold text-white transition-opacity hover:opacity-90"
-            aria-label={t("card.whatsapp")}
-          >
-            <MessageCircle className="h-3.5 w-3.5" /> {t("card.whatsapp")}
-          </a>
-          <a
-            href={telLink(phone)}
-            onClick={(e) => {
-              e.stopPropagation();
-              logContactAttempt({ recipientId: item.userId, listingId: item.id, method: "call", listingTitle: item.title });
-            }}
-            className="inline-flex items-center justify-center gap-1 rounded-lg bg-primary px-2 py-1.5 text-xs font-bold text-primary-foreground transition-opacity hover:opacity-90"
-            aria-label={t("card.call")}
-          >
-            <Phone className="h-3.5 w-3.5" /> {t("card.call")}
-          </a>
+        <div className={`mt-3 grid gap-1.5 ${phone ? "grid-cols-3" : "grid-cols-1"}`}>
+          {phone && waLink && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                setSafety({
+                  label: lang === "ar" ? "متابعة إلى واتساب" : "Continue to WhatsApp",
+                  run: () => {
+                    logContactAttempt({ recipientId: item.userId, listingId: item.id, method: "whatsapp", listingTitle: item.title });
+                    window.open(waLink, "_blank", "noopener,noreferrer");
+                  },
+                });
+              }}
+              className="inline-flex items-center justify-center gap-1 rounded-lg bg-[#25D366] px-2 py-1.5 text-xs font-bold text-white transition-opacity hover:opacity-90"
+              aria-label={t("card.whatsapp")}
+            >
+              <MessageCircle className="h-3.5 w-3.5" /> {t("card.whatsapp")}
+            </button>
+          )}
+          {phone && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                setSafety({
+                  label: lang === "ar" ? "متابعة إلى الاتصال" : "Continue to Call",
+                  run: () => {
+                    logContactAttempt({ recipientId: item.userId, listingId: item.id, method: "call", listingTitle: item.title });
+                    window.location.href = telLink(phone);
+                  },
+                });
+              }}
+              className="inline-flex items-center justify-center gap-1 rounded-lg bg-primary px-2 py-1.5 text-xs font-bold text-primary-foreground transition-opacity hover:opacity-90"
+              aria-label={t("card.call")}
+            >
+              <Phone className="h-3.5 w-3.5" /> {t("card.call")}
+            </button>
+          )}
           <button
             type="button"
             onClick={(e) => {
               e.stopPropagation();
-              setOfferOpen(true);
+              e.preventDefault();
+              setSafety({
+                label: lang === "ar" ? "متابعة لتقديم عرض" : "Continue to Offer",
+                run: () => setOfferOpen(true),
+              });
             }}
             className="inline-flex items-center justify-center gap-1 rounded-lg border border-border bg-muted px-2 py-1.5 text-xs font-bold text-foreground transition-colors hover:bg-accent"
           >
