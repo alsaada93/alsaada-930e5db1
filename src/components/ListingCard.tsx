@@ -210,11 +210,3 @@ export function ListingCard({ item, displayTitle }: { item: Listing; displayTitl
     </article>
   );
 }
-
-useEffect(() => {
-  console.log("Listing Mounted", item.id);
-
-  return () => {
-    console.log("Listing Unmounted", item.id);
-  };
-}, []);
