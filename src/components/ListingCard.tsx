@@ -8,13 +8,14 @@ import { useSellers } from "@/hooks/useSellers";
 import { useLanguage } from "@/hooks/useLanguage";
 import { logContactAttempt, whatsappLink, telLink } from "@/lib/contact";
 import { PriceOfferDialog } from "@/components/PriceOfferDialog";
+import { SafetyModal } from "@/components/SafetyModal";
 import { useViewBoost, boostViews } from "@/hooks/useViewBoost";
 import { detectBrand } from "@/lib/facebook-parse";
 import { carBrandLogo } from "@/data/carBrandLogos";
 import { listingRating } from "@/lib/rating";
 import { optimizedImage, optimizedSrcSet } from "@/lib/image-url";
 
-const DEFAULT_PHONE = "33982383"; // الرقم المحلي البحريني
+const DEFAULT_PHONE = "33982383"; // الرقم المحلي البحريني (قسم المطاعم فقط)
 
 export function ListingCard({ item, displayTitle }: { item: Listing; displayTitle?: string }) {
   const { byId } = useSellers();
@@ -22,8 +23,10 @@ export function ListingCard({ item, displayTitle }: { item: Listing; displayTitl
   const { boost } = useViewBoost();
   const seller = item.sellerId ? byId.get(item.sellerId) : undefined;
   const [offerOpen, setOfferOpen] = useState(false);
+  const [safety, setSafety] = useState<null | { label: string; run: () => void }>(null);
 
-  const phone = seller?.phone ?? item.phone ?? DEFAULT_PHONE;
+  const isRestaurant = item.category === "restaurant";
+  const phone = seller?.phone ?? item.phone ?? (isRestaurant ? DEFAULT_PHONE : null);
   const sellerName = seller?.name ?? item.seller ?? t("card.trustedSeller");
   const rating = listingRating(item.id);
   const reviews = seller?.reviews_count ?? item.sellerReviews ?? 0;
