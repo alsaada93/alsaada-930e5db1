@@ -58,10 +58,7 @@ export function useListings(opts: UseListingsOpts = {}) {
   const pageRef = useRef(0);
 
   const buildQuery = (from: number, to: number) => {
-    let q = supabase
-      .from("listings")
-      .select(SELECT_COLS)
-      .eq("status", "approved");
+    let q = supabase.from("listings").select(SELECT_COLS).eq("status", "approved");
     if (onlyNormal) q = q.or("listing_type.eq.normal,listing_type.is.null");
     return q.order("created_at", { ascending: false }).range(from, to);
   };
@@ -101,3 +98,10 @@ export function useListings(opts: UseListingsOpts = {}) {
   return { listings, loading, loadMore, loadingMore, hasMore };
 }
 
+useEffect(() => {
+  console.log("Listing Mounted", item.id);
+
+  return () => {
+    console.log("Listing Unmounted", item.id);
+  };
+}, []);
