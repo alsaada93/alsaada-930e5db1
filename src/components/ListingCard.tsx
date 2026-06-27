@@ -9,6 +9,7 @@ import { useLanguage } from "@/hooks/useLanguage";
 import { logContactAttempt, whatsappLink, telLink } from "@/lib/contact";
 import { PriceOfferDialog } from "@/components/PriceOfferDialog";
 import { SafetyModal } from "@/components/SafetyModal";
+import { ListingChatDialog } from "@/components/ListingChatDialog";
 import { useViewBoost, boostViews } from "@/hooks/useViewBoost";
 import { detectBrand } from "@/lib/facebook-parse";
 import { carBrandLogo } from "@/data/carBrandLogos";
@@ -23,6 +24,7 @@ export function ListingCard({ item, displayTitle }: { item: Listing; displayTitl
   const { boost } = useViewBoost();
   const seller = item.sellerId ? byId.get(item.sellerId) : undefined;
   const [offerOpen, setOfferOpen] = useState(false);
+  const [chatOpen, setChatOpen] = useState(false);
   const [safety, setSafety] = useState<null | { label: string; run: () => void }>(null);
 
   const isRestaurant = item.category === "restaurant";
@@ -180,13 +182,13 @@ export function ListingCard({ item, displayTitle }: { item: Listing; displayTitl
               e.stopPropagation();
               e.preventDefault();
               setSafety({
-                label: lang === "ar" ? "متابعة لتقديم عرض" : "Continue to Offer",
-                run: () => setOfferOpen(true),
+                label: lang === "ar" ? "متابعة إلى الدردشة" : "Continue to Chat",
+                run: () => setChatOpen(true),
               });
             }}
             className="inline-flex items-center justify-center gap-1 rounded-lg border border-border bg-muted px-2 py-1.5 text-xs font-bold text-foreground transition-colors hover:bg-accent"
           >
-            <Tag className="h-3.5 w-3.5" /> {t("card.offer")}
+            <Tag className="h-3.5 w-3.5" /> {t("card.message")}
           </button>
         </div>
       </div>
@@ -200,6 +202,14 @@ export function ListingCard({ item, displayTitle }: { item: Listing; displayTitl
           onClose={() => setOfferOpen(false)}
         />
       )}
+
+      <ListingChatDialog
+        open={chatOpen}
+        onClose={() => setChatOpen(false)}
+        listingId={item.id}
+        listingTitle={item.title}
+        sellerId={item.userId ?? null}
+      />
 
       <SafetyModal
         open={safety != null}
