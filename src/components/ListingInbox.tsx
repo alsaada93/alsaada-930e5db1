@@ -160,6 +160,8 @@ export function ListingInbox() {
     return <p className="py-8 text-center text-sm text-muted-foreground">لا توجد دردشات حتى الآن.</p>;
   }
 
+  const activeConversation = selected ?? conversations[0];
+
   return (
     <div className="grid overflow-hidden rounded-2xl border border-border bg-background md:grid-cols-[280px_1fr]">
       <div className="max-h-[520px] overflow-y-auto border-b border-border md:border-b-0 md:border-e">
@@ -187,11 +189,11 @@ export function ListingInbox() {
 
       <div className="flex min-h-[520px] flex-col">
         <div className="flex items-center justify-between border-b border-border p-3">
-          <Link to="/listing/$id" params={{ id: selected.listing_id }} className="text-sm font-bold text-primary hover:underline">
+          <Link to="/listing/$id" params={{ id: activeConversation.listing_id }} className="text-sm font-bold text-primary hover:underline">
             فتح الإعلان
           </Link>
           <div className="min-w-0 text-right">
-            <h3 className="truncate font-extrabold">{listings[selected.listing_id]?.title ?? "إعلان"}</h3>
+            <h3 className="truncate font-extrabold">{listings[activeConversation.listing_id]?.title ?? "إعلان"}</h3>
             <p className="text-xs text-muted-foreground">دردشة داخل الموقع</p>
           </div>
         </div>

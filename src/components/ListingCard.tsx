@@ -7,7 +7,6 @@ import { displayCity } from "@/data/bahrainCities";
 import { useSellers } from "@/hooks/useSellers";
 import { useLanguage } from "@/hooks/useLanguage";
 import { logContactAttempt, whatsappLink, telLink } from "@/lib/contact";
-import { PriceOfferDialog } from "@/components/PriceOfferDialog";
 import { SafetyModal } from "@/components/SafetyModal";
 import { ListingChatDialog } from "@/components/ListingChatDialog";
 import { useViewBoost, boostViews } from "@/hooks/useViewBoost";
@@ -23,7 +22,6 @@ export function ListingCard({ item, displayTitle }: { item: Listing; displayTitl
   const { t, lang } = useLanguage();
   const { boost } = useViewBoost();
   const seller = item.sellerId ? byId.get(item.sellerId) : undefined;
-  const [offerOpen, setOfferOpen] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
   const [safety, setSafety] = useState<null | { label: string; run: () => void }>(null);
 
@@ -192,16 +190,6 @@ export function ListingCard({ item, displayTitle }: { item: Listing; displayTitl
           </button>
         </div>
       </div>
-
-      {offerOpen && (
-        <PriceOfferDialog
-          listingId={item.id}
-          recipientId={item.userId}
-          listingTitle={item.title}
-          currentPrice={item.price}
-          onClose={() => setOfferOpen(false)}
-        />
-      )}
 
       <ListingChatDialog
         open={chatOpen}

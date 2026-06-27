@@ -30,7 +30,6 @@ import { useCategories } from "@/hooks/useCategories";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { logContactAttempt, whatsappLink, telLink } from "@/lib/contact";
-import { PriceOfferDialog } from "@/components/PriceOfferDialog";
 import { SafetyModal } from "@/components/SafetyModal";
 import { ListingChatDialog } from "@/components/ListingChatDialog";
 import { ListingHashtags } from "@/components/ListingHashtags";
@@ -442,7 +441,6 @@ function ListingPage() {
   const { data: sellerPhone } = useSellerPhone(item.sellerId);
   const [reposting, setReposting] = useState(false);
   const [isFav, setIsFav] = useState(false);
-  const [offerOpen, setOfferOpen] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
   // نافذة إرشادات السلامة قبل أي تواصل + الإجراء المعلّق بعد الموافقة
   const [safety, setSafety] = useState<null | { label: string; run: () => void }>(null);
@@ -951,16 +949,6 @@ function ListingPage() {
         onClose={() => setSafety(null)}
         onContinue={() => safety?.run()}
       />
-
-      {offerOpen && (
-        <PriceOfferDialog
-          listingId={item.id}
-          recipientId={item.userId}
-          listingTitle={item.title}
-          currentPrice={item.price}
-          onClose={() => setOfferOpen(false)}
-        />
-      )}
 
       <ListingChatDialog
         open={chatOpen}
