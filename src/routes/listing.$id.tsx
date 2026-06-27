@@ -30,8 +30,8 @@ import { useCategories } from "@/hooks/useCategories";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { logContactAttempt, whatsappLink, telLink } from "@/lib/contact";
-import { PriceOfferDialog } from "@/components/PriceOfferDialog";
 import { SafetyModal } from "@/components/SafetyModal";
+import { ListingChatDialog } from "@/components/ListingChatDialog";
 import { ListingHashtags } from "@/components/ListingHashtags";
 import { ShareButtons } from "@/components/ShareButtons";
 import { useListingTranslations } from "@/hooks/useListingTranslations";
@@ -441,7 +441,7 @@ function ListingPage() {
   const { data: sellerPhone } = useSellerPhone(item.sellerId);
   const [reposting, setReposting] = useState(false);
   const [isFav, setIsFav] = useState(false);
-  const [offerOpen, setOfferOpen] = useState(false);
+  const [chatOpen, setChatOpen] = useState(false);
   // نافذة إرشادات السلامة قبل أي تواصل + الإجراء المعلّق بعد الموافقة
   const [safety, setSafety] = useState<null | { label: string; run: () => void }>(null);
   // لتفادي اختلاف وقت العرض بين الخادم والمتصفّح (hydration)
@@ -821,12 +821,12 @@ function ListingPage() {
                 onClick={() =>
                   setSafety({
                     label: lang === "ar" ? "متابعة إلى المراسلة" : "Continue to Chat",
-                    run: () => setOfferOpen(true),
+                    run: () => setChatOpen(true),
                   })
                 }
                 className="inline-flex items-center justify-center gap-1 rounded-xl border border-border bg-muted px-3 py-2.5 text-sm font-bold text-foreground transition-colors hover:bg-accent"
               >
-                <Tag className="h-4 w-4" /> {lang === "ar" ? "عرض سعر" : "Offer"}
+                <Tag className="h-4 w-4" /> {lang === "ar" ? "دردشة" : "Chat"}
               </button>
             </div>
 
@@ -950,15 +950,13 @@ function ListingPage() {
         onContinue={() => safety?.run()}
       />
 
-      {offerOpen && (
-        <PriceOfferDialog
-          listingId={item.id}
-          recipientId={item.userId}
-          listingTitle={item.title}
-          currentPrice={item.price}
-          onClose={() => setOfferOpen(false)}
-        />
-      )}
+      <ListingChatDialog
+        open={chatOpen}
+        onClose={() => setChatOpen(false)}
+        listingId={item.id}
+        listingTitle={item.title}
+        sellerId={item.userId}
+      />
     </div>
   );
 }

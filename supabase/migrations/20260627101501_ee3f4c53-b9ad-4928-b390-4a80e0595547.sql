@@ -1,0 +1,3 @@
+ALTER TABLE public.listing_conversations DROP CONSTRAINT IF EXISTS listing_conversations_buyer_id_fkey;
+ALTER TABLE public.listing_conversations DROP CONSTRAINT IF EXISTS listing_conversations_seller_id_fkey;
+ALTER TABLE public.listing_messages DROP CONSTRAINT IF EXISTS listing_messages_sender_id_fkey;

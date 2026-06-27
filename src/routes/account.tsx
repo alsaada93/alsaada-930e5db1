@@ -22,11 +22,13 @@ import {
   History,
   Users,
   Bell,
+  MessageCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { DeleteListingDialog } from "@/components/DeleteListingDialog";
+import { ListingInbox } from "@/components/ListingInbox";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -90,6 +92,7 @@ function AccountPage() {
   const [recentViews, setRecentViews] = useState<ListingRow[]>([]);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [notifications, setNotifications] = useState<{ id: string; type: string; message: string | null; read: boolean; created_at: string }[]>([]);
+  const [chatCount, setChatCount] = useState(0);
   const [activePanel, setActivePanel] = useState<string | null>(null);
 
   useEffect(() => {
@@ -188,6 +191,11 @@ function AccountPage() {
         .order("created_at", { ascending: false })
         .limit(30);
       if (active) setNotifications((notifs as any) ?? []);
+
+      const { count } = await db
+        .from("listing_conversations")
+        .select("id", { count: "exact", head: true });
+      if (active) setChatCount(count ?? 0);
     })();
     return () => {
       active = false;
@@ -322,6 +330,7 @@ function AccountPage() {
     { key: "views", icon: History, label: "آخر الإعلانات المشاهدة", count: recentViews.length },
     { key: "recentSearches", icon: History, label: "آخر البحوث", count: recentSearches.length },
     { key: "follows", icon: Users, label: "إعلانات المتابعون", count: followedListings.length },
+    { key: "messages", icon: MessageCircle, label: "الدردشات", count: chatCount },
     { key: "verify", icon: ShieldCheck, label: "طلبات التوثيق" },
   ];
 
@@ -512,6 +521,8 @@ function AccountPage() {
               ) : (
                 <EmptyPanel text="لا توجد إعلانات من حسابات تتابعها." />
               ))}
+
+            {activePanel === "messages" && <ListingInbox />}
 
             {activePanel === "verify" && (
               <div className="space-y-3 text-sm">
