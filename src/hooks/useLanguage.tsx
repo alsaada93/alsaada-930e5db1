@@ -73,7 +73,7 @@ const dict: Dict = {
   "card.deal": { ar: "صفقة", en: "deals" },
   "card.whatsapp": { ar: "واتساب", en: "WhatsApp" },
   "card.call": { ar: "اتصال", en: "Call" },
-  "card.message": { ar: "رسالة", en: "Message" },
+  "card.message": { ar: "دردشة", en: "Chat" },
   "card.offer": { ar: "عرض سعر", en: "Offer" },
   "cond.new": { ar: "جديد", en: "New" },
   "cond.used": { ar: "مستعمل", en: "Used" },
