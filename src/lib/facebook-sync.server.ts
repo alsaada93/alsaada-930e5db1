@@ -16,6 +16,7 @@ import {
   buildAdTitle,
   hasMeaningfulTitle,
   firstMeaningfulLine,
+  cleanDescription,
   type FbCategorySlug,
 } from "./facebook-parse";
 
