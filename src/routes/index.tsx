@@ -61,7 +61,7 @@ function Index() {
           <PromoCarousel />
           <CategoryGrid />
           <WeBuyBanner />
-          <ListingsSection title={t("sec.latest")} subtitle={t("sec.latestSub")} items={latest} />
+          <ListingsCarousel title={t("sec.latest")} subtitle={t("sec.latestSub")} items={latest} />
           {hasMore && (
             <div className="mx-auto max-w-7xl px-4 pb-4 text-center">
               <button
