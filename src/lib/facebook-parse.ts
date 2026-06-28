@@ -256,10 +256,10 @@ function parseIntNum(tok: string): number | null {
 }
 
 const PRICE_KW = [
-  "price", "cost", "asking", "offer", "nego", "obo",
-  "السعر", "بسعر", "سعر", "مطلوب",
+  "price", "cost", "asking", "offer", "nego", "obo", "only",
+  "السعر", "بسعر", "سعر", "مطلوب", "فقط", "بيع", "للبيع", "بكم", "السوم", "required",
 ];
-const CURRENCY = ["bd", "bhd", "kd", "kwd", "sar", "aed", "usd", "$", "دينار", "ريال", "درهم"];
+const CURRENCY = ["bd", "bhd", "kd", "kwd", "sar", "aed", "usd", "$", "دينار", "د.ب", "ريال", "درهم"];
 
 export interface PriceResult {
   price: number | null;
