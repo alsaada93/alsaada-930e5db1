@@ -648,17 +648,74 @@ export function hasMeaningfulTitle(rawTitle: string | null | undefined): boolean
 
 /** Generic, non-descriptive words that must never stand alone as an ad title. */
 const GENERIC_TITLE_WORDS =
-  /^(عام|أخرى|اخرى|عام وأخرى|للبيع|للايجار|للإيجار|سيارات?|عقار|عقارات|اعلان|إعلان|متوفر|available|for sale|item for sale|sale|new|used|general|other|misc)$/i;
+  /^(عام|أخرى|اخرى|عام وأخرى|للبيع|للايجار|للإيجار|سيارات?|مركبات?|عقار|عقارات|الكترونيات|إلكترونيات|اثاث|أثاث|معدات|خدمات|وظائف|اعلان|إعلان|متوفر|جديد|مستعمل|بسعر|السعر|available|for sale|item for sale|sale|new|used|general|other|misc|electronics|furniture|services|jobs|cars|vehicles)$/i;
 
-/** Derives a descriptive title from the first meaningful line of the body. */
-export function firstMeaningfulLine(text: string | null | undefined): string {
-  const lines = (text ?? "").toString().replace(/\r/g, "").split("\n");
-  for (const line of lines) {
-    const cleaned = cleanTitlePart(line);
-    if (cleaned.length >= 3 && !GENERIC_TITLE_WORDS.test(cleaned)) return cleaned.slice(0, 80).trim();
+/** True when a text fragment contains a recognisable product / brand keyword. */
+function hasProductSignal(s: string): boolean {
+  const t = s.toLowerCase();
+  if (Object.keys(CAR_BRANDS).some((b) => t.includes(b))) return true;
+  for (const words of Object.values(CATEGORY_KEYWORDS)) {
+    if (words.some((w) => t.includes(w.toLowerCase()))) return true;
   }
-  return "";
+  return false;
 }
+
+/**
+ * Derives a clean, descriptive title from the body — never a category name and
+ * never an invented product. Prefers the first line that carries a real product
+ * or brand signal; otherwise falls back to the first non-generic, text-bearing
+ * line. Returns "" when nothing usable exists.
+ */
+export function firstMeaningfulLine(text: string | null | undefined): string {
+  const segments = (text ?? "")
+    .toString()
+    .replace(/\r/g, "")
+    .split(/[\n.،؛;]+/);
+  let fallback = "";
+  for (const seg of segments) {
+    const cleaned = cleanTitlePart(seg);
+    if (cleaned.length < 3) continue;
+    if (GENERIC_TITLE_WORDS.test(cleaned)) continue;
+    // skip lines that are mostly digits (prices / phones / specs)
+    const letters = (cleaned.match(/\p{L}/gu) || []).length;
+    if (letters < 2) continue;
+    const short = cleaned.split(/\s+/).filter(Boolean).slice(0, 9).join(" ").slice(0, 80).trim();
+    if (!fallback) fallback = short;
+    if (hasProductSignal(cleaned)) return short;
+  }
+  return fallback;
+}
+
+/**
+ * Cleans an ad description coming from a scraper:
+ *  - removes URLs
+ *  - removes the seller phone (when stored separately) from the body
+ *  - drops duplicate / repeated lines
+ *  - normalises blank lines and whitespace
+ */
+export function cleanDescription(text: string | null | undefined, phone?: string | null): string {
+  let t = (text ?? "").toString().replace(/\r/g, "");
+  t = t.replace(/https?:\/\/\S+/gi, " ").replace(/www\.\S+/gi, " ");
+
+  const phoneTail = (phone ?? "").replace(/\D/g, "").slice(-6);
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const rawLine of t.split("\n")) {
+    const line = rawLine.replace(/[ \t]{2,}/g, " ").trimEnd();
+    const key = line.trim().toLowerCase();
+    if (key) {
+      if (seen.has(key)) continue; // drop repeated lines
+      seen.add(key);
+      if (phoneTail.length >= 6) {
+        const lineDigits = normDigits(line).replace(/\D/g, "");
+        if (lineDigits.length >= 6 && lineDigits.includes(phoneTail)) continue; // drop phone line
+      }
+    }
+    out.push(line);
+  }
+  return out.join("\n").replace(/\n{3,}/g, "\n\n").trim();
+}
+
 
 
 // ───────────────────────── Subcategory detection ─────────────────────────
