@@ -256,10 +256,10 @@ function parseIntNum(tok: string): number | null {
 }
 
 const PRICE_KW = [
-  "price", "cost", "asking", "offer", "nego", "obo",
-  "السعر", "بسعر", "سعر", "مطلوب",
+  "price", "cost", "asking", "offer", "nego", "obo", "only",
+  "السعر", "بسعر", "سعر", "مطلوب", "فقط", "بيع", "للبيع", "بكم", "السوم", "required",
 ];
-const CURRENCY = ["bd", "bhd", "kd", "kwd", "sar", "aed", "usd", "$", "دينار", "ريال", "درهم"];
+const CURRENCY = ["bd", "bhd", "kd", "kwd", "sar", "aed", "usd", "$", "دينار", "د.ب", "ريال", "درهم"];
 
 export interface PriceResult {
   price: number | null;
@@ -274,22 +274,25 @@ export interface PriceResult {
  */
 export function extractPriceSmart(text: string): PriceResult {
   if (!text) return { price: null, detected: false };
-  const raw = normDigits(text);
+  // أزل أرقام الهواتف بالكامل قبل أي تحليل حتى لا تُعتبر سعراً
+  const raw = stripPhoneLike(normDigits(text));
   const words = raw.split(/\s+/).filter(Boolean);
-  const curYear = new Date().getFullYear();
+
 
   // A bare 4-digit number in the model-year range is a year, NOT a price.
   const isYearValue = (n: number, tok: string): boolean => {
     const digitsOnly = tok.replace(/\D/g, "");
     if (digitsOnly.length !== 4) return false;
-    return Number.isInteger(n) && n >= 1980 && n <= curYear + 1;
+    return Number.isInteger(n) && n >= 1950 && n <= 2035;
   };
   const hasCurrency = (tok: string): boolean => {
     const w = tok.toLowerCase();
     return CURRENCY.some((c) => (c === "$" ? w.includes("$") : w.includes(c)));
   };
-  // Tokens that signal the number is a model year, not a price.
-  const yearContext = (tok: string): boolean => /موديل|model|سنة|سنه|year/i.test(tok);
+  // Tokens/contexts that signal the number is NOT a price (year/model/mileage/area/part no.).
+  const nonPriceContext = (s: string): boolean =>
+    /موديل|model|سنة|سنه|year|عداد|كيلومتر|كيلو|\bkm\b|mileage|مقاس|مقاعد|مقعد|seat|رقم|قطعة|قطعه|part|sku|متر|م2|م²|sqm|غرفة|غرف|حمام|حمامات|bedroom|bathroom|bhk/i.test(s);
+  const isPhoneish = (tok: string): boolean => tok.replace(/\D/g, "").length >= 8;
 
   // (a) keyword / currency adjacency (max 2 words either side)
   const kw = [...PRICE_KW, ...CURRENCY];
@@ -299,7 +302,7 @@ export function extractPriceSmart(text: string): PriceResult {
     // attached currency+number e.g "4500BD", "$4500", "BD4500"
     if (!isKw) {
       const attached = CURRENCY.some((c) => c !== "$" && w.includes(c)) || w.includes("$");
-      if (attached && /\d/.test(w)) {
+      if (attached && /\d/.test(w) && !isPhoneish(w)) {
         const n = parsePriceNum(w);
         if (n && n > 0) return { price: n, detected: true };
       }
@@ -308,8 +311,10 @@ export function extractPriceSmart(text: string): PriceResult {
     for (let d = 1; d <= 2; d++) {
       for (const j of [i + d, i - d]) {
         if (j >= 0 && j < words.length && /\d/.test(words[j])) {
-          // skip years that sit next to a model/year word (e.g. "موديل 2020")
-          if (yearContext(words[i]) || yearContext(words[j - 1] ?? "") || yearContext(words[j + 1] ?? "")) continue;
+          if (isPhoneish(words[j])) continue; // phone number, never a price
+          // skip non-price contexts (model/year/km/area/part no.) adjacent to the number
+          const ctx = `${words[i]} ${words[j - 1] ?? ""} ${words[j]} ${words[j + 1] ?? ""}`;
+          if (nonPriceContext(ctx)) continue;
           const n = parsePriceNum(words[j]);
           if (!n || n <= 0) continue;
           // a bare year with no currency is not a price
@@ -328,20 +333,16 @@ export function extractPriceSmart(text: string): PriceResult {
     if (!digitsOnly) continue;
     const around = `${words[i - 1] ?? ""} ${words[i]} ${words[i + 1] ?? ""}`.toLowerCase();
 
-    // year (1980 .. current+1) unless an explicit currency is attached to the token
+    // year (1950 .. 2035) unless an explicit currency is attached to the token
     if (digitsOnly.length === 4) {
       const y = Number(digitsOnly);
-      if (y >= 1980 && y <= curYear + 1 && !hasCurrency(words[i])) continue;
+      if (y >= 1950 && y <= 2035 && !hasCurrency(words[i])) continue;
     }
-    // model/year context word adjacent → treat as year, skip
-    if (/موديل|model|سنة الصنع|year/i.test(around)) continue;
-    // mileage
-    if (/\bkm\b|كم|كيلومتر|mileage/i.test(around)) continue;
-    // area
-    if (/م2|م²|متر|sqm|sq m/i.test(around)) continue;
+    // model/year/mileage/area/part/phone context → skip
+    if (nonPriceContext(around)) continue;
     // phone (8+ digits, or near a call keyword)
     if (digitsOnly.length >= 8) continue;
-    if (/call|اتصال|جوال|واتساب|whatsapp|للتواصل/i.test(around)) continue;
+    if (/call|اتصال|جوال|واتساب|whatsapp|للتواصل|hatif|هاتف/i.test(around)) continue;
 
     const n = parsePriceNum(words[i]);
     if (n && n > 0) survivors.push(n);
@@ -349,6 +350,14 @@ export function extractPriceSmart(text: string): PriceResult {
   if (survivors.length) return { price: survivors[survivors.length - 1], detected: true };
 
   return { price: null, detected: false };
+}
+
+/** Removes phone-like digit sequences (8–15 digits, common separators) from text. */
+function stripPhoneLike(text: string): string {
+  return text.replace(/\+?\d[\d\s\-()]{6,}\d/g, (m) => {
+    const digits = m.replace(/\D/g, "");
+    return digits.length >= 8 && digits.length <= 15 ? " " : m;
+  });
 }
 
 
@@ -639,17 +648,74 @@ export function hasMeaningfulTitle(rawTitle: string | null | undefined): boolean
 
 /** Generic, non-descriptive words that must never stand alone as an ad title. */
 const GENERIC_TITLE_WORDS =
-  /^(عام|أخرى|اخرى|عام وأخرى|للبيع|للايجار|للإيجار|سيارات?|عقار|عقارات|اعلان|إعلان|متوفر|available|for sale|item for sale|sale|new|used|general|other|misc)$/i;
+  /^(عام|أخرى|اخرى|عام وأخرى|للبيع|للايجار|للإيجار|سيارات?|مركبات?|عقار|عقارات|الكترونيات|إلكترونيات|اثاث|أثاث|معدات|خدمات|وظائف|اعلان|إعلان|متوفر|جديد|مستعمل|بسعر|السعر|available|for sale|item for sale|sale|new|used|general|other|misc|electronics|furniture|services|jobs|cars|vehicles)$/i;
 
-/** Derives a descriptive title from the first meaningful line of the body. */
-export function firstMeaningfulLine(text: string | null | undefined): string {
-  const lines = (text ?? "").toString().replace(/\r/g, "").split("\n");
-  for (const line of lines) {
-    const cleaned = cleanTitlePart(line);
-    if (cleaned.length >= 3 && !GENERIC_TITLE_WORDS.test(cleaned)) return cleaned.slice(0, 80).trim();
+/** True when a text fragment contains a recognisable product / brand keyword. */
+function hasProductSignal(s: string): boolean {
+  const t = s.toLowerCase();
+  if (Object.keys(CAR_BRANDS).some((b) => t.includes(b))) return true;
+  for (const words of Object.values(CATEGORY_KEYWORDS)) {
+    if (words.some((w) => t.includes(w.toLowerCase()))) return true;
   }
-  return "";
+  return false;
 }
+
+/**
+ * Derives a clean, descriptive title from the body — never a category name and
+ * never an invented product. Prefers the first line that carries a real product
+ * or brand signal; otherwise falls back to the first non-generic, text-bearing
+ * line. Returns "" when nothing usable exists.
+ */
+export function firstMeaningfulLine(text: string | null | undefined): string {
+  const segments = (text ?? "")
+    .toString()
+    .replace(/\r/g, "")
+    .split(/[\n.،؛;]+/);
+  let fallback = "";
+  for (const seg of segments) {
+    const cleaned = cleanTitlePart(seg);
+    if (cleaned.length < 3) continue;
+    if (GENERIC_TITLE_WORDS.test(cleaned)) continue;
+    // skip lines that are mostly digits (prices / phones / specs)
+    const letters = (cleaned.match(/\p{L}/gu) || []).length;
+    if (letters < 2) continue;
+    const short = cleaned.split(/\s+/).filter(Boolean).slice(0, 9).join(" ").slice(0, 80).trim();
+    if (!fallback) fallback = short;
+    if (hasProductSignal(cleaned)) return short;
+  }
+  return fallback;
+}
+
+/**
+ * Cleans an ad description coming from a scraper:
+ *  - removes URLs
+ *  - removes the seller phone (when stored separately) from the body
+ *  - drops duplicate / repeated lines
+ *  - normalises blank lines and whitespace
+ */
+export function cleanDescription(text: string | null | undefined, phone?: string | null): string {
+  let t = (text ?? "").toString().replace(/\r/g, "");
+  t = t.replace(/https?:\/\/\S+/gi, " ").replace(/www\.\S+/gi, " ");
+
+  const phoneTail = (phone ?? "").replace(/\D/g, "").slice(-6);
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const rawLine of t.split("\n")) {
+    const line = rawLine.replace(/[ \t]{2,}/g, " ").trimEnd();
+    const key = line.trim().toLowerCase();
+    if (key) {
+      if (seen.has(key)) continue; // drop repeated lines
+      seen.add(key);
+      if (phoneTail.length >= 6) {
+        const lineDigits = normDigits(line).replace(/\D/g, "");
+        if (lineDigits.length >= 6 && lineDigits.includes(phoneTail)) continue; // drop phone line
+      }
+    }
+    out.push(line);
+  }
+  return out.join("\n").replace(/\n{3,}/g, "\n\n").trim();
+}
+
 
 
 // ───────────────────────── Subcategory detection ─────────────────────────
