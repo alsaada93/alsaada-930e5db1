@@ -1,3 +1,4 @@
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Quote, Star, BadgeCheck } from "lucide-react";
 import { useLanguage } from "@/hooks/useLanguage";
 
