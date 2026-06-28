@@ -277,7 +277,7 @@ export function extractPriceSmart(text: string): PriceResult {
   // أزل أرقام الهواتف بالكامل قبل أي تحليل حتى لا تُعتبر سعراً
   const raw = stripPhoneLike(normDigits(text));
   const words = raw.split(/\s+/).filter(Boolean);
-  const curYear = new Date().getFullYear();
+
 
   // A bare 4-digit number in the model-year range is a year, NOT a price.
   const isYearValue = (n: number, tok: string): boolean => {
