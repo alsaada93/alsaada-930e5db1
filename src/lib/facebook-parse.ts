@@ -274,7 +274,8 @@ export interface PriceResult {
  */
 export function extractPriceSmart(text: string): PriceResult {
   if (!text) return { price: null, detected: false };
-  const raw = normDigits(text);
+  // أزل أرقام الهواتف بالكامل قبل أي تحليل حتى لا تُعتبر سعراً
+  const raw = stripPhoneLike(normDigits(text));
   const words = raw.split(/\s+/).filter(Boolean);
   const curYear = new Date().getFullYear();
 
@@ -282,14 +283,16 @@ export function extractPriceSmart(text: string): PriceResult {
   const isYearValue = (n: number, tok: string): boolean => {
     const digitsOnly = tok.replace(/\D/g, "");
     if (digitsOnly.length !== 4) return false;
-    return Number.isInteger(n) && n >= 1980 && n <= curYear + 1;
+    return Number.isInteger(n) && n >= 1950 && n <= 2035;
   };
   const hasCurrency = (tok: string): boolean => {
     const w = tok.toLowerCase();
     return CURRENCY.some((c) => (c === "$" ? w.includes("$") : w.includes(c)));
   };
-  // Tokens that signal the number is a model year, not a price.
-  const yearContext = (tok: string): boolean => /موديل|model|سنة|سنه|year/i.test(tok);
+  // Tokens/contexts that signal the number is NOT a price (year/model/mileage/area/part no.).
+  const nonPriceContext = (s: string): boolean =>
+    /موديل|model|سنة|سنه|year|عداد|كيلومتر|كيلو|\bkm\b|mileage|مقاس|مقاعد|مقعد|seat|رقم|قطعة|قطعه|part|sku|متر|م2|م²|sqm/i.test(s);
+  const isPhoneish = (tok: string): boolean => tok.replace(/\D/g, "").length >= 8;
 
   // (a) keyword / currency adjacency (max 2 words either side)
   const kw = [...PRICE_KW, ...CURRENCY];
@@ -299,7 +302,7 @@ export function extractPriceSmart(text: string): PriceResult {
     // attached currency+number e.g "4500BD", "$4500", "BD4500"
     if (!isKw) {
       const attached = CURRENCY.some((c) => c !== "$" && w.includes(c)) || w.includes("$");
-      if (attached && /\d/.test(w)) {
+      if (attached && /\d/.test(w) && !isPhoneish(w)) {
         const n = parsePriceNum(w);
         if (n && n > 0) return { price: n, detected: true };
       }
@@ -308,8 +311,10 @@ export function extractPriceSmart(text: string): PriceResult {
     for (let d = 1; d <= 2; d++) {
       for (const j of [i + d, i - d]) {
         if (j >= 0 && j < words.length && /\d/.test(words[j])) {
-          // skip years that sit next to a model/year word (e.g. "موديل 2020")
-          if (yearContext(words[i]) || yearContext(words[j - 1] ?? "") || yearContext(words[j + 1] ?? "")) continue;
+          if (isPhoneish(words[j])) continue; // phone number, never a price
+          // skip non-price contexts (model/year/km/area/part no.) adjacent to the number
+          const ctx = `${words[i]} ${words[j - 1] ?? ""} ${words[j]} ${words[j + 1] ?? ""}`;
+          if (nonPriceContext(ctx)) continue;
           const n = parsePriceNum(words[j]);
           if (!n || n <= 0) continue;
           // a bare year with no currency is not a price
@@ -328,20 +333,16 @@ export function extractPriceSmart(text: string): PriceResult {
     if (!digitsOnly) continue;
     const around = `${words[i - 1] ?? ""} ${words[i]} ${words[i + 1] ?? ""}`.toLowerCase();
 
-    // year (1980 .. current+1) unless an explicit currency is attached to the token
+    // year (1950 .. 2035) unless an explicit currency is attached to the token
     if (digitsOnly.length === 4) {
       const y = Number(digitsOnly);
-      if (y >= 1980 && y <= curYear + 1 && !hasCurrency(words[i])) continue;
+      if (y >= 1950 && y <= 2035 && !hasCurrency(words[i])) continue;
     }
-    // model/year context word adjacent → treat as year, skip
-    if (/موديل|model|سنة الصنع|year/i.test(around)) continue;
-    // mileage
-    if (/\bkm\b|كم|كيلومتر|mileage/i.test(around)) continue;
-    // area
-    if (/م2|م²|متر|sqm|sq m/i.test(around)) continue;
+    // model/year/mileage/area/part/phone context → skip
+    if (nonPriceContext(around)) continue;
     // phone (8+ digits, or near a call keyword)
     if (digitsOnly.length >= 8) continue;
-    if (/call|اتصال|جوال|واتساب|whatsapp|للتواصل/i.test(around)) continue;
+    if (/call|اتصال|جوال|واتساب|whatsapp|للتواصل|hatif|هاتف/i.test(around)) continue;
 
     const n = parsePriceNum(words[i]);
     if (n && n > 0) survivors.push(n);
@@ -349,6 +350,14 @@ export function extractPriceSmart(text: string): PriceResult {
   if (survivors.length) return { price: survivors[survivors.length - 1], detected: true };
 
   return { price: null, detected: false };
+}
+
+/** Removes phone-like digit sequences (8–15 digits, common separators) from text. */
+function stripPhoneLike(text: string): string {
+  return text.replace(/\+?\d[\d\s\-()]{6,}\d/g, (m) => {
+    const digits = m.replace(/\D/g, "");
+    return digits.length >= 8 && digits.length <= 15 ? " " : m;
+  });
 }
 
 
