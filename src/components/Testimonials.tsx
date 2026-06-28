@@ -612,10 +612,91 @@ const TESTIMONIALS: Testimonial[] = [
   },
 ];
 
-/** Customer testimonials — social proof from real-style buyers and sellers. */
+function TestimonialCard({ tm, lang }: { tm: Testimonial; lang: "ar" | "en" }) {
+  return (
+    <figure className="relative h-full rounded-2xl border border-border bg-card p-5 shadow-card">
+      <Quote className="absolute end-4 top-4 h-8 w-8 text-primary/15" />
+      <div className="flex items-center gap-1 text-amber-500">
+        {[1, 2, 3, 4, 5].map((n) => (
+          <Star key={n} className="h-4 w-4 fill-amber-500" />
+        ))}
+      </div>
+      <blockquote className="mt-3 text-sm leading-relaxed text-card-foreground">{tm.text[lang]}</blockquote>
+      <figcaption className="mt-4 flex items-center gap-3">
+        <span className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-primary text-sm font-bold text-primary-foreground">
+          {tm.initials}
+        </span>
+        <span>
+          <span className="flex items-center gap-1 font-bold">
+            {tm.name[lang]}
+            <BadgeCheck className="h-4 w-4 text-primary" />
+          </span>
+          <span className="block text-xs text-muted-foreground">{tm.role[lang]}</span>
+        </span>
+      </figcaption>
+    </figure>
+  );
+}
+
+/** Customer testimonials — auto-rotating, swipeable carousel (3 at a time on desktop). */
 export function Testimonials() {
   const { lang } = useLanguage();
   const ar = lang === "ar";
+
+  // Shuffle once so the order varies between visits, without repeating items back-to-back.
+  const items = useMemo(() => {
+    const a = [...TESTIMONIALS];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }, []);
+  const len = items.length;
+
+  // Responsive count of cards visible at once (1 mobile, 2 tablet, 3 desktop).
+  const [perView, setPerView] = useState(3);
+  useEffect(() => {
+    const calc = () => {
+      const w = window.innerWidth;
+      setPerView(w >= 1024 ? 3 : w >= 640 ? 2 : 1);
+    };
+    calc();
+    window.addEventListener("resize", calc);
+    return () => window.removeEventListener("resize", calc);
+  }, []);
+
+  const [start, setStart] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const next = useCallback(() => setStart((s) => (s + perView) % len), [perView, len]);
+  const prev = useCallback(() => setStart((s) => (s - perView + len) % len), [perView, len]);
+
+  useEffect(() => {
+    if (paused) return;
+    const id = setInterval(next, 4500);
+    return () => clearInterval(id);
+  }, [next, paused]);
+
+  const visible = Array.from({ length: perView }, (_, i) => items[(start + i) % len]);
+
+  // Touch swipe handling
+  const touchX = useRef<number | null>(null);
+  const onTouchStart = (e: React.TouchEvent) => {
+    touchX.current = e.touches[0].clientX;
+    setPaused(true);
+  };
+  const onTouchEnd = (e: React.TouchEvent) => {
+    if (touchX.current === null) return;
+    const dx = e.changedTouches[0].clientX - touchX.current;
+    if (Math.abs(dx) > 40) {
+      // In RTL, swiping right should go back; flip accordingly.
+      const forward = ar ? dx > 0 : dx < 0;
+      forward ? next() : prev();
+    }
+    touchX.current = null;
+    setPaused(false);
+  };
+
   return (
     <section className="bg-muted/40 py-12">
       <div className="mx-auto max-w-7xl px-4">
@@ -625,32 +706,36 @@ export function Testimonials() {
             {ar ? "تجارب حقيقية لبائعين ومشترين عبر حراج السعادة" : "Real experiences from buyers and sellers on Haraj Al Saada"}
           </p>
         </div>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {TESTIMONIALS.map((tm, idx) => (
-            <figure key={idx} className="relative rounded-2xl border border-border bg-card p-5 shadow-card">
-              <Quote className="absolute end-4 top-4 h-8 w-8 text-primary/15" />
-              <div className="flex items-center gap-1 text-amber-500">
-                {[1, 2, 3, 4, 5].map((n) => (
-                  <Star key={n} className="h-4 w-4 fill-amber-500" />
-                ))}
-              </div>
-              <blockquote className="mt-3 text-sm leading-relaxed text-card-foreground">{tm.text[lang]}</blockquote>
-              <figcaption className="mt-4 flex items-center gap-3">
-                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-primary text-sm font-bold text-primary-foreground">
-                  {tm.initials}
-                </span>
-                <span>
-                  <span className="flex items-center gap-1 font-bold">
-                    {tm.name[lang]}
-                    <BadgeCheck className="h-4 w-4 text-primary" />
-                  </span>
-                  <span className="block text-xs text-muted-foreground">{tm.role[lang]}</span>
-                </span>
-              </figcaption>
-            </figure>
+
+        <div
+          className="grid gap-4 transition-opacity duration-500 sm:grid-cols-2 lg:grid-cols-3"
+          onTouchStart={onTouchStart}
+          onTouchEnd={onTouchEnd}
+          onMouseEnter={() => setPaused(true)}
+          onMouseLeave={() => setPaused(false)}
+        >
+          {visible.map((tm, idx) => (
+            <TestimonialCard key={`${start}-${idx}`} tm={tm} lang={lang} />
           ))}
+        </div>
+
+        {/* Pagination dots */}
+        <div className="mt-6 flex items-center justify-center gap-1.5">
+          {Array.from({ length: Math.ceil(len / perView) }).map((_, i) => {
+            const active = i === Math.floor(start / perView) % Math.ceil(len / perView);
+            return (
+              <button
+                key={i}
+                type="button"
+                aria-label={`${i + 1}`}
+                onClick={() => setStart((i * perView) % len)}
+                className={`h-2 rounded-full transition-all ${active ? "w-5 bg-primary" : "w-2 bg-border"}`}
+              />
+            );
+          })}
         </div>
       </div>
     </section>
   );
 }
+
