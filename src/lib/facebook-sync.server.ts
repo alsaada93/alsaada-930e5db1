@@ -585,8 +585,8 @@ export async function ingestBotPost(payload: BotPayload): Promise<BotIngestResul
     void stripPhoneNumbers; // (مُبقى للتوافق) لم نعد نحذف الأرقام
     const phone: string | null =
       (payload.contact_phone ?? "").toString().trim() || extractPhone(content) || null;
-    // نُبقي النص كما هو دون إزالة الأرقام
-    const cleanContent = content;
+    // ننظّف الوصف: إزالة الروابط والتكرار وحذف رقم الهاتف منه (إن وُجد بخانة مستقلة)
+    const cleanContent = cleanDescription(content, phone);
 
     // Does the bot provide a real, human ad name? Ads without one go to manual review.
     const namedByBot = hasMeaningfulTitle(title);
