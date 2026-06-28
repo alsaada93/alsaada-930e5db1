@@ -291,7 +291,7 @@ export function extractPriceSmart(text: string): PriceResult {
   };
   // Tokens/contexts that signal the number is NOT a price (year/model/mileage/area/part no.).
   const nonPriceContext = (s: string): boolean =>
-    /موديل|model|سنة|سنه|year|عداد|كيلومتر|كيلو|\bkm\b|mileage|مقاس|مقاعد|مقعد|seat|رقم|قطعة|قطعه|part|sku|متر|م2|م²|sqm/i.test(s);
+    /موديل|model|سنة|سنه|year|عداد|كيلومتر|كيلو|\bkm\b|mileage|مقاس|مقاعد|مقعد|seat|رقم|قطعة|قطعه|part|sku|متر|م2|م²|sqm|غرفة|غرف|حمام|حمامات|bedroom|bathroom|bhk/i.test(s);
   const isPhoneish = (tok: string): boolean => tok.replace(/\D/g, "").length >= 8;
 
   // (a) keyword / currency adjacency (max 2 words either side)
