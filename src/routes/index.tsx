@@ -9,14 +9,15 @@ import { PromoCarousel } from "@/components/PromoCarousel";
 import { HomeBanners } from "@/components/HomeBanners";
 // FeatureStrip removed per request — no marketing feature text on home page
 import { ListingsSection } from "@/components/ListingsSection";
-import { LatestListingsCarousel } from "@/components/LatestListingsCarousel";
+import { HomeListingsRow } from "@/components/HomeListingsRow";
+import { Link } from "@tanstack/react-router";
 // AuctionsSection removed per request — auctions discontinued
 import { BusinessSection } from "@/components/BusinessSection";
 import { Testimonials } from "@/components/Testimonials";
 import { Footer } from "@/components/Footer";
 import { useListings } from "@/hooks/useListings";
 import { useLanguage } from "@/hooks/useLanguage";
-import { ChevronDown, Loader2 } from "lucide-react";
+
 
 
 export const Route = createFileRoute("/")({
@@ -45,10 +46,13 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
-  const { t } = useLanguage();
-  // التحميل التدريجي: نجلب أول 12 إعلان فقط ثم نجلب الباقي عند الضغط على "عرض المزيد"
-  const { listings: latest, loadMore, loadingMore, hasMore } = useListings({ pageSize: 30, onlyNormal: true });
+  const { t, lang } = useLanguage();
+  // احدث الاعلانات: نعرض 6 أولاً ثم نحمّل 6 إضافية مع كل ضغطة على "عرض المزيد"
+  const { listings: latest, loadMore, loadingMore, hasMore } = useListings({ pageSize: 6, onlyNormal: true });
+  // اخر 6 اعلانات من قسم المطاعم
+  const { listings: restaurant } = useListings({ pageSize: 6, categoryId: "restaurant", onlyNormal: true });
   const featured = latest.filter((l) => l.featured);
+
 
   return (
     <div className="min-h-screen bg-background">
@@ -61,29 +65,28 @@ function Index() {
           <PromoCarousel />
           <CategoryGrid />
           <WeBuyBanner />
-          <LatestListingsCarousel title={t("sec.latest")} subtitle={t("sec.latestSub")} items={latest} />
-          {hasMore && (
-            <div className="mx-auto max-w-7xl px-4 pb-4 text-center">
-              <button
-                type="button"
-                onClick={() => loadMore()}
-                disabled={loadingMore}
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-primary px-8 py-3 text-sm font-bold text-primary-foreground shadow-glow transition-opacity hover:opacity-90 disabled:opacity-60"
+          <HomeListingsRow
+            title={lang === "ar" ? "مطاعم وكافيهات" : "Restaurants & Cafes"}
+            subtitle={lang === "ar" ? "أحدث معدات المطاعم والكافيهات" : "Latest restaurant equipment"}
+            items={restaurant}
+            moreButton={
+              <Link
+                to="/category/$id"
+                params={{ id: "restaurant" }}
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-primary px-8 py-3 text-sm font-bold text-primary-foreground shadow-glow transition-opacity hover:opacity-90"
               >
-                {loadingMore ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    {t("common.loading") || "جارٍ التحميل…"}
-                  </>
-                ) : (
-                  <>
-                    <ChevronDown className="h-4 w-4" />
-                    {t("sec.more") || "⬇️ عرض المزيد من الإعلانات"}
-                  </>
-                )}
-              </button>
-            </div>
-          )}
+                {lang === "ar" ? "عرض المزيد من المطاعم" : "More restaurant ads"}
+              </Link>
+            }
+          />
+          <HomeListingsRow
+            title={t("sec.latest")}
+            subtitle={t("sec.latestSub")}
+            items={latest}
+            onLoadMore={() => loadMore()}
+            loadingMore={loadingMore}
+            hasMore={hasMore}
+          />
           {featured.length > 0 && (
             <ListingsSection title={t("sec.featured")} subtitle={t("sec.featuredSub")} items={featured} />
           )}
