@@ -15,7 +15,7 @@ export function HomeListingsRow({
   subtitle,
   items,
   emptyText,
-  moreTo,
+  moreButton,
   moreLabel,
   onLoadMore,
   loadingMore,
