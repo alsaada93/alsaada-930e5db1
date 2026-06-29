@@ -606,40 +606,36 @@ export async function ingestBotPost(payload: BotPayload): Promise<BotIngestResul
       await logSync("bot", null, "failed", warning + "تم حفظ الإعلان بدون صور.");
     }
 
-    const priceResult = extractPriceSmart(content);
+    // ─── المحرك الحتمي (100% Regex) — بدون أي ذكاء اصطناعي ───
     const explicitPrice = parsePayloadPrice(payload.price);
-    // سياسة جديدة: لا نحذف أي رقم. نحتفظ برقم المعلن إن وُجد، ونحوّل الإعلان
-    // إلى «بانتظار المراجعة» إذا لم يوجد هاتف أو لم يوجد اسم/عنوان للإعلان.
+    const engineText = `${title}\n${content}`.trim();
+    const engine = runIngestEngine(engineText, payload.category);
+
+    // الهاتف: نُفضّل ما أرسله البوت، ثم ما يستخرجه المحرك حتمياً من النص.
     void stripPhoneNumbers; // (مُبقى للتوافق) لم نعد نحذف الأرقام
     const phone: string | null =
-      (payload.contact_phone ?? "").toString().trim() || extractPhone(content) || null;
-    // ننظّف الوصف: إزالة الروابط والتكرار وحذف رقم الهاتف منه (إن وُجد بخانة مستقلة)
+      (payload.contact_phone ?? "").toString().trim() || engine.contact_phone || extractPhone(content) || null;
+
+    // ننظّف الوصف: إزالة الروابط والتكرار وحذف رقم الهاتف منه (إن وُجد).
     const cleanContent = cleanDescription(content, phone);
 
-    // هل لدينا اسم إعلان حقيقي؟ إن لم يرسله البوت نحاول استخراجه من أول سطر مفيد في الوصف.
-    const namedByBot = hasMeaningfulTitle(title);
-
-    // إذا لم يصل عنوان حقيقي: لا نكتب "عام/أخرى"، بل نسحب أول سطر مفيد من الوصف
-    // ونستخدمه كعنوان، ثم نُصنّف الإعلان بناءً على هذا العنوان المشتق.
-    const derivedName = namedByBot ? title : firstMeaningfulLine(cleanContent) || "";
-    // النص المستخدم للتصنيف: نُعطي العنوان (المُرسل أو المشتق من أول سطر) وزناً أكبر.
-    const classifyText = `${derivedName} ${derivedName} ${content}`.trim();
-
-    const detected = detectCategory(classifyText, payload.category);
-    const category = payload.category ? detected : refineCategory(classifyText, detected);
+    // التصنيف الحتمي (لا يقع أبداً في "عام وأخرى" بالخطأ — الافتراضي "بضائع عامة").
+    const category: FbCategorySlug = engine.slug;
     const cats = await loadSiteCategories();
     const categoryId = await resolveSiteCategoryId(category, cats);
     const catObj = cats.find((c) => c.id === categoryId);
-    const { group_name, item_name } = resolveSubcategory(catObj, category, `${derivedName} ${content}`);
+    const { group_name, item_name } = resolveSubcategory(catObj, category, engineText);
 
     const specsBlock = buildSpecsBlock(category, content);
     const carSpecs = category === "cars" ? extractCarSpecs(content) : null;
     const reSpecs = category === "real_estate" ? extractRealEstateSpecs(content) : null;
     const negotiable = /\bnego\b|\bobo\b|قابل للتفاوض|قابل للنقاش|قابل/i.test(content);
 
-    let finalPrice = explicitPrice ?? priceResult.price ?? 0;
-    if (!finalPrice || finalPrice <= 0) finalPrice = 1; // أي إعلان بدون سعر يُسعّر بـ 1 د.ب
-    if (explicitPrice === null && !priceResult.detected) {
+    // السعر: ما يرسله البوت صراحةً يفوز، وإلا السعر المرتبط بعملة بحرينية حتمياً.
+    // عدم وجود سعر مرتبط بعملة ⇒ 0 (بدون سعر).
+    let finalPrice = explicitPrice ?? engine.price;
+    if (finalPrice === null || finalPrice === undefined || finalPrice < 0) finalPrice = 0;
+    if (explicitPrice === null && !engine.priceDetected) {
       warning = warning ? `${warning} | price_not_detected` : "price_not_detected";
     }
 
@@ -649,39 +645,15 @@ export async function ingestBotPost(payload: BotPayload): Promise<BotIngestResul
       if (!Number.isNaN(d.getTime())) publishedAt = d.toISOString();
     }
 
-    let finalTitle: string;
-    if (namedByBot) {
-      finalTitle = buildAdTitle({
-        slug: category,
-        itemName: item_name,
-        groupName: group_name,
-        categoryName: catObj?.name ?? categoryLabel(category).name,
-        brand: carSpecs?.brand ?? null,
-        text: `${title} ${cleanContent}`,
-        rawTitle: title,
-      });
-    } else {
-      // No ad name supplied: use the first meaningful line of the body as the
-      // title — never relabel it "عام/أخرى".
-      finalTitle =
-        derivedName ||
-        buildAdTitle({
-          slug: category,
-          itemName: item_name,
-          groupName: group_name,
-          categoryName: catObj?.name ?? categoryLabel(category).name,
-          brand: carSpecs?.brand ?? null,
-          text: cleanContent,
-          rawTitle: null,
-        });
-    }
+    // العنوان: حتمي من المحرك (تجاوز السيارات: "سيارة للبيع - الماركة السنة").
+    const finalTitle = engine.title.trim();
 
-    // يُقبل تلقائياً فقط الإعلان الذي يحمل اسماً حقيقياً (مُرسل أو مُستخرج من الوصف) وهاتفاً؛ غير ذلك للمراجعة.
-    const hasResolvedTitle = hasMeaningfulTitle(finalTitle);
-    const adStatus: "approved" | "pending" = hasResolvedTitle && !!phone ? "approved" : "pending";
+    // يُقبل تلقائياً كل إعلان يحمل اسماً حقيقياً؛ ما بلا اسم يُحوَّل لمراجعة يدوية.
+    const hasResolvedTitle = finalTitle.length >= 3;
+    const adStatus: "approved" | "pending" = hasResolvedTitle ? "approved" : "pending";
 
     const row = {
-      title: finalTitle,
+      title: finalTitle || "بدون عنوان",
       description: (cleanContent || "") + specsBlock || null,
       category_id: categoryId,
       group_name,
@@ -692,7 +664,11 @@ export async function ingestBotPost(payload: BotPayload): Promise<BotIngestResul
       contact_name: authorName,
       contact_phone: phone,
       ...(reSpecs?.area_sqm ? { area_sqm: reSpecs.area_sqm } : {}),
-      brand: carSpecs?.brand ?? "ماركة أخرى",
+      brand: engine.car_make ?? carSpecs?.brand ?? "ماركة أخرى",
+      ...(engine.car_make ? { car_make: engine.car_make } : {}),
+      ...(engine.model_year ? { model_year: engine.model_year } : {}),
+      ...(engine.mileage ? { mileage: engine.mileage } : {}),
+      ...(engine.engine_capacity ? { engine_capacity: engine.engine_capacity } : {}),
       ...(reSpecs?.region ? { city: reSpecs.region } : {}),
       status: adStatus,
       published_at: publishedAt ?? new Date().toISOString(),
