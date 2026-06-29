@@ -4,7 +4,7 @@ import { z } from "zod";
 const CORS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, x-sync-secret, x-hub-signature-256",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization, x-sync-secret, x-hub-signature-256",
 };
 
 const json = (body: unknown, status = 200) =>
@@ -107,6 +107,14 @@ function normalizeBotPayload(body: Record<string, unknown>): Record<string, unkn
   };
 }
 
+function readSyncSecret(request: Request): string | null {
+  const direct = request.headers.get("x-sync-secret");
+  if (direct) return direct;
+  const auth = request.headers.get("authorization");
+  const m = auth?.match(/^Bearer\s+(.+)$/i);
+  return m?.[1]?.trim() || null;
+}
+
 export const Route = createFileRoute("/api/public/facebook-sync")({
   server: {
     handlers: {
@@ -126,7 +134,7 @@ export const Route = createFileRoute("/api/public/facebook-sync")({
           return new Response(challenge, { status: 200 });
         }
 
-        const secret = request.headers.get("x-sync-secret");
+        const secret = readSyncSecret(request);
         const { verifySecret } = await import("@/lib/facebook-sync.server");
         const ok = await verifySecret(secret);
         return json({ ok, service: "facebook-sync", status: ok ? "ready" : "unauthorized" }, ok ? 200 : 401);
@@ -228,7 +236,7 @@ export const Route = createFileRoute("/api/public/facebook-sync")({
         // ====================================================================
         // الجزء الثاني: التعامل مع البوتات وأدوات الأتمتة
         // ====================================================================
-        const secret = request.headers.get("x-sync-secret");
+        const secret = readSyncSecret(request);
 
         if (!(await verifySecret(secret))) {
           return json({ status: "error", message: "Unauthorized" }, 401);
