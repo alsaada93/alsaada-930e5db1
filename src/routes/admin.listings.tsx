@@ -58,6 +58,21 @@ function AdminListingsPage() {
   const [busy, setBusy] = useState<string | null>(null);
   const [editing, setEditing] = useState<AdminListingRow | null>(null);
   const [reclassifying, setReclassifying] = useState(false);
+  const [reprocessing, setReprocessing] = useState(false);
+
+  const doReprocess = async () => {
+    if (!confirm("معالجة عميقة لجميع الإعلانات: إصلاح العناوين والأسعار والتصنيف ومواصفات السيارات تلقائياً؟")) return;
+    setReprocessing(true);
+    try {
+      const res = await reprocessFn({ data: { onlyBot: false } });
+      toast.success(`تمت معالجة ${res.updated.toLocaleString("ar")} إعلان من ${res.scanned.toLocaleString("ar")}`);
+      qc.invalidateQueries({ queryKey: ["admin-listings"] });
+    } catch {
+      toast.error("تعذّرت المعالجة العميقة");
+    } finally {
+      setReprocessing(false);
+    }
+  };
 
   const refresh = () => qc.invalidateQueries({ queryKey: ["admin-listings"] });
 
