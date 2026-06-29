@@ -115,7 +115,10 @@ export interface IsolationResult {
 
 const PHONE_RE = /(?:\+|00)?(?:973)?[\s-]*([36](?:[\s-]*\d){7})\b/g;
 const YEAR_RE = /\b(19[8-9][0-9]|20[0-2][0-9])\b/g;
-const KM_RE = /(\d{1,3}(?:,\d{3})*|\d+)\s*(km|kms|كيلو|كم|ممشى|ماشية|كيلومتر)/i;
+// number THEN unit (e.g. "150,000 كم")
+const KM_AFTER_RE = /(\d{1,3}(?:,\d{3})*|\d{3,7})\s*(km\b|kms\b|كم|كيلو|كيلومتر)/i;
+// indicator THEN number (e.g. "ممشى 150000", "عداد 80,000")
+const KM_BEFORE_RE = /(ممشى|ماشية|عداد|mileage|odometer)\s*[:：]?\s*(\d{1,3}(?:,\d{3})*|\d{3,7})/i;
 const ENGINE_L_RE = /\b([1-8]\.[0-9])\s*(l|لتر|cc)?\b/i;
 const ENGINE_V_RE = /\b(v4|v6|v8|v10|v12)\b/i;
 
