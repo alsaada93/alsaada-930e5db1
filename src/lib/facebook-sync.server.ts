@@ -346,7 +346,7 @@ export async function deletePostAd(postId: string): Promise<IngestResult> {
     await supabaseAdmin
       .from("listings")
       .update({ status: "deleted" })
-      .eq("source", SOURCE)
+      .in("source", [SOURCE, "facebook_bot"])
       .eq("source_ref", fb_post_id);
     await logSync("delete", fb_post_id, "success", "تم إخفاء الإعلان");
     await touchMeta("ok");
