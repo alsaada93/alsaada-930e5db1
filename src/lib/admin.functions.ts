@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { categories } from "@/data/marketplace";
 
 async function assertAdmin(supabase: any, userId: string) {
   const { data } = await supabase
@@ -36,6 +37,127 @@ export interface AdminListingRow {
   created_at: string;
 }
 
+export interface AdminDashboardStatsData {
+  stats: {
+    totalViews: number;
+    pending: number;
+    users: number;
+    listings: number;
+    auctions: number;
+    businesses: number;
+    favorites: number;
+    requests: number;
+  };
+  weekTrend: { day: string; listings: number; views: number }[];
+  monthTrend: { month: string; listings: number; views: number }[];
+  categoryActivity: { name: string; value: number }[];
+}
+
+const WEEK_DAYS = ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
+const MONTHS = [
+  "يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو",
+  "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر",
+];
+
+function categoryName(id: string | null): string {
+  if (!id) return "أخرى";
+  return categories.find((c) => c.id === id)?.name ?? id;
+}
+
+async function fetchListingsForAdminStats(supabaseAdmin: any): Promise<Array<Record<string, unknown>>> {
+  const PAGE = 1000;
+  const rows: Array<Record<string, unknown>> = [];
+  for (let page = 0; ; page++) {
+    const from = page * PAGE;
+    const to = from + PAGE - 1;
+    const { data, error } = await supabaseAdmin
+      .from("listings")
+      .select("listing_type,status,views,category_id,created_at")
+      .order("created_at", { ascending: false })
+      .range(from, to);
+    if (error) throw error;
+    const batch = (data ?? []) as Array<Record<string, unknown>>;
+    rows.push(...batch);
+    if (batch.length < PAGE) break;
+  }
+  return rows;
+}
+
+/** Exact admin dashboard aggregates; uses service-role + paged reads so totals never freeze at 1000. */
+export const adminGetDashboardStats = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<AdminDashboardStatsData> => {
+    const { supabase, userId } = context;
+    await assertAdmin(supabase, userId);
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const [rows, listingsCount, pendingCount, auctionsCount, businessesCount, usersCount, favoritesCount, requestsCount] =
+      await Promise.all([
+        fetchListingsForAdminStats(supabaseAdmin),
+        supabaseAdmin.from("listings").select("id", { count: "exact", head: true }),
+        supabaseAdmin.from("listings").select("id", { count: "exact", head: true }).eq("status", "pending"),
+        supabaseAdmin.from("listings").select("id", { count: "exact", head: true }).eq("listing_type", "auction"),
+        supabaseAdmin.from("listings").select("id", { count: "exact", head: true }).eq("listing_type", "business"),
+        supabaseAdmin.from("profiles").select("id", { count: "exact", head: true }),
+        supabaseAdmin.from("favorites").select("id", { count: "exact", head: true }),
+        supabaseAdmin.from("equipment_requests").select("id", { count: "exact", head: true }),
+      ]);
+
+    const totalViews = rows.reduce((s, r) => s + (Number(r.views) || 0), 0);
+    const now = new Date();
+
+    const weekTrend = Array.from({ length: 7 }, (_, idx) => {
+      const d = new Date(now);
+      d.setDate(now.getDate() - (6 - idx));
+      const dayRows = rows.filter((r) => {
+        const c = new Date(String(r.created_at ?? ""));
+        return c.toDateString() === d.toDateString();
+      });
+      return {
+        day: WEEK_DAYS[d.getDay()],
+        listings: dayRows.length,
+        views: dayRows.reduce((s, r) => s + (Number(r.views) || 0), 0),
+      };
+    });
+
+    const monthTrend = Array.from({ length: 6 }, (_, idx) => {
+      const d = new Date(now.getFullYear(), now.getMonth() - (5 - idx), 1);
+      const monthRows = rows.filter((r) => {
+        const c = new Date(String(r.created_at ?? ""));
+        return c.getFullYear() === d.getFullYear() && c.getMonth() === d.getMonth();
+      });
+      return {
+        month: MONTHS[d.getMonth()],
+        listings: monthRows.length,
+        views: monthRows.reduce((s, r) => s + (Number(r.views) || 0), 0),
+      };
+    });
+
+    const catMap: Record<string, number> = {};
+    rows.forEach((r) => {
+      const name = categoryName((r.category_id as string | null) ?? null);
+      catMap[name] = (catMap[name] ?? 0) + 1;
+    });
+
+    return {
+      stats: {
+        totalViews,
+        pending: pendingCount.count ?? rows.filter((r) => r.status === "pending").length,
+        users: usersCount.count ?? 0,
+        listings: listingsCount.count ?? rows.length,
+        auctions: auctionsCount.count ?? rows.filter((r) => r.listing_type === "auction").length,
+        businesses: businessesCount.count ?? rows.filter((r) => r.listing_type === "business").length,
+        favorites: favoritesCount.count ?? 0,
+        requests: requestsCount.count ?? 0,
+      },
+      weekTrend,
+      monthTrend,
+      categoryActivity: Object.entries(catMap)
+        .map(([name, value]) => ({ name, value }))
+        .sort((a, b) => b.value - a.value),
+    };
+  });
+
 /** Returns all listings (any status) for the admin management table. */
 export const adminListListings = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -44,13 +166,22 @@ export const adminListListings = createServerFn({ method: "GET" })
     await assertAdmin(supabase, userId);
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data } = await supabaseAdmin
-      .from("listings")
-      .select(
-        "id,title,description,price,old_price,category_id,group_name,item_name,brand,condition,city,contact_name,contact_phone,images,negotiable_flag,delivery_available,status,listing_type,featured,created_at",
-      )
-      .order("created_at", { ascending: false })
-      .limit(5000);
+    const PAGE = 1000;
+    const data: any[] = [];
+    for (let page = 0; ; page++) {
+      const from = page * PAGE;
+      const to = from + PAGE - 1;
+      const { data: batch, error } = await supabaseAdmin
+        .from("listings")
+        .select(
+          "id,title,description,price,old_price,category_id,group_name,item_name,brand,condition,city,contact_name,contact_phone,images,negotiable_flag,delivery_available,status,listing_type,featured,created_at",
+        )
+        .order("created_at", { ascending: false })
+        .range(from, to);
+      if (error) throw error;
+      data.push(...(batch ?? []));
+      if ((batch ?? []).length < PAGE) break;
+    }
 
     return (data ?? []).map((d: any) => ({
       id: String(d.id),
