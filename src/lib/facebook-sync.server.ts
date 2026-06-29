@@ -608,7 +608,7 @@ export async function ingestBotPost(payload: BotPayload): Promise<BotIngestResul
     // ننظّف الوصف: إزالة الروابط والتكرار وحذف رقم الهاتف منه (إن وُجد بخانة مستقلة)
     const cleanContent = cleanDescription(content, phone);
 
-    // Does the bot provide a real, human ad name? Ads without one go to manual review.
+    // هل لدينا اسم إعلان حقيقي؟ إن لم يرسله البوت نحاول استخراجه من أول سطر مفيد في الوصف.
     const namedByBot = hasMeaningfulTitle(title);
 
     // إذا لم يصل عنوان حقيقي: لا نكتب "عام/أخرى"، بل نسحب أول سطر مفيد من الوصف
@@ -668,8 +668,9 @@ export async function ingestBotPost(payload: BotPayload): Promise<BotIngestResul
         });
     }
 
-    // يُقبل تلقائياً فقط الإعلان الذي يحمل اسماً وهاتفاً معاً؛ غير ذلك يذهب للمراجعة اليدوية.
-    const adStatus: "approved" | "pending" = namedByBot && !!phone ? "approved" : "pending";
+    // يُقبل تلقائياً فقط الإعلان الذي يحمل اسماً حقيقياً (مُرسل أو مُستخرج من الوصف) وهاتفاً؛ غير ذلك للمراجعة.
+    const hasResolvedTitle = hasMeaningfulTitle(finalTitle);
+    const adStatus: "approved" | "pending" = hasResolvedTitle && !!phone ? "approved" : "pending";
 
     const row = {
       title: finalTitle,
