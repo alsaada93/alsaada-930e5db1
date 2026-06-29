@@ -28,6 +28,9 @@ const LegacyPayloadSchema = z.object({
 
 // New external-bot payload
 const BotPayloadSchema = z.object({
+  post_id: z.string().max(500).nullish(),
+  fb_post_id: z.string().max(500).nullish(),
+  external_id: z.string().max(500).nullish(),
   source: z.string().max(100).nullish(),
   title: z.string().max(500).nullish(),
   content: z.string().max(20000).nullish(),
@@ -39,6 +42,70 @@ const BotPayloadSchema = z.object({
   category: z.string().max(100).nullish(),
   published_at: z.string().max(60).nullish(),
 });
+
+function firstString(...values: unknown[]): string | undefined {
+  for (const v of values) {
+    if (typeof v === "string" && v.trim()) return v.trim();
+    if (typeof v === "number" && Number.isFinite(v)) return String(v);
+  }
+  return undefined;
+}
+
+function collectImageUrls(...values: unknown[]): string[] {
+  const out: string[] = [];
+  const visit = (v: unknown) => {
+    if (!v) return;
+    if (typeof v === "string") {
+      v
+        .split(/[\n,]/)
+        .map((s) => s.trim())
+        .filter((s) => /^https?:\/\//i.test(s))
+        .forEach((s) => out.push(s));
+      return;
+    }
+    if (Array.isArray(v)) {
+      v.forEach(visit);
+      return;
+    }
+    if (typeof v === "object") {
+      const o = v as Record<string, unknown>;
+      visit(o.url ?? o.src ?? o.href ?? o.image_url ?? o.photo_url);
+    }
+  };
+  values.forEach(visit);
+  return Array.from(new Set(out)).slice(0, 30);
+}
+
+function normalizeBotPayload(body: Record<string, unknown>): Record<string, unknown> {
+  const images = collectImageUrls(
+    body.images,
+    body.image_urls,
+    body.imageUrls,
+    body.image_url,
+    body.imageUrl,
+    body.photo_url,
+    body.photoUrl,
+    body.photos,
+    body.media,
+    body.attachments,
+  );
+
+  return {
+    post_id: firstString(body.post_id, body.fb_post_id, body.facebook_post_id, body.external_id, body.id, body.permalink_url, body.url, body.link),
+    fb_post_id: firstString(body.fb_post_id, body.facebook_post_id),
+    external_id: firstString(body.external_id, body.id),
+    source: firstString(body.source) ?? "facebook_bot",
+    title: firstString(body.title, body.name, body.ad_title, body.adTitle, body.product_name, body.productName),
+    content: firstString(body.content, body.text, body.message, body.description, body.caption, body.body, body.details),
+    author_name: firstString(body.author_name, body.author, body.seller_name, body.sellerName, body.user_name, body.userName, body.from_name),
+    contact_phone: firstString(body.contact_phone, body.phone, body.mobile, body.whatsapp, body.whatsApp, body.contact),
+    price: firstString(body.price, body.amount, body.value) ?? (typeof body.price === "number" ? body.price : undefined),
+    image_base64: firstString(body.image_base64, body.imageBase64, body.base64, body.image_data, body.imageData),
+    images: images.length ? images : undefined,
+    category: firstString(body.category, body.category_name, body.categoryName, body.section),
+    published_at: firstString(body.published_at, body.created_time, body.createdAt, body.created_at, body.date, body.timestamp),
+  };
+}
 
 export const Route = createFileRoute("/api/public/facebook-sync")({
   server: {
@@ -165,6 +232,25 @@ export const Route = createFileRoute("/api/public/facebook-sync")({
 
         if (!(await verifySecret(secret))) {
           return json({ status: "error", message: "Unauthorized" }, 401);
+        }
+
+        const objectBody = typeof body === "object" && body !== null ? (body as Record<string, unknown>) : null;
+        if (objectBody && objectBody.action === "delete" && typeof objectBody.post_id === "string") {
+          const result = await deletePostAd(objectBody.post_id);
+          return json(result, result.ok ? 200 : 500);
+        }
+
+        // كل منشور جديد/محدّث من البوت الخارجي يذهب إلى نظام الإعلانات الرئيسي مباشرة.
+        // نقوم بتطبيع أسماء الحقول الشائعة حتى لا يتوقف الاستقبال إذا أرسل البوت
+        // message/text/description أو image_url/image_urls بدلاً من content/images.
+        if (objectBody) {
+          const parsed = BotPayloadSchema.safeParse(normalizeBotPayload(objectBody));
+          if (!parsed.success) {
+            return json({ status: "error", message: "Invalid payload", details: parsed.error.flatten() }, 400);
+          }
+          const result = await ingestBotPost(parsed.data);
+          const code = result.status === "error" ? 500 : 200;
+          return json(result, code);
         }
 
         const isLegacy = typeof body === "object" && body !== null && "post_id" in (body as Record<string, unknown>);
