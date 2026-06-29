@@ -76,15 +76,15 @@ export function LatestListingsCarousel({
       {items.length > 0 ? (
         <div
           ref={trackRef}
-          className="grid grid-flow-col grid-rows-3 gap-3 overflow-x-auto scroll-smooth pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-          style={{ gridAutoColumns: "minmax(46%, 1fr)", scrollSnapType: "x mandatory" }}
+          className="grid snap-x snap-mandatory grid-flow-col grid-rows-3 auto-cols-[46%] gap-3 overflow-x-auto scroll-smooth pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:auto-cols-[30%] lg:auto-cols-[22%]"
         >
           {items.map((item) => (
-            <div key={item.id} className="min-w-0 [scroll-snap-align:start] sm:[grid-auto-columns:unset]">
+            <div key={item.id} className="min-w-0 snap-start">
               <ListingCard item={item} displayTitle={map[item.id]?.title} />
             </div>
           ))}
         </div>
+
       ) : (
         <div className="rounded-2xl border border-dashed border-border bg-card p-10 text-center text-sm text-muted-foreground">
           {emptyText ?? (lang === "ar" ? "لا توجد إعلانات بعد." : "No listings yet.")}
