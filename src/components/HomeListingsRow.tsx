@@ -1,6 +1,5 @@
-import { useRef } from "react";
-import { ChevronLeft, ChevronRight, ChevronDown, Loader2, ArrowLeft } from "lucide-react";
-import { Link } from "@tanstack/react-router";
+import { useRef, type ReactNode } from "react";
+import { ChevronLeft, ChevronRight, ChevronDown, Loader2 } from "lucide-react";
 import { ListingCard } from "./ListingCard";
 import type { Listing } from "@/data/marketplace";
 import { useLanguage } from "@/hooks/useLanguage";
