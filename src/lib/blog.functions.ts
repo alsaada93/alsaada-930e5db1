@@ -90,7 +90,7 @@ export const adminListPosts = createServerFn({ method: "GET" })
       .from("blog_posts")
       .select("*")
       .order("created_at", { ascending: false })
-      .limit(1000);
+      .limit(5000);
     return (data ?? []).map(mapPost);
   });
 

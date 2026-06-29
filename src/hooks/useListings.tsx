@@ -21,6 +21,7 @@ function mapRow(d: Row): Listing {
     condition: (d.condition as Listing["condition"]) ?? "مستعمل",
     city: (d.city as string | null) ?? "",
     category: categoryName((d.category_id as string | null) ?? null),
+    categoryId: (d.category_id as string | null) ?? undefined,
     sub: (d.group_name as string | null) ?? undefined,
     image: images[0] ?? "/placeholder.svg",
     featured: Boolean(d.featured),
