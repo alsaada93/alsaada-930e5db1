@@ -19,6 +19,7 @@ import {
   cleanDescription,
   type FbCategorySlug,
 } from "./facebook-parse";
+import { runIngestEngine } from "./ad-ingest-engine";
 
 const BUCKET = "listings";
 const PREFIX = "facebook";
