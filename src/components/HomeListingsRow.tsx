@@ -25,8 +25,8 @@ export function HomeListingsRow({
   subtitle?: string;
   items: Listing[];
   emptyText?: string;
-  /** عند تمريره: زر المزيد يكون رابطًا لهذا المسار */
-  moreTo?: string;
+  /** عند تمريره: زر المزيد يظهر أسفل القسم (رابط مثلاً) */
+  moreButton?: ReactNode;
   moreLabel?: string;
   /** عند تمريره: زر المزيد يحمّل المزيد من الإعلانات داخل نفس الصف */
   onLoadMore?: () => void;
