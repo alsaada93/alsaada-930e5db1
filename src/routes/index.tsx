@@ -9,7 +9,8 @@ import { PromoCarousel } from "@/components/PromoCarousel";
 import { HomeBanners } from "@/components/HomeBanners";
 // FeatureStrip removed per request — no marketing feature text on home page
 import { ListingsSection } from "@/components/ListingsSection";
-import { LatestListingsCarousel } from "@/components/LatestListingsCarousel";
+import { HomeListingsRow } from "@/components/HomeListingsRow";
+import { Link } from "@tanstack/react-router";
 // AuctionsSection removed per request — auctions discontinued
 import { BusinessSection } from "@/components/BusinessSection";
 import { Testimonials } from "@/components/Testimonials";
