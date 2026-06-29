@@ -2,7 +2,7 @@
 export function BrandLogo({ size = 36 }: { size?: number }) {
   return (
     <img
-      src="/site-logo.png"
+      src="/site-logo.png?v=alsaada-2026-06"
       alt="حراج السعادة"
       width={size}
       height={size}
