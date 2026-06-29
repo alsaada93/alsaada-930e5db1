@@ -233,11 +233,15 @@ async function storeImages(postId: string, urls: string[]): Promise<string[]> {
       const res = await fetch(url);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const contentType = res.headers.get("content-type");
+      const normalizedType = (contentType || "").split(";")[0].trim().toLowerCase();
+      if (normalizedType && !ALLOWED_IMAGE_TYPES.includes(normalizedType)) {
+        throw new Error(`نوع صورة غير مسموح: ${normalizedType}`);
+      }
       const ext = guessExt(contentType, url);
       const buf = new Uint8Array(await res.arrayBuffer());
       const path = `${PREFIX}/${safeId}/${i}.${ext}`;
       const { error } = await supabaseAdmin.storage.from(BUCKET).upload(path, buf, {
-        contentType: contentType ?? "image/jpeg",
+        contentType: normalizedType && ALLOWED_IMAGE_TYPES.includes(normalizedType) ? normalizedType : "image/jpeg",
         cacheControl: "31536000",
         upsert: true,
       });
