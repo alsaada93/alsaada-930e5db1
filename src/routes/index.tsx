@@ -9,6 +9,7 @@ import { PromoCarousel } from "@/components/PromoCarousel";
 import { HomeBanners } from "@/components/HomeBanners";
 // FeatureStrip removed per request — no marketing feature text on home page
 import { ListingsSection } from "@/components/ListingsSection";
+import { LatestListingsCarousel } from "@/components/LatestListingsCarousel";
 // AuctionsSection removed per request — auctions discontinued
 import { BusinessSection } from "@/components/BusinessSection";
 import { Testimonials } from "@/components/Testimonials";
@@ -46,7 +47,7 @@ export const Route = createFileRoute("/")({
 function Index() {
   const { t } = useLanguage();
   // التحميل التدريجي: نجلب أول 12 إعلان فقط ثم نجلب الباقي عند الضغط على "عرض المزيد"
-  const { listings: latest, loadMore, loadingMore, hasMore } = useListings({ pageSize: 12, onlyNormal: true });
+  const { listings: latest, loadMore, loadingMore, hasMore } = useListings({ pageSize: 30, onlyNormal: true });
   const featured = latest.filter((l) => l.featured);
 
   return (
@@ -60,7 +61,7 @@ function Index() {
           <PromoCarousel />
           <CategoryGrid />
           <WeBuyBanner />
-          <ListingsSection title={t("sec.latest")} subtitle={t("sec.latestSub")} items={latest} />
+          <LatestListingsCarousel title={t("sec.latest")} subtitle={t("sec.latestSub")} items={latest} />
           {hasMore && (
             <div className="mx-auto max-w-7xl px-4 pb-4 text-center">
               <button
