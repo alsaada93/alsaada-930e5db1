@@ -47,7 +47,7 @@ export const Route = createFileRoute("/")({
 function Index() {
   const { t } = useLanguage();
   // التحميل التدريجي: نجلب أول 12 إعلان فقط ثم نجلب الباقي عند الضغط على "عرض المزيد"
-  const { listings: latest, loadMore, loadingMore, hasMore } = useListings({ pageSize: 12, onlyNormal: true });
+  const { listings: latest, loadMore, loadingMore, hasMore } = useListings({ pageSize: 30, onlyNormal: true });
   const featured = latest.filter((l) => l.featured);
 
   return (
