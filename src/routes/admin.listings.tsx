@@ -10,6 +10,7 @@ import {
   adminUpdateListing,
   adminDeleteListing,
   adminReclassifyListings,
+  adminReprocessListings,
   type AdminListingRow,
 } from "@/lib/admin.functions";
 import { useCategories } from "@/hooks/useCategories";
