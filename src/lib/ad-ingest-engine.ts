@@ -115,7 +115,7 @@ export interface IsolationResult {
 
 const PHONE_RE = /(?:\+|00)?(?:973)?[\s-]*([36](?:[\s-]*\d){7})\b/g;
 const YEAR_RE = /\b(19[8-9][0-9]|20[0-2][0-9])\b/g;
-const KM_RE = /\b(\d{1,3}(?:,\d{3})*|\d+)\s*(km|kms|كيلو|كم|ممشى|ماشية|كيلومتر)\b/i;
+const KM_RE = /(\d{1,3}(?:,\d{3})*|\d+)\s*(km|kms|كيلو|كم|ممشى|ماشية|كيلومتر)/i;
 const ENGINE_L_RE = /\b([1-8]\.[0-9])\s*(l|لتر|cc)?\b/i;
 const ENGINE_V_RE = /\b(v4|v6|v8|v10|v12)\b/i;
 
