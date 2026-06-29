@@ -265,8 +265,10 @@ export const Route = createFileRoute("/api/public/facebook-sync")({
         }
 
         const objectBody = typeof body === "object" && body !== null && !Array.isArray(body) ? (body as Record<string, unknown>) : null;
-        if (objectBody && objectBody.action === "delete" && typeof objectBody.post_id === "string") {
-          const result = await deletePostAd(objectBody.post_id);
+        if (objectBody && objectBody.action === "delete") {
+          const postId = firstString(objectBody.post_id, objectBody.fb_post_id, objectBody.external_id, objectBody.id);
+          if (!postId) return json({ status: "error", message: "post_id is required for delete" }, 400);
+          const result = await deletePostAd(postId);
           return json(result, result.ok ? 200 : 500);
         }
 
