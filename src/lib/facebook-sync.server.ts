@@ -22,7 +22,7 @@ import {
 
 const BUCKET = "listings";
 const PREFIX = "facebook";
-const MAX_IMAGES = 20; // تم التعديل للسماح بعدد أكبر من الصور
+const MAX_IMAGES = 30; // حد الصور مطابق لنموذج إضافة الإعلان والويبهوك
 const SOURCE = "facebook";
 
 interface SiteCategory {
@@ -346,7 +346,7 @@ export async function deletePostAd(postId: string): Promise<IngestResult> {
     await supabaseAdmin
       .from("listings")
       .update({ status: "deleted" })
-      .eq("source", SOURCE)
+      .in("source", [SOURCE, "facebook_bot"])
       .eq("source_ref", fb_post_id);
     await logSync("delete", fb_post_id, "success", "تم إخفاء الإعلان");
     await touchMeta("ok");
@@ -362,6 +362,9 @@ export async function deletePostAd(postId: string): Promise<IngestResult> {
 // ───────────────────────── External bot ingest (new payload) ─────────────────────────
 
 export interface BotPayload {
+  post_id?: string | null;
+  fb_post_id?: string | null;
+  external_id?: string | null;
   source?: string | null;
   title?: string | null;
   content?: string | null;
@@ -513,6 +516,7 @@ export async function ingestBotPost(payload: BotPayload): Promise<BotIngestResul
   try {
     const content = (payload.content ?? "").toString().trim();
     const title = (payload.title ?? "").toString().trim();
+    const sourceRef = (payload.post_id ?? payload.fb_post_id ?? payload.external_id ?? "").toString().trim() || null;
 
     if (!content && !title) {
       await logSync("bot", null, "failed", "title و content مفقودان", payload);
@@ -523,32 +527,47 @@ export async function ingestBotPost(payload: BotPayload): Promise<BotIngestResul
 
     // Deduplication
     {
+      if (sourceRef) {
+        const { data: dup } = await supabaseAdmin
+          .from("listings")
+          .select("id,status")
+          .eq("source", "facebook_bot")
+          .eq("source_ref", sourceRef)
+          .limit(1)
+          .maybeSingle();
+        if (dup?.id) {
+          await logSync("bot", sourceRef, "success", "تم تجاهل إعلان مكرر (نفس معرف المنشور)");
+          return { status: "duplicate", id: dup.id, ad_status: (dup.status as "pending" | "approved") ?? "pending" };
+        }
+      }
       const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
       if (content) {
         const { data: dup } = await supabaseAdmin
           .from("listings")
-          .select("id")
+          .select("id,status")
           .eq("source", "facebook_bot")
           .eq("description", content)
           .gte("created_at", since)
+          .limit(1)
           .maybeSingle();
         if (dup?.id) {
           await logSync("bot", null, "success", "تم تجاهل إعلان مكرر (نفس النص خلال 24 ساعة)");
-          return { status: "duplicate", id: dup.id, ad_status: "pending" };
+          return { status: "duplicate", id: dup.id, ad_status: (dup.status as "pending" | "approved") ?? "pending" };
         }
       }
       if (authorName && title) {
         const { data: dup } = await supabaseAdmin
           .from("listings")
-          .select("id")
+          .select("id,status")
           .eq("source", "facebook_bot")
           .eq("contact_name", authorName)
           .eq("title", title)
           .gte("created_at", since)
+          .limit(1)
           .maybeSingle();
         if (dup?.id) {
           await logSync("bot", null, "success", "تم تجاهل إعلان مكرر (نفس البائع والعنوان خلال 24 ساعة)");
-          return { status: "duplicate", id: dup.id, ad_status: "pending" };
+          return { status: "duplicate", id: dup.id, ad_status: (dup.status as "pending" | "approved") ?? "pending" };
         }
       }
     }
@@ -589,7 +608,7 @@ export async function ingestBotPost(payload: BotPayload): Promise<BotIngestResul
     // ننظّف الوصف: إزالة الروابط والتكرار وحذف رقم الهاتف منه (إن وُجد بخانة مستقلة)
     const cleanContent = cleanDescription(content, phone);
 
-    // Does the bot provide a real, human ad name? Ads without one go to manual review.
+    // هل لدينا اسم إعلان حقيقي؟ إن لم يرسله البوت نحاول استخراجه من أول سطر مفيد في الوصف.
     const namedByBot = hasMeaningfulTitle(title);
 
     // إذا لم يصل عنوان حقيقي: لا نكتب "عام/أخرى"، بل نسحب أول سطر مفيد من الوصف
@@ -649,8 +668,9 @@ export async function ingestBotPost(payload: BotPayload): Promise<BotIngestResul
         });
     }
 
-    // يُقبل تلقائياً فقط الإعلان الذي يحمل اسماً وهاتفاً معاً؛ غير ذلك يذهب للمراجعة اليدوية.
-    const adStatus: "approved" | "pending" = namedByBot && !!phone ? "approved" : "pending";
+    // يُقبل تلقائياً فقط الإعلان الذي يحمل اسماً حقيقياً (مُرسل أو مُستخرج من الوصف) وهاتفاً؛ غير ذلك للمراجعة.
+    const hasResolvedTitle = hasMeaningfulTitle(finalTitle);
+    const adStatus: "approved" | "pending" = hasResolvedTitle && !!phone ? "approved" : "pending";
 
     const row = {
       title: finalTitle,
@@ -670,6 +690,7 @@ export async function ingestBotPost(payload: BotPayload): Promise<BotIngestResul
       published_at: publishedAt ?? new Date().toISOString(),
       listing_type: "normal" as const,
       source: "facebook_bot",
+      ...(sourceRef ? { source_ref: sourceRef } : {}),
     };
 
     const { data: inserted, error } = await supabaseAdmin.from("listings").insert(row).select("id").single();
@@ -682,7 +703,7 @@ export async function ingestBotPost(payload: BotPayload): Promise<BotIngestResul
       `تم استقبال إعلان من البوت — التصنيف: ${categoryLabel(category).name}، الحالة: ${
         adStatus === "approved"
           ? "منشور"
-          : `بانتظار المراجعة (${!namedByBot ? "بدون اسم إعلان" : "بدون رقم هاتف"})`
+            : `بانتظار المراجعة (${!hasResolvedTitle ? "بدون اسم إعلان" : "بدون رقم هاتف"})`
       }، السعر: ${priceResult.detected ? priceResult.price : "غير محدد"}`,
     );
     await touchMeta("ok");

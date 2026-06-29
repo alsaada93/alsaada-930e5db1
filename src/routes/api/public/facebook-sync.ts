@@ -4,7 +4,7 @@ import { z } from "zod";
 const CORS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, x-sync-secret, x-hub-signature-256",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization, x-sync-secret, x-hub-signature-256",
 };
 
 const json = (body: unknown, status = 200) =>
@@ -22,12 +22,15 @@ const LegacyPayloadSchema = z.object({
   seller_name: z.string().max(200).nullish(),
   phone: z.string().max(50).nullish(),
   category: z.string().max(100).nullish(),
-  images: z.array(z.string().url().max(2000)).max(20).nullish(),
+  images: z.array(z.string().url().max(2000)).max(30).nullish(),
   created_time: z.string().max(60).nullish(),
 });
 
 // New external-bot payload
 const BotPayloadSchema = z.object({
+  post_id: z.string().max(500).nullish(),
+  fb_post_id: z.string().max(500).nullish(),
+  external_id: z.string().max(500).nullish(),
   source: z.string().max(100).nullish(),
   title: z.string().max(500).nullish(),
   content: z.string().max(20000).nullish(),
@@ -35,10 +38,120 @@ const BotPayloadSchema = z.object({
   contact_phone: z.string().max(50).nullish(),
   price: z.union([z.string().max(50), z.number()]).nullish(),
   image_base64: z.string().max(15_000_000).nullish(),
-  images: z.array(z.string().url().max(2000)).max(20).nullish(),
+  images: z.array(z.string().url().max(2000)).max(30).nullish(),
   category: z.string().max(100).nullish(),
   published_at: z.string().max(60).nullish(),
 });
+
+function firstString(...values: unknown[]): string | undefined {
+  for (const v of values) {
+    if (typeof v === "string" && v.trim()) return v.trim();
+    if (typeof v === "number" && Number.isFinite(v)) return String(v);
+  }
+  return undefined;
+}
+
+function collectImageUrls(...values: unknown[]): string[] {
+  const out: string[] = [];
+  const seenObjects = new WeakSet<object>();
+  const visit = (v: unknown) => {
+    if (!v) return;
+    if (typeof v === "string") {
+      v
+        .split(/[\n,]/)
+        .map((s) => s.trim())
+        .filter((s) => /^https?:\/\//i.test(s))
+        .forEach((s) => out.push(s));
+      return;
+    }
+    if (Array.isArray(v)) {
+      v.forEach(visit);
+      return;
+    }
+    if (typeof v === "object") {
+      if (seenObjects.has(v)) return;
+      seenObjects.add(v);
+      const o = v as Record<string, unknown>;
+      visit(o.url ?? o.src ?? o.href ?? o.image_url ?? o.photo_url);
+      visit(o.imageUrl ?? o.photoUrl ?? o.full_picture ?? o.picture);
+      visit(o.media);
+      visit(o.image);
+      visit(o.images);
+      visit(o.photos);
+      visit(o.attachments);
+      visit(o.subattachments);
+      visit(o.data);
+    }
+  };
+  values.forEach(visit);
+  return Array.from(new Set(out)).slice(0, 30);
+}
+
+function normalizeBotPayload(body: Record<string, unknown>): Record<string, unknown> {
+  const images = collectImageUrls(
+    body.images,
+    body.image_urls,
+    body.imageUrls,
+    body.image_url,
+    body.imageUrl,
+    body.photo_url,
+    body.photoUrl,
+    body.photos,
+    body.media,
+    body.attachments,
+  );
+
+  return {
+    post_id: firstString(body.post_id, body.fb_post_id, body.facebook_post_id, body.external_id, body.id, body.permalink_url, body.url, body.link),
+    fb_post_id: firstString(body.fb_post_id, body.facebook_post_id),
+    external_id: firstString(body.external_id, body.id),
+    source: firstString(body.source) ?? "facebook_bot",
+    title: firstString(body.title, body.name, body.ad_title, body.adTitle, body.product_name, body.productName),
+    content: firstString(body.content, body.text, body.message, body.description, body.caption, body.body, body.details),
+    author_name: firstString(body.author_name, body.author, body.seller_name, body.sellerName, body.user_name, body.userName, body.from_name),
+    contact_phone: firstString(body.contact_phone, body.phone, body.mobile, body.whatsapp, body.whatsApp, body.contact),
+    price: firstString(body.price, body.amount, body.value) ?? (typeof body.price === "number" ? body.price : undefined),
+    image_base64: firstString(body.image_base64, body.imageBase64, body.base64, body.image_data, body.imageData),
+    images: images.length ? images : undefined,
+    category: firstString(body.category, body.category_name, body.categoryName, body.section),
+    published_at: firstString(body.published_at, body.created_time, body.createdAt, body.created_at, body.date, body.timestamp),
+  };
+}
+
+function readSyncSecret(request: Request): string | null {
+  const direct = request.headers.get("x-sync-secret");
+  if (direct) return direct;
+  const auth = request.headers.get("authorization");
+  const m = auth?.match(/^Bearer\s+(.+)$/i);
+  return m?.[1]?.trim() || null;
+}
+
+function extractBotItems(body: unknown): Record<string, unknown>[] {
+  const isRecord = (v: unknown): v is Record<string, unknown> => typeof v === "object" && v !== null && !Array.isArray(v);
+  if (Array.isArray(body)) return body.filter(isRecord);
+  if (!isRecord(body)) return [];
+  for (const key of ["posts", "items", "data", "records", "listings", "ads"]) {
+    const v = body[key];
+    if (Array.isArray(v)) return v.filter(isRecord);
+  }
+  for (const key of ["post", "item", "record", "listing", "ad", "payload", "data"]) {
+    const v = body[key];
+    if (isRecord(v)) return [v];
+  }
+  return [body];
+}
+
+function parsePublishedAt(value: unknown): string {
+  if (typeof value === "number") return new Date(value > 10_000_000_000 ? value : value * 1000).toISOString();
+  if (typeof value === "string" && value.trim()) {
+    const numeric = Number(value);
+    const d = Number.isFinite(numeric)
+      ? new Date(numeric > 10_000_000_000 ? numeric : numeric * 1000)
+      : new Date(value);
+    if (!Number.isNaN(d.getTime())) return d.toISOString();
+  }
+  return new Date().toISOString();
+}
 
 export const Route = createFileRoute("/api/public/facebook-sync")({
   server: {
@@ -59,7 +172,7 @@ export const Route = createFileRoute("/api/public/facebook-sync")({
           return new Response(challenge, { status: 200 });
         }
 
-        const secret = request.headers.get("x-sync-secret");
+        const secret = readSyncSecret(request);
         const { verifySecret } = await import("@/lib/facebook-sync.server");
         const ok = await verifySecret(secret);
         return json({ ok, service: "facebook-sync", status: ok ? "ready" : "unauthorized" }, ok ? 200 : 401);
@@ -79,7 +192,7 @@ export const Route = createFileRoute("/api/public/facebook-sync")({
         // أضفنا هذا السطر لنرى في السجلات (Logs) ما الذي يرسله فيسبوك بالضبط
         console.log("🚨 [Facebook Webhook] تم استلام طلب جديد:", JSON.stringify(body, null, 2));
 
-        const { verifySecret, ingestPost, deletePostAd, ingestBotPost } = await import("@/lib/facebook-sync.server");
+        const { verifySecret, deletePostAd, ingestBotPost } = await import("@/lib/facebook-sync.server");
 
         // ====================================================================
         // الجزء الأول: التعامل مع تنسيق فيسبوك الرسمي (Meta Webhook)
@@ -137,13 +250,12 @@ export const Route = createFileRoute("/api/public/facebook-sync")({
                 const uniqueImages = [...new Set(extractedImages)];
 
                 const mappedPayload = {
+                  post_id: firstString(post.post_id, post.id, post.link, post.permalink_url),
                   source: "facebook_official",
-                  title: "منشور من فيسبوك",
+                  title: firstString(post.title, post.name),
                   content: contentText,
                   author_name: post.from?.name || "عضو في الصفحة",
-                  published_at: post.created_time
-                    ? new Date(post.created_time * 1000).toISOString()
-                    : new Date().toISOString(),
+                  published_at: parsePublishedAt(post.created_time),
                   images: uniqueImages.length > 0 ? uniqueImages : null,
                 };
 
@@ -161,16 +273,43 @@ export const Route = createFileRoute("/api/public/facebook-sync")({
         // ====================================================================
         // الجزء الثاني: التعامل مع البوتات وأدوات الأتمتة
         // ====================================================================
-        const secret = request.headers.get("x-sync-secret");
+        const secret = readSyncSecret(request);
 
         if (!(await verifySecret(secret))) {
           return json({ status: "error", message: "Unauthorized" }, 401);
         }
 
-        const isLegacy = typeof body === "object" && body !== null && "post_id" in (body as Record<string, unknown>);
+        const objectBody = typeof body === "object" && body !== null && !Array.isArray(body) ? (body as Record<string, unknown>) : null;
+        if (objectBody && objectBody.action === "delete") {
+          const postId = firstString(objectBody.post_id, objectBody.fb_post_id, objectBody.external_id, objectBody.id);
+          if (!postId) return json({ status: "error", message: "post_id is required for delete" }, 400);
+          const result = await deletePostAd(postId);
+          return json(result, result.ok ? 200 : 500);
+        }
 
-        if (!isLegacy) {
-          const parsed = BotPayloadSchema.safeParse(body);
+        const botItems = extractBotItems(body);
+        if (botItems.length > 1) {
+          const results = [];
+          for (const item of botItems) {
+            const parsed = BotPayloadSchema.safeParse(normalizeBotPayload(item));
+            if (!parsed.success) {
+              results.push({ status: "error", message: "Invalid payload", details: parsed.error.flatten() });
+              continue;
+            }
+            results.push(await ingestBotPost(parsed.data));
+          }
+          const imported = results.filter((r: any) => r.status === "ok").length;
+          const duplicates = results.filter((r: any) => r.status === "duplicate").length;
+          const errors = results.filter((r: any) => r.status === "error").length;
+          return json({ status: errors ? "partial" : "ok", imported, duplicates, errors, results }, errors === results.length ? 400 : 200);
+        }
+
+        // كل منشور جديد/محدّث من البوت الخارجي يذهب إلى نظام الإعلانات الرئيسي مباشرة.
+        // نقوم بتطبيع أسماء الحقول الشائعة حتى لا يتوقف الاستقبال إذا أرسل البوت
+        // message/text/description أو image_url/image_urls بدلاً من content/images.
+        const singleBotItem = botItems[0] ?? objectBody;
+        if (singleBotItem) {
+          const parsed = BotPayloadSchema.safeParse(normalizeBotPayload(singleBotItem));
           if (!parsed.success) {
             return json({ status: "error", message: "Invalid payload", details: parsed.error.flatten() }, 400);
           }
@@ -179,19 +318,7 @@ export const Route = createFileRoute("/api/public/facebook-sync")({
           return json(result, code);
         }
 
-        const parsed = LegacyPayloadSchema.safeParse(body);
-        if (!parsed.success) {
-          return json({ status: "error", message: "Invalid payload", details: parsed.error.flatten() }, 422);
-        }
-
-        const data = parsed.data;
-        if (data.action === "delete") {
-          const result = await deletePostAd(data.post_id);
-          return json(result, result.ok ? 200 : 500);
-        }
-
-        const result = await ingestPost(data);
-        return json(result, result.ok ? 200 : 500);
+        return json({ status: "error", message: "Invalid payload" }, 400);
       },
     },
   },
