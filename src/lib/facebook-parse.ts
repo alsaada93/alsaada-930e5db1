@@ -850,10 +850,33 @@ export function detectSubcategory(slug: FbCategorySlug, text: string): SubCatego
   }
 
   if (slug === "equipment") {
-    if (has("oven", "cooking range", "فرن", "طباخ")) return { group_name: "معدات طهي", item_name: "طباخات" };
-    if (has("grill", "شواية")) return { group_name: "معدات طهي", item_name: "شوايات" };
-    if (has("coffee", "espresso", "قهوة")) return { group_name: "قهوة ومشروبات", item_name: "مكائن قهوة" };
-    if (has("fridge", "freezer", "ثلاجة", "فريزر")) return { group_name: "معدات تبريد", item_name: "ثلاجات" };
+    if (has("pizza oven", "فرن بيتزا")) return { group_name: "معدات طهي", item_name: "أفران بيتزا" };
+    if (has("oven", "فرن", "menumaster", "مايكرويف", "microwave")) return { group_name: "معدات طهي", item_name: has("مايكرويف", "microwave", "menumaster") ? "مايكروويف" : "أفران" };
+    if (has("cooking range", "burner", "طباخ", "غاز", "mendi", "مندي")) return { group_name: "معدات طهي", item_name: "طباخات" };
+    if (has("grill", "griddle", "قريل", "شواية", "برجر")) return { group_name: "معدات طهي", item_name: "شوايات" };
+    if (has("fryer", "قلاية", "قلايات")) return { group_name: "معدات طهي", item_name: "قلايات" };
+    if (has("dough sheeter", "dough", "عجين", "فرادة", "عجان", "mixer", "خلاط تجاري", "omniblend", "jtc")) {
+      return { group_name: "معدات تحضير", item_name: has("عجان", "mixer") ? "عجانات" : has("خلاط", "omniblend", "jtc") ? "خلاطات صناعية" : "طاولات تحضير" };
+    }
+    if (has("prep table", "طاولة تحضير", "تحضير وتبريد", "حوض وطاولة")) return { group_name: "معدات تحضير", item_name: "طاولات تحضير" };
+    if (has("coffee", "espresso", "baratza", "delonghi", "de'longhi", "de’longhi", "قهوة", "اسبريسو", "إسبريسو")) {
+      return { group_name: "قهوة ومشروبات", item_name: has("مطحنة", "grinder", "baratza") ? "مطاحن قهوة" : "مكائن قهوة" };
+    }
+    if (has("juice", "orange juicer", "frucosol", "santos", "عصارة", "عصير", "برتقال")) return { group_name: "قهوة ومشروبات", item_name: "صانعات عصير" };
+    if (has("ice maker", "ice machine", "simag", "ثلج")) return { group_name: "قهوة ومشروبات", item_name: "صانعات ثلج" };
+    if (has("fridge", "freezer", "showcase", "display fridge", "salad fridge", "mastercool", "master cool", "ثلاجة", "فريزر", "تبريد", "تجميد", "سلطة", "كيك")) {
+      if (has("عرض", "display", "showcase", "كيك", "مشروبات")) return { group_name: "معدات تبريد", item_name: "ثلاجات عرض" };
+      if (has("freezer", "فريزر", "تجميد", "مجمد")) return { group_name: "معدات تبريد", item_name: "فريزرات" };
+      if (has("سلطة", "pizza", "salad")) return { group_name: "معدات تبريد", item_name: "ثلاجات سلطة وبيتزا" };
+      if (has("تحضير", "under counter", "undercounter")) return { group_name: "معدات تبريد", item_name: "ثلاجات تحضير" };
+      return { group_name: "معدات تبريد", item_name: "ثلاجات" };
+    }
+    if (has("dishwasher", "غسالة صحون")) return { group_name: "نظافة وخدمة", item_name: "غسالات صحون" };
+    if (has("sink", "مغسلة", "حوض")) return { group_name: "نظافة وخدمة", item_name: "مغاسل ستانلس" };
+    if (has("shelf", "رف", "أرفف", "ستانلس")) return { group_name: "نظافة وخدمة", item_name: "أرفف ستانلس" };
+    if (has("trolley", "عربة")) return { group_name: "نظافة وخدمة", item_name: "عربات نقل" };
+    if (has("pos", "cashier", "كاشير", "فاتورة", "باركود")) return { group_name: "كاشير ونقاط بيع", item_name: has("طابعة", "فاتورة") ? "طابعات فواتير" : "أجهزة كاشير" };
+    if (has("table", "chair", "طاولة", "كراسي", "بوفيه", "كاونتر")) return { group_name: "أثاث وتجهيز المطعم", item_name: has("كرسي", "كراسي", "chair") ? "كراسي" : has("كاونتر", "counter") ? "كاونترات" : "طاولات مطاعم" };
     return { group_name: "معدات متنوعة (أخرى)", item_name: null };
   }
 
