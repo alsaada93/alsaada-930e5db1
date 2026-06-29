@@ -25,7 +25,7 @@ export function ListingCard({ item, displayTitle }: { item: Listing; displayTitl
   const [chatOpen, setChatOpen] = useState(false);
   const [safety, setSafety] = useState<null | { label: string; run: () => void }>(null);
 
-  const isRestaurant = item.category === "restaurant";
+  const isRestaurant = item.categoryId === "restaurant" || item.category === "مطاعم وكافيهات";
   const phone = seller?.phone ?? item.phone ?? (isRestaurant ? DEFAULT_PHONE : null);
   const sellerName = seller?.name ?? item.seller ?? t("card.trustedSeller");
   const rating = listingRating(item.id);
@@ -34,7 +34,7 @@ export function ListingCard({ item, displayTitle }: { item: Listing; displayTitl
   const verified = seller?.verified ?? item.sellerVerified ?? false;
   const title = displayTitle || item.title;
   const condLabel = item.condition === "جديد" ? t("cond.new") : t("cond.used");
-  const cat = categories.find((c) => c.id === item.category);
+  const cat = categories.find((c) => c.id === item.categoryId || c.id === item.category);
   const showCond = showsCondition(cat?.name ?? item.category, cat?.nameEn);
 
   const waLink = phone ? whatsappLink({ phone, listingTitle: title, listingId: item.id }) : null;

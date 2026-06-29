@@ -114,13 +114,9 @@ function AccountPage() {
     if (!user) return;
     let active = true;
     (async () => {
-      const [{ data: prof }, { data: rows }] = await Promise.all([
+      const [{ data: prof }, rows] = await Promise.all([
         supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
-        supabase
-          .from("listings")
-          .select("id,title,price,status,views,images,published_at,expires_at")
-          .eq("user_id", user.id)
-          .order("created_at", { ascending: false }),
+        fetchUserListings(user.id),
       ]);
       if (!active) return;
       setProfile(
@@ -752,6 +748,23 @@ function AccountPage() {
       )}
     </div>
   );
+}
+
+async function fetchUserListings(userId: string): Promise<ListingRow[]> {
+  const PAGE = 1000;
+  const all: ListingRow[] = [];
+  for (let page = 0; ; page++) {
+    const { data } = await supabase
+      .from("listings")
+      .select("id,title,price,status,views,images,published_at,expires_at")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .range(page * PAGE, page * PAGE + PAGE - 1);
+    const batch = (data as ListingRow[] | null) ?? [];
+    all.push(...batch);
+    if (batch.length < PAGE) break;
+  }
+  return all;
 }
 
 function StatCard({

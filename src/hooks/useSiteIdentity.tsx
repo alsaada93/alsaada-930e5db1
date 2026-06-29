@@ -23,16 +23,16 @@ export interface SiteIdentity {
 }
 
 export const DEFAULT_IDENTITY: SiteIdentity = {
-  logoUrl: "",
-  faviconUrl: "/site-logo.png",
+  logoUrl: "https://grnkrmqjhjhgrnylihvq.supabase.co/storage/v1/object/public/listings/identity/1780501032878-fnlp383h3r9.png",
+  faviconUrl: "https://grnkrmqjhjhgrnylihvq.supabase.co/storage/v1/object/public/listings/identity/1780501035807-5c7ofh7dyrl.png",
   nameAr: "حراج السعادة",
   nameEn: "Haraj Al Saada",
   taglineAr: "شراء وبيع معدات المطاعم والأثاث والإلكترونيات في البحرين",
   taglineEn: "Buy & sell restaurant equipment, furniture & electronics in Bahrain",
   showLogo: true,
   showName: true,
-  logoBoxWidth: 40,
-  logoBoxHeight: 40,
+  logoBoxWidth: 35,
+  logoBoxHeight: 35,
   logoFontSize: 16,
   instagramUrl: "https://www.instagram.com/alsaada.bh1",
   contactPhone: "36818153",
