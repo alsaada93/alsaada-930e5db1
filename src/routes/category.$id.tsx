@@ -261,6 +261,27 @@ function CategoryPage() {
               )}
             </div>
           )}
+          {hasMore && (
+            <div className="mt-8 text-center">
+              <button
+                type="button"
+                onClick={() => loadMore()}
+                disabled={loadingMore}
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-primary px-8 py-3 text-sm font-bold text-primary-foreground shadow-glow transition-opacity hover:opacity-90 disabled:opacity-60"
+              >
+                {loadingMore ? (
+                  <>
+                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                    {lang === "ar" ? "جارٍ التحميل..." : "Loading..."}
+                  </>
+                ) : (
+                  <>
+                    {lang === "ar" ? "عرض المزيد" : "Load more"}
+                  </>
+                )}
+              </button>
+            </div>
+          )}
         </section>
 
         {/* Advanced filters (hidden until toggled) */}
@@ -384,6 +405,27 @@ function CategoryPage() {
             </div>
           </div>
           )}
+          {hasMore && (
+            <div className="mt-8 text-center">
+              <button
+                type="button"
+                onClick={() => loadMore()}
+                disabled={loadingMore}
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-primary px-8 py-3 text-sm font-bold text-primary-foreground shadow-glow transition-opacity hover:opacity-90 disabled:opacity-60"
+              >
+                {loadingMore ? (
+                  <>
+                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                    {lang === "ar" ? "جارٍ التحميل..." : "Loading..."}
+                  </>
+                ) : (
+                  <>
+                    {lang === "ar" ? "عرض المزيد" : "Load more"}
+                  </>
+                )}
+              </button>
+            </div>
+          )}
         </section>
 
         <section className="mx-auto max-w-7xl px-4 py-8 pb-16">
@@ -411,6 +453,27 @@ function CategoryPage() {
                   {lang === "ar" ? "مسح الفلاتر" : "Clear filters"}
                 </button>
               )}
+            </div>
+          )}
+          {hasMore && (
+            <div className="mt-8 text-center">
+              <button
+                type="button"
+                onClick={() => loadMore()}
+                disabled={loadingMore}
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-primary px-8 py-3 text-sm font-bold text-primary-foreground shadow-glow transition-opacity hover:opacity-90 disabled:opacity-60"
+              >
+                {loadingMore ? (
+                  <>
+                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                    {lang === "ar" ? "جارٍ التحميل..." : "Loading..."}
+                  </>
+                ) : (
+                  <>
+                    {lang === "ar" ? "عرض المزيد" : "Load more"}
+                  </>
+                )}
+              </button>
             </div>
           )}
         </section>
