@@ -240,6 +240,24 @@ export const Route = createFileRoute("/api/public/facebook-sync")({
           return json(result, result.ok ? 200 : 500);
         }
 
+        const isLegacy = !!(
+          objectBody &&
+          "post_id" in objectBody &&
+          ("text" in objectBody || "message" in objectBody || "action" in objectBody) &&
+          !("content" in objectBody) &&
+          !("title" in objectBody) &&
+          !("image_base64" in objectBody)
+        );
+
+        if (isLegacy) {
+          const parsed = LegacyPayloadSchema.safeParse(body);
+          if (!parsed.success) {
+            return json({ status: "error", message: "Invalid payload", details: parsed.error.flatten() }, 422);
+          }
+          const result = await ingestPost(parsed.data);
+          return json(result, result.ok ? 200 : 500);
+        }
+
         // كل منشور جديد/محدّث من البوت الخارجي يذهب إلى نظام الإعلانات الرئيسي مباشرة.
         // نقوم بتطبيع أسماء الحقول الشائعة حتى لا يتوقف الاستقبال إذا أرسل البوت
         // message/text/description أو image_url/image_urls بدلاً من content/images.
@@ -253,31 +271,7 @@ export const Route = createFileRoute("/api/public/facebook-sync")({
           return json(result, code);
         }
 
-        const isLegacy = typeof body === "object" && body !== null && "post_id" in (body as Record<string, unknown>);
-
-        if (!isLegacy) {
-          const parsed = BotPayloadSchema.safeParse(body);
-          if (!parsed.success) {
-            return json({ status: "error", message: "Invalid payload", details: parsed.error.flatten() }, 400);
-          }
-          const result = await ingestBotPost(parsed.data);
-          const code = result.status === "error" ? 500 : 200;
-          return json(result, code);
-        }
-
-        const parsed = LegacyPayloadSchema.safeParse(body);
-        if (!parsed.success) {
-          return json({ status: "error", message: "Invalid payload", details: parsed.error.flatten() }, 422);
-        }
-
-        const data = parsed.data;
-        if (data.action === "delete") {
-          const result = await deletePostAd(data.post_id);
-          return json(result, result.ok ? 200 : 500);
-        }
-
-        const result = await ingestPost(data);
-        return json(result, result.ok ? 200 : 500);
+        return json({ status: "error", message: "Invalid payload" }, 400);
       },
     },
   },
