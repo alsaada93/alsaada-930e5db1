@@ -313,6 +313,20 @@ export const adminReclassifyListings = createServerFn({ method: "POST" })
     return reclassifyExistingListings(Boolean(data.onlyUncategorized));
   });
 
+/** Re-runs the deterministic ingestion engine over existing ads (full migration). */
+export const adminReprocessListings = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z.object({ onlyBot: z.boolean().optional() }).parse(input ?? {}),
+  )
+  .handler(async ({ context, data }) => {
+    const { supabase, userId } = context;
+    await assertAdmin(supabase, userId);
+    const { reprocessAllListings } = await import("@/lib/facebook-sync.server");
+    return reprocessAllListings({ onlyBot: data.onlyBot ?? false });
+  });
+
+
 /** Permanently deletes a listing. */
 export const adminDeleteListing = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])

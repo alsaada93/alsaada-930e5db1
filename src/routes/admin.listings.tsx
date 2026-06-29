@@ -10,6 +10,7 @@ import {
   adminUpdateListing,
   adminDeleteListing,
   adminReclassifyListings,
+  adminReprocessListings,
   type AdminListingRow,
 } from "@/lib/admin.functions";
 import { useCategories } from "@/hooks/useCategories";
@@ -44,6 +45,7 @@ function AdminListingsPage() {
   const updateFn = useServerFn(adminUpdateListing);
   const deleteFn = useServerFn(adminDeleteListing);
   const reclassifyFn = useServerFn(adminReclassifyListings);
+  const reprocessFn = useServerFn(adminReprocessListings);
   const { categories } = useCategories();
 
   const { data: items = [], isLoading } = useQuery({
@@ -56,6 +58,21 @@ function AdminListingsPage() {
   const [busy, setBusy] = useState<string | null>(null);
   const [editing, setEditing] = useState<AdminListingRow | null>(null);
   const [reclassifying, setReclassifying] = useState(false);
+  const [reprocessing, setReprocessing] = useState(false);
+
+  const doReprocess = async () => {
+    if (!confirm("معالجة عميقة لجميع الإعلانات: إصلاح العناوين والأسعار والتصنيف ومواصفات السيارات تلقائياً؟")) return;
+    setReprocessing(true);
+    try {
+      const res = await reprocessFn({ data: { onlyBot: false } });
+      toast.success(`تمت معالجة ${res.updated.toLocaleString("ar")} إعلان من ${res.scanned.toLocaleString("ar")}`);
+      qc.invalidateQueries({ queryKey: ["admin-listings"] });
+    } catch {
+      toast.error("تعذّرت المعالجة العميقة");
+    } finally {
+      setReprocessing(false);
+    }
+  };
 
   const refresh = () => qc.invalidateQueries({ queryKey: ["admin-listings"] });
 
@@ -162,6 +179,15 @@ function AdminListingsPage() {
             >
               {reclassifying ? <Loader2 className="h-4 w-4 animate-spin" /> : <FolderSync className="h-4 w-4" />}
               إعادة التصنيف التلقائي
+            </button>
+            <button
+              onClick={doReprocess}
+              disabled={reprocessing}
+              title="معالجة عميقة: إصلاح العناوين والأسعار والمواصفات والتصنيف"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
+            >
+              {reprocessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <FolderSync className="h-4 w-4" />}
+              معالجة عميقة
             </button>
             <div className="relative">
               <Search className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />

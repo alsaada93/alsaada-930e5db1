@@ -175,6 +175,11 @@ function AddListingPage() {
 
   // Extra options
   const [negotiable, setNegotiable] = useState(true);
+  // مواصفات السيارة (تظهر فقط عند اختيار تصنيف المركبات)
+  const [carYear, setCarYear] = useState("");
+  const [carMileage, setCarMileage] = useState("");
+  const [carEngine, setCarEngine] = useState("");
+  const [carColor, setCarColor] = useState("");
   const [delivery, setDelivery] = useState(false);
 
   // Business fields (controlled to survive step navigation)
@@ -552,6 +557,11 @@ function AddListingPage() {
         condition,
         category_id: categoryId || null,
         brand: (brand === "أخرى" ? customBrand.trim() : brand) || null,
+        car_make: isVehicleCat ? ((brand === "أخرى" ? customBrand.trim() : brand) || null) : null,
+        model_year: isVehicleCat && carYear ? (Number(carYear) || null) : null,
+        mileage: isVehicleCat && carMileage ? (Number(carMileage) || null) : null,
+        engine_capacity: isVehicleCat && carEngine.trim() ? carEngine.trim() : null,
+        color: isVehicleCat && carColor.trim() ? carColor.trim() : null,
         country_of_origin: country ? country.ar : null,
         group_name: groupName || null,
         item_name: itemName || null,
@@ -1170,11 +1180,59 @@ function AddListingPage() {
               </div>
             )}
 
-
-
-
+            {/* مواصفات السيارة — تظهر ديناميكياً عند اختيار تصنيف المركبات */}
+            {isVehicleCat && (
+              <div className="rounded-2xl border border-primary/30 bg-accent/20 p-4">
+                <p className="mb-3 text-sm font-extrabold text-primary">
+                  {ar ? "مواصفات السيارة" : "Vehicle specifications"}
+                </p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="mb-1 block text-sm font-semibold">{ar ? "سنة الصنع" : "Year"}</label>
+                    <input
+                      type="number"
+                      inputMode="numeric"
+                      value={carYear}
+                      onChange={(e) => setCarYear(e.target.value)}
+                      placeholder={ar ? "مثال: 2018" : "e.g. 2018"}
+                      className={fieldCls}
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-sm font-semibold">{ar ? "الممشى (كم)" : "Mileage (km)"}</label>
+                    <input
+                      type="number"
+                      inputMode="numeric"
+                      value={carMileage}
+                      onChange={(e) => setCarMileage(e.target.value)}
+                      placeholder={ar ? "مثال: 120000" : "e.g. 120000"}
+                      className={fieldCls}
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-sm font-semibold">{ar ? "سعة المحرك" : "Engine"}</label>
+                    <input
+                      value={carEngine}
+                      onChange={(e) => setCarEngine(e.target.value)}
+                      placeholder={ar ? "مثال: 2.0 لتر / V6" : "e.g. 2.0L / V6"}
+                      className={fieldCls}
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-sm font-semibold">{ar ? "اللون" : "Color"}</label>
+                    <input
+                      value={carColor}
+                      onChange={(e) => setCarColor(e.target.value)}
+                      placeholder={ar ? "مثال: أبيض" : "e.g. White"}
+                      className={fieldCls}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Country */}
+
             <div className="relative">
               <label className="mb-1 block text-sm font-semibold">{ar ? "بلد الصنع" : "Country of manufacture"}</label>
               <div className="relative">

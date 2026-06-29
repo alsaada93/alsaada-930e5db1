@@ -723,8 +723,10 @@ export type Database = {
           area_sqm: number | null
           auction_ends_at: string | null
           brand: string | null
+          car_make: string | null
           category_id: string | null
           city: string | null
+          color: string | null
           condition: string
           contact_name: string | null
           contact_phone: string | null
@@ -732,6 +734,7 @@ export type Database = {
           created_at: string
           delivery_available: boolean | null
           description: string | null
+          engine_capacity: string | null
           expires_at: string
           featured: boolean
           group_name: string | null
@@ -743,6 +746,8 @@ export type Database = {
           lat: number | null
           listing_type: string
           lng: number | null
+          mileage: number | null
+          model_year: number | null
           monthly_revenue: number | null
           negotiable: boolean
           negotiable_flag: boolean | null
@@ -769,8 +774,10 @@ export type Database = {
           area_sqm?: number | null
           auction_ends_at?: string | null
           brand?: string | null
+          car_make?: string | null
           category_id?: string | null
           city?: string | null
+          color?: string | null
           condition?: string
           contact_name?: string | null
           contact_phone?: string | null
@@ -778,6 +785,7 @@ export type Database = {
           created_at?: string
           delivery_available?: boolean | null
           description?: string | null
+          engine_capacity?: string | null
           expires_at?: string
           featured?: boolean
           group_name?: string | null
@@ -789,6 +797,8 @@ export type Database = {
           lat?: number | null
           listing_type?: string
           lng?: number | null
+          mileage?: number | null
+          model_year?: number | null
           monthly_revenue?: number | null
           negotiable?: boolean
           negotiable_flag?: boolean | null
@@ -815,8 +825,10 @@ export type Database = {
           area_sqm?: number | null
           auction_ends_at?: string | null
           brand?: string | null
+          car_make?: string | null
           category_id?: string | null
           city?: string | null
+          color?: string | null
           condition?: string
           contact_name?: string | null
           contact_phone?: string | null
@@ -824,6 +836,7 @@ export type Database = {
           created_at?: string
           delivery_available?: boolean | null
           description?: string | null
+          engine_capacity?: string | null
           expires_at?: string
           featured?: boolean
           group_name?: string | null
@@ -835,6 +848,8 @@ export type Database = {
           lat?: number | null
           listing_type?: string
           lng?: number | null
+          mileage?: number | null
+          model_year?: number | null
           monthly_revenue?: number | null
           negotiable?: boolean
           negotiable_flag?: boolean | null

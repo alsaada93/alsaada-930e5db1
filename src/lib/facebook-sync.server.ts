@@ -8,17 +8,14 @@ import {
   parsePost,
   detectCategory,
   categoryLabel,
-  extractPriceSmart,
   extractCarSpecs,
   extractRealEstateSpecs,
   refineCategory,
   detectSubcategory,
-  buildAdTitle,
-  hasMeaningfulTitle,
-  firstMeaningfulLine,
   cleanDescription,
   type FbCategorySlug,
 } from "./facebook-parse";
+import { runIngestEngine } from "./ad-ingest-engine";
 
 const BUCKET = "listings";
 const PREFIX = "facebook";
@@ -606,40 +603,36 @@ export async function ingestBotPost(payload: BotPayload): Promise<BotIngestResul
       await logSync("bot", null, "failed", warning + "تم حفظ الإعلان بدون صور.");
     }
 
-    const priceResult = extractPriceSmart(content);
+    // ─── المحرك الحتمي (100% Regex) — بدون أي ذكاء اصطناعي ───
     const explicitPrice = parsePayloadPrice(payload.price);
-    // سياسة جديدة: لا نحذف أي رقم. نحتفظ برقم المعلن إن وُجد، ونحوّل الإعلان
-    // إلى «بانتظار المراجعة» إذا لم يوجد هاتف أو لم يوجد اسم/عنوان للإعلان.
+    const engineText = `${title}\n${content}`.trim();
+    const engine = runIngestEngine(engineText, payload.category);
+
+    // الهاتف: نُفضّل ما أرسله البوت، ثم ما يستخرجه المحرك حتمياً من النص.
     void stripPhoneNumbers; // (مُبقى للتوافق) لم نعد نحذف الأرقام
     const phone: string | null =
-      (payload.contact_phone ?? "").toString().trim() || extractPhone(content) || null;
-    // ننظّف الوصف: إزالة الروابط والتكرار وحذف رقم الهاتف منه (إن وُجد بخانة مستقلة)
+      (payload.contact_phone ?? "").toString().trim() || engine.contact_phone || extractPhone(content) || null;
+
+    // ننظّف الوصف: إزالة الروابط والتكرار وحذف رقم الهاتف منه (إن وُجد).
     const cleanContent = cleanDescription(content, phone);
 
-    // هل لدينا اسم إعلان حقيقي؟ إن لم يرسله البوت نحاول استخراجه من أول سطر مفيد في الوصف.
-    const namedByBot = hasMeaningfulTitle(title);
-
-    // إذا لم يصل عنوان حقيقي: لا نكتب "عام/أخرى"، بل نسحب أول سطر مفيد من الوصف
-    // ونستخدمه كعنوان، ثم نُصنّف الإعلان بناءً على هذا العنوان المشتق.
-    const derivedName = namedByBot ? title : firstMeaningfulLine(cleanContent) || "";
-    // النص المستخدم للتصنيف: نُعطي العنوان (المُرسل أو المشتق من أول سطر) وزناً أكبر.
-    const classifyText = `${derivedName} ${derivedName} ${content}`.trim();
-
-    const detected = detectCategory(classifyText, payload.category);
-    const category = payload.category ? detected : refineCategory(classifyText, detected);
+    // التصنيف الحتمي (لا يقع أبداً في "عام وأخرى" بالخطأ — الافتراضي "بضائع عامة").
+    const category: FbCategorySlug = engine.slug;
     const cats = await loadSiteCategories();
     const categoryId = await resolveSiteCategoryId(category, cats);
     const catObj = cats.find((c) => c.id === categoryId);
-    const { group_name, item_name } = resolveSubcategory(catObj, category, `${derivedName} ${content}`);
+    const { group_name, item_name } = resolveSubcategory(catObj, category, engineText);
 
     const specsBlock = buildSpecsBlock(category, content);
     const carSpecs = category === "cars" ? extractCarSpecs(content) : null;
     const reSpecs = category === "real_estate" ? extractRealEstateSpecs(content) : null;
     const negotiable = /\bnego\b|\bobo\b|قابل للتفاوض|قابل للنقاش|قابل/i.test(content);
 
-    let finalPrice = explicitPrice ?? priceResult.price ?? 0;
-    if (!finalPrice || finalPrice <= 0) finalPrice = 1; // أي إعلان بدون سعر يُسعّر بـ 1 د.ب
-    if (explicitPrice === null && !priceResult.detected) {
+    // السعر: ما يرسله البوت صراحةً يفوز، وإلا السعر المرتبط بعملة بحرينية حتمياً.
+    // عدم وجود سعر مرتبط بعملة ⇒ 0 (بدون سعر).
+    let finalPrice = explicitPrice ?? engine.price;
+    if (finalPrice === null || finalPrice === undefined || finalPrice < 0) finalPrice = 0;
+    if (explicitPrice === null && !engine.priceDetected) {
       warning = warning ? `${warning} | price_not_detected` : "price_not_detected";
     }
 
@@ -649,39 +642,15 @@ export async function ingestBotPost(payload: BotPayload): Promise<BotIngestResul
       if (!Number.isNaN(d.getTime())) publishedAt = d.toISOString();
     }
 
-    let finalTitle: string;
-    if (namedByBot) {
-      finalTitle = buildAdTitle({
-        slug: category,
-        itemName: item_name,
-        groupName: group_name,
-        categoryName: catObj?.name ?? categoryLabel(category).name,
-        brand: carSpecs?.brand ?? null,
-        text: `${title} ${cleanContent}`,
-        rawTitle: title,
-      });
-    } else {
-      // No ad name supplied: use the first meaningful line of the body as the
-      // title — never relabel it "عام/أخرى".
-      finalTitle =
-        derivedName ||
-        buildAdTitle({
-          slug: category,
-          itemName: item_name,
-          groupName: group_name,
-          categoryName: catObj?.name ?? categoryLabel(category).name,
-          brand: carSpecs?.brand ?? null,
-          text: cleanContent,
-          rawTitle: null,
-        });
-    }
+    // العنوان: حتمي من المحرك (تجاوز السيارات: "سيارة للبيع - الماركة السنة").
+    const finalTitle = engine.title.trim();
 
-    // يُقبل تلقائياً فقط الإعلان الذي يحمل اسماً حقيقياً (مُرسل أو مُستخرج من الوصف) وهاتفاً؛ غير ذلك للمراجعة.
-    const hasResolvedTitle = hasMeaningfulTitle(finalTitle);
-    const adStatus: "approved" | "pending" = hasResolvedTitle && !!phone ? "approved" : "pending";
+    // يُقبل تلقائياً كل إعلان يحمل اسماً حقيقياً؛ ما بلا اسم يُحوَّل لمراجعة يدوية.
+    const hasResolvedTitle = finalTitle.length >= 3;
+    const adStatus: "approved" | "pending" = hasResolvedTitle ? "approved" : "pending";
 
     const row = {
-      title: finalTitle,
+      title: finalTitle || "بدون عنوان",
       description: (cleanContent || "") + specsBlock || null,
       category_id: categoryId,
       group_name,
@@ -692,7 +661,11 @@ export async function ingestBotPost(payload: BotPayload): Promise<BotIngestResul
       contact_name: authorName,
       contact_phone: phone,
       ...(reSpecs?.area_sqm ? { area_sqm: reSpecs.area_sqm } : {}),
-      brand: carSpecs?.brand ?? "ماركة أخرى",
+      brand: engine.car_make ?? carSpecs?.brand ?? "ماركة أخرى",
+      ...(engine.car_make ? { car_make: engine.car_make } : {}),
+      ...(engine.model_year ? { model_year: engine.model_year } : {}),
+      ...(engine.mileage ? { mileage: engine.mileage } : {}),
+      ...(engine.engine_capacity ? { engine_capacity: engine.engine_capacity } : {}),
       ...(reSpecs?.region ? { city: reSpecs.region } : {}),
       status: adStatus,
       published_at: publishedAt ?? new Date().toISOString(),
@@ -709,10 +682,8 @@ export async function ingestBotPost(payload: BotPayload): Promise<BotIngestResul
       inserted.id,
       "success",
       `تم استقبال إعلان من البوت — التصنيف: ${categoryLabel(category).name}، الحالة: ${
-        adStatus === "approved"
-          ? "منشور"
-            : `بانتظار المراجعة (${!hasResolvedTitle ? "بدون اسم إعلان" : "بدون رقم هاتف"})`
-      }، السعر: ${priceResult.detected ? priceResult.price : "غير محدد"}`,
+        adStatus === "approved" ? "منشور" : "بانتظار المراجعة (بدون اسم إعلان)"
+      }، السعر: ${engine.priceDetected ? engine.price : "غير محدد"}`,
     );
     await touchMeta("ok");
     return { status: "ok", id: inserted.id, ad_status: adStatus, warning };
@@ -824,4 +795,94 @@ export async function reclassifyExistingListings(
   }
 
   return { scanned: list.length, updated };
+}
+
+/**
+ * Backend migration job: re-runs the deterministic ingestion engine over ALL
+ * existing listings to fix trashed titles, phone-snippet prices, mis-categorised
+ * ads (out of "عام وأخرى"), and to structure car specs (year/mileage/engine/make).
+ * Conservative: only overwrites a title when the current one is empty/banned/generic.
+ */
+export async function reprocessAllListings(
+  opts: { onlyBot?: boolean } = {},
+): Promise<{ scanned: number; updated: number }> {
+  const { isBanned } = await import("./ad-ingest-engine");
+  const cats = await loadSiteCategories();
+  if (cats.length === 0) return { scanned: 0, updated: 0 };
+
+  const categoryNames = new Set(cats.map((c) => (c.name ?? "").trim()));
+  const pageSize = 1000;
+  let from = 0;
+  let scanned = 0;
+  let updated = 0;
+
+  for (;;) {
+    let query = supabaseAdmin
+      .from("listings")
+      .select(
+        "id, title, description, price, category_id, group_name, item_name, brand, car_make, model_year, mileage, engine_capacity, source",
+      )
+      .order("created_at", { ascending: true })
+      .range(from, from + pageSize - 1);
+    if (opts.onlyBot) query = query.eq("source", "facebook_bot");
+
+    const { data: rows, error } = await query;
+    if (error) throw error;
+    const list = rows ?? [];
+    if (list.length === 0) break;
+
+    for (const row of list) {
+      scanned += 1;
+      const r = row as any;
+      const text = `${r.title ?? ""}\n${r.description ?? ""}`.trim();
+      if (!text) continue;
+
+      const engine = runIngestEngine(text);
+      const categoryId = await resolveSiteCategoryId(engine.slug, cats);
+      if (!categoryId) continue;
+      const catObj = cats.find((c) => c.id === categoryId);
+      const sub = resolveSubcategory(catObj, engine.slug, text);
+
+      const patch: Record<string, unknown> = {};
+
+      // Category / subcategory
+      if (r.category_id !== categoryId) patch.category_id = categoryId;
+      if (r.group_name !== sub.group_name) patch.group_name = sub.group_name;
+      if (r.item_name !== sub.item_name) patch.item_name = sub.item_name;
+
+      // Title: only replace trashed/empty/banned/category-name titles.
+      const curTitle = (r.title ?? "").toString().trim();
+      const titleIsTrash =
+        curTitle.length < 3 || isBanned(curTitle) || categoryNames.has(curTitle);
+      if (titleIsTrash && engine.title.trim().length >= 3) {
+        patch.title = engine.title.trim();
+      }
+
+      // Price: fix only when engine detected a currency-bound price.
+      if (engine.priceDetected) {
+        const curPrice = Number(r.price ?? 0);
+        if (curPrice !== engine.price) patch.price = engine.price;
+      }
+
+      // Car specs
+      if (engine.car_make && r.car_make !== engine.car_make) patch.car_make = engine.car_make;
+      if (engine.car_make && (!r.brand || r.brand === "ماركة أخرى")) patch.brand = engine.car_make;
+      if (engine.model_year && r.model_year !== engine.model_year) patch.model_year = engine.model_year;
+      if (engine.mileage && r.mileage !== engine.mileage) patch.mileage = engine.mileage;
+      if (engine.engine_capacity && r.engine_capacity !== engine.engine_capacity)
+        patch.engine_capacity = engine.engine_capacity;
+
+      if (Object.keys(patch).length === 0) continue;
+      const { error: upErr } = await supabaseAdmin
+        .from("listings")
+        .update(patch as never)
+        .eq("id", r.id);
+      if (!upErr) updated += 1;
+    }
+
+    if (list.length < pageSize) break;
+    from += pageSize;
+  }
+
+  return { scanned, updated };
 }
