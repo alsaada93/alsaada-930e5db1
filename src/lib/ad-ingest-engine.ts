@@ -165,14 +165,16 @@ export function isolateNumbers(rawText: string, isCarContext: boolean): Isolatio
       blacklist.add(String(y));
     }
 
-    const km = text.match(KM_RE);
-    if (km) {
-      const numeric = km[1].replace(/,/g, "");
+    const kmA = text.match(KM_AFTER_RE);
+    const kmB = text.match(KM_BEFORE_RE);
+    const kmRaw = kmA?.[1] ?? kmB?.[2] ?? null;
+    if (kmRaw) {
+      const numeric = kmRaw.replace(/,/g, "");
       const val = Number(numeric);
       if (Number.isFinite(val)) {
         mileage = val;
         blacklist.add(numeric);
-        blacklist.add(km[1]);
+        blacklist.add(kmRaw);
       }
     }
 
