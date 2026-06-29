@@ -628,8 +628,7 @@ export function refineCategory(text: string, current: FbCategorySlug): FbCategor
   // strong signals for the remaining sections — keeps ads out of "general/other"
   const electronicsSignal =
     /جوال|ايفون|آيفون|موبايل|هاتف|لابتوب|كمبيوتر|تلفزيون|شاشة|بلايستيشن|سماعة|كاميرا|تابلت|ايباد|iphone|laptop|dell|\bhp\b|lenovo|acer|asus|macbook|desktop|computer|powerbank|charger|samsung|galaxy|سامسونج|tablet|ipad|printer|hard disk|core i\d/i.test(lower);
-  const equipmentSignal =
-    /مطعم|مطبخ صناعي|ثلاجة عرض|فرن|ماكينة|معدات مطاعم|كوفي|باريستا|قهوة|عجان|شواية/i.test(lower);
+  const equipmentSignal = RESTAURANT_EQUIPMENT_SIGNAL.test(lower);
   const furnitureSignal =
     /أثاث|اثاث|كنب|كنبة|سرير|دولاب|طاولة|كرسي|مجلس|خزانة|ديكور|sofa|trolley|jewellery|jewelry|ring|stone/i.test(lower);
   const servicesSignal =
@@ -638,6 +637,10 @@ export function refineCategory(text: string, current: FbCategorySlug): FbCategor
     /مطلوب موظف|مطلوب عامل|مطلوب عاملة|توظيف|وظيفة شاغرة|راتب شهري|سيرة ذاتية|hiring/i.test(lower);
 
   const strongServiceSignal = /shifting|movers|packers|house shift|office shift|flat shifting|villa shifting|pick and drop|document clearance|cpr services|scrap|recycling|course|diploma/i.test(lower);
+
+  // Commercial restaurant/cafe equipment must win over generic words like
+  // "موديل", "تجاري", "خدمة" or old misclassified categories.
+  if (equipmentSignal && !STRONG_VEHICLE_SIGNAL.test(lower)) return "equipment";
   if (strongServiceSignal) return "services";
   if (current === "cars" || current === "real_estate") return current;
   if (servicesSignal && !carSignal) return "services";
