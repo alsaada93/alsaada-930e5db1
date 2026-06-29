@@ -175,6 +175,11 @@ function AddListingPage() {
 
   // Extra options
   const [negotiable, setNegotiable] = useState(true);
+  // مواصفات السيارة (تظهر فقط عند اختيار تصنيف المركبات)
+  const [carYear, setCarYear] = useState("");
+  const [carMileage, setCarMileage] = useState("");
+  const [carEngine, setCarEngine] = useState("");
+  const [carColor, setCarColor] = useState("");
   const [delivery, setDelivery] = useState(false);
 
   // Business fields (controlled to survive step navigation)
