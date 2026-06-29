@@ -643,14 +643,16 @@ export function Testimonials() {
   const { lang } = useLanguage();
   const ar = lang === "ar";
 
-  // Shuffle once so the order varies between visits, without repeating items back-to-back.
-  const items = useMemo(() => {
+  // Keep server and first client render identical (no Math.random during render)
+  // to avoid hydration mismatches. Shuffle only after mount, on the client.
+  const [items, setItems] = useState<Testimonial[]>(TESTIMONIALS);
+  useEffect(() => {
     const a = [...TESTIMONIALS];
     for (let i = a.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [a[i], a[j]] = [a[j], a[i]];
     }
-    return a;
+    setItems(a);
   }, []);
   const len = items.length;
 
