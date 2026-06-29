@@ -47,11 +47,12 @@ type UseListingsOpts = {
   pageSize?: number;
   /** اقتصار النتائج على الإعلانات العادية فقط */
   onlyNormal?: boolean;
+  categoryId?: string;
 };
 
 /** يجلب الإعلانات الحقيقية المعتمدة من قاعدة البيانات (بدون الإعلانات التجريبية) */
 export function useListings(opts: UseListingsOpts = {}) {
-  const { pageSize, onlyNormal } = opts;
+  const { pageSize, onlyNormal, categoryId } = opts;
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -61,6 +62,7 @@ export function useListings(opts: UseListingsOpts = {}) {
   const buildQuery = (from: number, to: number) => {
     let q = supabase.from("listings").select(SELECT_COLS).eq("status", "approved");
     if (onlyNormal) q = q.or("listing_type.eq.normal,listing_type.is.null");
+    if (categoryId) q = q.eq("category_id", categoryId);
     return q.order("created_at", { ascending: false }).range(from, to);
   };
 
@@ -80,7 +82,7 @@ export function useListings(opts: UseListingsOpts = {}) {
       active = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pageSize, onlyNormal]);
+  }, [pageSize, onlyNormal, categoryId]);
 
   const loadMore = async () => {
     if (!pageSize || loadingMore || !hasMore) return;
