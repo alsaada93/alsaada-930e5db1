@@ -189,8 +189,8 @@ export const Route = createFileRoute("/api/public/facebook-sync")({
           return json({ status: "error", message: "Invalid JSON format" }, 400);
         }
 
-        // أضفنا هذا السطر لنرى في السجلات (Logs) ما الذي يرسله فيسبوك بالضبط
-        console.log("🚨 [Facebook Webhook] تم استلام طلب جديد:", JSON.stringify(body, null, 2));
+        // نسجّل وصول الطلب فقط دون أي بيانات شخصية (هاتف/أسماء) لتجنّب تسريب PII في السجلات
+        console.log("[Facebook Webhook] received request:", { object: body?.object ?? "unknown" });
 
         const { verifySecret, deletePostAd, ingestBotPost } = await import("@/lib/facebook-sync.server");
 
@@ -259,8 +259,8 @@ export const Route = createFileRoute("/api/public/facebook-sync")({
                   images: uniqueImages.length > 0 ? uniqueImages : null,
                 };
 
-                // طباعة البيانات قبل الحفظ للتأكد من سلامتها
-                console.log("✅ [Facebook Webhook] سيتم حفظ هذه البيانات:", mappedPayload);
+                // نسجّل معرّف المنشور فقط دون بيانات شخصية لتجنّب تسريب PII في السجلات
+                console.log("[Facebook Webhook] ingesting post:", { post_id: mappedPayload.post_id });
 
                 await ingestBotPost(mappedPayload);
               }

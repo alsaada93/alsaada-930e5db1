@@ -209,6 +209,9 @@ async function touchMeta(apiStatus: "ok" | "error") {
     .eq("id", 1);
 }
 
+/** Raster image types we allow into the public bucket. SVG is excluded (script execution risk). */
+const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/avif"];
+
 function guessExt(contentType: string | null, url: string): string {
   if (contentType?.includes("png")) return "png";
   if (contentType?.includes("webp")) return "webp";
@@ -230,11 +233,15 @@ async function storeImages(postId: string, urls: string[]): Promise<string[]> {
       const res = await fetch(url);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const contentType = res.headers.get("content-type");
+      const normalizedType = (contentType || "").split(";")[0].trim().toLowerCase();
+      if (normalizedType && !ALLOWED_IMAGE_TYPES.includes(normalizedType)) {
+        throw new Error(`نوع صورة غير مسموح: ${normalizedType}`);
+      }
       const ext = guessExt(contentType, url);
       const buf = new Uint8Array(await res.arrayBuffer());
       const path = `${PREFIX}/${safeId}/${i}.${ext}`;
       const { error } = await supabaseAdmin.storage.from(BUCKET).upload(path, buf, {
-        contentType: contentType ?? "image/jpeg",
+        contentType: normalizedType && ALLOWED_IMAGE_TYPES.includes(normalizedType) ? normalizedType : "image/jpeg",
         cacheControl: "31536000",
         upsert: true,
       });
@@ -490,10 +497,11 @@ async function storeBase64Image(b64: string): Promise<string | null> {
     let contentType = "image/jpeg";
     const dataUri = data.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.*)$/s);
     if (dataUri) {
-      contentType = dataUri[1];
+      contentType = dataUri[1].toLowerCase();
       data = dataUri[2];
       ext = contentType.split("/")[1]?.replace("jpeg", "jpg") || "jpg";
     }
+    if (!ALLOWED_IMAGE_TYPES.includes(contentType)) return null;
     const buf = Uint8Array.from(atob(data), (c) => c.charCodeAt(0));
     if (buf.length === 0) return null;
     const path = `${PREFIX}/bot/${crypto.randomUUID()}.${ext}`;
