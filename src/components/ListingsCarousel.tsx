@@ -68,12 +68,12 @@ export function ListingsCarousel({
       {items.length > 0 ? (
         <div
           ref={trackRef}
-          className="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-smooth px-4 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className="-mx-2 flex snap-x snap-mandatory gap-2 overflow-x-auto scroll-smooth px-2 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:gap-3"
         >
           {items.map((item) => (
             <div
               key={item.id}
-              className="w-[78%] shrink-0 snap-start sm:w-[calc((100%-1.5rem)/3)]"
+              className="w-[calc((100%-1rem)/3)] shrink-0 snap-start sm:w-[calc((100%-1.5rem)/3)]"
             >
               <ListingCard item={item} displayTitle={map[item.id]?.title} />
             </div>
