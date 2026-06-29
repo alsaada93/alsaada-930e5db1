@@ -726,6 +726,7 @@ export type Database = {
           car_make: string | null
           category_id: string | null
           city: string | null
+          color: string | null
           condition: string
           contact_name: string | null
           contact_phone: string | null
@@ -776,6 +777,7 @@ export type Database = {
           car_make?: string | null
           category_id?: string | null
           city?: string | null
+          color?: string | null
           condition?: string
           contact_name?: string | null
           contact_phone?: string | null
@@ -826,6 +828,7 @@ export type Database = {
           car_make?: string | null
           category_id?: string | null
           city?: string | null
+          color?: string | null
           condition?: string
           contact_name?: string | null
           contact_phone?: string | null
