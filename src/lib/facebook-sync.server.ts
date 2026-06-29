@@ -22,7 +22,7 @@ import {
 
 const BUCKET = "listings";
 const PREFIX = "facebook";
-const MAX_IMAGES = 20; // تم التعديل للسماح بعدد أكبر من الصور
+const MAX_IMAGES = 30; // حد الصور مطابق لنموذج إضافة الإعلان والويبهوك
 const SOURCE = "facebook";
 
 interface SiteCategory {
