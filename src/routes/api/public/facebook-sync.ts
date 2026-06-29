@@ -259,8 +259,8 @@ export const Route = createFileRoute("/api/public/facebook-sync")({
                   images: uniqueImages.length > 0 ? uniqueImages : null,
                 };
 
-                // طباعة البيانات قبل الحفظ للتأكد من سلامتها
-                console.log("✅ [Facebook Webhook] سيتم حفظ هذه البيانات:", mappedPayload);
+                // نسجّل معرّف المنشور فقط دون بيانات شخصية لتجنّب تسريب PII في السجلات
+                console.log("[Facebook Webhook] ingesting post:", { post_id: mappedPayload.post_id });
 
                 await ingestBotPost(mappedPayload);
               }
