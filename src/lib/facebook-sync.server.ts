@@ -796,3 +796,93 @@ export async function reclassifyExistingListings(
 
   return { scanned: list.length, updated };
 }
+
+/**
+ * Backend migration job: re-runs the deterministic ingestion engine over ALL
+ * existing listings to fix trashed titles, phone-snippet prices, mis-categorised
+ * ads (out of "عام وأخرى"), and to structure car specs (year/mileage/engine/make).
+ * Conservative: only overwrites a title when the current one is empty/banned/generic.
+ */
+export async function reprocessAllListings(
+  opts: { onlyBot?: boolean } = {},
+): Promise<{ scanned: number; updated: number }> {
+  const { isBanned } = await import("./ad-ingest-engine");
+  const cats = await loadSiteCategories();
+  if (cats.length === 0) return { scanned: 0, updated: 0 };
+
+  const categoryNames = new Set(cats.map((c) => (c.name ?? "").trim()));
+  const pageSize = 1000;
+  let from = 0;
+  let scanned = 0;
+  let updated = 0;
+
+  for (;;) {
+    let query = supabaseAdmin
+      .from("listings")
+      .select(
+        "id, title, description, price, category_id, group_name, item_name, brand, car_make, model_year, mileage, engine_capacity, source",
+      )
+      .order("created_at", { ascending: true })
+      .range(from, from + pageSize - 1);
+    if (opts.onlyBot) query = query.eq("source", "facebook_bot");
+
+    const { data: rows, error } = await query;
+    if (error) throw error;
+    const list = rows ?? [];
+    if (list.length === 0) break;
+
+    for (const row of list) {
+      scanned += 1;
+      const r = row as any;
+      const text = `${r.title ?? ""}\n${r.description ?? ""}`.trim();
+      if (!text) continue;
+
+      const engine = runIngestEngine(text);
+      const categoryId = await resolveSiteCategoryId(engine.slug, cats);
+      if (!categoryId) continue;
+      const catObj = cats.find((c) => c.id === categoryId);
+      const sub = resolveSubcategory(catObj, engine.slug, text);
+
+      const patch: Record<string, unknown> = {};
+
+      // Category / subcategory
+      if (r.category_id !== categoryId) patch.category_id = categoryId;
+      if (r.group_name !== sub.group_name) patch.group_name = sub.group_name;
+      if (r.item_name !== sub.item_name) patch.item_name = sub.item_name;
+
+      // Title: only replace trashed/empty/banned/category-name titles.
+      const curTitle = (r.title ?? "").toString().trim();
+      const titleIsTrash =
+        curTitle.length < 3 || isBanned(curTitle) || categoryNames.has(curTitle);
+      if (titleIsTrash && engine.title.trim().length >= 3) {
+        patch.title = engine.title.trim();
+      }
+
+      // Price: fix only when engine detected a currency-bound price.
+      if (engine.priceDetected) {
+        const curPrice = Number(r.price ?? 0);
+        if (curPrice !== engine.price) patch.price = engine.price;
+      }
+
+      // Car specs
+      if (engine.car_make && r.car_make !== engine.car_make) patch.car_make = engine.car_make;
+      if (engine.car_make && (!r.brand || r.brand === "ماركة أخرى")) patch.brand = engine.car_make;
+      if (engine.model_year && r.model_year !== engine.model_year) patch.model_year = engine.model_year;
+      if (engine.mileage && r.mileage !== engine.mileage) patch.mileage = engine.mileage;
+      if (engine.engine_capacity && r.engine_capacity !== engine.engine_capacity)
+        patch.engine_capacity = engine.engine_capacity;
+
+      if (Object.keys(patch).length === 0) continue;
+      const { error: upErr } = await supabaseAdmin
+        .from("listings")
+        .update(patch as never)
+        .eq("id", r.id);
+      if (!upErr) updated += 1;
+    }
+
+    if (list.length < pageSize) break;
+    from += pageSize;
+  }
+
+  return { scanned, updated };
+}
