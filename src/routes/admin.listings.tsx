@@ -44,6 +44,7 @@ function AdminListingsPage() {
   const updateFn = useServerFn(adminUpdateListing);
   const deleteFn = useServerFn(adminDeleteListing);
   const reclassifyFn = useServerFn(adminReclassifyListings);
+  const reprocessFn = useServerFn(adminReprocessListings);
   const { categories } = useCategories();
 
   const { data: items = [], isLoading } = useQuery({
