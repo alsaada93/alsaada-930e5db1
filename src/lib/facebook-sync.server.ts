@@ -362,6 +362,9 @@ export async function deletePostAd(postId: string): Promise<IngestResult> {
 // ───────────────────────── External bot ingest (new payload) ─────────────────────────
 
 export interface BotPayload {
+  post_id?: string | null;
+  fb_post_id?: string | null;
+  external_id?: string | null;
   source?: string | null;
   title?: string | null;
   content?: string | null;
@@ -513,6 +516,7 @@ export async function ingestBotPost(payload: BotPayload): Promise<BotIngestResul
   try {
     const content = (payload.content ?? "").toString().trim();
     const title = (payload.title ?? "").toString().trim();
+    const sourceRef = (payload.post_id ?? payload.fb_post_id ?? payload.external_id ?? "").toString().trim() || null;
 
     if (!content && !title) {
       await logSync("bot", null, "failed", "title و content مفقودان", payload);
@@ -523,32 +527,47 @@ export async function ingestBotPost(payload: BotPayload): Promise<BotIngestResul
 
     // Deduplication
     {
+      if (sourceRef) {
+        const { data: dup } = await supabaseAdmin
+          .from("listings")
+          .select("id,status")
+          .eq("source", "facebook_bot")
+          .eq("source_ref", sourceRef)
+          .limit(1)
+          .maybeSingle();
+        if (dup?.id) {
+          await logSync("bot", sourceRef, "success", "تم تجاهل إعلان مكرر (نفس معرف المنشور)");
+          return { status: "duplicate", id: dup.id, ad_status: (dup.status as "pending" | "approved") ?? "pending" };
+        }
+      }
       const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
       if (content) {
         const { data: dup } = await supabaseAdmin
           .from("listings")
-          .select("id")
+          .select("id,status")
           .eq("source", "facebook_bot")
           .eq("description", content)
           .gte("created_at", since)
+          .limit(1)
           .maybeSingle();
         if (dup?.id) {
           await logSync("bot", null, "success", "تم تجاهل إعلان مكرر (نفس النص خلال 24 ساعة)");
-          return { status: "duplicate", id: dup.id, ad_status: "pending" };
+          return { status: "duplicate", id: dup.id, ad_status: (dup.status as "pending" | "approved") ?? "pending" };
         }
       }
       if (authorName && title) {
         const { data: dup } = await supabaseAdmin
           .from("listings")
-          .select("id")
+          .select("id,status")
           .eq("source", "facebook_bot")
           .eq("contact_name", authorName)
           .eq("title", title)
           .gte("created_at", since)
+          .limit(1)
           .maybeSingle();
         if (dup?.id) {
           await logSync("bot", null, "success", "تم تجاهل إعلان مكرر (نفس البائع والعنوان خلال 24 ساعة)");
-          return { status: "duplicate", id: dup.id, ad_status: "pending" };
+          return { status: "duplicate", id: dup.id, ad_status: (dup.status as "pending" | "approved") ?? "pending" };
         }
       }
     }
@@ -670,6 +689,7 @@ export async function ingestBotPost(payload: BotPayload): Promise<BotIngestResul
       published_at: publishedAt ?? new Date().toISOString(),
       listing_type: "normal" as const,
       source: "facebook_bot",
+      ...(sourceRef ? { source_ref: sourceRef } : {}),
     };
 
     const { data: inserted, error } = await supabaseAdmin.from("listings").insert(row).select("id").single();
