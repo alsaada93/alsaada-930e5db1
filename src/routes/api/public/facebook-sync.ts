@@ -80,7 +80,7 @@ function collectImageUrls(...values: unknown[]): string[] {
       visit(o.photos);
       visit(o.attachments);
       visit(o.subattachments);
-      for (const nested of Object.values(o)) visit(nested);
+      visit(o.data);
     }
   };
   values.forEach(visit);
