@@ -497,10 +497,11 @@ async function storeBase64Image(b64: string): Promise<string | null> {
     let contentType = "image/jpeg";
     const dataUri = data.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.*)$/s);
     if (dataUri) {
-      contentType = dataUri[1];
+      contentType = dataUri[1].toLowerCase();
       data = dataUri[2];
       ext = contentType.split("/")[1]?.replace("jpeg", "jpg") || "jpg";
     }
+    if (!ALLOWED_IMAGE_TYPES.includes(contentType)) return null;
     const buf = Uint8Array.from(atob(data), (c) => c.charCodeAt(0));
     if (buf.length === 0) return null;
     const path = `${PREFIX}/bot/${crypto.randomUUID()}.${ext}`;
