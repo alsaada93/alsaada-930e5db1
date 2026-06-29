@@ -180,6 +180,15 @@ function AdminListingsPage() {
               {reclassifying ? <Loader2 className="h-4 w-4 animate-spin" /> : <FolderSync className="h-4 w-4" />}
               إعادة التصنيف التلقائي
             </button>
+            <button
+              onClick={doReprocess}
+              disabled={reprocessing}
+              title="معالجة عميقة: إصلاح العناوين والأسعار والمواصفات والتصنيف"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
+            >
+              {reprocessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <FolderSync className="h-4 w-4" />}
+              معالجة عميقة
+            </button>
             <div className="relative">
               <Search className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <input
