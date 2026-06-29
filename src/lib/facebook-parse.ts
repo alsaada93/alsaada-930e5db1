@@ -44,7 +44,7 @@ export function categoryLabel(slug: string): FbCategory {
 const CATEGORY_KEYWORDS: Record<Exclude<FbCategorySlug, "other">, string[]> = {
   cars: [
     "سيارة", "سيارات", "مركبة", "تويوتا", "نيسان", "هوندا", "لكزس", "مرسيدس",
-    "بي ام", "هونداي", "كيا", "رينو", "سوزوكي", "مازيراتي", "موديل", "ماشي", "ممشى", "جيب", "دباب", "car", "cars",
+    "بي ام", "هونداي", "كيا", "رينو", "سوزوكي", "مازيراتي", "ماشي", "ممشى", "جيب", "دباب", "car", "cars",
     "scooter", "bicycle", "bike", "e-scooter",
   ],
   real_estate: [
@@ -57,9 +57,14 @@ const CATEGORY_KEYWORDS: Record<Exclude<FbCategorySlug, "other">, string[]> = {
     "راتب", "دوام", "خبرة", "سيرة ذاتية", "job", "jobs", "hiring",
   ],
   equipment: [
-    "معدات", "معدة", "ماكينة", "ماكينات", "ثلاجة عرض", "فرن", "مطعم", "مطبخ صناعي",
-    "كمبروسر", "مولد", "رافعة", "عدة", "equipment", "commercial kitchen", "coffee shop", "cafe",
-    "cooking range", "burner", "oven", "grill",
+    "معدات", "معدة", "ماكينة", "مكينه", "مكينة", "ماكينات", "ثلاجة عرض", "ثلاجة سلطة", "ثلاجة كيك",
+    "ثلاجة مشروبات", "فريزر", "فرن", "مايكرويف", "مطعم", "مطاعم", "كافتيريا", "كوفي", "كافيه",
+    "مطبخ صناعي", "معدة مطعم", "معدات مطاعم", "ستانلس", "ستيل", "تحضير", "تبريد", "تجميد",
+    "عصارة", "عصير", "برتقال", "صانعة ثلج", "مكينة ثلج", "مكينه ثلج", "مطحنة قهوة", "مكينة قهوة",
+    "مكينه قهوة", "آلة القهوة", "قهوة", "بانكيك", "قريل", "شواية", "مندي", "عجان", "فرادة عجين",
+    "كاشير", "pos", "كمبروسر", "مولد", "رافعة", "عدة", "equipment", "commercial kitchen", "coffee shop", "cafe",
+    "cooking range", "burner", "oven", "grill", "display fridge", "showcase", "freezer", "ice maker",
+    "juice machine", "orange juicer", "espresso", "coffee machine", "dough sheeter", "prep table", "salad fridge",
   ],
   electronics: [
     "جوال", "ايفون", "آيفون", "موبايل", "هاتف", "لابتوب", "كمبيوتر", "تلفزيون",
@@ -78,14 +83,26 @@ const CATEGORY_KEYWORDS: Record<Exclude<FbCategorySlug, "other">, string[]> = {
   ],
 };
 
+const RESTAURANT_EQUIPMENT_SIGNAL =
+  /(معدات\s*(مطاعم|مطبخ)|مطبخ\s*صناعي|مطاعم?|كافيه|كوفي|كافتيريا|ستانلس|ستيل|ثلاجة\s*(عرض|سلطة|كيك|مشروبات|تجارية|تبريد)|فريزر|مجمد|تبريد|تجميد|فرن|مايكرويف|ماكينة|مكين[هة]|عصارة|عصير|برتقال|صانعة\s*ثلج|مكين[هة]\s*ثلج|مطحنة\s*قهوة|مكين[هة]\s*قهوة|آلة\s*القهوة|قهوة|اسبريسو|إسبريسو|بانكيك|قريل|شواية|مندي|عجان|فرادة\s*عجين|تقطيع\s*العجين|طاولة\s*تحضير|تحضير\s*وتبريد|حوض\s*وطاولة|كاشير|نقاط\s*بيع|\bpos\b|commercial\s*kitchen|coffee\s*machine|espresso|display\s*fridge|showcase|freezer|ice\s*maker|juice\s*machine|orange\s*juicer|dough\s*sheeter|prep\s*table|salad\s*fridge|cooking\s*range|burner|oven|grill|menumaster|master\s*cool|mastercool|frucosol|santos|baratza|delonghi|de['’]?longhi|simag|popcake|omniblend|jtc)/i;
+
+const STRONG_VEHICLE_SIGNAL =
+  /(سيارة|سيارات|مركبة|مركبات|تويوتا|نيسان|هوندا|لكزس|مرسيدس|بي\s*ام|هونداي|هيونداي|كيا|جيب|دباب|دراجة\s*نارية|شاحنة|باص|\bcar\b|\bcars\b|suv|sedan|pickup|motorcycle|odometer|mileage|كيلومتر|ممشى)/i;
+
 /** Detects a category slug from free text. Returns "other" when nothing matches. */
 export function detectCategory(text: string, explicit?: string | null): FbCategorySlug {
   const haystack = `${explicit ?? ""} ${text}`.toLowerCase();
 
-  // explicit Arabic category words take priority
+  // explicit Arabic category words take priority, except generic scraper words.
   if (explicit) {
     const direct = FB_CATEGORIES.find((c) => explicit.includes(c.name));
-    if (direct) return direct.slug;
+    if (direct && direct.slug !== "other") return direct.slug;
+  }
+
+  // Restaurant/commercial equipment has priority over generic services/cars words
+  // such as "تجاري" or "موديل" that often appear in equipment ads.
+  if (RESTAURANT_EQUIPMENT_SIGNAL.test(haystack) && !STRONG_VEHICLE_SIGNAL.test(haystack)) {
+    return "equipment";
   }
 
   // Tokenize once so short keywords match whole words only (avoids "مستعمل" ⊃ "عمل").
