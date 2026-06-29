@@ -235,6 +235,7 @@ export const Route = createFileRoute("/api/public/facebook-sync")({
                 const uniqueImages = [...new Set(extractedImages)];
 
                 const mappedPayload = {
+                  post_id: firstString(post.post_id, post.id, post.link, post.permalink_url),
                   source: "facebook_official",
                   title: "منشور من فيسبوك",
                   content: contentText,
