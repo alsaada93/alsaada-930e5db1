@@ -52,8 +52,22 @@ export function useAdminStats() {
     let active = true;
 
     (async () => {
-      const [{ data: listings }, profilesRes, favoritesRes, requestsRes] = await Promise.all([
-        supabase.from("listings").select("listing_type,status,views,category_id,created_at"),
+      // Fetch ALL listings in pages of 1000 to avoid the PostgREST 1000-row cap
+      // (otherwise totals freeze at 1000 once the table grows beyond that).
+      const PAGE = 1000;
+      const allRows: Array<Record<string, unknown>> = [];
+      for (let page = 0; ; page++) {
+        const { data } = await supabase
+          .from("listings")
+          .select("listing_type,status,views,category_id,created_at")
+          .order("created_at", { ascending: false })
+          .range(page * PAGE, page * PAGE + PAGE - 1);
+        const batch = data ?? [];
+        allRows.push(...batch);
+        if (batch.length < PAGE) break;
+      }
+
+      const [profilesRes, favoritesRes, requestsRes] = await Promise.all([
         supabase.from("profiles").select("id", { count: "exact", head: true }),
         supabase.from("favorites").select("id", { count: "exact", head: true }),
         supabase.from("equipment_requests").select("id", { count: "exact", head: true }),
@@ -61,7 +75,7 @@ export function useAdminStats() {
 
       if (!active) return;
 
-      const rows = listings ?? [];
+      const rows = allRows;
       const totalViews = rows.reduce((s, r) => s + (Number(r.views) || 0), 0);
 
       setStats({
