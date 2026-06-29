@@ -289,8 +289,9 @@ export const Route = createFileRoute("/api/public/facebook-sync")({
         // كل منشور جديد/محدّث من البوت الخارجي يذهب إلى نظام الإعلانات الرئيسي مباشرة.
         // نقوم بتطبيع أسماء الحقول الشائعة حتى لا يتوقف الاستقبال إذا أرسل البوت
         // message/text/description أو image_url/image_urls بدلاً من content/images.
-        if (objectBody) {
-          const parsed = BotPayloadSchema.safeParse(normalizeBotPayload(objectBody));
+        const singleBotItem = botItems[0] ?? objectBody;
+        if (singleBotItem) {
+          const parsed = BotPayloadSchema.safeParse(normalizeBotPayload(singleBotItem));
           if (!parsed.success) {
             return json({ status: "error", message: "Invalid payload", details: parsed.error.flatten() }, 400);
           }
