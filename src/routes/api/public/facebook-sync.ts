@@ -252,7 +252,7 @@ export const Route = createFileRoute("/api/public/facebook-sync")({
                 const mappedPayload = {
                   post_id: firstString(post.post_id, post.id, post.link, post.permalink_url),
                   source: "facebook_official",
-                  title: "منشور من فيسبوك",
+                  title: firstString(post.title, post.name),
                   content: contentText,
                   author_name: post.from?.name || "عضو في الصفحة",
                   published_at: parsePublishedAt(post.created_time),
