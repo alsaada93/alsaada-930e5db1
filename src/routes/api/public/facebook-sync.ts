@@ -115,6 +115,29 @@ function readSyncSecret(request: Request): string | null {
   return m?.[1]?.trim() || null;
 }
 
+function extractBotItems(body: unknown): Record<string, unknown>[] {
+  const isRecord = (v: unknown): v is Record<string, unknown> => typeof v === "object" && v !== null && !Array.isArray(v);
+  if (Array.isArray(body)) return body.filter(isRecord);
+  if (!isRecord(body)) return [];
+  for (const key of ["posts", "items", "data", "records", "listings", "ads"]) {
+    const v = body[key];
+    if (Array.isArray(v)) return v.filter(isRecord);
+  }
+  return [body];
+}
+
+function parsePublishedAt(value: unknown): string {
+  if (typeof value === "number") return new Date(value > 10_000_000_000 ? value : value * 1000).toISOString();
+  if (typeof value === "string" && value.trim()) {
+    const numeric = Number(value);
+    const d = Number.isFinite(numeric)
+      ? new Date(numeric > 10_000_000_000 ? numeric : numeric * 1000)
+      : new Date(value);
+    if (!Number.isNaN(d.getTime())) return d.toISOString();
+  }
+  return new Date().toISOString();
+}
+
 export const Route = createFileRoute("/api/public/facebook-sync")({
   server: {
     handlers: {
@@ -216,9 +239,7 @@ export const Route = createFileRoute("/api/public/facebook-sync")({
                   title: "منشور من فيسبوك",
                   content: contentText,
                   author_name: post.from?.name || "عضو في الصفحة",
-                  published_at: post.created_time
-                    ? new Date(post.created_time * 1000).toISOString()
-                    : new Date().toISOString(),
+                  published_at: parsePublishedAt(post.created_time),
                   images: uniqueImages.length > 0 ? uniqueImages : null,
                 };
 
@@ -242,10 +263,27 @@ export const Route = createFileRoute("/api/public/facebook-sync")({
           return json({ status: "error", message: "Unauthorized" }, 401);
         }
 
-        const objectBody = typeof body === "object" && body !== null ? (body as Record<string, unknown>) : null;
+        const objectBody = typeof body === "object" && body !== null && !Array.isArray(body) ? (body as Record<string, unknown>) : null;
         if (objectBody && objectBody.action === "delete" && typeof objectBody.post_id === "string") {
           const result = await deletePostAd(objectBody.post_id);
           return json(result, result.ok ? 200 : 500);
+        }
+
+        const botItems = extractBotItems(body);
+        if (botItems.length > 1) {
+          const results = [];
+          for (const item of botItems) {
+            const parsed = BotPayloadSchema.safeParse(normalizeBotPayload(item));
+            if (!parsed.success) {
+              results.push({ status: "error", message: "Invalid payload", details: parsed.error.flatten() });
+              continue;
+            }
+            results.push(await ingestBotPost(parsed.data));
+          }
+          const imported = results.filter((r: any) => r.status === "ok").length;
+          const duplicates = results.filter((r: any) => r.status === "duplicate").length;
+          const errors = results.filter((r: any) => r.status === "error").length;
+          return json({ status: errors ? "partial" : "ok", imported, duplicates, errors, results }, errors === results.length ? 400 : 200);
         }
 
         // كل منشور جديد/محدّث من البوت الخارجي يذهب إلى نظام الإعلانات الرئيسي مباشرة.
