@@ -4,7 +4,7 @@ import { BrandLogo } from "@/components/BrandLogo";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useAuth } from "@/hooks/useAuth";
 import { useSiteIdentity } from "@/hooks/useSiteIdentity";
-import { optimizedImage } from "@/lib/image-url";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
