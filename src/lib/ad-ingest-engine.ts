@@ -318,7 +318,7 @@ const BANNED_TITLES = [
 const NOISE_WORDS_RE =
   /^(للبيع|للايجار|للإيجار|عاجل|message|msg|call|اتصال|واتساب|whatsapp|تواصل|للتواصل|بسعر|السعر|مطلوب|سعر|new|used|جديد|مستعمل|available|متوفر|عرض|عروض|تخفيض|sale|for)$/i;
 
-function isBanned(s: string): boolean {
+export function isBanned(s: string): boolean {
   const t = s.trim().toLowerCase();
   return BANNED_TITLES.some((b) => b.toLowerCase() === t);
 }
