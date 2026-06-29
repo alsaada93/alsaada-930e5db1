@@ -43,18 +43,16 @@ export function useSeller(id: string | undefined) {
   });
 }
 
-/** رقم هاتف البائع — متاح للمسجّلين الداخلين فقط (جدول محمي). */
+/** رقم هاتف البائع — يُجلب عبر دالة آمنة تُرجع رقم بائع واحد فقط (لا يمكن سحب كل الأرقام). */
 export function useSellerPhone(id: string | undefined) {
   return useQuery({
     queryKey: ["seller-phone", id],
     queryFn: async (): Promise<string | null> => {
-      const { data, error } = await (supabase as any)
-        .from("seller_contacts")
-        .select("phone")
-        .eq("seller_id", id as string)
-        .maybeSingle();
+      const { data, error } = await (supabase as any).rpc("get_seller_phone", {
+        _seller_id: id as string,
+      });
       if (error) return null;
-      return data?.phone ?? null;
+      return (data as string | null) ?? null;
     },
     enabled: !!id,
     staleTime: 1000 * 60 * 5,

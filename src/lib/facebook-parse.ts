@@ -667,23 +667,33 @@ function hasProductSignal(s: string): boolean {
  * line. Returns "" when nothing usable exists.
  */
 export function firstMeaningfulLine(text: string | null | undefined): string {
+  // Strip leading offer/sale words so titles read as the product, not "للبيع ...".
+  const stripLead = (s: string): string =>
+    s
+      .replace(/^\s*(للبيع|للايجار|للإيجار|مطلوب|عرض|بيع|تخفيض|عروض|متوفر|available|for\s*sale|sale)[\s:،.-]*/i, "")
+      .trim();
+
   const segments = (text ?? "")
     .toString()
     .replace(/\r/g, "")
     .split(/[\n.،؛;]+/);
+
   let fallback = "";
+  let relaxed = "";
   for (const seg of segments) {
-    const cleaned = cleanTitlePart(seg);
+    const cleaned = stripLead(cleanTitlePart(seg));
     if (cleaned.length < 3) continue;
-    if (GENERIC_TITLE_WORDS.test(cleaned)) continue;
     // skip lines that are mostly digits (prices / phones / specs)
     const letters = (cleaned.match(/\p{L}/gu) || []).length;
     if (letters < 2) continue;
     const short = cleaned.split(/\s+/).filter(Boolean).slice(0, 9).join(" ").slice(0, 80).trim();
+    // remember the very first text-bearing line as a last-resort relaxed candidate
+    if (!relaxed) relaxed = short;
+    if (GENERIC_TITLE_WORDS.test(cleaned)) continue;
     if (!fallback) fallback = short;
     if (hasProductSignal(cleaned)) return short;
   }
-  return fallback;
+  return fallback || relaxed;
 }
 
 /**

@@ -4,7 +4,7 @@ import { BrandLogo } from "@/components/BrandLogo";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useAuth } from "@/hooks/useAuth";
 import { useSiteIdentity } from "@/hooks/useSiteIdentity";
-import { optimizedImage } from "@/lib/image-url";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,7 +36,7 @@ export function Header() {
             style={{ width: identity.logoBoxWidth, height: identity.logoBoxHeight }}
           >
             {identity.logoUrl ? (
-              <img src={optimizedImage(identity.logoUrl, 160, 80)} alt="" width={64} height={64} loading="eager" fetchPriority="high" decoding="async" className="h-full w-full object-contain" />
+              <img src={identity.logoUrl} alt="" width={64} height={64} loading="eager" fetchPriority="high" decoding="async" className="h-full w-full object-contain" />
             ) : (
               <BrandLogo size={logoSize} />
             )}
