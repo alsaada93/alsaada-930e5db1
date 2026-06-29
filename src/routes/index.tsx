@@ -65,29 +65,28 @@ function Index() {
           <PromoCarousel />
           <CategoryGrid />
           <WeBuyBanner />
-          <LatestListingsCarousel title={t("sec.latest")} subtitle={t("sec.latestSub")} items={latest} />
-          {hasMore && (
-            <div className="mx-auto max-w-7xl px-4 pb-4 text-center">
-              <button
-                type="button"
-                onClick={() => loadMore()}
-                disabled={loadingMore}
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-primary px-8 py-3 text-sm font-bold text-primary-foreground shadow-glow transition-opacity hover:opacity-90 disabled:opacity-60"
+          <HomeListingsRow
+            title={lang === "ar" ? "مطاعم وكافيهات" : "Restaurants & Cafes"}
+            subtitle={lang === "ar" ? "أحدث معدات المطاعم والكافيهات" : "Latest restaurant equipment"}
+            items={restaurant}
+            moreButton={
+              <Link
+                to="/category/$id"
+                params={{ id: "restaurant" }}
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-primary px-8 py-3 text-sm font-bold text-primary-foreground shadow-glow transition-opacity hover:opacity-90"
               >
-                {loadingMore ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    {t("common.loading") || "جارٍ التحميل…"}
-                  </>
-                ) : (
-                  <>
-                    <ChevronDown className="h-4 w-4" />
-                    {t("sec.more") || "⬇️ عرض المزيد من الإعلانات"}
-                  </>
-                )}
-              </button>
-            </div>
-          )}
+                {lang === "ar" ? "عرض المزيد من المطاعم" : "More restaurant ads"}
+              </Link>
+            }
+          />
+          <HomeListingsRow
+            title={t("sec.latest")}
+            subtitle={t("sec.latestSub")}
+            items={latest}
+            onLoadMore={() => loadMore()}
+            loadingMore={loadingMore}
+            hasMore={hasMore}
+          />
           {featured.length > 0 && (
             <ListingsSection title={t("sec.featured")} subtitle={t("sec.featuredSub")} items={featured} />
           )}
