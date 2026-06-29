@@ -23,8 +23,8 @@ export interface SiteIdentity {
 }
 
 export const DEFAULT_IDENTITY: SiteIdentity = {
-  logoUrl: "https://grnkrmqjhjhgrnylihvq.supabase.co/storage/v1/object/public/listings/identity/1780501032878-fnlp383h3r9.png",
-  faviconUrl: "https://grnkrmqjhjhgrnylihvq.supabase.co/storage/v1/object/public/listings/identity/1780501035807-5c7ofh7dyrl.png",
+  logoUrl: "/site-logo.png?v=alsaada-2026-06",
+  faviconUrl: "/site-logo.png?v=alsaada-2026-06",
   nameAr: "حراج السعادة",
   nameEn: "Haraj Al Saada",
   taglineAr: "شراء وبيع معدات المطاعم والأثاث والإلكترونيات في البحرين",
@@ -41,6 +41,21 @@ export const DEFAULT_IDENTITY: SiteIdentity = {
 };
 
 const SETTINGS_KEY = "identity";
+
+
+function cleanIdentity(v: Partial<SiteIdentity> | null | undefined): SiteIdentity {
+  const merged = { ...DEFAULT_IDENTITY, ...(v ?? {}) };
+  const oldBrand = /araba|عربه|عربة|cart|lovable/i;
+  if (!merged.logoUrl || oldBrand.test(merged.logoUrl) || oldBrand.test(merged.nameAr) || oldBrand.test(merged.nameEn)) {
+    merged.logoUrl = DEFAULT_IDENTITY.logoUrl;
+  }
+  if (!merged.faviconUrl || oldBrand.test(merged.faviconUrl)) {
+    merged.faviconUrl = DEFAULT_IDENTITY.faviconUrl;
+  }
+  merged.nameAr = "حراج السعادة";
+  merged.nameEn = "Haraj Al Saada";
+  return merged;
+}
 
 function applyFavicon(url: string) {
   if (typeof document === "undefined" || !url) return;
@@ -75,7 +90,7 @@ export function SiteIdentityProvider({ children }: { children: ReactNode }) {
       .then(({ data }) => {
         if (!active) return;
         const v = (data?.value as Partial<SiteIdentity> | null | undefined) ?? undefined;
-        const merged = { ...DEFAULT_IDENTITY, ...(v ?? {}) };
+        const merged = cleanIdentity(v);
         setIdentity(merged);
         applyFavicon(merged.faviconUrl);
         setLoading(false);
@@ -86,12 +101,13 @@ export function SiteIdentityProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const save = async (next: SiteIdentity) => {
-    setIdentity(next);
-    applyFavicon(next.faviconUrl);
+    const clean = cleanIdentity(next);
+    setIdentity(clean);
+    applyFavicon(clean.faviconUrl);
     const { error } = await supabase
       .from("site_settings")
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .upsert({ key: SETTINGS_KEY, value: next as any }, { onConflict: "key" });
+      .upsert({ key: SETTINGS_KEY, value: clean as any }, { onConflict: "key" });
     if (error) throw error;
   };
 
