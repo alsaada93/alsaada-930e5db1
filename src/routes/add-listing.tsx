@@ -1175,11 +1175,59 @@ function AddListingPage() {
               </div>
             )}
 
-
-
-
+            {/* مواصفات السيارة — تظهر ديناميكياً عند اختيار تصنيف المركبات */}
+            {isVehicleCat && (
+              <div className="rounded-2xl border border-primary/30 bg-accent/20 p-4">
+                <p className="mb-3 text-sm font-extrabold text-primary">
+                  {ar ? "مواصفات السيارة" : "Vehicle specifications"}
+                </p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="mb-1 block text-sm font-semibold">{ar ? "سنة الصنع" : "Year"}</label>
+                    <input
+                      type="number"
+                      inputMode="numeric"
+                      value={carYear}
+                      onChange={(e) => setCarYear(e.target.value)}
+                      placeholder={ar ? "مثال: 2018" : "e.g. 2018"}
+                      className={fieldCls}
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-sm font-semibold">{ar ? "الممشى (كم)" : "Mileage (km)"}</label>
+                    <input
+                      type="number"
+                      inputMode="numeric"
+                      value={carMileage}
+                      onChange={(e) => setCarMileage(e.target.value)}
+                      placeholder={ar ? "مثال: 120000" : "e.g. 120000"}
+                      className={fieldCls}
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-sm font-semibold">{ar ? "سعة المحرك" : "Engine"}</label>
+                    <input
+                      value={carEngine}
+                      onChange={(e) => setCarEngine(e.target.value)}
+                      placeholder={ar ? "مثال: 2.0 لتر / V6" : "e.g. 2.0L / V6"}
+                      className={fieldCls}
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-sm font-semibold">{ar ? "اللون" : "Color"}</label>
+                    <input
+                      value={carColor}
+                      onChange={(e) => setCarColor(e.target.value)}
+                      placeholder={ar ? "مثال: أبيض" : "e.g. White"}
+                      className={fieldCls}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Country */}
+
             <div className="relative">
               <label className="mb-1 block text-sm font-semibold">{ar ? "بلد الصنع" : "Country of manufacture"}</label>
               <div className="relative">
