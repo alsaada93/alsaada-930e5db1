@@ -209,6 +209,9 @@ async function touchMeta(apiStatus: "ok" | "error") {
     .eq("id", 1);
 }
 
+/** Raster image types we allow into the public bucket. SVG is excluded (script execution risk). */
+const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/avif"];
+
 function guessExt(contentType: string | null, url: string): string {
   if (contentType?.includes("png")) return "png";
   if (contentType?.includes("webp")) return "webp";
