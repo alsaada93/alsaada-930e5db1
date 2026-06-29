@@ -1598,6 +1598,7 @@ export type Database = {
         Returns: number
       }
       expire_old_listings: { Args: never; Returns: undefined }
+      get_seller_phone: { Args: { _seller_id: string }; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
