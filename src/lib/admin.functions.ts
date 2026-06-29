@@ -50,7 +50,7 @@ export const adminListListings = createServerFn({ method: "GET" })
         "id,title,description,price,old_price,category_id,group_name,item_name,brand,condition,city,contact_name,contact_phone,images,negotiable_flag,delivery_available,status,listing_type,featured,created_at",
       )
       .order("created_at", { ascending: false })
-      .limit(1000);
+      .limit(5000);
 
     return (data ?? []).map((d: any) => ({
       id: String(d.id),
@@ -226,7 +226,7 @@ export const adminListMembers = createServerFn({ method: "GET" })
         .from("profiles")
         .select("id,full_name,phone,verified,created_at")
         .order("created_at", { ascending: false })
-        .limit(1000),
+        .limit(5000),
       supabaseAdmin.from("user_roles").select("user_id,role").limit(5000),
       supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 1000 }),
     ]);

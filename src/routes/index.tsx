@@ -9,7 +9,6 @@ import { PromoCarousel } from "@/components/PromoCarousel";
 import { HomeBanners } from "@/components/HomeBanners";
 // FeatureStrip removed per request — no marketing feature text on home page
 import { ListingsSection } from "@/components/ListingsSection";
-import { ListingsCarousel } from "@/components/ListingsCarousel";
 // AuctionsSection removed per request — auctions discontinued
 import { BusinessSection } from "@/components/BusinessSection";
 import { Testimonials } from "@/components/Testimonials";
@@ -61,7 +60,7 @@ function Index() {
           <PromoCarousel />
           <CategoryGrid />
           <WeBuyBanner />
-          <ListingsCarousel title={t("sec.latest")} subtitle={t("sec.latestSub")} items={latest} />
+          <ListingsSection title={t("sec.latest")} subtitle={t("sec.latestSub")} items={latest} />
           {hasMore && (
             <div className="mx-auto max-w-7xl px-4 pb-4 text-center">
               <button
@@ -78,7 +77,7 @@ function Index() {
                 ) : (
                   <>
                     <ChevronDown className="h-4 w-4" />
-                    {t("sec.more") || "عرض المزيد"}
+                    {t("sec.more") || "⬇️ عرض المزيد من الإعلانات"}
                   </>
                 )}
               </button>

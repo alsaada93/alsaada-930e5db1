@@ -44,7 +44,7 @@ export function categoryLabel(slug: string): FbCategory {
 const CATEGORY_KEYWORDS: Record<Exclude<FbCategorySlug, "other">, string[]> = {
   cars: [
     "سيارة", "سيارات", "مركبة", "تويوتا", "نيسان", "هوندا", "لكزس", "مرسيدس",
-    "بي ام", "هونداي", "كيا", "رينو", "سوزوكي", "مازيراتي", "موديل", "ماشي", "ممشى", "جيب", "دباب", "car", "cars",
+    "بي ام", "هونداي", "كيا", "رينو", "سوزوكي", "مازيراتي", "ماشي", "ممشى", "جيب", "دباب", "car", "cars",
     "scooter", "bicycle", "bike", "e-scooter",
   ],
   real_estate: [
@@ -57,9 +57,14 @@ const CATEGORY_KEYWORDS: Record<Exclude<FbCategorySlug, "other">, string[]> = {
     "راتب", "دوام", "خبرة", "سيرة ذاتية", "job", "jobs", "hiring",
   ],
   equipment: [
-    "معدات", "معدة", "ماكينة", "ماكينات", "ثلاجة عرض", "فرن", "مطعم", "مطبخ صناعي",
-    "كمبروسر", "مولد", "رافعة", "عدة", "equipment", "commercial kitchen", "coffee shop", "cafe",
-    "cooking range", "burner", "oven", "grill",
+    "معدات", "معدة", "ماكينة", "مكينه", "مكينة", "ماكينات", "ثلاجة عرض", "ثلاجة سلطة", "ثلاجة كيك",
+    "ثلاجة مشروبات", "فريزر", "فرن", "مايكرويف", "مطعم", "مطاعم", "كافتيريا", "كوفي", "كافيه",
+    "مطبخ صناعي", "معدة مطعم", "معدات مطاعم", "ستانلس", "ستيل", "تحضير", "تبريد", "تجميد",
+    "عصارة", "عصير", "برتقال", "صانعة ثلج", "مكينة ثلج", "مكينه ثلج", "مطحنة قهوة", "مكينة قهوة",
+    "مكينه قهوة", "آلة القهوة", "قهوة", "بانكيك", "قريل", "شواية", "مندي", "عجان", "فرادة عجين",
+    "كاشير", "pos", "كمبروسر", "مولد", "رافعة", "عدة", "equipment", "commercial kitchen", "coffee shop", "cafe",
+    "cooking range", "burner", "oven", "grill", "display fridge", "showcase", "freezer", "ice maker",
+    "juice machine", "orange juicer", "espresso", "coffee machine", "dough sheeter", "prep table", "salad fridge",
   ],
   electronics: [
     "جوال", "ايفون", "آيفون", "موبايل", "هاتف", "لابتوب", "كمبيوتر", "تلفزيون",
@@ -78,14 +83,26 @@ const CATEGORY_KEYWORDS: Record<Exclude<FbCategorySlug, "other">, string[]> = {
   ],
 };
 
+const RESTAURANT_EQUIPMENT_SIGNAL =
+  /(معدات\s*(مطاعم|مطبخ)|مطبخ\s*صناعي|مطاعم?|كافيه|كوفي|كافتيريا|ستانلس|ستيل|ثلاجة\s*(عرض|سلطة|كيك|مشروبات|تجارية|تبريد)|فريزر|مجمد|تبريد|تجميد|فرن|مايكرويف|ماكينة|مكين[هة]|عصارة|عصير|برتقال|صانعة\s*ثلج|مكين[هة]\s*ثلج|مطحنة\s*قهوة|مكين[هة]\s*قهوة|آلة\s*القهوة|قهوة|اسبريسو|إسبريسو|بانكيك|قريل|شواية|مندي|عجان|فرادة\s*عجين|تقطيع\s*العجين|طاولة\s*تحضير|تحضير\s*وتبريد|حوض\s*وطاولة|كاشير|نقاط\s*بيع|\bpos\b|commercial\s*kitchen|coffee\s*machine|espresso|display\s*fridge|showcase|freezer|ice\s*maker|juice\s*machine|orange\s*juicer|dough\s*sheeter|prep\s*table|salad\s*fridge|cooking\s*range|burner|oven|grill|menumaster|master\s*cool|mastercool|frucosol|santos|baratza|delonghi|de['’]?longhi|simag|popcake|omniblend|jtc)/i;
+
+const STRONG_VEHICLE_SIGNAL =
+  /(سيارة|سيارات|مركبة|مركبات|تويوتا|نيسان|هوندا|لكزس|مرسيدس|بي\s*ام|هونداي|هيونداي|كيا|جيب|دباب|دراجة\s*نارية|شاحنة|باص|\bcar\b|\bcars\b|suv|sedan|pickup|motorcycle|odometer|mileage|كيلومتر|ممشى)/i;
+
 /** Detects a category slug from free text. Returns "other" when nothing matches. */
 export function detectCategory(text: string, explicit?: string | null): FbCategorySlug {
   const haystack = `${explicit ?? ""} ${text}`.toLowerCase();
 
-  // explicit Arabic category words take priority
+  // explicit Arabic category words take priority, except generic scraper words.
   if (explicit) {
     const direct = FB_CATEGORIES.find((c) => explicit.includes(c.name));
-    if (direct) return direct.slug;
+    if (direct && direct.slug !== "other") return direct.slug;
+  }
+
+  // Restaurant/commercial equipment has priority over generic services/cars words
+  // such as "تجاري" or "موديل" that often appear in equipment ads.
+  if (RESTAURANT_EQUIPMENT_SIGNAL.test(haystack) && !STRONG_VEHICLE_SIGNAL.test(haystack)) {
+    return "equipment";
   }
 
   // Tokenize once so short keywords match whole words only (avoids "مستعمل" ⊃ "عمل").
@@ -611,8 +628,7 @@ export function refineCategory(text: string, current: FbCategorySlug): FbCategor
   // strong signals for the remaining sections — keeps ads out of "general/other"
   const electronicsSignal =
     /جوال|ايفون|آيفون|موبايل|هاتف|لابتوب|كمبيوتر|تلفزيون|شاشة|بلايستيشن|سماعة|كاميرا|تابلت|ايباد|iphone|laptop|dell|\bhp\b|lenovo|acer|asus|macbook|desktop|computer|powerbank|charger|samsung|galaxy|سامسونج|tablet|ipad|printer|hard disk|core i\d/i.test(lower);
-  const equipmentSignal =
-    /مطعم|مطبخ صناعي|ثلاجة عرض|فرن|ماكينة|معدات مطاعم|كوفي|باريستا|قهوة|عجان|شواية/i.test(lower);
+  const equipmentSignal = RESTAURANT_EQUIPMENT_SIGNAL.test(lower);
   const furnitureSignal =
     /أثاث|اثاث|كنب|كنبة|سرير|دولاب|طاولة|كرسي|مجلس|خزانة|ديكور|sofa|trolley|jewellery|jewelry|ring|stone/i.test(lower);
   const servicesSignal =
@@ -621,6 +637,10 @@ export function refineCategory(text: string, current: FbCategorySlug): FbCategor
     /مطلوب موظف|مطلوب عامل|مطلوب عاملة|توظيف|وظيفة شاغرة|راتب شهري|سيرة ذاتية|hiring/i.test(lower);
 
   const strongServiceSignal = /shifting|movers|packers|house shift|office shift|flat shifting|villa shifting|pick and drop|document clearance|cpr services|scrap|recycling|course|diploma/i.test(lower);
+
+  // Commercial restaurant/cafe equipment must win over generic words like
+  // "موديل", "تجاري", "خدمة" or old misclassified categories.
+  if (equipmentSignal && !STRONG_VEHICLE_SIGNAL.test(lower)) return "equipment";
   if (strongServiceSignal) return "services";
   if (current === "cars" || current === "real_estate") return current;
   if (servicesSignal && !carSignal) return "services";
@@ -830,10 +850,33 @@ export function detectSubcategory(slug: FbCategorySlug, text: string): SubCatego
   }
 
   if (slug === "equipment") {
-    if (has("oven", "cooking range", "فرن", "طباخ")) return { group_name: "معدات طهي", item_name: "طباخات" };
-    if (has("grill", "شواية")) return { group_name: "معدات طهي", item_name: "شوايات" };
-    if (has("coffee", "espresso", "قهوة")) return { group_name: "قهوة ومشروبات", item_name: "مكائن قهوة" };
-    if (has("fridge", "freezer", "ثلاجة", "فريزر")) return { group_name: "معدات تبريد", item_name: "ثلاجات" };
+    if (has("pizza oven", "فرن بيتزا")) return { group_name: "معدات طهي", item_name: "أفران بيتزا" };
+    if (has("oven", "فرن", "menumaster", "مايكرويف", "microwave")) return { group_name: "معدات طهي", item_name: has("مايكرويف", "microwave", "menumaster") ? "مايكروويف" : "أفران" };
+    if (has("cooking range", "burner", "طباخ", "غاز", "mendi", "مندي")) return { group_name: "معدات طهي", item_name: "طباخات" };
+    if (has("grill", "griddle", "قريل", "شواية", "برجر")) return { group_name: "معدات طهي", item_name: "شوايات" };
+    if (has("fryer", "قلاية", "قلايات")) return { group_name: "معدات طهي", item_name: "قلايات" };
+    if (has("dough sheeter", "dough", "عجين", "فرادة", "عجان", "mixer", "خلاط تجاري", "omniblend", "jtc")) {
+      return { group_name: "معدات تحضير", item_name: has("عجان", "mixer") ? "عجانات" : has("خلاط", "omniblend", "jtc") ? "خلاطات صناعية" : "طاولات تحضير" };
+    }
+    if (has("prep table", "طاولة تحضير", "تحضير وتبريد", "حوض وطاولة")) return { group_name: "معدات تحضير", item_name: "طاولات تحضير" };
+    if (has("coffee", "espresso", "baratza", "delonghi", "de'longhi", "de’longhi", "قهوة", "اسبريسو", "إسبريسو")) {
+      return { group_name: "قهوة ومشروبات", item_name: has("مطحنة", "grinder", "baratza") ? "مطاحن قهوة" : "مكائن قهوة" };
+    }
+    if (has("juice", "orange juicer", "frucosol", "santos", "عصارة", "عصير", "برتقال")) return { group_name: "قهوة ومشروبات", item_name: "صانعات عصير" };
+    if (has("ice maker", "ice machine", "simag", "ثلج")) return { group_name: "قهوة ومشروبات", item_name: "صانعات ثلج" };
+    if (has("fridge", "freezer", "showcase", "display fridge", "salad fridge", "mastercool", "master cool", "ثلاجة", "فريزر", "تبريد", "تجميد", "سلطة", "كيك")) {
+      if (has("عرض", "display", "showcase", "كيك", "مشروبات")) return { group_name: "معدات تبريد", item_name: "ثلاجات عرض" };
+      if (has("freezer", "فريزر", "تجميد", "مجمد")) return { group_name: "معدات تبريد", item_name: "فريزرات" };
+      if (has("سلطة", "pizza", "salad")) return { group_name: "معدات تبريد", item_name: "ثلاجات سلطة وبيتزا" };
+      if (has("تحضير", "under counter", "undercounter")) return { group_name: "معدات تبريد", item_name: "ثلاجات تحضير" };
+      return { group_name: "معدات تبريد", item_name: "ثلاجات" };
+    }
+    if (has("dishwasher", "غسالة صحون")) return { group_name: "نظافة وخدمة", item_name: "غسالات صحون" };
+    if (has("sink", "مغسلة", "حوض")) return { group_name: "نظافة وخدمة", item_name: "مغاسل ستانلس" };
+    if (has("shelf", "رف", "أرفف", "ستانلس")) return { group_name: "نظافة وخدمة", item_name: "أرفف ستانلس" };
+    if (has("trolley", "عربة")) return { group_name: "نظافة وخدمة", item_name: "عربات نقل" };
+    if (has("pos", "cashier", "كاشير", "فاتورة", "باركود")) return { group_name: "كاشير ونقاط بيع", item_name: has("طابعة", "فاتورة") ? "طابعات فواتير" : "أجهزة كاشير" };
+    if (has("table", "chair", "طاولة", "كراسي", "بوفيه", "كاونتر")) return { group_name: "أثاث وتجهيز المطعم", item_name: has("كرسي", "كراسي", "chair") ? "كراسي" : has("كاونتر", "counter") ? "كاونترات" : "طاولات مطاعم" };
     return { group_name: "معدات متنوعة (أخرى)", item_name: null };
   }
 

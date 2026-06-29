@@ -26,6 +26,7 @@ export function Header() {
     (lang === "ar" ? "حسابي" : "Account");
 
   const logoSize = Math.round(Math.min(identity.logoBoxWidth, identity.logoBoxHeight) * 0.8);
+  const logoUrl = identity.logoUrl ? `${identity.logoUrl}${identity.logoUrl.includes("?") ? "&" : "?"}v=alsaada-2026-06` : "";
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-navy text-navy-foreground">
@@ -35,8 +36,8 @@ export function Header() {
             className="flex items-center justify-center rounded-xl bg-white p-1 shadow-md"
             style={{ width: identity.logoBoxWidth, height: identity.logoBoxHeight }}
           >
-            {identity.logoUrl ? (
-              <img src={identity.logoUrl} alt="" width={64} height={64} loading="eager" fetchPriority="high" decoding="async" className="h-full w-full object-contain" />
+            {logoUrl ? (
+              <img src={logoUrl} alt="حراج السعادة" width={64} height={64} loading="eager" fetchPriority="high" decoding="async" className="h-full w-full object-contain" />
             ) : (
               <BrandLogo size={logoSize} />
             )}

@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import heroImg from "@/assets/hero.jpg";
 
 export interface HeroConfig {
   /** Static hero background image. Empty falls back to the bundled image. */
@@ -26,19 +25,19 @@ export interface HeroConfig {
 
 export const DEFAULT_HERO_CONFIG: HeroConfig = {
   imageUrl: "",
-  imageOpacity: 30,
+  imageOpacity: 75,
   overlayColor: "#0b2545",
-  overlayOpacity: 80,
+  overlayOpacity: 0,
   textColor: "#ffffff",
   titleAr: "بيع وشراء معدات المطاعم والأثاث",
   titleEn: "Buy & sell restaurant equipment & furniture",
-  subtitleAr: "أكبر سوق للمعدات المستعملة والجديدة في البحرين",
-  subtitleEn: "Bahrain's largest marketplace for used & new equipment",
+  subtitleAr: "",
+  subtitleEn: "",
   showName: true,
   showSearch: true,
   showBadge: true,
-  badgeAr: "مدعوم بالذكاء الاصطناعي",
-  badgeEn: "Powered by AI",
+  badgeAr: "",
+  badgeEn: "",
 };
 
 export const HERO_CONFIG_KEY = "heroConfig";
@@ -49,7 +48,23 @@ export function mergeHeroConfig(v: Partial<HeroConfig> | null | undefined): Hero
 
 /** The resolved hero image (DB value or bundled fallback). */
 export function resolveHeroImage(config: HeroConfig): string {
-  return config.imageUrl || heroImg;
+  return config.imageUrl || "/site-logo.png";
+}
+
+
+function cleanHeroConfig(v: Partial<HeroConfig> | null | undefined): HeroConfig {
+  const merged = mergeHeroConfig(v);
+  const oldBrand = /araba|عربه|عربة|cart|lovable/i;
+  if (oldBrand.test(merged.imageUrl || "")) merged.imageUrl = DEFAULT_HERO_CONFIG.imageUrl;
+  if (oldBrand.test(merged.titleAr || "") || oldBrand.test(merged.titleEn || "")) {
+    merged.titleAr = DEFAULT_HERO_CONFIG.titleAr;
+    merged.titleEn = DEFAULT_HERO_CONFIG.titleEn;
+  }
+  if (oldBrand.test(merged.subtitleAr || "") || oldBrand.test(merged.subtitleEn || "")) {
+    merged.subtitleAr = DEFAULT_HERO_CONFIG.subtitleAr;
+    merged.subtitleEn = DEFAULT_HERO_CONFIG.subtitleEn;
+  }
+  return merged;
 }
 
 /** Reads the static hero section configuration from site_settings. */
@@ -66,7 +81,7 @@ export function useHeroConfig() {
       .maybeSingle()
       .then(({ data }) => {
         if (!active) return;
-        setConfig(mergeHeroConfig(data?.value as Partial<HeroConfig> | null));
+        setConfig(cleanHeroConfig(data?.value as Partial<HeroConfig> | null));
         setLoading(false);
       });
     return () => {

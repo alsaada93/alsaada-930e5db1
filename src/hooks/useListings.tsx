@@ -21,7 +21,9 @@ function mapRow(d: Row): Listing {
     condition: (d.condition as Listing["condition"]) ?? "مستعمل",
     city: (d.city as string | null) ?? "",
     category: categoryName((d.category_id as string | null) ?? null),
+    categoryId: (d.category_id as string | null) ?? undefined,
     sub: (d.group_name as string | null) ?? undefined,
+    itemName: (d.item_name as string | null) ?? undefined,
     image: images[0] ?? "/placeholder.svg",
     featured: Boolean(d.featured),
     views: Number(d.views ?? 0),
@@ -39,18 +41,21 @@ function mapRow(d: Row): Listing {
 }
 
 const SELECT_COLS =
-  "id,title,price,start_price,negotiable,condition,city,category_id,group_name,images,featured,views,contact_phone,user_id,description,contact_name,listing_type,auction_ends_at,monthly_revenue,area_sqm,staff_count,created_at";
+  "id,title,price,start_price,negotiable,condition,city,category_id,group_name,item_name,images,featured,views,contact_phone,user_id,description,contact_name,listing_type,auction_ends_at,monthly_revenue,area_sqm,staff_count,created_at";
 
 type UseListingsOpts = {
   /** حجم الصفحة لتفعيل التحميل التدريجي (مثلاً 12). إذا لم يُمرّر يُجلب حتى 300 إعلان دفعة واحدة. */
   pageSize?: number;
   /** اقتصار النتائج على الإعلانات العادية فقط */
   onlyNormal?: boolean;
+  categoryId?: string;
+  /** فلترة تصنيف فرعي: يطابق اسم المجموعة أو اسم المنتج. */
+  subcategory?: string;
 };
 
 /** يجلب الإعلانات الحقيقية المعتمدة من قاعدة البيانات (بدون الإعلانات التجريبية) */
 export function useListings(opts: UseListingsOpts = {}) {
-  const { pageSize, onlyNormal } = opts;
+  const { pageSize, onlyNormal, categoryId, subcategory } = opts;
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -60,6 +65,8 @@ export function useListings(opts: UseListingsOpts = {}) {
   const buildQuery = (from: number, to: number) => {
     let q = supabase.from("listings").select(SELECT_COLS).eq("status", "approved");
     if (onlyNormal) q = q.or("listing_type.eq.normal,listing_type.is.null");
+    if (categoryId) q = q.eq("category_id", categoryId);
+    if (subcategory) q = q.or(`group_name.eq.${subcategory},item_name.eq.${subcategory}`);
     return q.order("created_at", { ascending: false }).range(from, to);
   };
 
@@ -67,19 +74,37 @@ export function useListings(opts: UseListingsOpts = {}) {
     let active = true;
     setLoading(true);
     pageRef.current = 0;
-    const size = pageSize ?? 300;
-    buildQuery(0, size - 1).then(({ data }) => {
-      if (!active) return;
-      const rows = (data ?? []).map(mapRow);
-      setListings(rows);
-      setHasMore(pageSize != null && rows.length === size);
+    const fetchRows = async () => {
+      if (pageSize) {
+        const { data } = await buildQuery(0, pageSize - 1);
+        if (!active) return;
+        const rows = (data ?? []).map(mapRow);
+        setListings(rows);
+        setHasMore(rows.length === pageSize);
+        setLoading(false);
+        return;
+      }
+
+      // بدون pageSize نجلب كل الإعلانات على دفعات لتجاوز حد PostgREST الافتراضي 1000 صف.
+      const PAGE = 1000;
+      const all: Listing[] = [];
+      for (let page = 0; ; page++) {
+        const { data } = await buildQuery(page * PAGE, page * PAGE + PAGE - 1);
+        if (!active) return;
+        const batch = (data ?? []).map(mapRow);
+        all.push(...batch);
+        if (batch.length < PAGE) break;
+      }
+      setListings(all);
+      setHasMore(false);
       setLoading(false);
-    });
+    };
+    void fetchRows();
     return () => {
       active = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pageSize, onlyNormal]);
+  }, [pageSize, onlyNormal, categoryId, subcategory]);
 
   const loadMore = async () => {
     if (!pageSize || loadingMore || !hasMore) return;

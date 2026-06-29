@@ -29,7 +29,9 @@ export interface Listing {
   condition: "جديد" | "مستعمل";
   city: string;
   category: string;
+  categoryId?: string;
   sub?: string;
+  itemName?: string;
   image: string;
   featured: boolean;
   views: number;

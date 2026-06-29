@@ -117,20 +117,24 @@ function CategoryPage() {
   const search = Route.useSearch();
   const navigate = useNavigate();
   const { t, lang } = useLanguage();
-  const { listings } = useListings();
+  const { listings, loadMore, loadingMore, hasMore } = useListings({
+    categoryId: category.id,
+    subcategory: search.sub,
+    pageSize: 24,
+  });
   const [regionQuery, setRegionQuery] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [showSubs, setShowSubs] = useState(false);
 
   const items = useMemo(
-    () => listings.filter((l) => l.category === category.name || l.category === category.id),
+    () => listings,
     [listings, category.name, category.id],
   );
 
   // قائمة التصنيفات الفرعية (اختيارية كفلاتر): من الأقسام أو من الإعلانات نفسها
   const subOptions = useMemo(() => {
-    const fromGroups = (category.groups ?? []).flatMap((g: { items?: string[] }) => g.items ?? []);
-    const fromData = items.map((l) => l.sub).filter((s): s is string => !!s);
+    const fromGroups = (category.groups ?? []).flatMap((g: { name: string; items?: string[] }) => [g.name, ...(g.items ?? [])]);
+    const fromData = items.flatMap((l) => [l.sub, l.itemName]).filter((s): s is string => !!s);
     const base = category.sub && category.sub.length > 0 ? category.sub : fromGroups;
     return Array.from(new Set([...base, ...fromData]));
   }, [category, items]);
@@ -145,7 +149,7 @@ function CategoryPage() {
 
   const filtered = useMemo(() => {
     let list: Listing[] = [...items];
-    if (search.sub) list = list.filter((l) => l.sub === search.sub);
+    if (search.sub) list = list.filter((l) => l.sub === search.sub || l.itemName === search.sub);
     if (search.region) list = list.filter((l) => l.city === search.region);
     if (search.cond) list = list.filter((l) => l.condition === search.cond);
     if (search.min != null) list = list.filter((l) => l.price >= search.min!);
@@ -411,6 +415,27 @@ function CategoryPage() {
                   {lang === "ar" ? "مسح الفلاتر" : "Clear filters"}
                 </button>
               )}
+            </div>
+          )}
+          {hasMore && (
+            <div className="mt-8 text-center">
+              <button
+                type="button"
+                onClick={() => loadMore()}
+                disabled={loadingMore}
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-primary px-8 py-3 text-sm font-bold text-primary-foreground shadow-glow transition-opacity hover:opacity-90 disabled:opacity-60"
+              >
+                {loadingMore ? (
+                  <>
+                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                    {lang === "ar" ? "جارٍ التحميل..." : "Loading..."}
+                  </>
+                ) : (
+                  <>
+                    {lang === "ar" ? "⬇️ عرض المزيد من الإعلانات" : "⬇️ Load more listings"}
+                  </>
+                )}
+              </button>
             </div>
           )}
         </section>
