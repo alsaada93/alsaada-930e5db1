@@ -117,13 +117,13 @@ function CategoryPage() {
   const search = Route.useSearch();
   const navigate = useNavigate();
   const { t, lang } = useLanguage();
-  const { listings } = useListings();
+  const { listings, loadMore, loadingMore, hasMore } = useListings({ categoryId: category.id, pageSize: 24 });
   const [regionQuery, setRegionQuery] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [showSubs, setShowSubs] = useState(false);
 
   const items = useMemo(
-    () => listings.filter((l) => l.category === category.name || l.category === category.id),
+    () => listings,
     [listings, category.name, category.id],
   );
 

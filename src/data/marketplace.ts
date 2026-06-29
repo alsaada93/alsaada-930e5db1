@@ -30,6 +30,7 @@ export interface Listing {
   city: string;
   category: string;
   categoryId?: string;
+  categoryId?: string;
   sub?: string;
   image: string;
   featured: boolean;

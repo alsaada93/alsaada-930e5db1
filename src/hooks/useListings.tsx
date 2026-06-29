@@ -22,6 +22,7 @@ function mapRow(d: Row): Listing {
     city: (d.city as string | null) ?? "",
     category: categoryName((d.category_id as string | null) ?? null),
     categoryId: (d.category_id as string | null) ?? undefined,
+    categoryId: (d.category_id as string | null) ?? undefined,
     sub: (d.group_name as string | null) ?? undefined,
     image: images[0] ?? "/placeholder.svg",
     featured: Boolean(d.featured),
@@ -48,6 +49,7 @@ type UseListingsOpts = {
   /** اقتصار النتائج على الإعلانات العادية فقط */
   onlyNormal?: boolean;
   categoryId?: string;
+  categoryId?: string;
 };
 
 /** يجلب الإعلانات الحقيقية المعتمدة من قاعدة البيانات (بدون الإعلانات التجريبية) */
@@ -62,6 +64,7 @@ export function useListings(opts: UseListingsOpts = {}) {
   const buildQuery = (from: number, to: number) => {
     let q = supabase.from("listings").select(SELECT_COLS).eq("status", "approved");
     if (onlyNormal) q = q.or("listing_type.eq.normal,listing_type.is.null");
+    if (categoryId) q = q.eq("category_id", categoryId);
     if (categoryId) q = q.eq("category_id", categoryId);
     return q.order("created_at", { ascending: false }).range(from, to);
   };
