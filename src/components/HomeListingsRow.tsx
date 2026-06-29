@@ -100,17 +100,7 @@ export function HomeListingsRow({
       )}
 
       {/* زر المزيد أسفل القسم */}
-      {moreTo && (
-        <div className="mt-4 text-center">
-          <Link
-            to={moreTo}
-            className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-primary px-8 py-3 text-sm font-bold text-primary-foreground shadow-glow transition-opacity hover:opacity-90"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            {moreLabel ?? (lang === "ar" ? "عرض المزيد" : "View more")}
-          </Link>
-        </div>
-      )}
+      {moreButton && <div className="mt-4 text-center">{moreButton}</div>}
       {onLoadMore && hasMore && (
         <div className="mt-4 text-center">
           <button
