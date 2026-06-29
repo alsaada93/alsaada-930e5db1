@@ -154,7 +154,7 @@ export const Route = createFileRoute("/api/public/facebook-sync")({
         // أضفنا هذا السطر لنرى في السجلات (Logs) ما الذي يرسله فيسبوك بالضبط
         console.log("🚨 [Facebook Webhook] تم استلام طلب جديد:", JSON.stringify(body, null, 2));
 
-        const { verifySecret, ingestPost, deletePostAd, ingestBotPost } = await import("@/lib/facebook-sync.server");
+        const { verifySecret, deletePostAd, ingestBotPost } = await import("@/lib/facebook-sync.server");
 
         // ====================================================================
         // الجزء الأول: التعامل مع تنسيق فيسبوك الرسمي (Meta Webhook)
@@ -245,24 +245,6 @@ export const Route = createFileRoute("/api/public/facebook-sync")({
         const objectBody = typeof body === "object" && body !== null ? (body as Record<string, unknown>) : null;
         if (objectBody && objectBody.action === "delete" && typeof objectBody.post_id === "string") {
           const result = await deletePostAd(objectBody.post_id);
-          return json(result, result.ok ? 200 : 500);
-        }
-
-        const isLegacy = !!(
-          objectBody &&
-          "post_id" in objectBody &&
-          ("text" in objectBody || "message" in objectBody || "action" in objectBody) &&
-          !("content" in objectBody) &&
-          !("title" in objectBody) &&
-          !("image_base64" in objectBody)
-        );
-
-        if (isLegacy) {
-          const parsed = LegacyPayloadSchema.safeParse(body);
-          if (!parsed.success) {
-            return json({ status: "error", message: "Invalid payload", details: parsed.error.flatten() }, 422);
-          }
-          const result = await ingestPost(parsed.data);
           return json(result, result.ok ? 200 : 500);
         }
 
