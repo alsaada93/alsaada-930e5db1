@@ -134,7 +134,7 @@ function extractBotItems(body: unknown): Record<string, unknown>[] {
     const v = body[key];
     if (Array.isArray(v)) return v.filter(isRecord);
   }
-  for (const key of ["post", "item", "record", "listing", "ad", "payload"]) {
+  for (const key of ["post", "item", "record", "listing", "ad", "payload", "data"]) {
     const v = body[key];
     if (isRecord(v)) return [v];
   }
