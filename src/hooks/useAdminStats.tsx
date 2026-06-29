@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { categories } from "@/data/marketplace";
+import { useServerFn } from "@tanstack/react-start";
+import { useQuery } from "@tanstack/react-query";
+import { adminGetDashboardStats } from "@/lib/admin.functions";
 
 export interface AdminStatsData {
   totalViews: number;
@@ -30,118 +30,19 @@ export interface CategoryPoint {
   value: number;
 }
 
-const WEEK_DAYS = ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
-const MONTHS = [
-  "يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو",
-  "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر",
-];
-
-function categoryName(id: string | null): string {
-  if (!id) return "أخرى";
-  return categories.find((c) => c.id === id)?.name ?? id;
-}
-
 export function useAdminStats() {
-  const [stats, setStats] = useState<AdminStatsData | null>(null);
-  const [weekTrend, setWeekTrend] = useState<TrendPoint[]>([]);
-  const [monthTrend, setMonthTrend] = useState<MonthPoint[]>([]);
-  const [categoryActivity, setCategoryActivity] = useState<CategoryPoint[]>([]);
-  const [loading, setLoading] = useState(true);
+  const fetchStats = useServerFn(adminGetDashboardStats);
+  const { data, isLoading } = useQuery({
+    queryKey: ["admin-dashboard-stats"],
+    queryFn: () => fetchStats(),
+    staleTime: 1000 * 30,
+  });
 
-  useEffect(() => {
-    let active = true;
-
-    (async () => {
-      // Fetch ALL listings in pages of 1000 to avoid the PostgREST 1000-row cap
-      // (otherwise totals freeze at 1000 once the table grows beyond that).
-      const PAGE = 1000;
-      const allRows: Array<Record<string, unknown>> = [];
-      for (let page = 0; ; page++) {
-        const { data } = await supabase
-          .from("listings")
-          .select("listing_type,status,views,category_id,created_at")
-          .order("created_at", { ascending: false })
-          .range(page * PAGE, page * PAGE + PAGE - 1);
-        const batch = data ?? [];
-        allRows.push(...batch);
-        if (batch.length < PAGE) break;
-      }
-
-      const [profilesRes, favoritesRes, requestsRes] = await Promise.all([
-        supabase.from("profiles").select("id", { count: "exact", head: true }),
-        supabase.from("favorites").select("id", { count: "exact", head: true }),
-        supabase.from("equipment_requests").select("id", { count: "exact", head: true }),
-      ]);
-
-      if (!active) return;
-
-      const rows = allRows;
-      const totalViews = rows.reduce((s, r) => s + (Number(r.views) || 0), 0);
-
-      setStats({
-        totalViews,
-        pending: rows.filter((r) => r.status === "pending").length,
-        users: profilesRes.count ?? 0,
-        listings: rows.length,
-        auctions: rows.filter((r) => r.listing_type === "auction").length,
-        businesses: rows.filter((r) => r.listing_type === "business").length,
-        favorites: favoritesRes.count ?? 0,
-        requests: requestsRes.count ?? 0,
-      });
-
-      // Last 7 days trend
-      const now = new Date();
-      const week: TrendPoint[] = [];
-      for (let i = 6; i >= 0; i--) {
-        const d = new Date(now);
-        d.setDate(now.getDate() - i);
-        const dayRows = rows.filter((r) => {
-          const c = new Date(r.created_at as string);
-          return c.toDateString() === d.toDateString();
-        });
-        week.push({
-          day: WEEK_DAYS[d.getDay()],
-          listings: dayRows.length,
-          views: dayRows.reduce((s, r) => s + (Number(r.views) || 0), 0),
-        });
-      }
-      setWeekTrend(week);
-
-      // Last 6 months trend
-      const months: MonthPoint[] = [];
-      for (let i = 5; i >= 0; i--) {
-        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-        const monthRows = rows.filter((r) => {
-          const c = new Date(r.created_at as string);
-          return c.getFullYear() === d.getFullYear() && c.getMonth() === d.getMonth();
-        });
-        months.push({
-          month: MONTHS[d.getMonth()],
-          listings: monthRows.length,
-          views: monthRows.reduce((s, r) => s + (Number(r.views) || 0), 0),
-        });
-      }
-      setMonthTrend(months);
-
-      // Category activity
-      const catMap: Record<string, number> = {};
-      rows.forEach((r) => {
-        const name = categoryName((r.category_id as string | null) ?? null);
-        catMap[name] = (catMap[name] ?? 0) + 1;
-      });
-      setCategoryActivity(
-        Object.entries(catMap)
-          .map(([name, value]) => ({ name, value }))
-          .sort((a, b) => b.value - a.value),
-      );
-
-      setLoading(false);
-    })();
-
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  return { stats, weekTrend, monthTrend, categoryActivity, loading };
+  return {
+    stats: (data?.stats as AdminStatsData | undefined) ?? null,
+    weekTrend: (data?.weekTrend as TrendPoint[] | undefined) ?? [],
+    monthTrend: (data?.monthTrend as MonthPoint[] | undefined) ?? [],
+    categoryActivity: (data?.categoryActivity as CategoryPoint[] | undefined) ?? [],
+    loading: isLoading,
+  };
 }
