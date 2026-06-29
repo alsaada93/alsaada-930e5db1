@@ -53,6 +53,7 @@ function firstString(...values: unknown[]): string | undefined {
 
 function collectImageUrls(...values: unknown[]): string[] {
   const out: string[] = [];
+  const seenObjects = new WeakSet<object>();
   const visit = (v: unknown) => {
     if (!v) return;
     if (typeof v === "string") {
@@ -68,8 +69,18 @@ function collectImageUrls(...values: unknown[]): string[] {
       return;
     }
     if (typeof v === "object") {
+      if (seenObjects.has(v)) return;
+      seenObjects.add(v);
       const o = v as Record<string, unknown>;
       visit(o.url ?? o.src ?? o.href ?? o.image_url ?? o.photo_url);
+      visit(o.imageUrl ?? o.photoUrl ?? o.full_picture ?? o.picture);
+      visit(o.media);
+      visit(o.image);
+      visit(o.images);
+      visit(o.photos);
+      visit(o.attachments);
+      visit(o.subattachments);
+      for (const nested of Object.values(o)) visit(nested);
     }
   };
   values.forEach(visit);
@@ -122,6 +133,10 @@ function extractBotItems(body: unknown): Record<string, unknown>[] {
   for (const key of ["posts", "items", "data", "records", "listings", "ads"]) {
     const v = body[key];
     if (Array.isArray(v)) return v.filter(isRecord);
+  }
+  for (const key of ["post", "item", "record", "listing", "ad", "payload"]) {
+    const v = body[key];
+    if (isRecord(v)) return [v];
   }
   return [body];
 }
