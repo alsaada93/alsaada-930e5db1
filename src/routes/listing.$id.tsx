@@ -589,7 +589,7 @@ function ListingPage() {
                 params={{ id: cat.id }}
                 className="font-semibold text-primary hover:underline"
               >
-                {cat.name}
+                {(lang === "en" && cat.nameEn) ? cat.nameEn : cat.name}
               </Link>
             </>
           )}
