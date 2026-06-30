@@ -34,3 +34,19 @@ export function realEstateLabel(text?: string | null): { ar: string; en: string 
   }
   return { ar: "للبيع", en: "For Sale" };
 }
+
+/** يحوّل وسم الحالة (جديد/مستعمل) إلى اللغة المختارة. */
+export function conditionLabel(condition?: string | null, lang: "ar" | "en" = "ar"): string {
+  const s = `${condition ?? ""}`.trim();
+  if (!s) return s;
+  const isNew = /جديد|new/i.test(s);
+  const isUsed = /مستعمل|used|secondhand|pre.?owned/i.test(s);
+  if (lang === "en") {
+    if (isNew) return "New";
+    if (isUsed) return "Used";
+    return s;
+  }
+  if (isNew) return "جديد";
+  if (isUsed) return "مستعمل";
+  return s;
+}

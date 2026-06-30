@@ -40,7 +40,7 @@ import { useViewBoost, boostViews } from "@/hooks/useViewBoost";
 import { countryByName } from "@/data/countries";
 import { cityCenter, displayCity } from "@/data/bahrainCities";
 import { brandInfo } from "@/data/brandsCatalog";
-import { showsCondition, categoryKind, realEstateLabel } from "@/lib/category-kind";
+import { showsCondition, categoryKind, realEstateLabel, conditionLabel } from "@/lib/category-kind";
 import { listingRating, listingReviewCount } from "@/lib/rating";
 import { optimizedImage, optimizedSrcSet } from "@/lib/image-url";
 
@@ -589,7 +589,7 @@ function ListingPage() {
                 params={{ id: cat.id }}
                 className="font-semibold text-primary hover:underline"
               >
-                {cat.name}
+                {(lang === "en" && cat.nameEn) ? cat.nameEn : cat.name}
               </Link>
             </>
           )}
@@ -650,22 +650,22 @@ function ListingPage() {
             <div className="flex flex-wrap items-center gap-2">
               {showsCondition(cat?.name, cat?.nameEn) && (
                 <span className="rounded-full bg-navy/80 px-2 py-0.5 text-[11px] font-semibold text-navy-foreground">
-                  {item.condition}
+                  {conditionLabel(item.condition, lang)}
                 </span>
               )}
               {categoryKind(cat?.name, cat?.nameEn) === "realestate" && (
                 <span className="rounded-full bg-navy/80 px-2 py-0.5 text-[11px] font-semibold text-navy-foreground">
-                  {realEstateLabel(`${item.title} ${item.description ?? ""}`).ar}
+                  {realEstateLabel(`${item.title} ${item.description ?? ""}`)[lang]}
                 </span>
               )}
               {item.featured && (
                 <span className="rounded-full bg-gradient-primary px-2 py-0.5 text-[11px] font-bold text-primary-foreground">
-                  مميّز
+                  {lang === "en" ? "Featured" : "مميّز"}
                 </span>
               )}
               {expired && (
                 <span className="rounded-full bg-destructive/15 px-2 py-0.5 text-[11px] font-bold text-destructive">
-                  منتهي
+                  {lang === "en" ? "Expired" : "منتهي"}
                 </span>
               )}
             </div>
@@ -698,21 +698,27 @@ function ListingPage() {
               <div className="flex items-center gap-2 rounded-xl border border-border bg-card p-2.5 text-sm">
                 <Truck className="h-4 w-4 text-primary" />
                 <span className="font-semibold">
-                  {item.deliveryAvailable ? "يوجد توصيل" : "لا يوجد توصيل"}
+                  {item.deliveryAvailable
+                    ? (lang === "en" ? "Delivery available" : "يوجد توصيل")
+                    : (lang === "en" ? "No delivery" : "لا يوجد توصيل")}
                 </span>
               </div>
               <div className="flex items-center gap-2 rounded-xl border border-border bg-card p-2.5 text-sm">
                 <TagIcon className="h-4 w-4 text-primary" />
                 <span className="font-semibold">
-                  {item.negotiable ? "قابل للتفاوض" : "السعر ثابت"}
+                  {item.negotiable
+                    ? (lang === "en" ? "Negotiable" : "قابل للتفاوض")
+                    : (lang === "en" ? "Fixed price" : "السعر ثابت")}
                 </span>
               </div>
               {item.countryOfOrigin && (
                 <div className="flex items-center gap-2 rounded-xl border border-border bg-card p-2.5 text-sm">
                   <Globe className="h-4 w-4 text-primary" />
                   <span className="font-semibold">
-                    {countryByName(item.countryOfOrigin)?.flag ?? ""} بلد الصنع:{" "}
-                    {countryByName(item.countryOfOrigin)?.ar ?? item.countryOfOrigin}
+                    {countryByName(item.countryOfOrigin)?.flag ?? ""} {lang === "en" ? "Made in:" : "بلد الصنع:"}{" "}
+                    {lang === "en"
+                      ? (countryByName(item.countryOfOrigin)?.en ?? item.countryOfOrigin)
+                      : (countryByName(item.countryOfOrigin)?.ar ?? item.countryOfOrigin)}
                   </span>
                 </div>
               )}
