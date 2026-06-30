@@ -62,39 +62,45 @@ function Index() {
         <main className="min-w-0 flex-1">
           <HomeBanners position="top" />
           <Hero />
-          <PromoCarousel />
-          <CategoryGrid />
-          <WeBuyBanner />
-          <HomeListingsRow
-            title={lang === "ar" ? "مطاعم وكافيهات" : "Restaurants & Cafes"}
-            subtitle={lang === "ar" ? "أحدث معدات المطاعم والكافيهات" : "Latest restaurant equipment"}
-            items={restaurant}
-            hideContact
-            moreButton={
-              <Link
-                to="/category/$id"
-                params={{ id: "restaurant" }}
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-primary px-8 py-3 text-sm font-bold text-primary-foreground shadow-glow transition-opacity hover:opacity-90"
-              >
-                {lang === "ar" ? "عرض المزيد من المطاعم" : "More restaurant ads"}
-              </Link>
-            }
-          />
-          <HomeListingsRow
-            title={t("sec.latest")}
-            subtitle={t("sec.latestSub")}
-            items={latest}
-            hideContact
-            onLoadMore={() => loadMore()}
-            loadingMore={loadingMore}
-            hasMore={hasMore}
-          />
-          {featured.length > 0 && (
+          {layout.showPromo && <PromoCarousel />}
+          {layout.showCategories && <CategoryGrid />}
+          {layout.showWeBuy && <WeBuyBanner />}
+          {layout.showRestaurantRow && (
+            <HomeListingsRow
+              title={lang === "ar" ? "مطاعم وكافيهات" : "Restaurants & Cafes"}
+              subtitle={lang === "ar" ? "أحدث معدات المطاعم والكافيهات" : "Latest restaurant equipment"}
+              items={restaurant}
+              hideContact
+              cardWidthPct={layout.cardWidthPct}
+              moreButton={
+                <Link
+                  to="/category/$id"
+                  params={{ id: "restaurant" }}
+                  className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-primary px-8 py-3 text-sm font-bold text-primary-foreground shadow-glow transition-opacity hover:opacity-90"
+                >
+                  {lang === "ar" ? "عرض المزيد من المطاعم" : "More restaurant ads"}
+                </Link>
+              }
+            />
+          )}
+          {layout.showLatestRow && (
+            <HomeListingsRow
+              title={t("sec.latest")}
+              subtitle={t("sec.latestSub")}
+              items={latest}
+              hideContact
+              cardWidthPct={layout.cardWidthPct}
+              onLoadMore={() => loadMore()}
+              loadingMore={loadingMore}
+              hasMore={hasMore}
+            />
+          )}
+          {layout.showFeatured && featured.length > 0 && (
             <ListingsSection title={t("sec.featured")} subtitle={t("sec.featuredSub")} items={featured} hideContact />
           )}
-          
-          <Testimonials />
-          <BusinessSection />
+
+          {layout.showTestimonials && <Testimonials />}
+          {layout.showBusiness && <BusinessSection />}
           <HomeBanners position="bottom" />
         </main>
         <HomeBanners position="right" />
