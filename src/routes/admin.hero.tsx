@@ -167,7 +167,7 @@ function HeroAdminPage() {
             </button>
             {draft.imageUrl && (
               <button
-                onClick={() => set("imageUrl", "")}
+                onClick={onRemoveImage}
                 className="text-xs text-destructive hover:underline"
               >
                 إزالة الصورة (استخدام الافتراضية)
