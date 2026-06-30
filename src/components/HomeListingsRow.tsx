@@ -20,6 +20,7 @@ export function HomeListingsRow({
   onLoadMore,
   loadingMore,
   hasMore,
+  hideContact,
 }: {
   title: string;
   subtitle?: string;
@@ -32,6 +33,7 @@ export function HomeListingsRow({
   onLoadMore?: () => void;
   loadingMore?: boolean;
   hasMore?: boolean;
+  hideContact?: boolean;
 }) {
   const { lang } = useLanguage();
   const rtl = lang === "ar";
@@ -89,7 +91,7 @@ export function HomeListingsRow({
               key={item.id}
               className="w-[62%] min-w-0 shrink-0 snap-start sm:w-[38%] lg:w-[23%]"
             >
-              <ListingCard item={item} displayTitle={map[item.id]?.title} />
+              <ListingCard item={item} displayTitle={map[item.id]?.title} hideContact={hideContact} />
             </div>
           ))}
         </div>
