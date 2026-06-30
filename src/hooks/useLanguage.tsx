@@ -44,8 +44,8 @@ const dict: Dict = {
 
 
   // Features
-  "feat.aiTitle": { ar: "تسعير ذكي بالـ AI", en: "Smart AI pricing" },
-  "feat.aiDesc": { ar: "اعرف السعر السوقي العادل والمدة المتوقعة للبيع فور إضافة الإعلان.", en: "Know the fair market price and expected time to sell instantly." },
+  "feat.aiTitle": { ar: "تصنيف تلقائي دقيق", en: "Accurate auto-categorization" },
+  "feat.aiDesc": { ar: "يوضع إعلانك في القسم الصحيح تلقائياً ليصل لأكبر عدد من المشترين.", en: "Your listing lands in the right category automatically to reach more buyers." },
   "feat.fraudTitle": { ar: "حماية من الاحتيال", en: "Fraud protection" },
   "feat.fraudDesc": { ar: "اكتشاف الإعلانات المكررة والصور المزيفة والحسابات غير الموثوقة.", en: "Detection of duplicate ads, fake images and untrusted accounts." },
   "feat.chatTitle": { ar: "تواصل مباشر", en: "Direct contact" },

@@ -42,7 +42,7 @@ const plans: Plan[] = [
       { ar: "حتى 3 إعلانات نشطة", en: "Up to 3 active listings" },
       { ar: "حتى 30 صورة لكل إعلان", en: "Up to 30 images per listing" },
       { ar: "تواصل واتساب واتصال مباشر", en: "WhatsApp & direct call" },
-      { ar: "تسعير ذكي بالذكاء الاصطناعي", en: "AI smart pricing" },
+      { ar: "ظهور إعلانك في نتائج البحث", en: "Appears in search results" },
     ],
   },
   {
