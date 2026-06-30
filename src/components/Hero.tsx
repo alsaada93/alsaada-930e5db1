@@ -65,22 +65,6 @@ export function Hero() {
                   placeholder={t("hero.searchPlaceholder")}
                   className="h-11 w-full border-0 bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
                 />
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleImageSelected}
-                />
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={imageSearching}
-                  className="rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-primary disabled:opacity-60"
-                  aria-label={t("hero.imageSearch")}
-                >
-                  {imageSearching ? <Loader2 className="h-5 w-5 animate-spin" /> : <Camera className="h-5 w-5" />}
-                </button>
                 <button
                   type="button"
                   onClick={goSearch}
@@ -89,11 +73,6 @@ export function Hero() {
                   {t("hero.search")}
                 </button>
               </div>
-              {imageName && (
-                <p className="px-2 pt-1 text-xs text-muted-foreground">
-                  {t("hero.imageSearchLabel")} {imageName}
-                </p>
-              )}
             </div>
           )}
         </div>
