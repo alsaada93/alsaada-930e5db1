@@ -24,7 +24,7 @@ import { toast } from "sonner";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import ImageEditor from "@/components/ImageEditor";
-import { bahrainRegions, listings, brandsFor } from "@/data/marketplace";
+import { bahrainRegions, listings } from "@/data/marketplace";
 import { cityCenter } from "@/data/bahrainCities";
 import { brandInfo } from "@/data/brandsCatalog";
 import { useCategories } from "@/hooks/useCategories";
