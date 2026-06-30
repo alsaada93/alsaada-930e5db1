@@ -159,44 +159,7 @@ function AdminBlogPage() {
     }
   };
 
-  const generate100 = async () => {
-    if (genProgress !== null) return;
-    if (!confirm("سيتم توليد 100 مقال SEO تلقائياً بالعربية والإنجليزية وحفظها في المدونة. متابعة؟"))
-      return;
-    const TARGET = 100;
-    const BATCH = 5;
-    let total = 0;
-    setGenProgress(0);
-    try {
-      for (let i = 0; i < Math.ceil(TARGET / BATCH); i++) {
-        const remaining = TARGET - total;
-        const count = Math.min(BATCH, remaining);
-        if (count <= 0) break;
-        try {
-          const r = await generate({ data: { count, seed: `${Date.now()}-${i}` } });
-          total += r.created;
-          setGenProgress(Math.min(TARGET, total));
-        } catch (e) {
-          const msg = e instanceof Error ? e.message : "";
-          if (msg.includes("rate_limited")) {
-            toast.message("تم الوصول لحد الطلبات، جاري الانتظار قليلاً...");
-            await new Promise((res) => setTimeout(res, 8000));
-            i -= 1; // retry this batch
-            continue;
-          }
-          if (msg.includes("credits_exhausted")) {
-            toast.error("نفد رصيد الذكاء الاصطناعي. أضف رصيداً ثم أعد المحاولة.");
-            break;
-          }
-          toast.error("تعذّر توليد بعض المقالات، جاري المتابعة...");
-        }
-      }
-      toast.success(`تم توليد ${total} مقال جديد`);
-      await load();
-    } finally {
-      setGenProgress(null);
-    }
-  };
+
 
   return (
     <>
