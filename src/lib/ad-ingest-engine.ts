@@ -305,8 +305,11 @@ export function classifyAd(rawText: string, explicit?: string | null): DetCatego
     const e = explicit.toLowerCase();
     if (/مطاع|معدات/.test(e)) return DET_CATEGORIES.equipment;
     if (/سيار|مركب/.test(e)) return DET_CATEGORIES.cars;
+    if (/عقار/.test(e)) return DET_CATEGORIES.realEstate;
     if (/أثاث|اثاث/.test(e)) return DET_CATEGORIES.furniture;
     if (/الكترون|إلكترون|كهرب/.test(e)) return DET_CATEGORIES.electronics;
+    if (/خدمات|خدمة/.test(e)) return DET_CATEGORIES.services;
+    if (/وظائف|وظيفة/.test(e)) return DET_CATEGORIES.jobs;
   }
 
   for (const [cat, re] of CAT_KEYWORDS) {
