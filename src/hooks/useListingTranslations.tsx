@@ -1,7 +1,3 @@
-import { useQuery } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
-import { useMemo } from "react";
-import { translateListings } from "@/lib/translate.functions";
 import { useLanguage } from "@/hooks/useLanguage";
 
 type Translatable = {
@@ -11,58 +7,18 @@ type Translatable = {
 };
 
 /**
- * Returns a map of listingId -> { title, description } translated into the
- * currently selected language. Listings are translated on demand and cached
- * server-side, so repeated views are instant.
+ * Returns the listing text as-is. Automatic AI translation was removed to avoid
+ * AI credit usage; listings always display their original title/description.
  */
-export function useListingTranslations(items: Translatable[]) {
+export function useListingTranslations(_items: Translatable[]) {
   const { lang } = useLanguage();
-  const run = useServerFn(translateListings);
-
-  // Stable key based on the ids being shown + language.
-  const ids = useMemo(
-    () =>
-      items
-        .map((i) => i.id)
-        .sort()
-        .join(","),
-    [items],
-  );
-
-  const { data } = useQuery({
-    queryKey: ["listing-translations", lang, ids],
-    enabled: items.length > 0,
-    staleTime: 1000 * 60 * 30,
-    retry: false,
-    queryFn: async () => {
-      const payload = items.map((i) => ({
-        id: i.id,
-        title: i.title ?? "",
-        description: i.description ?? "",
-      }));
-      // Server fn caps batches at 40 items, so chunk larger lists.
-      const merged: Record<string, { title: string; description: string }> = {};
-      try {
-        for (let i = 0; i < payload.length; i += 40) {
-          const chunk = payload.slice(i, i + 40);
-          const res = await run({ data: { lang, items: chunk } });
-          Object.assign(merged, res);
-        }
-      } catch {
-        // Translation requires an authenticated session (paid AI). For
-        // anonymous visitors we silently fall back to the original text.
-        return {};
-      }
-      return merged;
-    },
-  });
 
   return {
     lang,
-    map: data ?? {},
+    map: {} as Record<string, { title: string; description: string }>,
     translate: (id: string, fallbackTitle: string, fallbackDesc?: string) => ({
-      title: data?.[id]?.title || fallbackTitle,
-      description: data?.[id]?.description || fallbackDesc || "",
+      title: fallbackTitle,
+      description: fallbackDesc || "",
     }),
   };
 }

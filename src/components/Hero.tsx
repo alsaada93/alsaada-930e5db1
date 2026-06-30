@@ -1,55 +1,18 @@
-import { Search, Camera, Sparkles, Loader2 } from "lucide-react";
-import { useRef, useState } from "react";
+import { Search, Sparkles } from "lucide-react";
+import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { toast } from "sonner";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useHeroConfig, resolveHeroImage } from "@/hooks/useHeroConfig";
-import { searchByImage } from "@/lib/image-search.functions";
 
 export function Hero() {
   const { t, lang } = useLanguage();
   const navigate = useNavigate();
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [imageName, setImageName] = useState<string | null>(null);
-  const [imageSearching, setImageSearching] = useState(false);
   const [query, setQuery] = useState("");
 
   const { config } = useHeroConfig();
   const heroImage = resolveHeroImage(config);
 
   const goSearch = () => navigate({ to: "/search", search: { q: query.trim() || undefined } });
-
-  const handleImageSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    e.target.value = "";
-    if (!file) return;
-    if (file.size > 6_000_000) {
-      toast.error(t("hero.imageTooBig"));
-      return;
-    }
-    setImageName(file.name);
-    setImageSearching(true);
-    toast.info(t("hero.uploaded"), { description: t("hero.searching") });
-    try {
-      const dataUrl = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result as string);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-      const { query: found } = await searchByImage({ data: { imageDataUrl: dataUrl } });
-      if (found) {
-        setQuery(found);
-        navigate({ to: "/search", search: { q: found } });
-      } else {
-        toast.error(t("hero.imageFailed"));
-      }
-    } catch {
-      toast.error(t("hero.imageFailed"));
-    } finally {
-      setImageSearching(false);
-    }
-  };
 
   const title = lang === "ar" ? config.titleAr : config.titleEn;
   const subtitle = lang === "ar" ? config.subtitleAr : config.subtitleEn;
@@ -102,22 +65,6 @@ export function Hero() {
                   placeholder={t("hero.searchPlaceholder")}
                   className="h-11 w-full border-0 bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
                 />
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleImageSelected}
-                />
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={imageSearching}
-                  className="rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-primary disabled:opacity-60"
-                  aria-label={t("hero.imageSearch")}
-                >
-                  {imageSearching ? <Loader2 className="h-5 w-5 animate-spin" /> : <Camera className="h-5 w-5" />}
-                </button>
                 <button
                   type="button"
                   onClick={goSearch}
@@ -126,11 +73,6 @@ export function Hero() {
                   {t("hero.search")}
                 </button>
               </div>
-              {imageName && (
-                <p className="px-2 pt-1 text-xs text-muted-foreground">
-                  {t("hero.imageSearchLabel")} {imageName}
-                </p>
-              )}
             </div>
           )}
         </div>
