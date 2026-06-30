@@ -660,12 +660,12 @@ function ListingPage() {
               )}
               {item.featured && (
                 <span className="rounded-full bg-gradient-primary px-2 py-0.5 text-[11px] font-bold text-primary-foreground">
-                  مميّز
+                  {lang === "en" ? "Featured" : "مميّز"}
                 </span>
               )}
               {expired && (
                 <span className="rounded-full bg-destructive/15 px-2 py-0.5 text-[11px] font-bold text-destructive">
-                  منتهي
+                  {lang === "en" ? "Expired" : "منتهي"}
                 </span>
               )}
             </div>
