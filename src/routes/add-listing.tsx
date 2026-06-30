@@ -251,13 +251,16 @@ function AddListingPage() {
 
   const brandOptions = useMemo(() => {
     if (!categoryId) return [];
-    const base = brandsFor(categoryId, itemName || undefined);
+    // STRICT per-category brands — no cross-category leakage.
+    // Vehicles use the dedicated vehicle brand list; every other category
+    // uses ONLY its own configured brands. DB-managed brands are scoped by category.
+    const base = isVehicleCat ? carBrandNames : (activeCategory?.brands ?? []);
     const fromDb = dbBrands
       .filter((b) => b.category_id === categoryId && (!itemName || !b.item_name || b.item_name === itemName))
       .map((b) => b.name);
     const merged = [...new Set([...base.filter((b) => b !== "أخرى"), ...fromDb])].sort((a, b) => a.localeCompare(b));
     return [...merged, "أخرى"];
-  }, [categoryId, itemName, dbBrands]);
+  }, [categoryId, itemName, dbBrands, isVehicleCat, activeCategory]);
 
   const filteredBrands = useMemo(() => {
     const q = brandQuery.trim();
