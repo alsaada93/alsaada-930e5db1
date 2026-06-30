@@ -16,7 +16,7 @@ function PrivacyPage() {
       <InfoSection>
         <p>
           {lang === "ar"
-            ? "نحترم خصوصيتك ونلتزم بحماية بياناتك الشخصية. نجمع فقط المعلومات اللازمة لتشغيل المنصة وتسهيل التواصل بين البائعين والمشترين، ولا نشاركها مع أي جهة خارجية لأغراض تسويقية."
+            ? "نحن نلتزم بحماية بياناتك الشخصية وسريتها وتوفير تجربة استخدام آمنة وموثوقة. نجمع فقط المعلومات اللازمة لتشغيل المنصة وتسهيل التواصل بين البائعين والمشترين، ولا نشاركها مع أي جهة خارجية لأغراض تسويقية."
             : "We respect your privacy and protect your personal data. We only collect information needed to run the platform and facilitate contact between buyers and sellers, and never share it with third parties for marketing."}
         </p>
       </InfoSection>
