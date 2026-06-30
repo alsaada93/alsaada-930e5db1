@@ -37,7 +37,7 @@ import { compressImage } from "@/lib/image-compress";
 import { compressVideo } from "@/lib/video-compress";
 import { matchesAr } from "@/lib/text";
 import { showsCondition, categoryKind } from "@/lib/category-kind";
-import { carBrandLogo } from "@/data/carBrandLogos";
+import { carBrandLogo, carBrandNames } from "@/data/carBrandLogos";
 import { countryByName } from "@/data/countries";
 
 interface AddListingSearch {
