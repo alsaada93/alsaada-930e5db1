@@ -41,6 +41,7 @@ import { countryByName } from "@/data/countries";
 import { cityCenter, displayCity } from "@/data/bahrainCities";
 import { brandInfo } from "@/data/brandsCatalog";
 import { showsCondition, categoryKind, realEstateLabel, conditionLabel } from "@/lib/category-kind";
+import { isPriceOnRequest, priceOnRequestLabel } from "@/lib/price-display";
 import { listingRating, listingReviewCount } from "@/lib/rating";
 import { optimizedImage, optimizedSrcSet } from "@/lib/image-url";
 
