@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { Loader2, Save, RotateCcw, Upload, Sparkles, Search } from "lucide-react";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import { supabase } from "@/integrations/supabase/client";
+import { deleteStorageImage } from "@/lib/storage";
 import {
   DEFAULT_HERO_CONFIG,
   HERO_CONFIG_KEY,
