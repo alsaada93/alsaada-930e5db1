@@ -45,6 +45,8 @@ export function ListingCard({
   const condLabel = item.condition === "جديد" ? t("cond.new") : t("cond.used");
   const cat = categories.find((c) => c.id === item.categoryId || c.id === item.category);
   const showCond = showsCondition(cat?.name ?? item.category, cat?.nameEn);
+  const isRealEstate = categoryKind(cat?.name ?? item.category, cat?.nameEn) === "realestate";
+  const reLabel = realEstateLabel(`${item.title} ${item.description ?? ""}`);
 
   const waLink = phone ? whatsappLink({ phone, listingTitle: title, listingId: item.id }) : null;
 
