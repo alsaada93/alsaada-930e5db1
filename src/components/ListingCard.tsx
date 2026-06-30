@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { MapPin, Eye, Star, BadgeCheck, MessageCircle, Phone, Tag } from "lucide-react";
 import { categories, type Listing } from "@/data/marketplace";
-import { showsCondition } from "@/lib/category-kind";
+import { showsCondition, categoryKind, realEstateLabel } from "@/lib/category-kind";
 import { displayCity } from "@/data/bahrainCities";
 import { useSellers } from "@/hooks/useSellers";
 import { useLanguage } from "@/hooks/useLanguage";
