@@ -251,8 +251,11 @@ function BannersSection() {
   const setLink = (pos: BannerPosition, id: string, link: string) =>
     setDraft((d) => ({ ...d, [pos]: d[pos].map((b) => (b.id === id ? { ...b, link } : b)) }));
 
-  const remove = (pos: BannerPosition, id: string) =>
+  const remove = (pos: BannerPosition, id: string) => {
+    const target = draft[pos].find((b) => b.id === id);
     setDraft((d) => ({ ...d, [pos]: d[pos].filter((b) => b.id !== id) }));
+    void deleteStorageImage(target?.imageUrl);
+  };
 
   const onSave = async () => {
     setSaving(true);
