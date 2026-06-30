@@ -8,11 +8,13 @@ export function ListingsSection({
   subtitle,
   items,
   emptyText,
+  hideContact,
 }: {
   title: string;
   subtitle?: string;
   items: Listing[];
   emptyText?: string;
+  hideContact?: boolean;
 }) {
   const { lang } = useLanguage();
   const { map } = useListingTranslations(items.map((i) => ({ id: i.id, title: i.title, description: i.description })));
