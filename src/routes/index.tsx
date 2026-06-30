@@ -47,10 +47,11 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   const { t, lang } = useLanguage();
-  // احدث الاعلانات: نعرض 6 أولاً ثم نحمّل 6 إضافية مع كل ضغطة على "عرض المزيد"
-  const { listings: latest, loadMore, loadingMore, hasMore } = useListings({ pageSize: 6, onlyNormal: true });
-  // اخر 6 اعلانات من قسم المطاعم
-  const { listings: restaurant } = useListings({ pageSize: 6, categoryId: "restaurant", onlyNormal: true });
+  const { layout } = useHomeLayout();
+  // احدث الاعلانات: نعرض العدد المحدد ثم نحمّل المزيد مع كل ضغطة على "عرض المزيد"
+  const { listings: latest, loadMore, loadingMore, hasMore } = useListings({ pageSize: layout.latestCount, onlyNormal: true });
+  // اخر إعلانات قسم المطاعم
+  const { listings: restaurant } = useListings({ pageSize: layout.restaurantCount, categoryId: "restaurant", onlyNormal: true });
   const featured = latest.filter((l) => l.featured);
 
 
