@@ -221,11 +221,13 @@ function RootComponent() {
         <ThemeProvider>
           <SiteIdentityProvider>
             <HomeBannersProvider>
-              <AuthProvider>
-                {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-                <Outlet />
-                <Toaster />
-              </AuthProvider>
+              <HomeLayoutProvider>
+                <AuthProvider>
+                  {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+                  <Outlet />
+                  <Toaster />
+                </AuthProvider>
+              </HomeLayoutProvider>
             </HomeBannersProvider>
           </SiteIdentityProvider>
         </ThemeProvider>
