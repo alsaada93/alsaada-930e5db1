@@ -17,6 +17,7 @@ import { LanguageProvider } from "@/hooks/useLanguage";
 import { ThemeProvider } from "@/hooks/useTheme";
 import { SiteIdentityProvider } from "@/hooks/useSiteIdentity";
 import { HomeBannersProvider } from "@/hooks/useHomeBanners";
+import { HomeLayoutProvider } from "@/hooks/useHomeLayout";
 import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
@@ -221,11 +222,13 @@ function RootComponent() {
         <ThemeProvider>
           <SiteIdentityProvider>
             <HomeBannersProvider>
-              <AuthProvider>
-                {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-                <Outlet />
-                <Toaster />
-              </AuthProvider>
+              <HomeLayoutProvider>
+                <AuthProvider>
+                  {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+                  <Outlet />
+                  <Toaster />
+                </AuthProvider>
+              </HomeLayoutProvider>
             </HomeBannersProvider>
           </SiteIdentityProvider>
         </ThemeProvider>

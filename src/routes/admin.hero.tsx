@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { Loader2, Save, RotateCcw, Upload, Sparkles, Search } from "lucide-react";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import { supabase } from "@/integrations/supabase/client";
+import { deleteStorageImage } from "@/lib/storage";
 import {
   DEFAULT_HERO_CONFIG,
   HERO_CONFIG_KEY,
@@ -55,14 +56,24 @@ function HeroAdminPage() {
     if (!file) return;
     setUploading(true);
     try {
+      const previous = draft.imageUrl;
       const url = await uploadHeroImage(file);
       set("imageUrl", url);
-      toast.success("تم رفع الصورة");
+      // احذف الصورة القديمة من التخزين حتى لا تتعارض مع الجديدة
+      if (previous && previous !== url) await deleteStorageImage(previous);
+      toast.success("تم رفع الصورة الجديدة وحذف القديمة");
     } catch {
       toast.error("تعذّر رفع الصورة");
     } finally {
       setUploading(false);
     }
+  };
+
+  const onRemoveImage = async () => {
+    const previous = draft.imageUrl;
+    set("imageUrl", "");
+    if (previous) await deleteStorageImage(previous);
+    toast.success("تم حذف الصورة الحالية");
   };
 
   const onSave = async () => {
@@ -156,7 +167,7 @@ function HeroAdminPage() {
             </button>
             {draft.imageUrl && (
               <button
-                onClick={() => set("imageUrl", "")}
+                onClick={onRemoveImage}
                 className="text-xs text-destructive hover:underline"
               >
                 إزالة الصورة (استخدام الافتراضية)

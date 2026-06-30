@@ -17,7 +17,16 @@ import { optimizedImage, optimizedSrcSet } from "@/lib/image-url";
 
 const DEFAULT_PHONE = "33982383"; // الرقم المحلي البحريني (قسم المطاعم فقط)
 
-export function ListingCard({ item, displayTitle }: { item: Listing; displayTitle?: string }) {
+export function ListingCard({
+  item,
+  displayTitle,
+  hideContact = false,
+}: {
+  item: Listing;
+  displayTitle?: string;
+  /** إخفاء أزرار التواصل (واتساب/اتصال/دردشة) — مستخدم في الصفحة الرئيسية */
+  hideContact?: boolean;
+}) {
   const { byId } = useSellers();
   const { t, lang } = useLanguage();
   const { boost } = useViewBoost();
@@ -123,6 +132,7 @@ export function ListingCard({ item, displayTitle }: { item: Listing; displayTitl
           </span>
         </div>
 
+        {!hideContact && (
         <div className={`mt-3 grid gap-1.5 ${phone ? "grid-cols-3" : "grid-cols-1"}`}>
           {phone && waLink && (
             <button
@@ -189,15 +199,18 @@ export function ListingCard({ item, displayTitle }: { item: Listing; displayTitl
             <Tag className="h-3.5 w-3.5" /> {t("card.message")}
           </button>
         </div>
+        )}
       </div>
 
-      <ListingChatDialog
-        open={chatOpen}
-        onClose={() => setChatOpen(false)}
-        listingId={item.id}
-        listingTitle={item.title}
-        sellerId={item.userId ?? null}
-      />
+      {!hideContact && (
+        <ListingChatDialog
+          open={chatOpen}
+          onClose={() => setChatOpen(false)}
+          listingId={item.id}
+          listingTitle={item.title}
+          sellerId={item.userId ?? null}
+        />
+      )}
 
       <SafetyModal
         open={safety != null}

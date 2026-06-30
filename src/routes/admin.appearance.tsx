@@ -6,6 +6,7 @@ import { Loader2, RotateCcw, Save, Upload } from "lucide-react";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import { Slider } from "@/components/ui/slider";
 import { supabase } from "@/integrations/supabase/client";
+import { deleteStorageImage } from "@/lib/storage";
 import {
   useTheme,
   COLOR_FIELDS,
@@ -51,9 +52,12 @@ function IdentitySection() {
     if (!file) return;
     setUploading(field === "logoUrl" ? "logo" : "favicon");
     try {
+      const previous = draft[field];
       const url = await uploadImage(file);
       set(field, url);
-      toast.success("تم رفع الصورة");
+      // احذف الصورة القديمة من التخزين حتى لا تتعارض القديمة مع الجديدة
+      if (previous && previous !== url) await deleteStorageImage(previous);
+      toast.success("تم رفع الصورة الجديدة وحذف القديمة");
     } catch {
       toast.error("تعذّر رفع الصورة");
     } finally {
@@ -100,7 +104,7 @@ function IdentitySection() {
               <input type="file" accept="image/*" className="hidden" onChange={(e) => onUpload("logoUrl", e.target.files?.[0])} />
             </label>
             {draft.logoUrl && (
-              <button type="button" onClick={() => set("logoUrl", "")} className="text-xs text-destructive hover:underline">
+              <button type="button" onClick={() => { const prev = draft.logoUrl; set("logoUrl", ""); void deleteStorageImage(prev); }} className="text-xs text-destructive hover:underline">
                 إزالة
               </button>
             )}
@@ -247,8 +251,11 @@ function BannersSection() {
   const setLink = (pos: BannerPosition, id: string, link: string) =>
     setDraft((d) => ({ ...d, [pos]: d[pos].map((b) => (b.id === id ? { ...b, link } : b)) }));
 
-  const remove = (pos: BannerPosition, id: string) =>
+  const remove = (pos: BannerPosition, id: string) => {
+    const target = draft[pos].find((b) => b.id === id);
     setDraft((d) => ({ ...d, [pos]: d[pos].filter((b) => b.id !== id) }));
+    void deleteStorageImage(target?.imageUrl);
+  };
 
   const onSave = async () => {
     setSaving(true);

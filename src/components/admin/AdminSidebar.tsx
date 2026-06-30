@@ -15,6 +15,7 @@ const items = [
   { title: "حاسبة التفصيل", url: "/admin/calculator", icon: Calculator },
   { title: "المدونة", url: "/admin/blog", icon: Newspaper },
   { title: "واجهة الرئيسية", url: "/admin/hero", icon: MonitorPlay },
+  { title: "تخطيط الصفحة الرئيسية", url: "/admin/home-layout", icon: LayoutDashboard },
   { title: "صور العرض", url: "/admin/slides", icon: Images },
   { title: "مظهر الموقع", url: "/admin/appearance", icon: Palette },
   { title: "تحسين SEO", url: "/admin/seo", icon: Search },

@@ -20,6 +20,8 @@ export function HomeListingsRow({
   onLoadMore,
   loadingMore,
   hasMore,
+  hideContact,
+  cardWidthPct,
 }: {
   title: string;
   subtitle?: string;
@@ -32,6 +34,9 @@ export function HomeListingsRow({
   onLoadMore?: () => void;
   loadingMore?: boolean;
   hasMore?: boolean;
+  hideContact?: boolean;
+  /** عرض البطاقة على الجوال كنسبة من الشاشة (يتحكم بها الأدمن) */
+  cardWidthPct?: number;
 }) {
   const { lang } = useLanguage();
   const rtl = lang === "ar";
@@ -87,9 +92,10 @@ export function HomeListingsRow({
           {items.map((item) => (
             <div
               key={item.id}
-              className="w-[62%] min-w-0 shrink-0 snap-start sm:w-[38%] lg:w-[23%]"
+              className="w-[var(--cw)] min-w-0 shrink-0 snap-start sm:w-[38%] lg:w-[23%]"
+              style={{ ["--cw" as string]: `${cardWidthPct ?? 62}%` }}
             >
-              <ListingCard item={item} displayTitle={map[item.id]?.title} />
+              <ListingCard item={item} displayTitle={map[item.id]?.title} hideContact={hideContact} />
             </div>
           ))}
         </div>

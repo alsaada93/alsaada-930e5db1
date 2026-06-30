@@ -4,6 +4,7 @@ import { Plus, Trash2, ImagePlus, ChevronUp, ChevronDown, Eye, EyeOff, Save, Loa
 import { toast } from "sonner";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import { supabase } from "@/integrations/supabase/client";
+import { deleteStorageImage } from "@/lib/storage";
 import type { HeroSlide } from "@/hooks/useHeroSlides";
 
 export const Route = createFileRoute("/admin/slides")({
@@ -68,10 +69,14 @@ function AdminSlidesPage() {
   };
 
   const removeSlide = async (id: string) => {
+    const target = slides.find((s) => s.id === id);
     setSlides((p) => p.filter((s) => s.id !== id));
     const { error } = await supabase.from("hero_slides").delete().eq("id", id);
     if (error) toast.error("تعذّر الحذف");
-    else toast.success("تم الحذف");
+    else {
+      await deleteStorageImage(target?.image_url);
+      toast.success("تم الحذف");
+    }
   };
 
   const move = async (index: number, dir: -1 | 1) => {
