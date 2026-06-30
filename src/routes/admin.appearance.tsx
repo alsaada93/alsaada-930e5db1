@@ -51,9 +51,12 @@ function IdentitySection() {
     if (!file) return;
     setUploading(field === "logoUrl" ? "logo" : "favicon");
     try {
+      const previous = draft[field];
       const url = await uploadImage(file);
       set(field, url);
-      toast.success("تم رفع الصورة");
+      // احذف الصورة القديمة من التخزين حتى لا تتعارض القديمة مع الجديدة
+      if (previous && previous !== url) await deleteStorageImage(previous);
+      toast.success("تم رفع الصورة الجديدة وحذف القديمة");
     } catch {
       toast.error("تعذّر رفع الصورة");
     } finally {
