@@ -650,12 +650,12 @@ function ListingPage() {
             <div className="flex flex-wrap items-center gap-2">
               {showsCondition(cat?.name, cat?.nameEn) && (
                 <span className="rounded-full bg-navy/80 px-2 py-0.5 text-[11px] font-semibold text-navy-foreground">
-                  {item.condition}
+                  {conditionLabel(item.condition, lang)}
                 </span>
               )}
               {categoryKind(cat?.name, cat?.nameEn) === "realestate" && (
                 <span className="rounded-full bg-navy/80 px-2 py-0.5 text-[11px] font-semibold text-navy-foreground">
-                  {realEstateLabel(`${item.title} ${item.description ?? ""}`).ar}
+                  {realEstateLabel(`${item.title} ${item.description ?? ""}`)[lang]}
                 </span>
               )}
               {item.featured && (
