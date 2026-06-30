@@ -137,7 +137,7 @@ const dict: Dict = {
   "add.condition": { ar: "الحالة", en: "Condition" },
   "add.new": { ar: "جديد", en: "New" },
   "add.used": { ar: "مستعمل", en: "Used" },
-  "add.aiSuggest": { ar: "اقتراح السعر بالذكاء الاصطناعي", en: "AI price suggestion" },
+  
   "add.analyzing": { ar: "جارٍ التحليل...", en: "Analyzing..." },
   "add.avgPrice": { ar: "متوسط السعر", en: "Average price" },
   "add.suggestedPrice": { ar: "السعر المقترح", en: "Suggested price" },
