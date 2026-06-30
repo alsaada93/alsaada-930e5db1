@@ -653,6 +653,11 @@ function ListingPage() {
                   {item.condition}
                 </span>
               )}
+              {categoryKind(cat?.name, cat?.nameEn) === "realestate" && (
+                <span className="rounded-full bg-navy/80 px-2 py-0.5 text-[11px] font-semibold text-navy-foreground">
+                  {realEstateLabel(`${item.title} ${item.description ?? ""}`).ar}
+                </span>
+              )}
               {item.featured && (
                 <span className="rounded-full bg-gradient-primary px-2 py-0.5 text-[11px] font-bold text-primary-foreground">
                   مميّز
