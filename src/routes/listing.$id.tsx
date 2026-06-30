@@ -32,6 +32,7 @@ import { toast } from "sonner";
 import { logContactAttempt, whatsappLink, telLink } from "@/lib/contact";
 import { SafetyModal } from "@/components/SafetyModal";
 import { ListingChatDialog } from "@/components/ListingChatDialog";
+import { AdminListingControls } from "@/components/AdminListingControls";
 import { ListingHashtags } from "@/components/ListingHashtags";
 import { ShareButtons } from "@/components/ShareButtons";
 import { useListingTranslations } from "@/hooks/useListingTranslations";
@@ -614,6 +615,21 @@ function ListingPage() {
             </>
           )}
         </nav>
+
+        {/* أدوات الإدارة (للأدمن فقط) */}
+        {isAdmin && (
+          <AdminListingControls
+            item={{
+              id: item.id,
+              title: item.title,
+              price: item.price,
+              categoryId: item.categoryId,
+              status: item.status,
+            }}
+          />
+        )}
+
+
 
         {/* تحكّم المالك: تعديل وإعادة نشر */}
         {isOwner && (
