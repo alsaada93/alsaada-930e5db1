@@ -4,6 +4,7 @@ import { Plus, Trash2, ImagePlus, ChevronUp, ChevronDown, Eye, EyeOff, Save, Loa
 import { toast } from "sonner";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import { supabase } from "@/integrations/supabase/client";
+import { deleteStorageImage } from "@/lib/storage";
 import type { HeroSlide } from "@/hooks/useHeroSlides";
 
 export const Route = createFileRoute("/admin/slides")({
