@@ -76,3 +76,6 @@ export function carBrandLogo(brand: string | null | undefined): string | null {
   const slug = SLUGS[brand.trim()];
   return slug ? `https://cdn.simpleicons.org/${slug}` : null;
 }
+
+/** Full list of supported vehicle brand names (used to scope the vehicles category). */
+export const carBrandNames: string[] = Object.keys(SLUGS);
