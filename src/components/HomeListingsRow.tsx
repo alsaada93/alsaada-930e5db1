@@ -21,6 +21,7 @@ export function HomeListingsRow({
   loadingMore,
   hasMore,
   hideContact,
+  cardWidthPct,
 }: {
   title: string;
   subtitle?: string;
@@ -34,6 +35,8 @@ export function HomeListingsRow({
   loadingMore?: boolean;
   hasMore?: boolean;
   hideContact?: boolean;
+  /** عرض البطاقة على الجوال كنسبة من الشاشة (يتحكم بها الأدمن) */
+  cardWidthPct?: number;
 }) {
   const { lang } = useLanguage();
   const rtl = lang === "ar";
