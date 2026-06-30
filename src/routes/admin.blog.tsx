@@ -67,7 +67,7 @@ function AdminBlogPage() {
   const [query, setQuery] = useState("");
   const [editing, setEditing] = useState<FormState | null>(null);
   const [saving, setSaving] = useState(false);
-  const [genProgress, setGenProgress] = useState<number | null>(null);
+  
 
   const load = async () => {
     setLoading(true);
