@@ -32,6 +32,7 @@ import { toast } from "sonner";
 import { logContactAttempt, whatsappLink, telLink } from "@/lib/contact";
 import { SafetyModal } from "@/components/SafetyModal";
 import { ListingChatDialog } from "@/components/ListingChatDialog";
+import { AdminListingControls } from "@/components/AdminListingControls";
 import { ListingHashtags } from "@/components/ListingHashtags";
 import { ShareButtons } from "@/components/ShareButtons";
 import { useListingTranslations } from "@/hooks/useListingTranslations";
