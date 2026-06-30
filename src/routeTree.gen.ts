@@ -42,6 +42,7 @@ import { Route as AdminRestaurantRouteImport } from './routes/admin.restaurant'
 import { Route as AdminMembersRouteImport } from './routes/admin.members'
 import { Route as AdminListingsRouteImport } from './routes/admin.listings'
 import { Route as AdminImagesRouteImport } from './routes/admin.images'
+import { Route as AdminHomeLayoutRouteImport } from './routes/admin.home-layout'
 import { Route as AdminHeroRouteImport } from './routes/admin.hero'
 import { Route as AdminFacebookRouteImport } from './routes/admin.facebook'
 import { Route as AdminCategoriesRouteImport } from './routes/admin.categories'
@@ -220,6 +221,11 @@ const AdminImagesRoute = AdminImagesRouteImport.update({
   path: '/images',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminHomeLayoutRoute = AdminHomeLayoutRouteImport.update({
+  id: '/home-layout',
+  path: '/home-layout',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminHeroRoute = AdminHeroRouteImport.update({
   id: '/hero',
   path: '/hero',
@@ -311,6 +317,7 @@ export interface FileRoutesByFullPath {
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/facebook': typeof AdminFacebookRoute
   '/admin/hero': typeof AdminHeroRoute
+  '/admin/home-layout': typeof AdminHomeLayoutRoute
   '/admin/images': typeof AdminImagesRoute
   '/admin/listings': typeof AdminListingsRoute
   '/admin/members': typeof AdminMembersRoute
@@ -357,6 +364,7 @@ export interface FileRoutesByTo {
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/facebook': typeof AdminFacebookRoute
   '/admin/hero': typeof AdminHeroRoute
+  '/admin/home-layout': typeof AdminHomeLayoutRoute
   '/admin/images': typeof AdminImagesRoute
   '/admin/listings': typeof AdminListingsRoute
   '/admin/members': typeof AdminMembersRoute
@@ -405,6 +413,7 @@ export interface FileRoutesById {
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/facebook': typeof AdminFacebookRoute
   '/admin/hero': typeof AdminHeroRoute
+  '/admin/home-layout': typeof AdminHomeLayoutRoute
   '/admin/images': typeof AdminImagesRoute
   '/admin/listings': typeof AdminListingsRoute
   '/admin/members': typeof AdminMembersRoute
@@ -454,6 +463,7 @@ export interface FileRouteTypes {
     | '/admin/categories'
     | '/admin/facebook'
     | '/admin/hero'
+    | '/admin/home-layout'
     | '/admin/images'
     | '/admin/listings'
     | '/admin/members'
@@ -500,6 +510,7 @@ export interface FileRouteTypes {
     | '/admin/categories'
     | '/admin/facebook'
     | '/admin/hero'
+    | '/admin/home-layout'
     | '/admin/images'
     | '/admin/listings'
     | '/admin/members'
@@ -547,6 +558,7 @@ export interface FileRouteTypes {
     | '/admin/categories'
     | '/admin/facebook'
     | '/admin/hero'
+    | '/admin/home-layout'
     | '/admin/images'
     | '/admin/listings'
     | '/admin/members'
@@ -830,6 +842,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminImagesRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/home-layout': {
+      id: '/admin/home-layout'
+      path: '/home-layout'
+      fullPath: '/admin/home-layout'
+      preLoaderRoute: typeof AdminHomeLayoutRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/hero': {
       id: '/admin/hero'
       path: '/hero'
@@ -927,6 +946,7 @@ interface AdminRouteChildren {
   AdminCategoriesRoute: typeof AdminCategoriesRoute
   AdminFacebookRoute: typeof AdminFacebookRoute
   AdminHeroRoute: typeof AdminHeroRoute
+  AdminHomeLayoutRoute: typeof AdminHomeLayoutRoute
   AdminImagesRoute: typeof AdminImagesRoute
   AdminListingsRoute: typeof AdminListingsRoute
   AdminMembersRoute: typeof AdminMembersRoute
@@ -946,6 +966,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminCategoriesRoute: AdminCategoriesRoute,
   AdminFacebookRoute: AdminFacebookRoute,
   AdminHeroRoute: AdminHeroRoute,
+  AdminHomeLayoutRoute: AdminHomeLayoutRoute,
   AdminImagesRoute: AdminImagesRoute,
   AdminListingsRoute: AdminListingsRoute,
   AdminMembersRoute: AdminMembersRoute,
