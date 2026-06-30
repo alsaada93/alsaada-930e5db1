@@ -698,21 +698,27 @@ function ListingPage() {
               <div className="flex items-center gap-2 rounded-xl border border-border bg-card p-2.5 text-sm">
                 <Truck className="h-4 w-4 text-primary" />
                 <span className="font-semibold">
-                  {item.deliveryAvailable ? "يوجد توصيل" : "لا يوجد توصيل"}
+                  {item.deliveryAvailable
+                    ? (lang === "en" ? "Delivery available" : "يوجد توصيل")
+                    : (lang === "en" ? "No delivery" : "لا يوجد توصيل")}
                 </span>
               </div>
               <div className="flex items-center gap-2 rounded-xl border border-border bg-card p-2.5 text-sm">
                 <TagIcon className="h-4 w-4 text-primary" />
                 <span className="font-semibold">
-                  {item.negotiable ? "قابل للتفاوض" : "السعر ثابت"}
+                  {item.negotiable
+                    ? (lang === "en" ? "Negotiable" : "قابل للتفاوض")
+                    : (lang === "en" ? "Fixed price" : "السعر ثابت")}
                 </span>
               </div>
               {item.countryOfOrigin && (
                 <div className="flex items-center gap-2 rounded-xl border border-border bg-card p-2.5 text-sm">
                   <Globe className="h-4 w-4 text-primary" />
                   <span className="font-semibold">
-                    {countryByName(item.countryOfOrigin)?.flag ?? ""} بلد الصنع:{" "}
-                    {countryByName(item.countryOfOrigin)?.ar ?? item.countryOfOrigin}
+                    {countryByName(item.countryOfOrigin)?.flag ?? ""} {lang === "en" ? "Made in:" : "بلد الصنع:"}{" "}
+                    {lang === "en"
+                      ? (countryByName(item.countryOfOrigin)?.en ?? item.countryOfOrigin)
+                      : (countryByName(item.countryOfOrigin)?.ar ?? item.countryOfOrigin)}
                   </span>
                 </div>
               )}
