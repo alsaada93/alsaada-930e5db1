@@ -40,7 +40,7 @@ import { useViewBoost, boostViews } from "@/hooks/useViewBoost";
 import { countryByName } from "@/data/countries";
 import { cityCenter, displayCity } from "@/data/bahrainCities";
 import { brandInfo } from "@/data/brandsCatalog";
-import { showsCondition, categoryKind, realEstateLabel } from "@/lib/category-kind";
+import { showsCondition, categoryKind, realEstateLabel, conditionLabel } from "@/lib/category-kind";
 import { listingRating, listingReviewCount } from "@/lib/rating";
 import { optimizedImage, optimizedSrcSet } from "@/lib/image-url";
 
