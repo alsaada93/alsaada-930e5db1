@@ -16,6 +16,7 @@ import { BusinessSection } from "@/components/BusinessSection";
 import { Testimonials } from "@/components/Testimonials";
 import { Footer } from "@/components/Footer";
 import { useListings } from "@/hooks/useListings";
+import { useHomeLayout } from "@/hooks/useHomeLayout";
 import { useLanguage } from "@/hooks/useLanguage";
 
 
