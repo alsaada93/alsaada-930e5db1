@@ -199,7 +199,18 @@ export function ListingCard({
             <Tag className="h-3.5 w-3.5" /> {t("card.message")}
           </button>
         </div>
+        )}
       </div>
+
+      {!hideContact && (
+        <ListingChatDialog
+          open={chatOpen}
+          onClose={() => setChatOpen(false)}
+          listingId={item.id}
+          listingTitle={item.title}
+          sellerId={item.userId ?? null}
+        />
+      )}
 
       <ListingChatDialog
         open={chatOpen}
