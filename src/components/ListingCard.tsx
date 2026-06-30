@@ -88,6 +88,11 @@ export function ListingCard({
               {condLabel}
             </span>
           )}
+          {isRealEstate && (
+            <span className="absolute left-2 top-2 rounded-full bg-navy/80 px-2 py-0.5 text-[11px] font-semibold text-navy-foreground">
+              {lang === "en" ? reLabel.en : reLabel.ar}
+            </span>
+          )}
         </div>
       </Link>
       <div className="p-3">
