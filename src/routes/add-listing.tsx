@@ -24,7 +24,7 @@ import { toast } from "sonner";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import ImageEditor from "@/components/ImageEditor";
-import { bahrainRegions, listings, brandsFor } from "@/data/marketplace";
+import { bahrainRegions, listings } from "@/data/marketplace";
 import { cityCenter } from "@/data/bahrainCities";
 import { brandInfo } from "@/data/brandsCatalog";
 import { useCategories } from "@/hooks/useCategories";
@@ -37,7 +37,7 @@ import { compressImage } from "@/lib/image-compress";
 import { compressVideo } from "@/lib/video-compress";
 import { matchesAr } from "@/lib/text";
 import { showsCondition, categoryKind } from "@/lib/category-kind";
-import { carBrandLogo } from "@/data/carBrandLogos";
+import { carBrandLogo, carBrandNames } from "@/data/carBrandLogos";
 import { countryByName } from "@/data/countries";
 
 interface AddListingSearch {
@@ -53,7 +53,7 @@ export const Route = createFileRoute("/add-listing")({
       { title: "أضف إعلان | حراج السعادة Haraj Al Saada" },
       { name: "description", content: "أضف إعلانك لبيع معدات المطاعم والفنادق والإلكترونيات على حراج السعادة." },
       { property: "og:title", content: "أضف إعلان | حراج السعادة Haraj Al Saada" },
-      { property: "og:description", content: "أنشئ إعلانًا جديدًا مع تسعير ذكي بالذكاء الاصطناعي على حراج السعادة." },
+      { property: "og:description", content: "أنشئ إعلانًا جديدًا بسهولة وانشره أمام آلاف المشترين على حراج السعادة." },
       { property: "og:url", content: "https://www.alsaada.sale/add-listing" },
     ],
     links: [{ rel: "canonical", href: "https://www.alsaada.sale/add-listing" }],
@@ -251,13 +251,16 @@ function AddListingPage() {
 
   const brandOptions = useMemo(() => {
     if (!categoryId) return [];
-    const base = brandsFor(categoryId, itemName || undefined);
+    // STRICT per-category brands — no cross-category leakage.
+    // Vehicles use the dedicated vehicle brand list; every other category
+    // uses ONLY its own configured brands. DB-managed brands are scoped by category.
+    const base = isVehicleCat ? carBrandNames : (activeCategory?.brands ?? []);
     const fromDb = dbBrands
       .filter((b) => b.category_id === categoryId && (!itemName || !b.item_name || b.item_name === itemName))
       .map((b) => b.name);
     const merged = [...new Set([...base.filter((b) => b !== "أخرى"), ...fromDb])].sort((a, b) => a.localeCompare(b));
     return [...merged, "أخرى"];
-  }, [categoryId, itemName, dbBrands]);
+  }, [categoryId, itemName, dbBrands, isVehicleCat, activeCategory]);
 
   const filteredBrands = useMemo(() => {
     const q = brandQuery.trim();
