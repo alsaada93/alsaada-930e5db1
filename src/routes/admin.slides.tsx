@@ -68,10 +68,14 @@ function AdminSlidesPage() {
   };
 
   const removeSlide = async (id: string) => {
+    const target = slides.find((s) => s.id === id);
     setSlides((p) => p.filter((s) => s.id !== id));
     const { error } = await supabase.from("hero_slides").delete().eq("id", id);
     if (error) toast.error("تعذّر الحذف");
-    else toast.success("تم الحذف");
+    else {
+      await deleteStorageImage(target?.image_url);
+      toast.success("تم الحذف");
+    }
   };
 
   const move = async (index: number, dir: -1 | 1) => {
