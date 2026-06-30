@@ -258,64 +258,205 @@ export function extractStrictPrice(rawText: string, blacklist: Set<string>): Pri
   return { price: 0, detected: false, free: false };
 }
 
-// ───────────────────────── STEP 3 — categorization ─────────────────────────
+// ───────────────────────── STEP 3 — categorization (Master Engine v4.0) ─────────────────────────
 
-const CAT_KEYWORDS: Array<[DetCategory, RegExp]> = [
-  // Restaurant / industrial equipment FIRST (wins over generic car/furniture words)
+/**
+ * تطبيع النص قبل المطابقة:
+ *  - تحويل للحروف الصغيرة
+ *  - تحويل الأرقام العربية إلى لاتينية
+ *  - إزالة التشكيل (Tashkeel)
+ *  - توحيد الألف (أ إ آ ٱ → ا) والتاء المربوطة (ة → ه) والياء (ى → ي)
+ */
+function normalizeForMatch(input: string): string {
+  return normDigits(input ?? "")
+    .toLowerCase()
+    .replace(/[أإآٱ]/g, "ا")
+    .replace(/ى/g, "ي")
+    .replace(/ة/g, "ه")
+    .replace(/[ًٌٍَُِّْـ]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/**
+ * قاموس ضخم لتصنيف الإعلانات (عربي + إنجليزي + عامية).
+ * الكلمات مُطبَّعة مسبقاً عبر buildMatcher لتطابق النص المُطبَّع.
+ * الترتيب = الأولوية: معدات المطاعم أولاً، ثم السيارات، ثم العقارات قبل الأثاث،
+ * ثم الإلكترونيات، ثم الخدمات/الوظائف.
+ */
+const CAT_DICTIONARY: Array<[DetCategory, string[]]> = [
+  // 1) معدات المطاعم والكافيهات (أولوية قصوى)
   [
     DET_CATEGORIES.equipment,
-    /مكينة\s*قهوة|مكينه\s*قهوة|آلة\s*القهوة|اسبريسو|إسبريسو|espresso|فرن|oven|عجان[ةه]|proofer|طاولات?\s*ستيل|ستانلس|ستيل|مقلاة|قلاية|fryer|nuova\s*simonelli|ثلاجة\s*عرض|فريزر|صانعة\s*ثلج|ice\s*maker|مطعم|مطاعم|كافيه|كوفي|كافتيريا|شواية|قريل|grill|مطبخ\s*صناعي|عصارة|juice\s*machine|prep\s*table|كاشير|\bpos\b/i,
+    [
+      "كافيه", "مقهي", "مكينه اسبريسو", "ماكينه اسبريسو", "مكينه قهوه", "ماكينه قهوه", "اله قهوه",
+      "طاحونه", "مطحنه قهوه", "ادوات باريستا", "باريستا", "محمصه", "قهوه مختصه", "في 60", "كميكس",
+      "كاليتا", "ايروبرس", "تامبر", "موزع قهوه", "بتشر", "لامارزوكو", "نوفا سيمونيلي", "فيكتوريا اردوينو",
+      "يوريكا", "مالكونيق", "باراتزا", "ديلونجي", "بريفيل", "سيج", "اسكاسو", "روكيت",
+      "معدات مطاعم", "معدات مطعم", "تجهيز مطاعم", "ثلاجه عرض", "ثلاجه تجاريه", "فريزر تجاري", "فريزر ارضي",
+      "صانعه ثلج", "مكينه ثلج", "غرفه تبريد", "باين ماري", "فرن بيتزا", "فرن حراري", "عجانه", "قطاعه لحم",
+      "مفرمه", "خلاط تجاري", "بلندتك", "فيتاميكس", "شوايه غاز", "صاج", "قلايه بطاطس", "مكينه شاورما",
+      "سخان طعام", "ستانلس ستيل", "ستانلس", "ستيل", "شفاط", "طاولات تحضير", "طاوله تحضير", "طباخ تجاري",
+      "عربه طعام", "فود ترك", "مطعم", "مطاعم", "كافتيريا", "كوفي", "كاشير مطعم", "نقاط بيع", "سيستم كاشير",
+      "كراسي مطعم", "طاولات مطعم", "مطبخ صناعي", "عصاره", "صانعه عصير",
+      "cafe", "coffee machine", "espresso machine", "espresso", "coffee grinder", "barista", "barista tools",
+      "coffee roaster", "specialty coffee", "v60", "chemex", "tamper", "pitcher", "la marzocco",
+      "nuova simonelli", "victoria arduino", "mahlkonig", "eureka", "delonghi", "breville", "sage",
+      "restaurant equipment", "commercial fridge", "commercial freezer", "ice maker", "cold room",
+      "bain marie", "pizza oven", "convection oven", "dough mixer", "slicer", "grill", "deep fryer",
+      "food warmer", "stainless steel", "hood", "prep table", "shawarma machine", "food truck",
+      "pos system", "cashier", "restaurant chairs", "restaurant tables", "commercial kitchen", "showcase",
+    ],
   ],
+  // 2) المركبات والمعدات الثقيلة وقطع الغيار
   [
     DET_CATEGORIES.cars,
-    /\bسيارة\b|سيارات|تويوتا|هوندا|نيسان|لكزس|مرسيدس|بي\s*ام|هونداي|هيونداي|كيا|جيب|للبيع\s*سيارة|صالون|سيدان|\btoyota\b|\bnissan\b|\bhonda\b|\blexus\b|\bmercedes\b|\bbmw\b|\bkia\b|\bhyundai\b/i,
+    [
+      "سياره", "سيارات", "موتر", "سيايير", "جيب", "بيك اب", "شاحنه", "باص", "فان", "صالون", "سيدان",
+      "دفع رباعي", "تويوتا", "نيسان", "لاندكروزر", "لاند كروزر", "باترول", "كامري", "كورولا", "صني",
+      "لكزس", "مرسيدس", "بي ام دبليو", "بي ام", "فورد", "شفروليه", "شيفروليه", "جمس", "هوندا", "هونداي",
+      "هيونداي", "كيا", "رنج روفر", "ميتسوبيشي", "جيلي", "ام جي", "شانجان", "تسلا", "مازدا", "دودج",
+      "اودي", "فولكس", "بورش", "لاند روفر", "سوزوكي", "سوبارو", "بيجو", "رينو", "انفنيتي", "كاديلاك",
+      "جاكوار", "شيري", "هافال", "فولفو",
+      "دراجه ناريه", "سيكل", "دباب", "بانشي", "بقي", "ريس", "هارلي", "سكوتر", "قارب", "طراد", "يخت",
+      "جت سكي", "رافعه", "بوكلين", "شيول", "رافعه شوكيه", "مقطوره",
+      "قطع غيار", "تواير", "اطارات", "رنجات", "جنوط", "ماكينه سياره", "مكينه سياره", "محرك", "قير",
+      "صدام", "بطاريه", "سفايف", "بلكات", "هرن", "بونيت", "دبه", "شفت", "رديتر", "سلف", "دينمو",
+      "كمبريسر", "مكيف سياره", "تنجيد",
+      "car", "auto", "vehicle", "suv", "sedan", "truck", "bus", "van", "pickup", "toyota", "nissan",
+      "land cruiser", "patrol", "camry", "lexus", "mercedes", "bmw", "ford", "chevrolet", "gmc",
+      "honda", "hyundai", "kia", "range rover", "tesla", "mazda", "dodge", "audi", "porsche",
+      "land rover", "suzuki", "subaru", "peugeot", "renault", "infiniti", "cadillac", "jaguar",
+      "motorcycle", "atv", "quad", "scooter", "boat", "yacht", "jet ski", "forklift", "crane",
+      "excavator", "trailer", "spare parts", "tires", "wheels", "rims", "engine", "transmission",
+      "gear", "bumper", "battery", "brake pads", "radiator", "alternator", "compressor",
+      "suspension", "headlights",
+    ],
   ],
-  // Real estate BEFORE furniture so "غرفة/طاولة" inside a property ad don't pull it to furniture
+  // 3) العقارات (قبل الأثاث حتى لا تُسحب «غرفة/طاولة» للأثاث خطأً)
   [
     DET_CATEGORIES.realEstate,
-    /عقار|عقارات|شق[ةه]|شقق|فيلا|فلل|فل[ةه]|بيت\s*للبيع|بيت\s*للايجار|منزل|أرض|ارض|للايجار|للإيجار|للبيع\s*أرض|للبيع\s*ارض|عمار[ةه]|ستوديو|استوديو|مستودع|مخزن|دور\s*أرضي|دور\s*علوي|سكني|تجاري\s*للايجار|\bapartment\b|\bvilla\b|\bstudio\b|\bflat\b|\bwarehouse\b|real\s*estate|\bproperty\b/i,
+    [
+      "عقار", "عقارات", "شقه", "استوديو", "ستوديو", "ملحق", "بيت", "فيلا", "قصر", "سكن عمال", "مبني",
+      "عماره", "شقق", "فلل", "بيوت", "ارض", "مخطط", "محل", "متجر", "مكتب", "مساحه تجاريه", "مستودع",
+      "كراج", "مبني تجاري", "شاليه", "مزرعه", "استراحه", "للايجار", "للبيع ارض", "خلو", "تقبيل",
+      "مفروش", "نصف مفروش", "شامل الكهرباء", "غرفه للايجار",
+      "real estate", "property", "apartment", "flat", "studio", "house", "villa", "building",
+      "residential", "labor camp", "land", "plot", "shop", "retail", "office", "commercial space",
+      "warehouse", "garage", "farm", "chalet", "for rent", "for lease", "lease", "furnished",
+      "semi-furnished",
+    ],
   ],
+  // 4) المنزل والأثاث والأجهزة المنزلية
   [
     DET_CATEGORIES.furniture,
-    /أثاث|اثاث|سرير|كبت|دولاب|كراسي|كرسي|طاولة|صوفا|كنب|كنبة|مجلس|خزانة|\bbed\b|\bsofa\b|\bdining\b|\bwardrobe\b|\bcouch\b/i,
+    [
+      "اثاث", "عفش", "غرفه نوم", "سرير", "مرتبه", "دوشق", "كنب", "كنبه", "صوفا", "طقم جلوس", "مجلس",
+      "قنفه", "زوليه", "سجاد", "ستائر", "ستاره", "كبت", "خزانه", "تسريحه", "طاوله طعام", "كرسي",
+      "كراسي", "جلسه خارجيه", "اثاث حديقه", "دولاب", "ديكور", "تحف", "لوحات", "ثريا", "مرايا",
+      "كبتات مطبخ", "اواني", "صحون", "دلات", "مفارش", "مكيف", "مكيفات", "سبليت", "مكيف شباك",
+      "تكييف مركزي", "غساله", "نشافه", "مجفف", "ثلاجه", "طباخ", "جوله", "ميكروويف", "فرن غاز",
+      "فرن كهربائي", "مكنسه", "دفايه", "كولر ماء", "براده",
+      "furniture", "bed", "bedroom", "mattress", "sofa", "couch", "living room", "carpet", "rug",
+      "curtains", "wardrobe", "closet", "cabinet", "dining table", "chair", "outdoor furniture",
+      "decor", "chandelier", "mirrors", "cookware", "dishes", "tableware", "ac", "air conditioner",
+      "split ac", "window ac", "washing machine", "dryer", "fridge", "refrigerator", "cooker",
+      "stove", "oven", "microwave", "vacuum", "heater", "water dispenser",
+    ],
   ],
+  // 5) الإلكترونيات والحاسبات والأجهزة
   [
     DET_CATEGORIES.electronics,
-    /شاشة|تلفزيون|ايفون|آيفون|لابتوب|مكيف|ثلاجة(?!\s*عرض)|غسالة|جوال|موبايل|سماعة|كاميرا|تابلت|ايباد|بلايستيشن|\btv\b|\bmonitor\b|\biphone\b|\blaptop\b|\bsamsung\b|\bipad\b|\bplaystation\b|\bmacbook\b|\bdell\b|\bhp\b|\blenovo\b/i,
+    [
+      "جوال", "هاتف", "موبايل", "تلفون", "ايفون", "سامسونج", "جالكسي", "هواوي", "شاومي", "ايباد",
+      "تابلت", "ايربودز", "سماعات", "سماعه", "باور بانك", "شاحن", "كيبل", "واير", "كفر", "حمايه شاشه",
+      "برو ماكس", "الترا", "لابتوب", "حاسب", "كمبيوتر", "بي سي", "تجميعه", "ماك بوك", "ديل", "اتش بي",
+      "لينوفو", "اسوس", "ايسر", "شاشه", "ماوس", "كيبورد", "كرت شاشه", "معالج", "مذربورد", "رامات",
+      "هاردسك", "اس اس دي", "باور سبلاي", "تبريد مائي", "كيس", "جيمنج", "تلفزيون", "سمارت",
+      "بلايستيشن", "سوني", "اكس بوكس", "نينتندو", "يد تحكم", "كونسول", "مسرح منزلي", "كاميرا", "عدسه",
+      "درون", "طابعه", "راوتر", "مقوي شبكه", "مودم", "ساعه ذكيه", "ابل واتش",
+      "iphone", "smartphone", "mobile", "ipad", "tablet", "samsung", "galaxy", "huawei", "xiaomi",
+      "airpods", "earbuds", "charger", "power bank", "pro max", "ultra", "laptop", "pc", "computer",
+      "macbook", "desktop", "gaming pc", "monitor", "keyboard", "mouse", "gpu", "cpu", "motherboard",
+      "ram", "ssd", "hdd", "power supply", "cooler", "dell", "hp", "asus", "lenovo", "acer", "msi",
+      "nvidia", "amd", "intel", "playstation", "ps4", "ps5", "xbox", "nintendo", "controller",
+      "speaker", "camera", "lens", "drone", "smartwatch", "apple watch", "tv", "television",
+      "router", "modem", "switch",
+    ],
   ],
+  // 6) الخدمات والمقاولات
   [
     DET_CATEGORIES.services,
-    /خدم[ةه]|خدمات|صيانة|تنظيف|نقل\s*عفش|تركيب|توصيل|سباك|كهربائي|نجار|دهان|\bservice\b|\bservices\b|repair|maintenance|movers|delivery/i,
+    [
+      "صيانه", "تصليح", "اصلاح", "تركيب", "صيانه افران", "كهربائي", "سباك", "نجار", "صباغ", "دهان",
+      "مقاولات", "بناء", "ترميم", "جبس", "عازل", "طربال", "واتر بروف", "سيراميك", "بلاط",
+      "صيانه مكيفات", "غسيل مكيفات", "المنيوم", "مظلات", "حداد", "تنظيف", "غسيل", "مكافحه حشرات",
+      "اباده", "نقل عفش", "فك وتركيب", "تغليف", "شحن", "ونش", "سطحه", "ريكفري", "تلميع سيارات",
+      "سمكره", "صبغ سيارات", "غسيل سيارات", "تخليص معاملات", "محاسبه", "تصميم", "برمجه", "طباعه",
+      "ترجمه", "دروس تقويه", "مدرس", "تدريس", "تصوير", "مصور", "تنسيق حفلات", "توصيل",
+      "repair", "maintenance", "fixing", "installation", "ac repair", "electrician", "plumber",
+      "carpenter", "painter", "construction", "contracting", "gypsum", "waterproofing", "tiles",
+      "welding", "aluminum", "cleaning", "washing", "pest control", "moving", "movers", "packers",
+      "packing", "shipping", "relocation", "towing", "recovery", "car polishing", "window tinting",
+      "denting", "car wash", "accounting", "design", "programming", "printing", "translation",
+      "tutoring", "photography", "events", "service", "services", "delivery", "clearance",
+    ],
   ],
+  // 7) الوظائف
   [
     DET_CATEGORIES.jobs,
-    /وظيف[ةه]|وظائف|مطلوب\s*موظف|مطلوب\s*عامل|مطلوب\s*عامل[ةه]|توظيف|سيرة\s*ذاتية|\bjob\b|\bjobs\b|hiring|vacancy/i,
+    [
+      "وظيفه", "وظائف", "مطلوب موظف", "مطلوب موظفه", "مطلوب عامل", "مطلوب عامله", "توظيف",
+      "سيره ذاتيه", "راتب", "دوام", "شاغر", "فرصه عمل",
+      "job", "jobs", "hiring", "vacancy", "recruitment", "cv", "salary", "full time", "part time",
+    ],
   ],
 ];
 
+// كلمات قصيرة قد تطابق ضمن كلمات أطول → نطابقها ككلمة مستقلة فقط لتفادي الإيجابيات الكاذبة.
+function buildMatcher(haystack: string): (kw: string) => boolean {
+  const tokens = new Set(haystack.split(/[^\p{L}\p{N}]+/u).filter(Boolean));
+  return (kw: string): boolean => {
+    const k = normalizeForMatch(kw);
+    if (!k) return false;
+    if (k.includes(" ")) return haystack.includes(k); // عبارة متعددة الكلمات
+    if (tokens.has(k)) return true; // مطابقة كلمة كاملة
+    return k.length >= 5 && haystack.includes(k); // جذور طويلة قد ترد ملتصقة
+  };
+}
+
 /**
- * STEP 3: returns the Arabic category. Falls back to "بضائع عامة" — never to
- * "عام وأخرى" or "سيارات" by default.
+ * STEP 3: يرجع التصنيف العربي بالاعتماد على القاموس الضخم.
+ * يحسب نقاط كل تصنيف ويختار الأعلى؛ عند التعادل يفوز الأعلى أولوية (ترتيب القاموس).
+ * الافتراضي «بضائع عامة» — لا يقع أبداً في عام بالخطأ إن وُجدت كلمة دالة.
  */
 export function classifyAd(rawText: string, explicit?: string | null): DetCategory {
-  const text = normDigits(`${explicit ?? ""} ${rawText ?? ""}`).toLowerCase();
+  const haystack = normalizeForMatch(`${explicit ?? ""} ${rawText ?? ""}`);
 
-  // explicit category mapping (only when it matches a known Arabic name)
+  // التصنيف الصريح القادم من المصدر له الأولوية (عند تطابقه مع اسم معروف).
   if (explicit) {
-    const e = explicit.toLowerCase();
+    const e = normalizeForMatch(explicit);
     if (/مطاع|معدات/.test(e)) return DET_CATEGORIES.equipment;
-    if (/سيار|مركب/.test(e)) return DET_CATEGORIES.cars;
+    if (/سيار|مركب|مركبات/.test(e)) return DET_CATEGORIES.cars;
     if (/عقار/.test(e)) return DET_CATEGORIES.realEstate;
-    if (/أثاث|اثاث/.test(e)) return DET_CATEGORIES.furniture;
-    if (/الكترون|إلكترون|كهرب/.test(e)) return DET_CATEGORIES.electronics;
-    if (/خدمات|خدمة/.test(e)) return DET_CATEGORIES.services;
-    if (/وظائف|وظيفة/.test(e)) return DET_CATEGORIES.jobs;
+    if (/اثاث/.test(e)) return DET_CATEGORIES.furniture;
+    if (/الكترون|كهرب|اجهزه/.test(e)) return DET_CATEGORIES.electronics;
+    if (/خدمات|خدمه/.test(e)) return DET_CATEGORIES.services;
+    if (/وظائف|وظيفه/.test(e)) return DET_CATEGORIES.jobs;
   }
 
-  for (const [cat, re] of CAT_KEYWORDS) {
-    if (re.test(text)) return cat;
+  const matches = buildMatcher(haystack);
+  let best: DetCategory = DET_CATEGORIES.general;
+  let bestScore = 0;
+  for (const [cat, words] of CAT_DICTIONARY) {
+    let score = 0;
+    for (const w of words) if (matches(w)) score += 1;
+    if (score > bestScore) {
+      bestScore = score;
+      best = cat;
+    }
   }
-  return DET_CATEGORIES.general; // bullet-proof fallback
+  return best;
 }
 
 // ───────────────────────── STEP 4 — title generation ─────────────────────────
