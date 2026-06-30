@@ -61,7 +61,6 @@ function AdminBlogPage() {
   const list = useServerFn(adminListPosts);
   const upsert = useServerFn(adminUpsertPost);
   const remove = useServerFn(adminDeletePost);
-  const generate = useServerFn(adminGenerateArticles);
 
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
