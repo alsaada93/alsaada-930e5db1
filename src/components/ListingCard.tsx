@@ -212,14 +212,6 @@ export function ListingCard({
         />
       )}
 
-      <ListingChatDialog
-        open={chatOpen}
-        onClose={() => setChatOpen(false)}
-        listingId={item.id}
-        listingTitle={item.title}
-        sellerId={item.userId ?? null}
-      />
-
       <SafetyModal
         open={safety != null}
         continueLabel={safety?.label ?? ""}
