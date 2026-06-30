@@ -92,8 +92,8 @@ export function HomeListingsRow({
           {items.map((item) => (
             <div
               key={item.id}
-              className="min-w-0 shrink-0 snap-start sm:w-[38%] lg:w-[23%]"
-              style={{ width: `${cardWidthPct ?? 62}%` }}
+              className="w-[var(--cw)] min-w-0 shrink-0 snap-start sm:w-[38%] lg:w-[23%]"
+              style={{ ["--cw" as string]: `${cardWidthPct ?? 62}%` }}
             >
               <ListingCard item={item} displayTitle={map[item.id]?.title} hideContact={hideContact} />
             </div>
