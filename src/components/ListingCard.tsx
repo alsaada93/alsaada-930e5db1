@@ -132,6 +132,7 @@ export function ListingCard({
           </span>
         </div>
 
+        {!hideContact && (
         <div className={`mt-3 grid gap-1.5 ${phone ? "grid-cols-3" : "grid-cols-1"}`}>
           {phone && waLink && (
             <button
