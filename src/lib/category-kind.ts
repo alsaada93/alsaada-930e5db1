@@ -22,3 +22,15 @@ export function categoryKind(name?: string | null, nameEn?: string | null): Cate
 export function showsCondition(name?: string | null, nameEn?: string | null): boolean {
   return categoryKind(name, nameEn) === "other";
 }
+
+/**
+ * وسم العقارات: «للإيجار» أو «للبيع» بدلاً من جديد/مستعمل.
+ * يُستنتج من نص الإعلان (العنوان/الوصف)؛ الافتراضي «للبيع».
+ */
+export function realEstateLabel(text?: string | null): { ar: string; en: string } {
+  const s = `${text ?? ""}`.toLowerCase();
+  if (/إيجار|ايجار|للايجار|للإيجار|تأجير|تاجير|for ?rent|rental|rent/.test(s)) {
+    return { ar: "للإيجار", en: "For Rent" };
+  }
+  return { ar: "للبيع", en: "For Sale" };
+}
