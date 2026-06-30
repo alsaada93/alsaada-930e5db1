@@ -270,6 +270,11 @@ const CAT_KEYWORDS: Array<[DetCategory, RegExp]> = [
     DET_CATEGORIES.cars,
     /\bسيارة\b|سيارات|تويوتا|هوندا|نيسان|لكزس|مرسيدس|بي\s*ام|هونداي|هيونداي|كيا|جيب|للبيع\s*سيارة|صالون|سيدان|\btoyota\b|\bnissan\b|\bhonda\b|\blexus\b|\bmercedes\b|\bbmw\b|\bkia\b|\bhyundai\b/i,
   ],
+  // Real estate BEFORE furniture so "غرفة/طاولة" inside a property ad don't pull it to furniture
+  [
+    DET_CATEGORIES.realEstate,
+    /عقار|عقارات|شق[ةه]|شقق|فيلا|فلل|فل[ةه]|بيت\s*للبيع|بيت\s*للايجار|منزل|أرض|ارض|للايجار|للإيجار|للبيع\s*أرض|للبيع\s*ارض|عمار[ةه]|ستوديو|استوديو|مستودع|مخزن|دور\s*أرضي|دور\s*علوي|سكني|تجاري\s*للايجار|\bapartment\b|\bvilla\b|\bstudio\b|\bflat\b|\bwarehouse\b|real\s*estate|\bproperty\b/i,
+  ],
   [
     DET_CATEGORIES.furniture,
     /أثاث|اثاث|سرير|كبت|دولاب|كراسي|كرسي|طاولة|صوفا|كنب|كنبة|مجلس|خزانة|\bbed\b|\bsofa\b|\bdining\b|\bwardrobe\b|\bcouch\b/i,
@@ -277,6 +282,14 @@ const CAT_KEYWORDS: Array<[DetCategory, RegExp]> = [
   [
     DET_CATEGORIES.electronics,
     /شاشة|تلفزيون|ايفون|آيفون|لابتوب|مكيف|ثلاجة(?!\s*عرض)|غسالة|جوال|موبايل|سماعة|كاميرا|تابلت|ايباد|بلايستيشن|\btv\b|\bmonitor\b|\biphone\b|\blaptop\b|\bsamsung\b|\bipad\b|\bplaystation\b|\bmacbook\b|\bdell\b|\bhp\b|\blenovo\b/i,
+  ],
+  [
+    DET_CATEGORIES.services,
+    /خدم[ةه]|خدمات|صيانة|تنظيف|نقل\s*عفش|تركيب|توصيل|سباك|كهربائي|نجار|دهان|\bservice\b|\bservices\b|repair|maintenance|movers|delivery/i,
+  ],
+  [
+    DET_CATEGORIES.jobs,
+    /وظيف[ةه]|وظائف|مطلوب\s*موظف|مطلوب\s*عامل|مطلوب\s*عامل[ةه]|توظيف|سيرة\s*ذاتية|\bjob\b|\bjobs\b|hiring|vacancy/i,
   ],
 ];
 
