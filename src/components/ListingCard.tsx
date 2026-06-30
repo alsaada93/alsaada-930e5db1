@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { MapPin, Eye, Star, BadgeCheck, MessageCircle, Phone, Tag } from "lucide-react";
 import { categories, type Listing } from "@/data/marketplace";
 import { showsCondition, categoryKind, realEstateLabel } from "@/lib/category-kind";
+import { isPriceOnRequest, priceOnRequestLabel } from "@/lib/price-display";
 import { displayCity } from "@/data/bahrainCities";
 import { useSellers } from "@/hooks/useSellers";
 import { useLanguage } from "@/hooks/useLanguage";
@@ -100,16 +101,17 @@ export function ListingCard({
           <h3 className="line-clamp-1 font-bold text-card-foreground hover:text-primary">{title}</h3>
         </Link>
         <div className="mt-1 flex items-baseline gap-1">
-          {item.price > 0 ? (
+          {!isPriceOnRequest(item.price) ? (
             <>
               <span className="text-lg font-extrabold text-primary">{item.price.toLocaleString("ar")}</span>
               <span className="text-xs font-semibold text-muted-foreground">د.ب</span>
               {item.negotiable && <span className="text-[11px] text-muted-foreground">• {t("card.negotiable")}</span>}
             </>
           ) : (
-            <span className="text-sm font-bold text-muted-foreground">بدون سعر</span>
+            <span className="text-sm font-bold text-primary">{priceOnRequestLabel(lang)}</span>
           )}
         </div>
+
 
         <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
           {verified && (
