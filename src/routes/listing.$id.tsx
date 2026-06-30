@@ -40,7 +40,7 @@ import { useViewBoost, boostViews } from "@/hooks/useViewBoost";
 import { countryByName } from "@/data/countries";
 import { cityCenter, displayCity } from "@/data/bahrainCities";
 import { brandInfo } from "@/data/brandsCatalog";
-import { showsCondition } from "@/lib/category-kind";
+import { showsCondition, categoryKind, realEstateLabel } from "@/lib/category-kind";
 import { listingRating, listingReviewCount } from "@/lib/rating";
 import { optimizedImage, optimizedSrcSet } from "@/lib/image-url";
 
@@ -651,6 +651,11 @@ function ListingPage() {
               {showsCondition(cat?.name, cat?.nameEn) && (
                 <span className="rounded-full bg-navy/80 px-2 py-0.5 text-[11px] font-semibold text-navy-foreground">
                   {item.condition}
+                </span>
+              )}
+              {categoryKind(cat?.name, cat?.nameEn) === "realestate" && (
+                <span className="rounded-full bg-navy/80 px-2 py-0.5 text-[11px] font-semibold text-navy-foreground">
+                  {realEstateLabel(`${item.title} ${item.description ?? ""}`).ar}
                 </span>
               )}
               {item.featured && (

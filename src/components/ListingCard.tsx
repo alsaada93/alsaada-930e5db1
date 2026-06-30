@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { MapPin, Eye, Star, BadgeCheck, MessageCircle, Phone, Tag } from "lucide-react";
 import { categories, type Listing } from "@/data/marketplace";
-import { showsCondition } from "@/lib/category-kind";
+import { showsCondition, categoryKind, realEstateLabel } from "@/lib/category-kind";
 import { displayCity } from "@/data/bahrainCities";
 import { useSellers } from "@/hooks/useSellers";
 import { useLanguage } from "@/hooks/useLanguage";
@@ -45,6 +45,8 @@ export function ListingCard({
   const condLabel = item.condition === "جديد" ? t("cond.new") : t("cond.used");
   const cat = categories.find((c) => c.id === item.categoryId || c.id === item.category);
   const showCond = showsCondition(cat?.name ?? item.category, cat?.nameEn);
+  const isRealEstate = categoryKind(cat?.name ?? item.category, cat?.nameEn) === "realestate";
+  const reLabel = realEstateLabel(`${item.title} ${item.description ?? ""}`);
 
   const waLink = phone ? whatsappLink({ phone, listingTitle: title, listingId: item.id }) : null;
 
@@ -84,6 +86,11 @@ export function ListingCard({
           {showCond && (
             <span className="absolute left-2 top-2 rounded-full bg-navy/80 px-2 py-0.5 text-[11px] font-semibold text-navy-foreground">
               {condLabel}
+            </span>
+          )}
+          {isRealEstate && (
+            <span className="absolute left-2 top-2 rounded-full bg-navy/80 px-2 py-0.5 text-[11px] font-semibold text-navy-foreground">
+              {lang === "en" ? reLabel.en : reLabel.ar}
             </span>
           )}
         </div>
