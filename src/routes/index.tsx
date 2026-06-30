@@ -69,6 +69,7 @@ function Index() {
             title={lang === "ar" ? "مطاعم وكافيهات" : "Restaurants & Cafes"}
             subtitle={lang === "ar" ? "أحدث معدات المطاعم والكافيهات" : "Latest restaurant equipment"}
             items={restaurant}
+            hideContact
             moreButton={
               <Link
                 to="/category/$id"
@@ -83,12 +84,13 @@ function Index() {
             title={t("sec.latest")}
             subtitle={t("sec.latestSub")}
             items={latest}
+            hideContact
             onLoadMore={() => loadMore()}
             loadingMore={loadingMore}
             hasMore={hasMore}
           />
           {featured.length > 0 && (
-            <ListingsSection title={t("sec.featured")} subtitle={t("sec.featuredSub")} items={featured} />
+            <ListingsSection title={t("sec.featured")} subtitle={t("sec.featuredSub")} items={featured} hideContact />
           )}
           
           <Testimonials />
