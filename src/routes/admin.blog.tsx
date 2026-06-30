@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useState } from "react";
-import { Plus, Trash2, Pencil, Loader2, Search, X, Eye, EyeOff, Sparkles } from "lucide-react";
+import { Plus, Trash2, Pencil, Loader2, Search, X, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,6 @@ import {
   adminListPosts,
   adminUpsertPost,
   adminDeletePost,
-  adminGenerateArticles,
   type BlogPost,
 } from "@/lib/blog.functions";
 
