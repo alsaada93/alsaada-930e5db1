@@ -176,19 +176,6 @@ function AdminBlogPage() {
             />
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <Button variant="secondary" onClick={generate100} disabled={genProgress !== null}>
-              {genProgress !== null ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  جاري التوليد… {genProgress}/100
-                </>
-              ) : (
-                <>
-                  <Sparkles className="h-4 w-4" />
-                  توليد 100 مقال
-                </>
-              )}
-            </Button>
             <Button onClick={() => setEditing({ ...EMPTY })}>
               <Plus className="h-4 w-4" />
               مقال جديد
