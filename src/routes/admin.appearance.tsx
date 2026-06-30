@@ -104,7 +104,7 @@ function IdentitySection() {
               <input type="file" accept="image/*" className="hidden" onChange={(e) => onUpload("logoUrl", e.target.files?.[0])} />
             </label>
             {draft.logoUrl && (
-              <button type="button" onClick={() => set("logoUrl", "")} className="text-xs text-destructive hover:underline">
+              <button type="button" onClick={() => { const prev = draft.logoUrl; set("logoUrl", ""); void deleteStorageImage(prev); }} className="text-xs text-destructive hover:underline">
                 إزالة
               </button>
             )}
