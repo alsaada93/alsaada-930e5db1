@@ -746,7 +746,7 @@ function ListingPage() {
 
             {/* السعر */}
             <div className="mt-4 flex flex-wrap items-baseline gap-2">
-              {item.price > 0 ? (
+              {!isPriceOnRequest(item.price) ? (
                 <>
                   <span className="text-3xl font-extrabold text-primary">{item.price.toLocaleString("ar")}</span>
                   <span className="text-sm font-semibold text-muted-foreground">د.ب</span>
@@ -763,9 +763,10 @@ function ListingPage() {
                   {item.negotiable && <span className="text-xs text-muted-foreground">• قابل للتفاوض</span>}
                 </>
               ) : (
-                <span className="text-2xl font-extrabold text-muted-foreground">بدون سعر</span>
+                <span className="text-2xl font-extrabold text-primary">{priceOnRequestLabel(lang)}</span>
               )}
             </div>
+
 
 
             <div className="mt-2 flex items-center gap-1 text-sm text-muted-foreground">
