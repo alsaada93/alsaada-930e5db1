@@ -616,6 +616,21 @@ function ListingPage() {
           )}
         </nav>
 
+        {/* أدوات الإدارة (للأدمن فقط) */}
+        {isAdmin && (
+          <AdminListingControls
+            item={{
+              id: item.id,
+              title: item.title,
+              price: item.price,
+              categoryId: item.categoryId,
+              status: item.status,
+            }}
+          />
+        )}
+
+
+
         {/* تحكّم المالك: تعديل وإعادة نشر */}
         {isOwner && (
           <div className="mb-4 flex flex-wrap items-center gap-2 rounded-2xl border border-primary/30 bg-accent/30 p-3">
