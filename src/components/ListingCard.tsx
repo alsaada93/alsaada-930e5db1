@@ -17,7 +17,16 @@ import { optimizedImage, optimizedSrcSet } from "@/lib/image-url";
 
 const DEFAULT_PHONE = "33982383"; // الرقم المحلي البحريني (قسم المطاعم فقط)
 
-export function ListingCard({ item, displayTitle }: { item: Listing; displayTitle?: string }) {
+export function ListingCard({
+  item,
+  displayTitle,
+  hideContact = false,
+}: {
+  item: Listing;
+  displayTitle?: string;
+  /** إخفاء أزرار التواصل (واتساب/اتصال/دردشة) — مستخدم في الصفحة الرئيسية */
+  hideContact?: boolean;
+}) {
   const { byId } = useSellers();
   const { t, lang } = useLanguage();
   const { boost } = useViewBoost();
