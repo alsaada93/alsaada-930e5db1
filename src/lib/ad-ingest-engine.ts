@@ -33,9 +33,12 @@ function stripEmojis(t: string): string {
 // Arabic display names for the deterministic category set.
 export const DET_CATEGORIES = {
   cars: "سيارات",
+  realEstate: "عقارات",
   furniture: "أثاث",
   electronics: "إلكترونيات",
   equipment: "معدات مطاعم",
+  services: "خدمات",
+  jobs: "وظائف",
   general: "بضائع عامة",
 } as const;
 
@@ -46,12 +49,18 @@ export function categoryToSlug(cat: DetCategory): FbCategorySlug {
   switch (cat) {
     case "سيارات":
       return "cars";
+    case "عقارات":
+      return "real_estate";
     case "أثاث":
       return "furniture";
     case "إلكترونيات":
       return "electronics";
     case "معدات مطاعم":
       return "equipment";
+    case "خدمات":
+      return "services";
+    case "وظائف":
+      return "jobs";
     default:
       return "other";
   }
