@@ -124,6 +124,18 @@ export interface IsolationResult {
 
 const PHONE_RE = /(?:\+|00)?(?:973)?[\s-]*([36](?:[\s-]*\d){7})\b/g;
 const YEAR_RE = /\b(19[8-9][0-9]|20[0-2][0-9])\b/g;
+
+// PART C.1 — أي تسلسل رقمي متصل طوله ≥ 7 خانات = رقم هاتف (يُتجاهل تماماً كسعر).
+const LONG_DIGIT_RE = /\d{7,}/g;
+
+// PART C.2 — واصمات مواصفات (تخزين/رام/شاشة/محرك/مساحة/موديل). أي رقم ملاصق لها ليس سعراً.
+// رقم ثم واصمة: 256gb, 55 بوصة, 2000cc, 150sqm, 16 رام
+const SPEC_NUM_UNIT_RE =
+  /(\d[\d.,]*)\s*(gb|tb|mb|ram|جيجا|قيقا|تيرا|تيرابايت|ميجا|رام|hz|هرتز|inch|بوصه|بوصة|cm|mm|سم|ملم|متر|meter|sqm|م2|قدم|kg|كيلو|كجم|cc|سيسي|سي\s?سي|liter|لتر|سلندر|cylinder|واط|watt|w|mp|ميجابكسل|بكسل|px)\b/giu;
+// واصمة محرك ثم رقم أو رقم ثم x: v8, 4x4, 2.0l
+const SPEC_MARKER_RE = /\b(v)\s?(\d{1,2})\b|\b(\d)\s?x\s?(\d)\b/gi;
+// موديل/سنة ثم رقم: موديل 2021, model 2015, سنة 2019
+const MODEL_YEAR_RE = /(موديل|model|سنه|سنة|year)\s*[:：]?\s*(19[89]\d|20[0-2]\d)/giu;
 // number THEN unit (e.g. "150,000 كم")
 const KM_AFTER_RE = /(\d{1,3}(?:,\d{3})*|\d{3,7})\s*(km\b|kms\b|كم|كيلو|كيلومتر)/i;
 // indicator THEN number (e.g. "ممشى 150000", "عداد 80,000")
@@ -158,6 +170,36 @@ export function isolateNumbers(rawText: string, isCarContext: boolean): Isolatio
     if (clean.length !== 8) continue;
     if (!contact_phone) contact_phone = clean;
     blacklistPhoneParts(clean, blacklist);
+  }
+
+  // A.1 — PART C.1: أي تسلسل رقمي ≥ 7 خانات (أرقام دولية/جوال) يُدرج بالكامل في القائمة السوداء.
+  LONG_DIGIT_RE.lastIndex = 0;
+  let ld: RegExpExecArray | null;
+  while ((ld = LONG_DIGIT_RE.exec(text)) !== null) {
+    const run = ld[0];
+    blacklist.add(run);
+    if (run.length === 8) {
+      blacklistPhoneParts(run, blacklist);
+      if (!contact_phone && /^[36]/.test(run)) contact_phone = run;
+    }
+  }
+
+  // A.2 — PART C.2: أرقام المواصفات (تخزين/رام/شاشة/مساحة/محرك/موديل) — تُتجاهل كأسعار دائماً.
+  SPEC_NUM_UNIT_RE.lastIndex = 0;
+  let su: RegExpExecArray | null;
+  while ((su = SPEC_NUM_UNIT_RE.exec(text)) !== null) {
+    blacklist.add(su[1]);
+    blacklist.add(su[1].replace(/[.,]/g, ""));
+  }
+  SPEC_MARKER_RE.lastIndex = 0;
+  let sm: RegExpExecArray | null;
+  while ((sm = SPEC_MARKER_RE.exec(text)) !== null) {
+    for (const g of [sm[2], sm[3], sm[4]]) if (g) blacklist.add(g);
+  }
+  MODEL_YEAR_RE.lastIndex = 0;
+  let my2: RegExpExecArray | null;
+  while ((my2 = MODEL_YEAR_RE.exec(text)) !== null) {
+    if (my2[2]) blacklist.add(my2[2]);
   }
 
   let model_year: number | null = null;
@@ -204,7 +246,7 @@ export function isolateNumbers(rawText: string, isCarContext: boolean): Isolatio
 // ───────────────────────── STEP 2 — strict price engine ─────────────────────────
 
 const FREE_RE = /(?:^|[^\p{L}])(مجانا|مجاناً|بلاش|free)(?:[^\p{L}]|$)/iu;
-const CURRENCY_BIND = "(?:bd|bhd|د\\.?\\s?ب|دينار|بحريني|السعر|مطلوب|بسعر)";
+const CURRENCY_BIND = "(?:bd|bhd|د\\.?\\s?ب|دينار|بحريني|السعر|سعر|مطلوب|بسعر|price|cost|\\$)";
 // number followed by currency, OR currency/keyword followed by number
 const PRICE_AFTER = new RegExp(`(\\d[\\d.,]*)\\s*${CURRENCY_BIND}`, "giu");
 const PRICE_BEFORE = new RegExp(`${CURRENCY_BIND}\\s*[:：]?\\s*(\\d[\\d.,]*)`, "giu");
