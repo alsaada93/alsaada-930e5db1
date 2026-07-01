@@ -7,11 +7,8 @@ import { Hero } from "@/components/Hero";
 import { CategoryGrid } from "@/components/CategoryGrid";
 import { PromoCarousel } from "@/components/PromoCarousel";
 import { HomeBanners } from "@/components/HomeBanners";
-// FeatureStrip removed per request — no marketing feature text on home page
 import { ListingsSection } from "@/components/ListingsSection";
-import { HomeListingsRow } from "@/components/HomeListingsRow";
-import { Link } from "@tanstack/react-router";
-// AuctionsSection removed per request — auctions discontinued
+import { HomeDynamicRow } from "@/components/HomeDynamicRow";
 import { BusinessSection } from "@/components/BusinessSection";
 import { Testimonials } from "@/components/Testimonials";
 import { Footer } from "@/components/Footer";
@@ -47,13 +44,12 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
-  const { t, lang } = useLanguage();
+  const { t } = useLanguage();
   const { layout } = useHomeLayout();
-  // احدث الاعلانات: نعرض العدد المحدد ثم نحمّل المزيد مع كل ضغطة على "عرض المزيد"
-  const { listings: latest, loadMore, loadingMore, hasMore } = useListings({ pageSize: layout.latestCount, onlyNormal: true });
-  // اخر إعلانات قسم المطاعم
-  const { listings: restaurant } = useListings({ pageSize: layout.restaurantCount, categoryId: "restaurant", onlyNormal: true });
+  // إعلانات مميزة (نجلب دفعة صغيرة ونفلتر المميّز منها)
+  const { listings: latest } = useListings({ pageSize: 24, onlyNormal: true });
   const featured = latest.filter((l) => l.featured);
+  const rows = (layout.rows ?? []).filter((r) => r.visible);
 
 
   return (
@@ -67,36 +63,11 @@ function Index() {
           {layout.showPromo && <PromoCarousel />}
           {layout.showCategories && <CategoryGrid />}
           {layout.showWeBuy && <WeBuyBanner />}
-          {layout.showRestaurantRow && (
-            <HomeListingsRow
-              title={lang === "ar" ? "مطاعم وكافيهات" : "Restaurants & Cafes"}
-              subtitle={lang === "ar" ? "أحدث معدات المطاعم والكافيهات" : "Latest restaurant equipment"}
-              items={restaurant}
-              hideContact
-              cardWidthPct={layout.cardWidthPct}
-              moreButton={
-                <Link
-                  to="/category/$id"
-                  params={{ id: "restaurant" }}
-                  className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-primary px-8 py-3 text-sm font-bold text-primary-foreground shadow-glow transition-opacity hover:opacity-90"
-                >
-                  {lang === "ar" ? "عرض المزيد من المطاعم" : "More restaurant ads"}
-                </Link>
-              }
-            />
-          )}
-          {layout.showLatestRow && (
-            <HomeListingsRow
-              title={t("sec.latest")}
-              subtitle={t("sec.latestSub")}
-              items={latest}
-              hideContact
-              cardWidthPct={layout.cardWidthPct}
-              onLoadMore={() => loadMore()}
-              loadingMore={loadingMore}
-              hasMore={hasMore}
-            />
-          )}
+
+          {rows.map((row) => (
+            <HomeDynamicRow key={row.id} row={row} />
+          ))}
+
           {layout.showFeatured && featured.length > 0 && (
             <ListingsSection title={t("sec.featured")} subtitle={t("sec.featuredSub")} items={featured} hideContact />
           )}
