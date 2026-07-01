@@ -246,7 +246,7 @@ export function isolateNumbers(rawText: string, isCarContext: boolean): Isolatio
 // ───────────────────────── STEP 2 — strict price engine ─────────────────────────
 
 const FREE_RE = /(?:^|[^\p{L}])(مجانا|مجاناً|بلاش|free)(?:[^\p{L}]|$)/iu;
-const CURRENCY_BIND = "(?:bd|bhd|د\\.?\\s?ب|دينار|بحريني|السعر|مطلوب|بسعر)";
+const CURRENCY_BIND = "(?:bd|bhd|د\\.?\\s?ب|دينار|بحريني|السعر|سعر|مطلوب|بسعر|price|cost|\\$)";
 // number followed by currency, OR currency/keyword followed by number
 const PRICE_AFTER = new RegExp(`(\\d[\\d.,]*)\\s*${CURRENCY_BIND}`, "giu");
 const PRICE_BEFORE = new RegExp(`${CURRENCY_BIND}\\s*[:：]?\\s*(\\d[\\d.,]*)`, "giu");
