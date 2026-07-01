@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
-import { ScanSearch, ChevronDown, ChevronUp, Search, AlertTriangle, CheckCircle2, Tag } from "lucide-react";
+import { ChevronDown, ChevronUp, Search, AlertTriangle, CheckCircle2, Tag } from "lucide-react";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
