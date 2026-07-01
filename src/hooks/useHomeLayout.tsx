@@ -1,6 +1,20 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
+/** صف إعلانات قابل للإضافة/الإخفاء في الصفحة الرئيسية. */
+export interface HomeRow {
+  id: string;
+  titleAr: string;
+  titleEn: string;
+  /** مصدر الإعلانات: أحدث الإعلانات، أو تصنيف محدد */
+  source: "latest" | "category";
+  /** معرّف التصنيف عندما يكون المصدر تصنيفاً */
+  categoryId?: string;
+  count: number;
+  cardWidthPct: number;
+  visible: boolean;
+}
+
 /** إعدادات تحكّم كامل بشكل الصفحة الرئيسية (يديرها الأدمن). */
 export interface HomeLayout {
   /** عدد إعلانات صف المطاعم */
@@ -18,7 +32,31 @@ export interface HomeLayout {
   showFeatured: boolean;
   showTestimonials: boolean;
   showBusiness: boolean;
+  /** صفوف إعلانات الصفحة الرئيسية (قابلة للإضافة والإخفاء والترتيب) */
+  rows: HomeRow[];
 }
+
+export const DEFAULT_HOME_ROWS: HomeRow[] = [
+  {
+    id: "restaurant",
+    titleAr: "مطاعم وكافيهات",
+    titleEn: "Restaurants & Cafes",
+    source: "category",
+    categoryId: "restaurant",
+    count: 10,
+    cardWidthPct: 62,
+    visible: true,
+  },
+  {
+    id: "latest",
+    titleAr: "أحدث الإعلانات",
+    titleEn: "Latest listings",
+    source: "latest",
+    count: 10,
+    cardWidthPct: 62,
+    visible: true,
+  },
+];
 
 export const DEFAULT_HOME_LAYOUT: HomeLayout = {
   restaurantCount: 6,
@@ -32,12 +70,17 @@ export const DEFAULT_HOME_LAYOUT: HomeLayout = {
   showFeatured: true,
   showTestimonials: true,
   showBusiness: true,
+  rows: DEFAULT_HOME_ROWS,
 };
 
 export const HOME_LAYOUT_KEY = "homeLayout";
 
 export function mergeHomeLayout(v: Partial<HomeLayout> | null | undefined): HomeLayout {
-  return { ...DEFAULT_HOME_LAYOUT, ...(v ?? {}) };
+  const merged = { ...DEFAULT_HOME_LAYOUT, ...(v ?? {}) };
+  if (!Array.isArray(merged.rows) || merged.rows.length === 0) {
+    merged.rows = DEFAULT_HOME_ROWS;
+  }
+  return merged;
 }
 
 interface HomeLayoutContextValue {

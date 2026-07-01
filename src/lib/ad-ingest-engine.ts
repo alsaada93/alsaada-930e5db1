@@ -414,20 +414,37 @@ const CAT_DICTIONARY: Array<[DetCategory, string[]]> = [
 ];
 
 // كلمات قصيرة قد تطابق ضمن كلمات أطول → نطابقها ككلمة مستقلة فقط لتفادي الإيجابيات الكاذبة.
-function buildMatcher(haystack: string): (kw: string) => boolean {
+// يرجع وزن المطابقة (0 = لا تطابق): العبارات متعددة الكلمات والجذور الطويلة إشارات أقوى.
+function buildMatcher(haystack: string): (kw: string) => number {
   const tokens = new Set(haystack.split(/[^\p{L}\p{N}]+/u).filter(Boolean));
-  return (kw: string): boolean => {
+  return (kw: string): number => {
     const k = normalizeForMatch(kw);
-    if (!k) return false;
-    if (k.includes(" ")) return haystack.includes(k); // عبارة متعددة الكلمات
-    if (tokens.has(k)) return true; // مطابقة كلمة كاملة
-    return k.length >= 5 && haystack.includes(k); // جذور طويلة قد ترد ملتصقة
+    if (!k) return 0;
+    if (k.includes(" ")) return haystack.includes(k) ? 3 : 0; // عبارة متعددة الكلمات = إشارة قوية
+    if (tokens.has(k)) return k.length >= 5 ? 2 : 1; // كلمة كاملة (أطول = أقوى)
+    return k.length >= 5 && haystack.includes(k) ? 1 : 0; // جذر طويل ملتصق
   };
 }
 
+// أولوية حسم التعادل: التصنيفات المحددة تتفوّق على العامة/الأثاث عند تساوي النقاط.
+const TIE_PRIORITY: DetCategory[] = [
+  DET_CATEGORIES.cars,
+  DET_CATEGORIES.realEstate,
+  DET_CATEGORIES.equipment,
+  DET_CATEGORIES.electronics,
+  DET_CATEGORIES.jobs,
+  DET_CATEGORIES.services,
+  DET_CATEGORIES.furniture,
+  DET_CATEGORIES.general,
+];
+const priorityOf = (c: DetCategory) => {
+  const i = TIE_PRIORITY.indexOf(c);
+  return i === -1 ? TIE_PRIORITY.length : i;
+};
+
 /**
  * STEP 3: يرجع التصنيف العربي بالاعتماد على القاموس الضخم.
- * يحسب نقاط كل تصنيف ويختار الأعلى؛ عند التعادل يفوز الأعلى أولوية (ترتيب القاموس).
+ * يحسب نقاط كل تصنيف (بأوزان) ويختار الأعلى؛ عند التعادل يفوز الأعلى أولوية.
  * الافتراضي «بضائع عامة» — لا يقع أبداً في عام بالخطأ إن وُجدت كلمة دالة.
  */
 export function classifyAd(rawText: string, explicit?: string | null): DetCategory {
@@ -450,8 +467,8 @@ export function classifyAd(rawText: string, explicit?: string | null): DetCatego
   let bestScore = 0;
   for (const [cat, words] of CAT_DICTIONARY) {
     let score = 0;
-    for (const w of words) if (matches(w)) score += 1;
-    if (score > bestScore) {
+    for (const w of words) score += matches(w);
+    if (score > bestScore || (score > 0 && score === bestScore && priorityOf(cat) < priorityOf(best))) {
       bestScore = score;
       best = cat;
     }

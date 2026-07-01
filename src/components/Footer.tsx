@@ -51,11 +51,11 @@ export function Footer() {
 
   return (
     <footer className="bg-navy text-navy-foreground">
-      <div className="mx-auto max-w-7xl px-4 py-8">
-        {/* روابط في صف واحد دائمًا */}
+      <div className="mx-auto max-w-5xl px-4 py-10 text-center">
+        {/* ثلاثة أقسام في الوسط */}
         <div className="grid grid-cols-3 gap-4">
           {cols.map((c) => (
-            <div key={c.title}>
+            <div key={c.title} className="flex flex-col items-center">
               <h4 className="mb-2 text-sm font-bold sm:text-base">{c.title}</h4>
               <ul className="space-y-1.5 text-xs text-navy-foreground/60 sm:text-sm">
                 {c.links.map((l) => (
@@ -70,44 +70,38 @@ export function Footer() {
           ))}
         </div>
 
-        {/* التواصل والوصف في صف أنيق مرتب */}
-        <div className="mt-8 flex flex-col items-start justify-between gap-4 border-t border-white/10 pt-6 sm:flex-row sm:items-center">
-          <div className="min-w-0">
-            <div className="text-base font-extrabold">
-              {lang === "ar" ? identity.nameEn : identity.nameAr}{" "}
-              <span className="text-navy-foreground/70">
-                | {lang === "ar" ? identity.nameAr : identity.nameEn}
-              </span>
-            </div>
-            <p className="mt-1 text-xs text-navy-foreground/70">{t("footer.tagline")}</p>
+        {/* الاسم والموقع والتواصل في الوسط */}
+        <div className="mt-10 flex flex-col items-center gap-3 border-t border-white/10 pt-8">
+          <div className="text-lg font-extrabold">
+            {lang === "ar" ? identity.nameAr : identity.nameEn}{" "}
+            <span className="text-navy-foreground/70">
+              | {lang === "ar" ? identity.nameEn : identity.nameAr}
+            </span>
           </div>
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-navy-foreground/70 sm:text-sm">
-            {(identity.locationAr || identity.locationEn) && (
-              <span className="flex items-center gap-1.5">
-                <MapPin className="h-4 w-4 shrink-0" />
-                {lang === "ar" ? identity.locationAr : identity.locationEn}
-              </span>
-            )}
-            {identity.contactPhone && (
-              <a href={`tel:${identity.contactPhone}`} className="flex items-center gap-1.5 hover:text-navy-foreground">
-                <Phone className="h-4 w-4 shrink-0" />
-                <span dir="ltr">{identity.contactPhone}</span>
-              </a>
-            )}
-            <a
-              href={instagram}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 rounded-lg bg-white/10 px-3 py-1.5 font-semibold transition-colors hover:bg-white/20"
-            >
-              <Instagram className="h-4 w-4 shrink-0" />
-              <span>{lang === "ar" ? "انستقرام" : "Instagram"}</span>
+          <div className="flex items-center gap-1.5 text-sm text-navy-foreground/80">
+            <MapPin className="h-4 w-4 shrink-0" />
+            {lang === "ar" ? "مملكة البحرين" : "Kingdom of Bahrain"}
+          </div>
+          {identity.contactPhone && (
+            <a href={`tel:${identity.contactPhone}`} className="flex items-center gap-1.5 text-sm text-navy-foreground/80 hover:text-navy-foreground">
+              <Phone className="h-4 w-4 shrink-0" />
+              <span dir="ltr">{identity.contactPhone}</span>
             </a>
-          </div>
+          )}
+          <a
+            href={instagram}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 rounded-lg bg-white/10 px-3 py-1.5 text-sm font-semibold transition-colors hover:bg-white/20"
+          >
+            <Instagram className="h-4 w-4 shrink-0" />
+            <span>{lang === "ar" ? "انستقرام" : "Instagram"}</span>
+          </a>
+          <p className="mt-1 max-w-md text-xs text-navy-foreground/60">{t("footer.tagline")}</p>
         </div>
       </div>
 
-      <div className="flex flex-col items-center justify-center gap-1 border-t border-sidebar-border py-3 text-center text-xs text-navy-foreground/50 sm:flex-row sm:gap-3">
+      <div className="flex flex-col items-center justify-center gap-1 border-t border-sidebar-border py-3 text-center text-xs text-navy-foreground/50">
         <span>© {new Date().getFullYear()} حراج السعادة Haraj Al Saada — {t("footer.rights")}</span>
       </div>
     </footer>
