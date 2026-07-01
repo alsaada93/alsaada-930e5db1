@@ -49,6 +49,7 @@ import { Route as AdminCategoriesRouteImport } from './routes/admin.categories'
 import { Route as AdminCalculatorRouteImport } from './routes/admin.calculator'
 import { Route as AdminBrandsRouteImport } from './routes/admin.brands'
 import { Route as AdminBlogRouteImport } from './routes/admin.blog'
+import { Route as AdminAuditRouteImport } from './routes/admin.audit'
 import { Route as AdminAuctionsRouteImport } from './routes/admin.auctions'
 import { Route as AdminAppearanceRouteImport } from './routes/admin.appearance'
 import { Route as AdminAccessRouteImport } from './routes/admin.access'
@@ -256,6 +257,11 @@ const AdminBlogRoute = AdminBlogRouteImport.update({
   path: '/blog',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminAuditRoute = AdminAuditRouteImport.update({
+  id: '/audit',
+  path: '/audit',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminAuctionsRoute = AdminAuctionsRouteImport.update({
   id: '/auctions',
   path: '/auctions',
@@ -311,6 +317,7 @@ export interface FileRoutesByFullPath {
   '/admin/access': typeof AdminAccessRoute
   '/admin/appearance': typeof AdminAppearanceRoute
   '/admin/auctions': typeof AdminAuctionsRoute
+  '/admin/audit': typeof AdminAuditRoute
   '/admin/blog': typeof AdminBlogRoute
   '/admin/brands': typeof AdminBrandsRoute
   '/admin/calculator': typeof AdminCalculatorRoute
@@ -358,6 +365,7 @@ export interface FileRoutesByTo {
   '/admin/access': typeof AdminAccessRoute
   '/admin/appearance': typeof AdminAppearanceRoute
   '/admin/auctions': typeof AdminAuctionsRoute
+  '/admin/audit': typeof AdminAuditRoute
   '/admin/blog': typeof AdminBlogRoute
   '/admin/brands': typeof AdminBrandsRoute
   '/admin/calculator': typeof AdminCalculatorRoute
@@ -407,6 +415,7 @@ export interface FileRoutesById {
   '/admin/access': typeof AdminAccessRoute
   '/admin/appearance': typeof AdminAppearanceRoute
   '/admin/auctions': typeof AdminAuctionsRoute
+  '/admin/audit': typeof AdminAuditRoute
   '/admin/blog': typeof AdminBlogRoute
   '/admin/brands': typeof AdminBrandsRoute
   '/admin/calculator': typeof AdminCalculatorRoute
@@ -457,6 +466,7 @@ export interface FileRouteTypes {
     | '/admin/access'
     | '/admin/appearance'
     | '/admin/auctions'
+    | '/admin/audit'
     | '/admin/blog'
     | '/admin/brands'
     | '/admin/calculator'
@@ -504,6 +514,7 @@ export interface FileRouteTypes {
     | '/admin/access'
     | '/admin/appearance'
     | '/admin/auctions'
+    | '/admin/audit'
     | '/admin/blog'
     | '/admin/brands'
     | '/admin/calculator'
@@ -552,6 +563,7 @@ export interface FileRouteTypes {
     | '/admin/access'
     | '/admin/appearance'
     | '/admin/auctions'
+    | '/admin/audit'
     | '/admin/blog'
     | '/admin/brands'
     | '/admin/calculator'
@@ -891,6 +903,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminBlogRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/audit': {
+      id: '/admin/audit'
+      path: '/audit'
+      fullPath: '/admin/audit'
+      preLoaderRoute: typeof AdminAuditRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/auctions': {
       id: '/admin/auctions'
       path: '/auctions'
@@ -940,6 +959,7 @@ interface AdminRouteChildren {
   AdminAccessRoute: typeof AdminAccessRoute
   AdminAppearanceRoute: typeof AdminAppearanceRoute
   AdminAuctionsRoute: typeof AdminAuctionsRoute
+  AdminAuditRoute: typeof AdminAuditRoute
   AdminBlogRoute: typeof AdminBlogRoute
   AdminBrandsRoute: typeof AdminBrandsRoute
   AdminCalculatorRoute: typeof AdminCalculatorRoute
@@ -960,6 +980,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminAccessRoute: AdminAccessRoute,
   AdminAppearanceRoute: AdminAppearanceRoute,
   AdminAuctionsRoute: AdminAuctionsRoute,
+  AdminAuditRoute: AdminAuditRoute,
   AdminBlogRoute: AdminBlogRoute,
   AdminBrandsRoute: AdminBrandsRoute,
   AdminCalculatorRoute: AdminCalculatorRoute,
