@@ -172,6 +172,36 @@ export function isolateNumbers(rawText: string, isCarContext: boolean): Isolatio
     blacklistPhoneParts(clean, blacklist);
   }
 
+  // A.1 — PART C.1: أي تسلسل رقمي ≥ 7 خانات (أرقام دولية/جوال) يُدرج بالكامل في القائمة السوداء.
+  LONG_DIGIT_RE.lastIndex = 0;
+  let ld: RegExpExecArray | null;
+  while ((ld = LONG_DIGIT_RE.exec(text)) !== null) {
+    const run = ld[0];
+    blacklist.add(run);
+    if (run.length === 8) {
+      blacklistPhoneParts(run, blacklist);
+      if (!contact_phone && /^[36]/.test(run)) contact_phone = run;
+    }
+  }
+
+  // A.2 — PART C.2: أرقام المواصفات (تخزين/رام/شاشة/مساحة/محرك/موديل) — تُتجاهل كأسعار دائماً.
+  SPEC_NUM_UNIT_RE.lastIndex = 0;
+  let su: RegExpExecArray | null;
+  while ((su = SPEC_NUM_UNIT_RE.exec(text)) !== null) {
+    blacklist.add(su[1]);
+    blacklist.add(su[1].replace(/[.,]/g, ""));
+  }
+  SPEC_MARKER_RE.lastIndex = 0;
+  let sm: RegExpExecArray | null;
+  while ((sm = SPEC_MARKER_RE.exec(text)) !== null) {
+    for (const g of [sm[2], sm[3], sm[4]]) if (g) blacklist.add(g);
+  }
+  MODEL_YEAR_RE.lastIndex = 0;
+  let my2: RegExpExecArray | null;
+  while ((my2 = MODEL_YEAR_RE.exec(text)) !== null) {
+    if (my2[2]) blacklist.add(my2[2]);
+  }
+
   let model_year: number | null = null;
   let mileage: number | null = null;
   let engine_capacity: string | null = null;
