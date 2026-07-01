@@ -1,6 +1,20 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
+/** صف إعلانات قابل للإضافة/الإخفاء في الصفحة الرئيسية. */
+export interface HomeRow {
+  id: string;
+  titleAr: string;
+  titleEn: string;
+  /** مصدر الإعلانات: أحدث الإعلانات، أو تصنيف محدد */
+  source: "latest" | "category";
+  /** معرّف التصنيف عندما يكون المصدر تصنيفاً */
+  categoryId?: string;
+  count: number;
+  cardWidthPct: number;
+  visible: boolean;
+}
+
 /** إعدادات تحكّم كامل بشكل الصفحة الرئيسية (يديرها الأدمن). */
 export interface HomeLayout {
   /** عدد إعلانات صف المطاعم */
