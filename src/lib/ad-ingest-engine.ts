@@ -642,3 +642,195 @@ export function runIngestEngine(rawText: string, explicitCategory?: string | nul
     title,
   };
 }
+
+// ───────────────────────── AUDIT / EXPLAIN ─────────────────────────
+
+export interface CategoryScore {
+  category: DetCategory;
+  slug: FbCategorySlug;
+  score: number;
+  priority: number;
+  matchedKeywords: string[];
+}
+
+export interface BlacklistItem {
+  value: string;
+  reason: string;
+}
+
+export interface PriceExplain {
+  price: number;
+  detected: boolean;
+  free: boolean;
+  reason: string;
+  currencyMatches: string[];
+  ignored: BlacklistItem[];
+}
+
+export interface CategoryExplain {
+  winner: DetCategory;
+  winnerSlug: FbCategorySlug;
+  winnerScore: number;
+  explicitOverride: string | null;
+  tieBreak: boolean;
+  runnerUp: { category: DetCategory; score: number } | null;
+  scores: CategoryScore[];
+}
+
+export interface IngestExplain {
+  result: EngineResult;
+  category: CategoryExplain;
+  price: PriceExplain;
+  normalizedText: string;
+}
+
+/**
+ * سجل تدقيق شفاف: يشرح لماذا صُنِّف الإعلان (نقاط كل تصنيف + الكلمات المطابِقة +
+ * حسم التعادل) ولماذا اعتُبر السعر صفراً/مجانياً أو كيف استُنتج رقمه (اقتران بعملة
+ * + الأرقام المستبعدة كهاتف/موديل/مواصفات).
+ * دالة نقية آمنة على العميل والخادم — تعتمد على نفس منطق runIngestEngine بالضبط.
+ */
+export function explainIngest(rawText: string, explicitCategory?: string | null): IngestExplain {
+  const text = rawText ?? "";
+  const haystack = normalizeForMatch(`${explicitCategory ?? ""} ${text}`);
+
+  // ── تفصيل نقاط التصنيف ──
+  const scores: CategoryScore[] = [];
+  const matcher = buildMatcher(haystack);
+  for (const [cat, words] of CAT_DICTIONARY) {
+    let score = 0;
+    const matchedKeywords: string[] = [];
+    for (const w of words) {
+      const wt = matcher(w);
+      if (wt > 0) {
+        score += wt;
+        matchedKeywords.push(w);
+      }
+    }
+    scores.push({
+      category: cat,
+      slug: categoryToSlug(cat),
+      score,
+      priority: priorityOf(cat),
+      matchedKeywords,
+    });
+  }
+
+  // نفس منطق classifyAd للحصول على الفائز الفعلي (يشمل التجاوز الصريح).
+  const winner = classifyAd(text, explicitCategory);
+  const winnerScoreEntry = scores.find((s) => s.category === winner);
+  const winnerScore = winnerScoreEntry?.score ?? 0;
+
+  // هل حُسم عبر الأولوية (تعادل نقاط) أم عبر تجاوز صريح؟
+  let explicitOverride: string | null = null;
+  if (explicitCategory) {
+    const e = normalizeForMatch(explicitCategory);
+    if (/مطاع|معدات|سيار|مركب|مركبات|عقار|اثاث|الكترون|كهرب|اجهزه|خدمات|خدمه|وظائف|وظيفه/.test(e)) {
+      explicitOverride = explicitCategory;
+    }
+  }
+
+  const sorted = [...scores].sort((a, b) => b.score - a.score || a.priority - b.priority);
+  const topScore = sorted[0]?.score ?? 0;
+  const tiedAtTop = sorted.filter((s) => s.score === topScore && topScore > 0);
+  const tieBreak = !explicitOverride && tiedAtTop.length > 1;
+  const runnerUp =
+    sorted.length > 1 && sorted[1].score > 0
+      ? { category: sorted[1].category, score: sorted[1].score }
+      : null;
+
+  // ── تفصيل السعر ──
+  const isCar = winner === DET_CATEGORIES.cars;
+  const iso = isolateNumbers(text, isCar);
+  const priceRes = extractStrictPrice(text, iso.blacklist);
+  const normText = normDigits(text);
+
+  const ignored: BlacklistItem[] = [];
+  const seen = new Set<string>();
+  const addIgnored = (value: string, reason: string) => {
+    if (!value || seen.has(value)) return;
+    seen.add(value);
+    ignored.push({ value, reason });
+  };
+
+  PHONE_RE.lastIndex = 0;
+  let pm: RegExpExecArray | null;
+  while ((pm = PHONE_RE.exec(normText)) !== null) {
+    const clean = pm[1].replace(/[\s-]/g, "");
+    if (clean.length === 8) addIgnored(clean, "رقم هاتف (8 خانات)");
+  }
+  LONG_DIGIT_RE.lastIndex = 0;
+  let lm: RegExpExecArray | null;
+  while ((lm = LONG_DIGIT_RE.exec(normText)) !== null) {
+    addIgnored(lm[0], "تسلسل رقمي طويل (≥7 خانات) — يُعامل كرقم تواصل");
+  }
+  SPEC_NUM_UNIT_RE.lastIndex = 0;
+  let sm: RegExpExecArray | null;
+  while ((sm = SPEC_NUM_UNIT_RE.exec(normText)) !== null) {
+    addIgnored(sm[1], `رقم مواصفات ملاصق للوحدة "${sm[2]}"`);
+  }
+  MODEL_YEAR_RE.lastIndex = 0;
+  let mym: RegExpExecArray | null;
+  while ((mym = MODEL_YEAR_RE.exec(normText)) !== null) {
+    if (mym[2]) addIgnored(mym[2], `سنة موديل بعد "${mym[1]}"`);
+  }
+  if (isCar) {
+    YEAR_RE.lastIndex = 0;
+    let ym: RegExpExecArray | null;
+    while ((ym = YEAR_RE.exec(normText)) !== null) {
+      addIgnored(ym[1], "سنة صنع (سياق سيارة)");
+    }
+    const kmA = normText.match(KM_AFTER_RE);
+    const kmB = normText.match(KM_BEFORE_RE);
+    const kmRaw = kmA?.[1] ?? kmB?.[2];
+    if (kmRaw) addIgnored(kmRaw.replace(/,/g, ""), "ممشى/عداد السيارة");
+  }
+
+  // مطابقات العملة/كلمات السعر التي أدّت لالتقاط الرقم.
+  const currencyMatches: string[] = [];
+  for (const re of [PRICE_AFTER, PRICE_BEFORE]) {
+    re.lastIndex = 0;
+    let cm: RegExpExecArray | null;
+    while ((cm = re.exec(normText)) !== null) {
+      const frag = cm[0].trim();
+      if (frag && !currencyMatches.includes(frag)) currencyMatches.push(frag);
+    }
+  }
+
+  let reason: string;
+  if (priceRes.free) {
+    reason = "الإعلان يحتوي كلمة تدل على المجانية (مجاناً/بلاش/free) → السعر 0.";
+  } else if (priceRes.detected) {
+    reason = `تم العثور على رقم مقترن بعملة/كلمة سعر: "${currencyMatches[0] ?? priceRes.price}" → السعر ${priceRes.price}.`;
+  } else if (currencyMatches.length > 0) {
+    reason =
+      "وُجد رقم قرب كلمة سعر لكنه استُبعد (مدرج ضمن القائمة السوداء كهاتف/موديل/مواصفات أو تجاوز 50000) → بدون سعر (تواصل لمعرفة السعر).";
+  } else {
+    reason =
+      "لا يوجد أي رقم مقترن بعملة بحرينية (bd/دينار/د.ب) أو كلمة سعر → بدون سعر (تواصل لمعرفة السعر).";
+  }
+
+  const result = runIngestEngine(text, explicitCategory);
+
+  return {
+    result,
+    category: {
+      winner,
+      winnerSlug: categoryToSlug(winner),
+      winnerScore,
+      explicitOverride,
+      tieBreak,
+      runnerUp,
+      scores: sorted,
+    },
+    price: {
+      price: priceRes.price,
+      detected: priceRes.detected,
+      free: priceRes.free,
+      reason,
+      currencyMatches,
+      ignored,
+    },
+    normalizedText: haystack,
+  };
+}
