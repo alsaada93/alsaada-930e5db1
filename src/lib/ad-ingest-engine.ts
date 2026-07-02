@@ -916,6 +916,7 @@ export function explainIngest(rawText: string, explicitCategory?: string | null)
       reason,
       currencyMatches,
       ignored,
+      candidates,
     },
     normalizedText: haystack,
   };
