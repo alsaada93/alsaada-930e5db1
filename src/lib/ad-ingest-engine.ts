@@ -880,14 +880,17 @@ export function explainIngest(rawText: string, explicitCategory?: string | null)
     }
   }
 
+  // مرشحو السعر بالنقاط (أعلى مرشح هو المختار).
+  const candidates = scorePriceCandidates(text, iso.blacklist);
+  const best = candidates[0];
+
   let reason: string;
   if (priceRes.free) {
     reason = "الإعلان يحتوي كلمة تدل على المجانية (مجاناً/بلاش/free) → السعر 0.";
-  } else if (priceRes.detected) {
-    reason = `تم العثور على رقم مقترن بعملة/كلمة سعر: "${currencyMatches[0] ?? priceRes.price}" → السعر ${priceRes.price}.`;
-  } else if (currencyMatches.length > 0) {
-    reason =
-      "وُجد رقم قرب كلمة سعر لكنه استُبعد (مدرج ضمن القائمة السوداء كهاتف/موديل/مواصفات أو تجاوز 50000) → بدون سعر (تواصل لمعرفة السعر).";
+  } else if (priceRes.detected && best) {
+    reason = `أعلى مرشح نقاطاً: «${best.token}» (${best.score} نقطة — ${best.reasons.join("، ")}) → السعر ${priceRes.price}.`;
+  } else if (best) {
+    reason = `أفضل رقم «${best.token}» حصل على ${best.score} نقطة فقط (أقل من الحد 3) → لا دلالة سعر كافية → بدون سعر (تواصل لمعرفة السعر).`;
   } else {
     reason =
       "لا يوجد أي رقم مقترن بعملة بحرينية (bd/دينار/د.ب) أو كلمة سعر → بدون سعر (تواصل لمعرفة السعر).";
