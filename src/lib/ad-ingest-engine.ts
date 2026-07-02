@@ -243,13 +243,21 @@ export function isolateNumbers(rawText: string, isCarContext: boolean): Isolatio
   return { contact_phone, model_year, mileage, engine_capacity, blacklist };
 }
 
-// ───────────────────────── STEP 2 — strict price engine ─────────────────────────
+// ───────────────────────── STEP 2 — scored price engine ─────────────────────────
 
 const FREE_RE = /(?:^|[^\p{L}])(مجانا|مجاناً|بلاش|free)(?:[^\p{L}]|$)/iu;
 const CURRENCY_BIND = "(?:bd|bhd|د\\.?\\s?ب|دينار|بحريني|السعر|سعر|مطلوب|بسعر|price|cost|\\$)";
 // number followed by currency, OR currency/keyword followed by number
 const PRICE_AFTER = new RegExp(`(\\d[\\d.,]*)\\s*${CURRENCY_BIND}`, "giu");
 const PRICE_BEFORE = new RegExp(`${CURRENCY_BIND}\\s*[:：]?\\s*(\\d[\\d.,]*)`, "giu");
+
+// أنماط دلالة السعر لاحتساب النقاط
+const CUR_STRONG = /(bd|bhd|د\.?\s?ب|دينار|بحريني)/i; // عملة صريحة
+const CUR_WEAK = /\$|price|cost/i; // إشارة عملة أضعف/أجنبية
+const PRICE_WORD = /(السعر|سعر|مطلوب|بسعر|للبيع|بـ|ب)\s*[:：]?\s*$/i; // كلمة سعر قبل الرقم مباشرة
+
+// كل الأرقام في النص (لمسح المرشحين وتسجيل النقاط)
+const ANY_NUM_RE = /\d[\d.,]*/g;
 
 /** "4,500"→4500 ; "4500.000"→4500 ; "4.500"→4.5 */
 function parsePriceNum(tok: string): number | null {
@@ -268,35 +276,109 @@ export interface PriceResult {
   free: boolean;
 }
 
+export interface PriceCandidate {
+  value: number;
+  token: string;
+  score: number;
+  reasons: string[];
+  index: number;
+}
+
 /**
- * STEP 2: strict, currency-bound price extraction.
- *  - explicit "free" words → 0
- *  - number must be bound to a Bahraini currency / price keyword
- *  - blacklisted numbers (phone/year/mileage parts) are ignored
- *  - numbers > 50000 are ignored
- *  - nothing found → 0 (i.e. "000", no price)
+ * يُقيّم كل رقم في النص ويعطيه نقاطاً حسب دلالته على السعر (مثل محرك التصنيف):
+ *  - عملة بحرينية ملاصقة بعد الرقم / قبله (أقوى إشارة)
+ *  - كلمة «سعر/السعر/مطلوب/بسعر» قبله مباشرة
+ *  - صيغة الفلس العشرية (مثل 4.500) — شائعة في الأسعار البحرينية
+ *  - المدى المعقول للسعر
+ * الأرقام المدرجة في القائمة السوداء (هاتف/موديل/ممشى/مواصفات) تُستبعد تماماً.
+ * يُرجع المرشحين مرتّبين تنازلياً حسب النقاط ثم حسب القرب من بداية النص.
+ */
+export function scorePriceCandidates(rawText: string, blacklist: Set<string>): PriceCandidate[] {
+  const text = normDigits(rawText ?? "");
+  const out: PriceCandidate[] = [];
+
+  ANY_NUM_RE.lastIndex = 0;
+  let m: RegExpExecArray | null;
+  while ((m = ANY_NUM_RE.exec(text)) !== null) {
+    const tok = m[0];
+    const start = m.index;
+    const end = start + tok.length;
+    const digitsOnly = tok.replace(/[^\d]/g, "");
+    if (!digitsOnly) continue;
+    if (blacklist.has(digitsOnly) || blacklist.has(tok)) continue; // مستبعد
+
+    const n = parsePriceNum(tok);
+    if (n === null || n <= 0) continue;
+
+    const before = text.slice(Math.max(0, start - 14), start);
+    const after = text.slice(end, end + 10);
+
+    let score = 0;
+    const reasons: string[] = [];
+
+    // عملة/كلمة سعر ملاصقة بعد الرقم (أقوى إشارة): "150 د.ب" / "150 bd"
+    if (CUR_STRONG.test(after.trimStart().slice(0, 6))) {
+      score += 6;
+      reasons.push("عملة بحرينية ملاصقة بعد الرقم");
+    } else if (CUR_STRONG.test(after)) {
+      score += 3;
+      reasons.push("عملة بحرينية قريبة بعد الرقم");
+    }
+
+    // كلمة سعر مباشرة قبل الرقم: "السعر: 150"
+    if (PRICE_WORD.test(before)) {
+      score += 5;
+      reasons.push("كلمة سعر قبل الرقم مباشرة");
+    }
+    // عملة صريحة قبل الرقم: "د.ب 150"
+    if (CUR_STRONG.test(before)) {
+      score += 3;
+      reasons.push("عملة بحرينية قبل الرقم");
+    }
+    // إشارة عملة أضعف/أجنبية
+    if (CUR_WEAK.test(after) || CUR_WEAK.test(before)) {
+      score += 2;
+      reasons.push("إشارة سعر/عملة أجنبية قريبة");
+    }
+
+    // صيغة الفلس العشرية البحرينية (3 خانات بعد الفاصلة): 4.500 / 12.750
+    if (/^\d+\.\d{3}$/.test(tok)) {
+      score += 2;
+      reasons.push("صيغة الفلس العشرية (xxx.000)");
+    }
+
+    // معقولية المدى
+    if (n >= 1 && n <= 50000) {
+      score += 1;
+      reasons.push("ضمن المدى المعقول للسعر");
+    } else if (n > 50000) {
+      score -= 4;
+      reasons.push("قيمة مبالغ فيها (>50000)");
+    }
+
+    out.push({ value: n, token: tok, score, reasons, index: start });
+  }
+
+  // ترتيب: الأعلى نقاطاً أولاً، ثم الأقرب لبداية النص
+  out.sort((a, b) => b.score - a.score || a.index - b.index);
+  return out;
+}
+
+/**
+ * STEP 2: استخراج السعر بنظام النقاط.
+ *  - كلمات المجانية → 0 (free)
+ *  - يُختار أعلى مرشح نقاطاً، ويشترط وجود دلالة سعر فعلية (نقاط ≥ 3)
+ *    أي اقتران بعملة/كلمة سعر — الأرقام المجرّدة لا تُعتبر سعراً.
+ *  - لا مرشح مؤهّل → بدون سعر (تواصل لمعرفة السعر).
  */
 export function extractStrictPrice(rawText: string, blacklist: Set<string>): PriceResult {
   const text = normDigits(rawText ?? "");
   if (FREE_RE.test(text)) return { price: 0, detected: true, free: true };
 
-  const candidates: number[] = [];
-  for (const re of [PRICE_AFTER, PRICE_BEFORE]) {
-    re.lastIndex = 0;
-    let m: RegExpExecArray | null;
-    while ((m = re.exec(text)) !== null) {
-      const tok = m[1];
-      const digitsOnly = tok.replace(/[^\d]/g, "");
-      if (!digitsOnly) continue;
-      if (blacklist.has(digitsOnly) || blacklist.has(tok)) continue; // blacklisted
-      const n = parsePriceNum(tok);
-      if (n === null || n <= 0) continue;
-      if (n > 50000) continue; // implausible price
-      candidates.push(n);
-    }
-  }
-
-  if (candidates.length) return { price: candidates[0], detected: true, free: false };
+  const candidates = scorePriceCandidates(text, blacklist);
+  const best = candidates[0];
+  // نشترط دلالة سعر واضحة (اقتران بعملة أو كلمة سعر) — الحد الأدنى 3 نقاط
+  if (best && best.score >= 3) return { price: best.value, detected: true, free: false };
   return { price: 0, detected: false, free: false };
 }
 
@@ -665,6 +747,7 @@ export interface PriceExplain {
   reason: string;
   currencyMatches: string[];
   ignored: BlacklistItem[];
+  candidates: PriceCandidate[];
 }
 
 export interface CategoryExplain {
@@ -797,14 +880,17 @@ export function explainIngest(rawText: string, explicitCategory?: string | null)
     }
   }
 
+  // مرشحو السعر بالنقاط (أعلى مرشح هو المختار).
+  const candidates = scorePriceCandidates(text, iso.blacklist);
+  const best = candidates[0];
+
   let reason: string;
   if (priceRes.free) {
     reason = "الإعلان يحتوي كلمة تدل على المجانية (مجاناً/بلاش/free) → السعر 0.";
-  } else if (priceRes.detected) {
-    reason = `تم العثور على رقم مقترن بعملة/كلمة سعر: "${currencyMatches[0] ?? priceRes.price}" → السعر ${priceRes.price}.`;
-  } else if (currencyMatches.length > 0) {
-    reason =
-      "وُجد رقم قرب كلمة سعر لكنه استُبعد (مدرج ضمن القائمة السوداء كهاتف/موديل/مواصفات أو تجاوز 50000) → بدون سعر (تواصل لمعرفة السعر).";
+  } else if (priceRes.detected && best) {
+    reason = `أعلى مرشح نقاطاً: «${best.token}» (${best.score} نقطة — ${best.reasons.join("، ")}) → السعر ${priceRes.price}.`;
+  } else if (best) {
+    reason = `أفضل رقم «${best.token}» حصل على ${best.score} نقطة فقط (أقل من الحد 3) → لا دلالة سعر كافية → بدون سعر (تواصل لمعرفة السعر).`;
   } else {
     reason =
       "لا يوجد أي رقم مقترن بعملة بحرينية (bd/دينار/د.ب) أو كلمة سعر → بدون سعر (تواصل لمعرفة السعر).";
@@ -830,6 +916,7 @@ export function explainIngest(rawText: string, explicitCategory?: string | null)
       reason,
       currencyMatches,
       ignored,
+      candidates,
     },
     normalizedText: haystack,
   };

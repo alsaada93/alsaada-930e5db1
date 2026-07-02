@@ -76,6 +76,20 @@ function ExplainCard({ ex }: { ex: IngestExplain }) {
             </span>
           </div>
           <div>{ex.price.reason}</div>
+          {ex.price.candidates.length > 0 && (
+            <div className="mt-2">
+              <div className="mb-1 font-medium text-foreground">مرشحو السعر (بالنقاط):</div>
+              <div className="space-y-1">
+                {ex.price.candidates.slice(0, 6).map((c, i) => (
+                  <div key={i} className="flex items-start gap-2">
+                    <span className="w-16 shrink-0 font-mono">{c.token}</span>
+                    <span className="w-10 shrink-0 tabular-nums">{c.score}</span>
+                    <span className="text-xs">{c.reasons.join("، ")}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
           {ex.price.currencyMatches.length > 0 && (
             <div>مطابقات العملة: {ex.price.currencyMatches.slice(0, 5).join(" | ")}</div>
           )}
