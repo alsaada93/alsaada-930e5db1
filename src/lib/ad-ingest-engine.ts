@@ -747,6 +747,7 @@ export interface PriceExplain {
   reason: string;
   currencyMatches: string[];
   ignored: BlacklistItem[];
+  candidates: PriceCandidate[];
 }
 
 export interface CategoryExplain {
