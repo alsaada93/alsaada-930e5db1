@@ -298,6 +298,14 @@ function AdminCategoriesPage() {
                       <ChevronDown className="h-4 w-4" />
                     </button>
                     <button
+                      onClick={() => toggleHidden(c.id)}
+                      className={`rounded-lg p-1.5 hover:bg-accent ${c.hidden ? "text-muted-foreground" : "text-primary"}`}
+                      aria-label={c.hidden ? "إظهار" : "إخفاء"}
+                      title={c.hidden ? "إظهار التصنيف في الصفحة الرئيسية" : "إخفاء التصنيف من الصفحة الرئيسية"}
+                    >
+                      {c.hidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                    <button
                       onClick={() => renameCat(c.id)}
                       className="rounded-lg p-1.5 text-primary hover:bg-accent"
                       aria-label="تعديل"
