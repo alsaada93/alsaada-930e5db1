@@ -163,9 +163,14 @@ export const Route = createFileRoute("/listing/$id")({
             offers: {
               "@type": "Offer",
               price: String(
-                loaderData?.item.listingType === "auction"
-                  ? (loaderData?.item.startPrice ?? loaderData?.item.price ?? 0)
-                  : (loaderData?.item.price ?? 0),
+                (() => {
+                  const p =
+                    loaderData?.item.listingType === "auction"
+                      ? (loaderData?.item.startPrice ?? loaderData?.item.price ?? 0)
+                      : (loaderData?.item.price ?? 0);
+                  // المنتجات بلا سعر تُنشر بسعر 1 دينار في الكود البنيوي لتفادي أخطاء المنتج في محركات البحث
+                  return p > 0 ? p : 1;
+                })(),
               ),
               priceCurrency: "BHD",
               url,
