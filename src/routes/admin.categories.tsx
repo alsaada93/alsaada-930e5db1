@@ -12,6 +12,8 @@ import {
   ImagePlus,
   X,
   Smile,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { toast } from "sonner";
 import { AdminHeader } from "@/components/admin/AdminHeader";
