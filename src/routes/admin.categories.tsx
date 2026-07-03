@@ -244,7 +244,14 @@ function AdminCategoriesPage() {
                     />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <h3 className="font-bold text-card-foreground">{c.name}</h3>
+                    <h3 className="flex items-center gap-2 font-bold text-card-foreground">
+                      {c.name}
+                      {c.hidden && (
+                        <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
+                          مخفي
+                        </span>
+                      )}
+                    </h3>
                     <p className="truncate text-xs text-muted-foreground">
                       {c.groups.length} تصنيف فرعي
                     </p>
