@@ -130,6 +130,8 @@ function AdminCategoriesPage() {
     }
   };
   const clearIcon = (id: string) => setCatIcon(id, "📦");
+  const toggleHidden = (id: string) =>
+    setCats((p) => p.map((x) => (x.id === id ? { ...x, hidden: !x.hidden } : x)));
 
   // ---- Group (sub-category) level ----
   const updateGroups = (catId: string, fn: (g: SubCategory[]) => SubCategory[]) =>
