@@ -146,9 +146,11 @@ export function CategoryGrid() {
         </div>
       </div>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-        {categories.map((c) => (
-          <CategoryCard key={c.id} c={c} />
-        ))}
+        {categories
+          .filter((c) => !c.hidden)
+          .map((c) => (
+            <CategoryCard key={c.id} c={c} />
+          ))}
 
         {/* تصنيف: أنشطة ومطاعم للبيع */}
         <a

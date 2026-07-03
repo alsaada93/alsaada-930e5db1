@@ -12,6 +12,8 @@ import {
   ImagePlus,
   X,
   Smile,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { toast } from "sonner";
 import { AdminHeader } from "@/components/admin/AdminHeader";
@@ -128,6 +130,8 @@ function AdminCategoriesPage() {
     }
   };
   const clearIcon = (id: string) => setCatIcon(id, "📦");
+  const toggleHidden = (id: string) =>
+    setCats((p) => p.map((x) => (x.id === id ? { ...x, hidden: !x.hidden } : x)));
 
   // ---- Group (sub-category) level ----
   const updateGroups = (catId: string, fn: (g: SubCategory[]) => SubCategory[]) =>
@@ -201,7 +205,10 @@ function AdminCategoriesPage() {
           {cats.map((c, idx) => {
             const expanded = openCat === c.id;
             return (
-              <li key={c.id} className="rounded-2xl border border-border bg-card shadow-card">
+              <li
+                key={c.id}
+                className={`rounded-2xl border border-border bg-card shadow-card ${c.hidden ? "opacity-60" : ""}`}
+              >
                 <div className="flex items-center gap-3 p-3">
                   <button
                     onClick={() => setOpenCat(expanded ? null : c.id)}
@@ -237,7 +244,14 @@ function AdminCategoriesPage() {
                     />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <h3 className="font-bold text-card-foreground">{c.name}</h3>
+                    <h3 className="flex items-center gap-2 font-bold text-card-foreground">
+                      {c.name}
+                      {c.hidden && (
+                        <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
+                          مخفي
+                        </span>
+                      )}
+                    </h3>
                     <p className="truncate text-xs text-muted-foreground">
                       {c.groups.length} تصنيف فرعي
                     </p>
@@ -282,6 +296,14 @@ function AdminCategoriesPage() {
                       aria-label="أسفل"
                     >
                       <ChevronDown className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={() => toggleHidden(c.id)}
+                      className={`rounded-lg p-1.5 hover:bg-accent ${c.hidden ? "text-muted-foreground" : "text-primary"}`}
+                      aria-label={c.hidden ? "إظهار" : "إخفاء"}
+                      title={c.hidden ? "إظهار التصنيف في الصفحة الرئيسية" : "إخفاء التصنيف من الصفحة الرئيسية"}
+                    >
+                      {c.hidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
                     <button
                       onClick={() => renameCat(c.id)}

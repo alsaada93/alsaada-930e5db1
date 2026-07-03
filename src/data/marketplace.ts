@@ -19,6 +19,8 @@ export interface Category {
   groups: SubCategory[];
   brands: string[];
   sub?: string[];
+  /** إخفاء التصنيف من الصفحة الرئيسية دون حذفه. */
+  hidden?: boolean;
 }
 
 export interface Listing {
