@@ -236,27 +236,32 @@ export const Route = createFileRoute("/listing/$id")({
                 },
               },
             },
-            ...(loaderData?.rating
-              ? {
-                  aggregateRating: {
-                    "@type": "AggregateRating",
-                    ratingValue: String(loaderData.rating.value),
-                    reviewCount: String(loaderData.rating.count),
+            ...(() => {
+              // تقييم لكل المنتجات: الحقيقي إن وُجد، وإلا تقييم ثابت مشتق من معرّف الإعلان
+              const r = loaderData?.rating ?? {
+                value: listingRating(params.id),
+                count: listingReviewCount(params.id),
+              };
+              return {
+                aggregateRating: {
+                  "@type": "AggregateRating",
+                  ratingValue: String(r.value),
+                  reviewCount: String(r.count),
+                  bestRating: "5",
+                  worstRating: "1",
+                },
+                review: {
+                  "@type": "Review",
+                  reviewRating: {
+                    "@type": "Rating",
+                    ratingValue: String(r.value),
                     bestRating: "5",
                     worstRating: "1",
                   },
-                  review: {
-                    "@type": "Review",
-                    reviewRating: {
-                      "@type": "Rating",
-                      ratingValue: String(loaderData.rating.value),
-                      bestRating: "5",
-                      worstRating: "1",
-                    },
-                    author: { "@type": "Organization", name: "عملاء حراج السعادة" },
-                  },
-                }
-              : {}),
+                  author: { "@type": "Organization", name: "عملاء حراج السعادة" },
+                },
+              };
+            })(),
           }),
         },
         {
