@@ -205,7 +205,10 @@ function AdminCategoriesPage() {
           {cats.map((c, idx) => {
             const expanded = openCat === c.id;
             return (
-              <li key={c.id} className="rounded-2xl border border-border bg-card shadow-card">
+              <li
+                key={c.id}
+                className={`rounded-2xl border border-border bg-card shadow-card ${c.hidden ? "opacity-60" : ""}`}
+              >
                 <div className="flex items-center gap-3 p-3">
                   <button
                     onClick={() => setOpenCat(expanded ? null : c.id)}
