@@ -69,6 +69,8 @@ function Index() {
 
 
 
+
+
           {rows.map((row) => (
             <HomeDynamicRow key={row.id} row={row} />
           ))}
