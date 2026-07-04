@@ -9,6 +9,7 @@ import { PromoCarousel } from "@/components/PromoCarousel";
 import { HomeBanners } from "@/components/HomeBanners";
 import { ListingsSection } from "@/components/ListingsSection";
 import { HomeDynamicRow } from "@/components/HomeDynamicRow";
+import { HomeOffersRow } from "@/components/HomeOffersRow";
 import { BusinessSection } from "@/components/BusinessSection";
 import { Testimonials } from "@/components/Testimonials";
 import { Footer } from "@/components/Footer";
