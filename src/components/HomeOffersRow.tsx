@@ -11,15 +11,19 @@ export function HomeOffersRow({ cardWidthPct }: { cardWidthPct?: number }) {
   const { lang } = useLanguage();
   const { offers } = useOffers();
 
-  if (offers.length === 0) return null;
-
   const title = lang === "ar" ? "🔥 العروض الخاصة" : "🔥 Special Offers";
 
   return (
     <HomeListingsRow
       title={title}
+      subtitle={
+        lang === "ar"
+          ? "أحدث العروض والخصومات الحصرية من إدارة الموقع"
+          : "The latest exclusive deals from the site admin"
+      }
       items={offers}
       cardWidthPct={cardWidthPct}
+      emptyText={lang === "ar" ? "لا توجد عروض حالياً — تابعنا قريباً." : "No offers yet — stay tuned."}
       moreButton={
         <Link
           to="/offers"
