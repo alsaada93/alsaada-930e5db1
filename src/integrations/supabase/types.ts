@@ -742,6 +742,7 @@ export type Database = {
           id: string
           images: string[]
           includes_equipment: boolean | null
+          is_offer: boolean
           item_name: string | null
           lat: number | null
           listing_type: string
@@ -758,6 +759,7 @@ export type Database = {
           published_at: string
           rent: number | null
           sale_reason: string | null
+          sold: boolean
           source: string | null
           source_ref: string | null
           staff_count: number | null
@@ -793,6 +795,7 @@ export type Database = {
           id?: string
           images?: string[]
           includes_equipment?: boolean | null
+          is_offer?: boolean
           item_name?: string | null
           lat?: number | null
           listing_type?: string
@@ -809,6 +812,7 @@ export type Database = {
           published_at?: string
           rent?: number | null
           sale_reason?: string | null
+          sold?: boolean
           source?: string | null
           source_ref?: string | null
           staff_count?: number | null
@@ -844,6 +848,7 @@ export type Database = {
           id?: string
           images?: string[]
           includes_equipment?: boolean | null
+          is_offer?: boolean
           item_name?: string | null
           lat?: number | null
           listing_type?: string
@@ -860,6 +865,7 @@ export type Database = {
           published_at?: string
           rent?: number | null
           sale_reason?: string | null
+          sold?: boolean
           source?: string | null
           source_ref?: string | null
           staff_count?: number | null
