@@ -605,6 +605,14 @@ export const adminUpdateOffer = createServerFn({ method: "POST" })
         featured: z.boolean().optional(),
         sold: z.boolean().optional(),
         status: z.enum(["approved", "suspended"]).optional(),
+        categoryId: z.string().max(120).nullable().optional(),
+        groupName: z.string().max(200).nullable().optional(),
+        itemName: z.string().max(200).nullable().optional(),
+        brand: z.string().max(200).nullable().optional(),
+        condition: z.string().max(60).optional(),
+        negotiable: z.boolean().optional(),
+        contactName: z.string().max(200).nullable().optional(),
+        contactPhone: z.string().max(60).nullable().optional(),
       })
       .parse(input),
   )
@@ -612,9 +620,16 @@ export const adminUpdateOffer = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     await assertAdmin(supabase, userId);
     const { id, ...rest } = data;
+    const COL_MAP: Record<string, string> = {
+      categoryId: "category_id",
+      groupName: "group_name",
+      itemName: "item_name",
+      contactName: "contact_name",
+      contactPhone: "contact_phone",
+    };
     const patch: Record<string, unknown> = {};
     for (const [k, v] of Object.entries(rest)) {
-      if (v !== undefined) patch[k] = v;
+      if (v !== undefined) patch[COL_MAP[k] ?? k] = v;
     }
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin
