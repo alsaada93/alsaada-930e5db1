@@ -74,7 +74,7 @@ function OffersPage() {
 
       <main className="mx-auto max-w-6xl px-4 py-10">
         {offers.length > 0 ? (
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
             {offers.map((item) => (
               <ListingCard key={item.id} item={item} displayTitle={map[item.id]?.title} />
             ))}
