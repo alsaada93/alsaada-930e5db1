@@ -122,6 +122,16 @@ function AdminOffersPage() {
     setSaving(true);
     try {
       const price = form.price ? Number(form.price) : 0;
+      const extra = {
+        categoryId: form.categoryId || null,
+        groupName: form.groupName || null,
+        itemName: form.itemName || null,
+        brand: form.brand.trim() || null,
+        condition: form.condition || "مستعمل",
+        negotiable: form.negotiable,
+        contactName: form.contactName.trim() || null,
+        contactPhone: form.contactPhone.trim() || null,
+      };
       if (form.id) {
         await updateFn({
           data: {
@@ -132,6 +142,7 @@ function AdminOffersPage() {
             city: form.city.trim() || null,
             images: form.images,
             featured: form.featured,
+            ...extra,
           },
         });
         toast.success("تم تحديث العرض");
@@ -144,6 +155,7 @@ function AdminOffersPage() {
             city: form.city.trim() || null,
             images: form.images,
             featured: form.featured,
+            ...extra,
           },
         });
         toast.success("تم إضافة العرض");
