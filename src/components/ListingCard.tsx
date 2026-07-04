@@ -36,6 +36,7 @@ export function ListingCard({
   const [safety, setSafety] = useState<null | { label: string; run: () => void }>(null);
 
   const isRestaurant = item.categoryId === "restaurant" || item.category === "مطاعم وكافيهات";
+  const isOffer = Boolean(item.isOffer);
   const phone = seller?.phone ?? item.phone ?? (isRestaurant ? DEFAULT_PHONE : null);
   const sellerName = seller?.name ?? item.seller ?? t("card.trustedSeller");
   const rating = listingRating(item.id);
