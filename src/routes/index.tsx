@@ -65,6 +65,10 @@ function Index() {
           {layout.showCategories && <CategoryGrid />}
           {layout.showWeBuy && <WeBuyBanner />}
 
+          <HomeOffersRow cardWidthPct={layout.cardWidthPct} />
+
+
+
           {rows.map((row) => (
             <HomeDynamicRow key={row.id} row={row} />
           ))}
