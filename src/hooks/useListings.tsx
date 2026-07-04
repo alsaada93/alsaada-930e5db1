@@ -37,6 +37,8 @@ function mapRow(d: Row): Listing {
     monthlyRevenue: d.monthly_revenue != null ? Number(d.monthly_revenue) : undefined,
     area: d.area_sqm != null ? Number(d.area_sqm) : undefined,
     staff: d.staff_count != null ? Number(d.staff_count) : undefined,
+    isOffer: Boolean(d.is_offer),
+    sold: Boolean(d.sold),
   };
 }
 
