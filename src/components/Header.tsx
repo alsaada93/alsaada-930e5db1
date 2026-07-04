@@ -104,11 +104,19 @@ export function Header() {
           </DropdownMenu>
 
           <Link
+            to="/offers"
+            className="hidden rounded-lg bg-gradient-to-r from-amber-500 to-red-500 px-3 py-2 text-sm font-bold text-white hover:opacity-90 sm:block"
+          >
+            {lang === "ar" ? "🔥 العروض" : "🔥 Offers"}
+          </Link>
+
+          <Link
             to="/restaurant"
             className="hidden rounded-lg px-3 py-2 text-sm font-bold hover:bg-white/10 sm:block"
           >
             {lang === "ar" ? "حاسبة المطاعم" : "Restaurant Cost"}
           </Link>
+
 
 
           <Link

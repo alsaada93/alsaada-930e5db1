@@ -36,6 +36,7 @@ export function ListingCard({
   const [safety, setSafety] = useState<null | { label: string; run: () => void }>(null);
 
   const isRestaurant = item.categoryId === "restaurant" || item.category === "مطاعم وكافيهات";
+  const isOffer = Boolean(item.isOffer);
   const phone = seller?.phone ?? item.phone ?? (isRestaurant ? DEFAULT_PHONE : null);
   const sellerName = seller?.name ?? item.seller ?? t("card.trustedSeller");
   const rating = listingRating(item.id);
@@ -79,17 +80,29 @@ export function ListingCard({
             </span>
           )}
 
-          {item.featured && (
+          {isOffer && (
+            <span className="absolute right-2 top-2 rounded-full bg-gradient-to-r from-amber-500 to-red-500 px-2 py-0.5 text-[11px] font-extrabold text-white shadow-glow">
+              {lang === "en" ? "Special offer" : "عرض خاص"}
+            </span>
+          )}
+          {!isOffer && item.featured && (
             <span className="absolute right-2 top-2 rounded-full bg-gradient-primary px-2 py-0.5 text-[11px] font-bold text-primary-foreground shadow-glow">
               {t("card.featured")}
             </span>
           )}
-          {showCond && (
+          {isOffer && item.sold && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/45">
+              <span className="rotate-[-12deg] rounded-lg bg-red-600 px-4 py-1.5 text-base font-extrabold text-white shadow-lg ring-2 ring-white/80">
+                {lang === "en" ? "SOLD" : "تم البيع"}
+              </span>
+            </div>
+          )}
+          {!isOffer && showCond && (
             <span className="absolute left-2 top-2 rounded-full bg-navy/80 px-2 py-0.5 text-[11px] font-semibold text-navy-foreground">
               {condLabel}
             </span>
           )}
-          {isRealEstate && (
+          {!isOffer && isRealEstate && (
             <span className="absolute left-2 top-2 rounded-full bg-navy/80 px-2 py-0.5 text-[11px] font-semibold text-navy-foreground">
               {lang === "en" ? reLabel.en : reLabel.ar}
             </span>

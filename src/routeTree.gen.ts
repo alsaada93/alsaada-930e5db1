@@ -18,6 +18,7 @@ import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as ReportRouteImport } from './routes/report'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PackagesRouteImport } from './routes/packages'
+import { Route as OffersRouteImport } from './routes/offers'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as ContactRouteImport } from './routes/contact'
@@ -39,6 +40,7 @@ import { Route as CategoryIdRouteImport } from './routes/category.$id'
 import { Route as AdminSlidesRouteImport } from './routes/admin.slides'
 import { Route as AdminSeoRouteImport } from './routes/admin.seo'
 import { Route as AdminRestaurantRouteImport } from './routes/admin.restaurant'
+import { Route as AdminOffersRouteImport } from './routes/admin.offers'
 import { Route as AdminMembersRouteImport } from './routes/admin.members'
 import { Route as AdminListingsRouteImport } from './routes/admin.listings'
 import { Route as AdminImagesRouteImport } from './routes/admin.images'
@@ -100,6 +102,11 @@ const PrivacyRoute = PrivacyRouteImport.update({
 const PackagesRoute = PackagesRouteImport.update({
   id: '/packages',
   path: '/packages',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OffersRoute = OffersRouteImport.update({
+  id: '/offers',
+  path: '/offers',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -207,6 +214,11 @@ const AdminRestaurantRoute = AdminRestaurantRouteImport.update({
   path: '/restaurant',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminOffersRoute = AdminOffersRouteImport.update({
+  id: '/offers',
+  path: '/offers',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminMembersRoute = AdminMembersRouteImport.update({
   id: '/members',
   path: '/members',
@@ -305,6 +317,7 @@ export interface FileRoutesByFullPath {
   '/contact': typeof ContactRoute
   '/faq': typeof FaqRoute
   '/login': typeof LoginRouteWithChildren
+  '/offers': typeof OffersRoute
   '/packages': typeof PackagesRoute
   '/privacy': typeof PrivacyRoute
   '/report': typeof ReportRoute
@@ -328,6 +341,7 @@ export interface FileRoutesByFullPath {
   '/admin/images': typeof AdminImagesRoute
   '/admin/listings': typeof AdminListingsRoute
   '/admin/members': typeof AdminMembersRoute
+  '/admin/offers': typeof AdminOffersRoute
   '/admin/restaurant': typeof AdminRestaurantRoute
   '/admin/seo': typeof AdminSeoRoute
   '/admin/slides': typeof AdminSlidesRoute
@@ -353,6 +367,7 @@ export interface FileRoutesByTo {
   '/contact': typeof ContactRoute
   '/faq': typeof FaqRoute
   '/login': typeof LoginRouteWithChildren
+  '/offers': typeof OffersRoute
   '/packages': typeof PackagesRoute
   '/privacy': typeof PrivacyRoute
   '/report': typeof ReportRoute
@@ -376,6 +391,7 @@ export interface FileRoutesByTo {
   '/admin/images': typeof AdminImagesRoute
   '/admin/listings': typeof AdminListingsRoute
   '/admin/members': typeof AdminMembersRoute
+  '/admin/offers': typeof AdminOffersRoute
   '/admin/restaurant': typeof AdminRestaurantRoute
   '/admin/seo': typeof AdminSeoRoute
   '/admin/slides': typeof AdminSlidesRoute
@@ -403,6 +419,7 @@ export interface FileRoutesById {
   '/contact': typeof ContactRoute
   '/faq': typeof FaqRoute
   '/login': typeof LoginRouteWithChildren
+  '/offers': typeof OffersRoute
   '/packages': typeof PackagesRoute
   '/privacy': typeof PrivacyRoute
   '/report': typeof ReportRoute
@@ -426,6 +443,7 @@ export interface FileRoutesById {
   '/admin/images': typeof AdminImagesRoute
   '/admin/listings': typeof AdminListingsRoute
   '/admin/members': typeof AdminMembersRoute
+  '/admin/offers': typeof AdminOffersRoute
   '/admin/restaurant': typeof AdminRestaurantRoute
   '/admin/seo': typeof AdminSeoRoute
   '/admin/slides': typeof AdminSlidesRoute
@@ -454,6 +472,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/faq'
     | '/login'
+    | '/offers'
     | '/packages'
     | '/privacy'
     | '/report'
@@ -477,6 +496,7 @@ export interface FileRouteTypes {
     | '/admin/images'
     | '/admin/listings'
     | '/admin/members'
+    | '/admin/offers'
     | '/admin/restaurant'
     | '/admin/seo'
     | '/admin/slides'
@@ -502,6 +522,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/faq'
     | '/login'
+    | '/offers'
     | '/packages'
     | '/privacy'
     | '/report'
@@ -525,6 +546,7 @@ export interface FileRouteTypes {
     | '/admin/images'
     | '/admin/listings'
     | '/admin/members'
+    | '/admin/offers'
     | '/admin/restaurant'
     | '/admin/seo'
     | '/admin/slides'
@@ -551,6 +573,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/faq'
     | '/login'
+    | '/offers'
     | '/packages'
     | '/privacy'
     | '/report'
@@ -574,6 +597,7 @@ export interface FileRouteTypes {
     | '/admin/images'
     | '/admin/listings'
     | '/admin/members'
+    | '/admin/offers'
     | '/admin/restaurant'
     | '/admin/seo'
     | '/admin/slides'
@@ -601,6 +625,7 @@ export interface RootRouteChildren {
   ContactRoute: typeof ContactRoute
   FaqRoute: typeof FaqRoute
   LoginRoute: typeof LoginRouteWithChildren
+  OffersRoute: typeof OffersRoute
   PackagesRoute: typeof PackagesRoute
   PrivacyRoute: typeof PrivacyRoute
   ReportRoute: typeof ReportRoute
@@ -684,6 +709,13 @@ declare module '@tanstack/react-router' {
       path: '/packages'
       fullPath: '/packages'
       preLoaderRoute: typeof PackagesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/offers': {
+      id: '/offers'
+      path: '/offers'
+      fullPath: '/offers'
+      preLoaderRoute: typeof OffersRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -833,6 +865,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRestaurantRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/offers': {
+      id: '/admin/offers'
+      path: '/offers'
+      fullPath: '/admin/offers'
+      preLoaderRoute: typeof AdminOffersRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/members': {
       id: '/admin/members'
       path: '/members'
@@ -970,6 +1009,7 @@ interface AdminRouteChildren {
   AdminImagesRoute: typeof AdminImagesRoute
   AdminListingsRoute: typeof AdminListingsRoute
   AdminMembersRoute: typeof AdminMembersRoute
+  AdminOffersRoute: typeof AdminOffersRoute
   AdminRestaurantRoute: typeof AdminRestaurantRoute
   AdminSeoRoute: typeof AdminSeoRoute
   AdminSlidesRoute: typeof AdminSlidesRoute
@@ -991,6 +1031,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminImagesRoute: AdminImagesRoute,
   AdminListingsRoute: AdminListingsRoute,
   AdminMembersRoute: AdminMembersRoute,
+  AdminOffersRoute: AdminOffersRoute,
   AdminRestaurantRoute: AdminRestaurantRoute,
   AdminSeoRoute: AdminSeoRoute,
   AdminSlidesRoute: AdminSlidesRoute,
@@ -1031,6 +1072,7 @@ const rootRouteChildren: RootRouteChildren = {
   ContactRoute: ContactRoute,
   FaqRoute: FaqRoute,
   LoginRoute: LoginRouteWithChildren,
+  OffersRoute: OffersRoute,
   PackagesRoute: PackagesRoute,
   PrivacyRoute: PrivacyRoute,
   ReportRoute: ReportRoute,

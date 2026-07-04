@@ -52,6 +52,10 @@ export interface Listing {
   monthlyRevenue?: number;
   area?: number;
   staff?: number;
+  /** عرض خاص منشور من الإدارة فقط. */
+  isOffer?: boolean;
+  /** تم بيع هذا العرض. */
+  sold?: boolean;
 }
 
 export interface Seller {
