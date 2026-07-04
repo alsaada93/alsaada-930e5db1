@@ -92,6 +92,14 @@ function AdminOffersPage() {
       city: o.city ?? "",
       images: o.images,
       featured: o.featured,
+      categoryId: o.categoryId ?? "",
+      groupName: o.groupName ?? "",
+      itemName: o.itemName ?? "",
+      brand: o.brand ?? "",
+      condition: o.condition || "مستعمل",
+      negotiable: o.negotiable,
+      contactName: o.contactName ?? "",
+      contactPhone: o.contactPhone ?? "",
     });
 
   const onUpload = async (files: FileList | null) => {
