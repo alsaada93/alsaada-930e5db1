@@ -289,6 +289,75 @@ function AdminOffersPage() {
                   placeholder="المدينة/المنطقة" className="rounded-lg border border-border bg-background px-3 py-2 text-sm" />
               </div>
 
+              <div className="grid grid-cols-2 gap-3">
+                <select
+                  value={form.categoryId}
+                  onChange={(e) => setForm({ ...form, categoryId: e.target.value, groupName: "", itemName: "" })}
+                  className="rounded-lg border border-border bg-background px-3 py-2 text-sm"
+                >
+                  <option value="">التصنيف</option>
+                  {categories.map((c) => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </select>
+                <select
+                  value={form.condition}
+                  onChange={(e) => setForm({ ...form, condition: e.target.value })}
+                  className="rounded-lg border border-border bg-background px-3 py-2 text-sm"
+                >
+                  <option value="جديد">جديد</option>
+                  <option value="مستعمل">مستعمل</option>
+                </select>
+              </div>
+
+              {(() => {
+                const cat = categories.find((c) => c.id === form.categoryId);
+                const groups = cat?.groups ?? [];
+                const items = groups.find((g) => g.name === form.groupName)?.items ?? [];
+                if (groups.length === 0) return null;
+                return (
+                  <div className="grid grid-cols-2 gap-3">
+                    <select
+                      value={form.groupName}
+                      onChange={(e) => setForm({ ...form, groupName: e.target.value, itemName: "" })}
+                      className="rounded-lg border border-border bg-background px-3 py-2 text-sm"
+                    >
+                      <option value="">المجموعة</option>
+                      {groups.map((g) => (
+                        <option key={g.name} value={g.name}>{g.name}</option>
+                      ))}
+                    </select>
+                    <select
+                      value={form.itemName}
+                      onChange={(e) => setForm({ ...form, itemName: e.target.value })}
+                      disabled={items.length === 0}
+                      className="rounded-lg border border-border bg-background px-3 py-2 text-sm disabled:opacity-50"
+                    >
+                      <option value="">النوع</option>
+                      {items.map((it) => (
+                        <option key={it} value={it}>{it}</option>
+                      ))}
+                    </select>
+                  </div>
+                );
+              })()}
+
+              <input value={form.brand} onChange={(e) => setForm({ ...form, brand: e.target.value })}
+                placeholder="الماركة (اختياري)" className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
+
+              <div className="grid grid-cols-2 gap-3">
+                <input value={form.contactName} onChange={(e) => setForm({ ...form, contactName: e.target.value })}
+                  placeholder="اسم جهة الاتصال" className="rounded-lg border border-border bg-background px-3 py-2 text-sm" />
+                <input value={form.contactPhone} onChange={(e) => setForm({ ...form, contactPhone: e.target.value })} inputMode="tel"
+                  placeholder="رقم الهاتف / واتساب" className="rounded-lg border border-border bg-background px-3 py-2 text-sm" />
+              </div>
+
+              <label className="flex items-center gap-2 text-sm font-semibold">
+                <input type="checkbox" checked={form.negotiable} onChange={(e) => setForm({ ...form, negotiable: e.target.checked })} />
+                السعر قابل للتفاوض
+              </label>
+
+
               <div className="flex flex-wrap gap-2">
                 {form.images.map((url) => (
                   <div key={url} className="relative h-16 w-16 overflow-hidden rounded-lg border border-border">
