@@ -26,9 +26,32 @@ interface FormState {
   city: string;
   images: string[];
   featured: boolean;
+  categoryId: string;
+  groupName: string;
+  itemName: string;
+  brand: string;
+  condition: string;
+  negotiable: boolean;
+  contactName: string;
+  contactPhone: string;
 }
 
-const EMPTY: FormState = { title: "", description: "", price: "", city: "", images: [], featured: false };
+const EMPTY: FormState = {
+  title: "",
+  description: "",
+  price: "",
+  city: "",
+  images: [],
+  featured: false,
+  categoryId: "",
+  groupName: "",
+  itemName: "",
+  brand: "",
+  condition: "مستعمل",
+  negotiable: false,
+  contactName: "",
+  contactPhone: "",
+};
 
 async function uploadImage(file: File): Promise<string> {
   const ext = file.name.split(".").pop() || "jpg";
