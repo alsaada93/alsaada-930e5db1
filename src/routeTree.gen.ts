@@ -18,6 +18,7 @@ import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as ReportRouteImport } from './routes/report'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PackagesRouteImport } from './routes/packages'
+import { Route as OffersRouteImport } from './routes/offers'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as ContactRouteImport } from './routes/contact'
@@ -100,6 +101,11 @@ const PrivacyRoute = PrivacyRouteImport.update({
 const PackagesRoute = PackagesRouteImport.update({
   id: '/packages',
   path: '/packages',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OffersRoute = OffersRouteImport.update({
+  id: '/offers',
+  path: '/offers',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -305,6 +311,7 @@ export interface FileRoutesByFullPath {
   '/contact': typeof ContactRoute
   '/faq': typeof FaqRoute
   '/login': typeof LoginRouteWithChildren
+  '/offers': typeof OffersRoute
   '/packages': typeof PackagesRoute
   '/privacy': typeof PrivacyRoute
   '/report': typeof ReportRoute
@@ -353,6 +360,7 @@ export interface FileRoutesByTo {
   '/contact': typeof ContactRoute
   '/faq': typeof FaqRoute
   '/login': typeof LoginRouteWithChildren
+  '/offers': typeof OffersRoute
   '/packages': typeof PackagesRoute
   '/privacy': typeof PrivacyRoute
   '/report': typeof ReportRoute
@@ -403,6 +411,7 @@ export interface FileRoutesById {
   '/contact': typeof ContactRoute
   '/faq': typeof FaqRoute
   '/login': typeof LoginRouteWithChildren
+  '/offers': typeof OffersRoute
   '/packages': typeof PackagesRoute
   '/privacy': typeof PrivacyRoute
   '/report': typeof ReportRoute
@@ -454,6 +463,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/faq'
     | '/login'
+    | '/offers'
     | '/packages'
     | '/privacy'
     | '/report'
@@ -502,6 +512,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/faq'
     | '/login'
+    | '/offers'
     | '/packages'
     | '/privacy'
     | '/report'
@@ -551,6 +562,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/faq'
     | '/login'
+    | '/offers'
     | '/packages'
     | '/privacy'
     | '/report'
@@ -601,6 +613,7 @@ export interface RootRouteChildren {
   ContactRoute: typeof ContactRoute
   FaqRoute: typeof FaqRoute
   LoginRoute: typeof LoginRouteWithChildren
+  OffersRoute: typeof OffersRoute
   PackagesRoute: typeof PackagesRoute
   PrivacyRoute: typeof PrivacyRoute
   ReportRoute: typeof ReportRoute
@@ -684,6 +697,13 @@ declare module '@tanstack/react-router' {
       path: '/packages'
       fullPath: '/packages'
       preLoaderRoute: typeof PackagesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/offers': {
+      id: '/offers'
+      path: '/offers'
+      fullPath: '/offers'
+      preLoaderRoute: typeof OffersRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -1031,6 +1051,7 @@ const rootRouteChildren: RootRouteChildren = {
   ContactRoute: ContactRoute,
   FaqRoute: FaqRoute,
   LoginRoute: LoginRouteWithChildren,
+  OffersRoute: OffersRoute,
   PackagesRoute: PackagesRoute,
   PrivacyRoute: PrivacyRoute,
   ReportRoute: ReportRoute,
