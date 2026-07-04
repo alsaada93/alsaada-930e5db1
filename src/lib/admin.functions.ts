@@ -480,6 +480,14 @@ export interface AdminOfferRow {
   sold: boolean;
   status: string;
   created_at: string;
+  categoryId: string | null;
+  groupName: string | null;
+  itemName: string | null;
+  brand: string | null;
+  condition: string;
+  negotiable: boolean;
+  contactName: string | null;
+  contactPhone: string | null;
 }
 
 function mapOfferRow(d: any): AdminOfferRow {
@@ -495,10 +503,19 @@ function mapOfferRow(d: any): AdminOfferRow {
     sold: Boolean(d.sold),
     status: String(d.status ?? "approved"),
     created_at: String(d.created_at ?? ""),
+    categoryId: d.category_id ?? null,
+    groupName: d.group_name ?? null,
+    itemName: d.item_name ?? null,
+    brand: d.brand ?? null,
+    condition: String(d.condition ?? "مستعمل"),
+    negotiable: Boolean(d.negotiable),
+    contactName: d.contact_name ?? null,
+    contactPhone: d.contact_phone ?? null,
   };
 }
 
-const OFFER_COLS = "id,title,description,price,city,images,featured,sold,status,created_at";
+const OFFER_COLS =
+  "id,title,description,price,city,images,featured,sold,status,created_at,category_id,group_name,item_name,brand,condition,negotiable,contact_name,contact_phone";
 
 /** Lists all special-offer listings for the admin panel. */
 export const adminListOffers = createServerFn({ method: "GET" })
@@ -529,6 +546,14 @@ export const adminCreateOffer = createServerFn({ method: "POST" })
         city: z.string().max(120).nullable().optional(),
         images: z.array(z.string().url()).max(30).optional(),
         featured: z.boolean().optional(),
+        categoryId: z.string().max(120).nullable().optional(),
+        groupName: z.string().max(200).nullable().optional(),
+        itemName: z.string().max(200).nullable().optional(),
+        brand: z.string().max(200).nullable().optional(),
+        condition: z.string().max(60).optional(),
+        negotiable: z.boolean().optional(),
+        contactName: z.string().max(200).nullable().optional(),
+        contactPhone: z.string().max(60).nullable().optional(),
       })
       .parse(input),
   )
@@ -545,9 +570,16 @@ export const adminCreateOffer = createServerFn({ method: "POST" })
         city: data.city ?? null,
         images: data.images ?? [],
         featured: data.featured ?? false,
+        category_id: data.categoryId ?? null,
+        group_name: data.groupName ?? null,
+        item_name: data.itemName ?? null,
+        brand: data.brand ?? null,
+        condition: data.condition ?? "مستعمل",
+        negotiable: data.negotiable ?? false,
+        contact_name: data.contactName ?? null,
+        contact_phone: data.contactPhone ?? null,
         is_offer: true,
         sold: false,
-        condition: "مستعمل",
         listing_type: "normal",
         status: "approved",
         user_id: userId,
@@ -573,6 +605,14 @@ export const adminUpdateOffer = createServerFn({ method: "POST" })
         featured: z.boolean().optional(),
         sold: z.boolean().optional(),
         status: z.enum(["approved", "suspended"]).optional(),
+        categoryId: z.string().max(120).nullable().optional(),
+        groupName: z.string().max(200).nullable().optional(),
+        itemName: z.string().max(200).nullable().optional(),
+        brand: z.string().max(200).nullable().optional(),
+        condition: z.string().max(60).optional(),
+        negotiable: z.boolean().optional(),
+        contactName: z.string().max(200).nullable().optional(),
+        contactPhone: z.string().max(60).nullable().optional(),
       })
       .parse(input),
   )
@@ -580,9 +620,16 @@ export const adminUpdateOffer = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     await assertAdmin(supabase, userId);
     const { id, ...rest } = data;
+    const COL_MAP: Record<string, string> = {
+      categoryId: "category_id",
+      groupName: "group_name",
+      itemName: "item_name",
+      contactName: "contact_name",
+      contactPhone: "contact_phone",
+    };
     const patch: Record<string, unknown> = {};
     for (const [k, v] of Object.entries(rest)) {
-      if (v !== undefined) patch[k] = v;
+      if (v !== undefined) patch[COL_MAP[k] ?? k] = v;
     }
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin
