@@ -480,6 +480,14 @@ export interface AdminOfferRow {
   sold: boolean;
   status: string;
   created_at: string;
+  categoryId: string | null;
+  groupName: string | null;
+  itemName: string | null;
+  brand: string | null;
+  condition: string;
+  negotiable: boolean;
+  contactName: string | null;
+  contactPhone: string | null;
 }
 
 function mapOfferRow(d: any): AdminOfferRow {
@@ -495,10 +503,19 @@ function mapOfferRow(d: any): AdminOfferRow {
     sold: Boolean(d.sold),
     status: String(d.status ?? "approved"),
     created_at: String(d.created_at ?? ""),
+    categoryId: d.category_id ?? null,
+    groupName: d.group_name ?? null,
+    itemName: d.item_name ?? null,
+    brand: d.brand ?? null,
+    condition: String(d.condition ?? "مستعمل"),
+    negotiable: Boolean(d.negotiable),
+    contactName: d.contact_name ?? null,
+    contactPhone: d.contact_phone ?? null,
   };
 }
 
-const OFFER_COLS = "id,title,description,price,city,images,featured,sold,status,created_at";
+const OFFER_COLS =
+  "id,title,description,price,city,images,featured,sold,status,created_at,category_id,group_name,item_name,brand,condition,negotiable,contact_name,contact_phone";
 
 /** Lists all special-offer listings for the admin panel. */
 export const adminListOffers = createServerFn({ method: "GET" })
