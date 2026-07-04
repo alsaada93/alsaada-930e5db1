@@ -43,7 +43,7 @@ function mapRow(d: Row): Listing {
 }
 
 const SELECT_COLS =
-  "id,title,price,start_price,negotiable,condition,city,category_id,group_name,item_name,images,featured,views,contact_phone,user_id,description,contact_name,listing_type,auction_ends_at,monthly_revenue,area_sqm,staff_count,created_at";
+  "id,title,price,start_price,negotiable,condition,city,category_id,group_name,item_name,images,featured,views,contact_phone,user_id,description,contact_name,listing_type,auction_ends_at,monthly_revenue,area_sqm,staff_count,is_offer,sold,created_at";
 
 type UseListingsOpts = {
   /** حجم الصفحة لتفعيل التحميل التدريجي (مثلاً 12). إذا لم يُمرّر يُجلب حتى 300 إعلان دفعة واحدة. */
