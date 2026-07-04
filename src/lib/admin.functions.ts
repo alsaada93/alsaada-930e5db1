@@ -463,3 +463,153 @@ export const adminSetAuthMethods = createServerFn({ method: "POST" })
     if (error) throw error;
     return { ok: true };
   });
+
+/* =========================================================================
+ * Special offers (العروض الخاصة) — admin-only listings with is_offer = true
+ * ========================================================================= */
+
+export interface AdminOfferRow {
+  id: string;
+  title: string;
+  description: string | null;
+  price: number;
+  city: string | null;
+  image: string | null;
+  images: string[];
+  featured: boolean;
+  sold: boolean;
+  status: string;
+  created_at: string;
+}
+
+function mapOfferRow(d: any): AdminOfferRow {
+  return {
+    id: String(d.id),
+    title: String(d.title ?? ""),
+    description: d.description ?? null,
+    price: Number(d.price ?? 0),
+    city: d.city ?? null,
+    image: (d.images as string[] | null)?.[0] ?? null,
+    images: (d.images as string[] | null) ?? [],
+    featured: Boolean(d.featured),
+    sold: Boolean(d.sold),
+    status: String(d.status ?? "approved"),
+    created_at: String(d.created_at ?? ""),
+  };
+}
+
+const OFFER_COLS = "id,title,description,price,city,images,featured,sold,status,created_at";
+
+/** Lists all special-offer listings for the admin panel. */
+export const adminListOffers = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<AdminOfferRow[]> => {
+    const { supabase, userId } = context;
+    await assertAdmin(supabase, userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data, error } = await supabaseAdmin
+      .from("listings")
+      .select(OFFER_COLS)
+      .eq("is_offer", true)
+      .order("featured", { ascending: false })
+      .order("created_at", { ascending: false });
+    if (error) throw error;
+    return (data ?? []).map(mapOfferRow);
+  });
+
+/** Creates a new special offer (admin only). */
+export const adminCreateOffer = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z
+      .object({
+        title: z.string().min(1).max(300),
+        description: z.string().max(8000).nullable().optional(),
+        price: z.number().min(0).max(100000000).optional(),
+        city: z.string().max(120).nullable().optional(),
+        images: z.array(z.string().url()).max(30).optional(),
+        featured: z.boolean().optional(),
+      })
+      .parse(input),
+  )
+  .handler(async ({ context, data }): Promise<{ id: string }> => {
+    const { supabase, userId } = context;
+    await assertAdmin(supabase, userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: row, error } = await supabaseAdmin
+      .from("listings")
+      .insert({
+        title: data.title.trim(),
+        description: data.description ?? null,
+        price: data.price ?? 0,
+        city: data.city ?? null,
+        images: data.images ?? [],
+        featured: data.featured ?? false,
+        is_offer: true,
+        sold: false,
+        condition: "مستعمل",
+        listing_type: "normal",
+        status: "approved",
+        user_id: userId,
+      } as never)
+      .select("id")
+      .single();
+    if (error) throw error;
+    return { id: String((row as any)?.id ?? "") };
+  });
+
+/** Updates a special offer: content, price, sold state, pin, visibility. */
+export const adminUpdateOffer = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z
+      .object({
+        id: z.string().uuid(),
+        title: z.string().min(1).max(300).optional(),
+        description: z.string().max(8000).nullable().optional(),
+        price: z.number().min(0).max(100000000).optional(),
+        city: z.string().max(120).nullable().optional(),
+        images: z.array(z.string().url()).max(30).optional(),
+        featured: z.boolean().optional(),
+        sold: z.boolean().optional(),
+        status: z.enum(["approved", "suspended"]).optional(),
+      })
+      .parse(input),
+  )
+  .handler(async ({ context, data }) => {
+    const { supabase, userId } = context;
+    await assertAdmin(supabase, userId);
+    const { id, ...rest } = data;
+    const patch: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(rest)) {
+      if (v !== undefined) patch[k] = v;
+    }
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin
+      .from("listings")
+      .update(patch as never)
+      .eq("id", id)
+      .eq("is_offer", true);
+    if (error) throw error;
+    if ("title" in patch || "description" in patch) {
+      await supabaseAdmin.from("listing_translations").delete().eq("listing_id", id);
+    }
+    return { ok: true };
+  });
+
+/** Permanently deletes a special offer. */
+export const adminDeleteOffer = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
+  .handler(async ({ context, data }) => {
+    const { supabase, userId } = context;
+    await assertAdmin(supabase, userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin
+      .from("listings")
+      .delete()
+      .eq("id", data.id)
+      .eq("is_offer", true);
+    if (error) throw error;
+    return { ok: true };
+  });
