@@ -13,6 +13,7 @@ import {
   type AdminOfferRow,
 } from "@/lib/admin.functions";
 import { supabase } from "@/integrations/supabase/client";
+import { categories } from "@/data/marketplace";
 
 export const Route = createFileRoute("/admin/offers")({
   component: AdminOffersPage,
