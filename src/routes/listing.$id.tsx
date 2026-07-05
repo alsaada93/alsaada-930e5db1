@@ -99,6 +99,9 @@ export const Route = createFileRoute("/listing/$id")({
         phone: data.contact_phone ?? undefined,
         description: data.description as string | null,
         brand: (data.brand as string | null) ?? null,
+        carMake: (data.car_make as string | null) ?? null,
+        isOffer: Boolean(data.is_offer),
+        sold: Boolean(data.sold),
         countryOfOrigin: (data.country_of_origin as string | null) ?? null,
         deliveryAvailable: Boolean(data.delivery_available),
         business:
