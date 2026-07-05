@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { FolderInput, Pause, Play, Trash2, Tag, Type, Loader2 } from "lucide-react";
+import { FolderInput, Pause, Play, Trash2, Tag, Type, Loader2, Phone, BadgeCheck, Flame, CheckCircle2 } from "lucide-react";
 import {
   adminUpdateListing,
   adminSetListingStatus,
@@ -12,7 +12,8 @@ import { useCategories } from "@/hooks/useCategories";
 
 /**
  * لوحة تحكم الأدمن داخل صفحة الإعلان: نقل التصنيف، إيقاف/تفعيل، حذف،
- * تعديل السعر، تعديل الاسم — تعمل عبر دوال الأدمن المحمية على الخادم.
+ * تعديل السعر، الاسم، الماركة، رقم الهاتف، الحالة (مستعمل/جديد)،
+ * تعليم "تم البيع" و"عرض خاص" — تعمل عبر دوال الأدمن المحمية على الخادم.
  */
 export function AdminListingControls({
   item,
@@ -23,6 +24,11 @@ export function AdminListingControls({
     price: number;
     categoryId: string | null;
     status: string;
+    brand?: string;
+    phone?: string;
+    condition?: string;
+    isOffer?: boolean;
+    sold?: boolean;
   };
 }) {
   const navigate = useNavigate();
@@ -35,7 +41,12 @@ export function AdminListingControls({
   const [title, setTitle] = useState(item.title);
   const [price, setPrice] = useState(String(item.price ?? 0));
   const [category, setCategory] = useState(item.categoryId ?? "");
+  const [brand, setBrand] = useState(item.brand ?? "");
+  const [phone, setPhone] = useState(item.phone ?? "");
+  const [condition, setCondition] = useState(item.condition === "جديد" ? "جديد" : "مستعمل");
   const suspended = item.status === "suspended";
+  const isOffer = Boolean(item.isOffer);
+  const sold = Boolean(item.sold);
 
   const refresh = () =>
     navigate({ to: "/listing/$id", params: { id: item.id } });
@@ -53,6 +64,7 @@ export function AdminListingControls({
       setBusy(false);
     }
   };
+
 
   return (
     <div className="mb-4 rounded-2xl border border-amber-400/50 bg-amber-50/60 p-3 dark:bg-amber-950/20">
