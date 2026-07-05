@@ -638,8 +638,14 @@ function ListingPage() {
               price: item.price,
               categoryId: item.categoryId,
               status: item.status,
+              brand: item.brand ?? item.carMake ?? "",
+              phone: item.phone ?? "",
+              condition: (item.condition as string) ?? "مستعمل",
+              isOffer: Boolean(item.isOffer),
+              sold: Boolean(item.sold),
             }}
           />
+
         )}
 
 
