@@ -5,6 +5,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Loader2, Plus, Trash2, Star, Eye, EyeOff, CheckCircle2, Pencil, X, Upload } from "lucide-react";
 import { AdminHeader } from "@/components/admin/AdminHeader";
+import { OffersSettingsPanel } from "@/components/admin/OffersSettingsPanel";
 import {
   adminListOffers,
   adminCreateOffer,
