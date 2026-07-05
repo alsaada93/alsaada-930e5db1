@@ -108,7 +108,7 @@ function OffersPage() {
             </div>
           ) : (
             <div
-              className={`grid gap-3 ${gridClass[config.gridColsMobile as 2 | 3 | 4] ?? "grid-cols-2"} sm:grid-cols-3 ${lgClass[config.gridColsDesktop] ?? "lg:grid-cols-4"}`}
+              className={`grid gap-3 ${gridClass[config.gridColsMobile] ?? "grid-cols-2"} sm:grid-cols-3 ${lgClass[config.gridColsDesktop] ?? "lg:grid-cols-4"}`}
             >
               {shown.map((item) => (
                 <ListingCard key={item.id} item={item} displayTitle={map[item.id]?.title} />
