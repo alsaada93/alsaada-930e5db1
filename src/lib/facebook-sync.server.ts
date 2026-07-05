@@ -631,6 +631,19 @@ export async function ingestBotPost(payload: BotPayload): Promise<BotIngestResul
     // السعر: ما يرسله البوت صراحةً يفوز، وإلا السعر المرتبط بعملة بحرينية حتمياً.
     // عدم وجود سعر مرتبط بعملة ⇒ 0 (بدون سعر).
     let finalPrice = explicitPrice ?? engine.price;
+    // حماية: أحياناً يرسل البوت سنة الصنع/التسجيل كسعر (مثل 2026 من "حتى 10-2026").
+    // إذا كان السعر الصريح يبدو كسنة مجرّدة والمحرك اكتشف سعراً مقترناً بعملة، نُفضّل سعر المحرك.
+    if (
+      explicitPrice !== null &&
+      engine.priceDetected &&
+      engine.price > 0 &&
+      Number.isInteger(explicitPrice) &&
+      explicitPrice >= 1950 &&
+      explicitPrice <= 2035 &&
+      explicitPrice !== engine.price
+    ) {
+      finalPrice = engine.price;
+    }
     if (finalPrice === null || finalPrice === undefined || finalPrice < 0) finalPrice = 0;
     if (explicitPrice === null && !engine.priceDetected) {
       warning = warning ? `${warning} | price_not_detected` : "price_not_detected";

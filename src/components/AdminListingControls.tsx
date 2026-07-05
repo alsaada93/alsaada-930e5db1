@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { FolderInput, Pause, Play, Trash2, Tag, Type, Loader2 } from "lucide-react";
+import { FolderInput, Pause, Play, Trash2, Tag, Type, Loader2, Phone, BadgeCheck, Flame, CheckCircle2 } from "lucide-react";
 import {
   adminUpdateListing,
   adminSetListingStatus,
@@ -12,7 +12,8 @@ import { useCategories } from "@/hooks/useCategories";
 
 /**
  * لوحة تحكم الأدمن داخل صفحة الإعلان: نقل التصنيف، إيقاف/تفعيل، حذف،
- * تعديل السعر، تعديل الاسم — تعمل عبر دوال الأدمن المحمية على الخادم.
+ * تعديل السعر، الاسم، الماركة، رقم الهاتف، الحالة (مستعمل/جديد)،
+ * تعليم "تم البيع" و"عرض خاص" — تعمل عبر دوال الأدمن المحمية على الخادم.
  */
 export function AdminListingControls({
   item,
@@ -23,6 +24,11 @@ export function AdminListingControls({
     price: number;
     categoryId: string | null;
     status: string;
+    brand?: string;
+    phone?: string;
+    condition?: string;
+    isOffer?: boolean;
+    sold?: boolean;
   };
 }) {
   const navigate = useNavigate();
@@ -35,7 +41,12 @@ export function AdminListingControls({
   const [title, setTitle] = useState(item.title);
   const [price, setPrice] = useState(String(item.price ?? 0));
   const [category, setCategory] = useState(item.categoryId ?? "");
+  const [brand, setBrand] = useState(item.brand ?? "");
+  const [phone, setPhone] = useState(item.phone ?? "");
+  const [condition, setCondition] = useState(item.condition === "جديد" ? "جديد" : "مستعمل");
   const suspended = item.status === "suspended";
+  const isOffer = Boolean(item.isOffer);
+  const sold = Boolean(item.sold);
 
   const refresh = () =>
     navigate({ to: "/listing/$id", params: { id: item.id } });
@@ -53,6 +64,7 @@ export function AdminListingControls({
       setBusy(false);
     }
   };
+
 
   return (
     <div className="mb-4 rounded-2xl border border-amber-400/50 bg-amber-50/60 p-3 dark:bg-amber-950/20">
@@ -161,6 +173,95 @@ export function AdminListingControls({
             >
               {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
               حذف
+            </button>
+          </div>
+        </div>
+
+        {/* تعديل الماركة */}
+        <div className="flex flex-col gap-1.5">
+          <label className="text-xs font-semibold text-muted-foreground">الماركة</label>
+          <div className="flex gap-2">
+            <input
+              value={brand}
+              onChange={(e) => setBrand(e.target.value)}
+              placeholder="مثال: تويوتا"
+              className="h-9 flex-1 rounded-lg border border-input bg-background px-2 text-sm"
+            />
+            <button
+              type="button"
+              disabled={busy || brand === (item.brand ?? "")}
+              onClick={() => run(() => update({ data: { id: item.id, brand: brand.trim() || null, car_make: brand.trim() || null } }), "تم تعديل الماركة")}
+              className="inline-flex items-center gap-1 rounded-lg bg-primary px-3 text-sm font-bold text-primary-foreground disabled:opacity-50"
+            >
+              <BadgeCheck className="h-4 w-4" /> حفظ
+            </button>
+          </div>
+        </div>
+
+        {/* تعديل رقم الهاتف */}
+        <div className="flex flex-col gap-1.5">
+          <label className="text-xs font-semibold text-muted-foreground">رقم الهاتف</label>
+          <div className="flex gap-2">
+            <input
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="مثال: 33xxxxxx"
+              inputMode="tel"
+              className="h-9 flex-1 rounded-lg border border-input bg-background px-2 text-sm"
+            />
+            <button
+              type="button"
+              disabled={busy || phone === (item.phone ?? "")}
+              onClick={() => run(() => update({ data: { id: item.id, contact_phone: phone.trim() || null } }), "تم تعديل رقم الهاتف")}
+              className="inline-flex items-center gap-1 rounded-lg bg-primary px-3 text-sm font-bold text-primary-foreground disabled:opacity-50"
+            >
+              <Phone className="h-4 w-4" /> حفظ
+            </button>
+          </div>
+        </div>
+
+        {/* تعديل الحالة: مستعمل / جديد */}
+        <div className="flex flex-col gap-1.5">
+          <label className="text-xs font-semibold text-muted-foreground">الحالة</label>
+          <div className="flex gap-2">
+            <select
+              value={condition}
+              onChange={(e) => setCondition(e.target.value)}
+              className="h-9 flex-1 rounded-lg border border-input bg-background px-2 text-sm"
+            >
+              <option value="مستعمل">مستعمل</option>
+              <option value="جديد">جديد</option>
+            </select>
+            <button
+              type="button"
+              disabled={busy || condition === (item.condition === "جديد" ? "جديد" : "مستعمل")}
+              onClick={() => run(() => update({ data: { id: item.id, condition } }), "تم تعديل الحالة")}
+              className="inline-flex items-center gap-1 rounded-lg bg-primary px-3 text-sm font-bold text-primary-foreground disabled:opacity-50"
+            >
+              <Tag className="h-4 w-4" /> حفظ
+            </button>
+          </div>
+        </div>
+
+        {/* تم البيع + عرض خاص */}
+        <div className="flex flex-col gap-1.5">
+          <label className="text-xs font-semibold text-muted-foreground">حالة العرض</label>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => run(() => update({ data: { id: item.id, sold: !sold } }), sold ? "تم إلغاء تعليم البيع" : "تم تعليم الإعلان كمباع")}
+              className={`inline-flex flex-1 items-center justify-center gap-1 rounded-lg border px-3 py-2 text-sm font-bold disabled:opacity-50 ${sold ? "border-red-500 bg-red-500 text-white" : "border-input bg-background hover:bg-accent"}`}
+            >
+              <CheckCircle2 className="h-4 w-4" /> {sold ? "مباع ✓" : "تم البيع"}
+            </button>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => run(() => update({ data: { id: item.id, is_offer: !isOffer } }), isOffer ? "تم إزالته من العروض" : "تمت إضافته إلى العروض")}
+              className={`inline-flex flex-1 items-center justify-center gap-1 rounded-lg border px-3 py-2 text-sm font-bold disabled:opacity-50 ${isOffer ? "border-amber-500 bg-gradient-to-r from-amber-500 to-red-500 text-white" : "border-input bg-background hover:bg-accent"}`}
+            >
+              <Flame className="h-4 w-4" /> {isOffer ? "عرض خاص ✓" : "عرض خاص"}
             </button>
           </div>
         </div>
