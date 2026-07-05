@@ -50,10 +50,10 @@ function OffersPage() {
   const icon = config.icon || "🔥";
 
   const gridClass = {
+    1: "grid-cols-1",
     2: "grid-cols-2",
     3: "grid-cols-3",
-    4: "grid-cols-4",
-  } as const;
+  } as Record<number, string>;
   const lgClass = {
     2: "lg:grid-cols-2",
     3: "lg:grid-cols-3",
