@@ -199,7 +199,9 @@ function AdminOffersPage() {
   return (
     <div>
       <AdminHeader title="العروض الخاصة" />
-      <div className="p-4">
+      <div class="p-4">
+        <OffersSettingsPanel />
+
         <div className="mb-4 flex items-center justify-between">
           <p className="text-sm text-muted-foreground">
             العروض تظهر في صفحة <span className="font-bold">/offers</span> والصفحة الرئيسية ونتائج البحث. الإدارة فقط تنشر هنا.
