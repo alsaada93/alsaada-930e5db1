@@ -199,7 +199,7 @@ function AdminOffersPage() {
   return (
     <div>
       <AdminHeader title="العروض الخاصة" />
-      <div class="p-4">
+      <div className="p-4">
         <OffersSettingsPanel />
 
         <div className="mb-4 flex items-center justify-between">
