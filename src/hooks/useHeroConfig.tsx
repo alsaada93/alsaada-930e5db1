@@ -48,7 +48,7 @@ export function mergeHeroConfig(v: Partial<HeroConfig> | null | undefined): Hero
 
 /** The resolved hero image (DB value or bundled fallback). */
 export function resolveHeroImage(config: HeroConfig): string {
-  return config.imageUrl || "/site-logo.png";
+  return config.imageUrl || "";
 }
 
 
