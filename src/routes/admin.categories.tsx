@@ -20,6 +20,7 @@ import { AdminHeader } from "@/components/admin/AdminHeader";
 import { categories as initial, type Category, type SubCategory } from "@/data/marketplace";
 import { saveCategories } from "@/hooks/useCategories";
 import { supabase } from "@/integrations/supabase/client";
+import { deleteStorageImage } from "@/lib/storage";
 
 async function uploadCategoryIcon(file: File): Promise<string> {
   const ext = file.name.split(".").pop() || "png";
