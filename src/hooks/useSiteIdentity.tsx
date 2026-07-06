@@ -46,10 +46,10 @@ const SETTINGS_KEY = "identity";
 function cleanIdentity(v: Partial<SiteIdentity> | null | undefined): SiteIdentity {
   const merged = { ...DEFAULT_IDENTITY, ...(v ?? {}) };
   const oldBrand = /araba|عربه|عربة|cart|lovable/i;
-  if (!merged.logoUrl || oldBrand.test(merged.logoUrl) || oldBrand.test(merged.nameAr) || oldBrand.test(merged.nameEn)) {
+  if (oldBrand.test(merged.logoUrl || "") || oldBrand.test(merged.nameAr) || oldBrand.test(merged.nameEn)) {
     merged.logoUrl = DEFAULT_IDENTITY.logoUrl;
   }
-  if (!merged.faviconUrl || oldBrand.test(merged.faviconUrl)) {
+  if (oldBrand.test(merged.faviconUrl || "")) {
     merged.faviconUrl = DEFAULT_IDENTITY.faviconUrl;
   }
   merged.nameAr = "حراج السعادة";
@@ -58,8 +58,12 @@ function cleanIdentity(v: Partial<SiteIdentity> | null | undefined): SiteIdentit
 }
 
 function applyFavicon(url: string) {
-  if (typeof document === "undefined" || !url) return;
+  if (typeof document === "undefined") return;
   let link = document.querySelector<HTMLLinkElement>('link[rel="icon"]');
+  if (!url) {
+    link?.remove();
+    return;
+  }
   if (!link) {
     link = document.createElement("link");
     link.rel = "icon";

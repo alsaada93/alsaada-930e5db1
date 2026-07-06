@@ -10,7 +10,6 @@ import { useLanguage } from "@/hooks/useLanguage";
 import { useListingTranslations } from "@/hooks/useListingTranslations";
 import { useOffersConfig } from "@/hooks/useOffersConfig";
 import { OffersSlideshow } from "@/components/OffersSlideshow";
-import offersBanner from "@/assets/offers-banner.jpg";
 
 export const Route = createFileRoute("/offers")({
   head: () => ({
@@ -37,7 +36,7 @@ export const Route = createFileRoute("/offers")({
 function OffersPage() {
   const { lang } = useLanguage();
   const { offers, loading } = useOffers();
-  const { config } = useOffersConfig();
+  const { config, loading: configLoading } = useOffersConfig();
   const { map } = useListingTranslations(
     offers.map((o) => ({ id: o.id, title: o.title, description: o.description })),
   );
@@ -46,7 +45,7 @@ function OffersPage() {
     ? offers.slice(0, config.rows * config.gridColsDesktop)
     : offers;
 
-  const banner = config.bannerImage?.trim() || offersBanner;
+  const banner = config.bannerImage?.trim();
   const title = lang === "en" ? config.titleEn : config.titleAr;
   const icon = config.icon || "🔥";
 
@@ -68,15 +67,17 @@ function OffersPage() {
       <Header />
 
       {/* بانر العروض الخاصة */}
-      {config.showBanner && (
+      {config.showBanner && !configLoading && (
         <section className="relative isolate overflow-hidden">
-          <img
-            src={banner}
-            alt={title}
-            width={1920}
-            height={640}
-            className="h-48 w-full object-cover sm:h-64 md:h-80"
-          />
+          {banner && (
+            <img
+              src={banner}
+              alt={title}
+              width={1920}
+              height={640}
+              className="h-48 w-full object-cover sm:h-64 md:h-80"
+            />
+          )}
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20" />
           <div className="absolute inset-0 flex flex-col items-center justify-center px-4 text-center">
             {config.badgeShow && config.badgePosition === "top" && (

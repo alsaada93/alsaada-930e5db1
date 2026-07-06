@@ -3,6 +3,7 @@ import { toast } from "sonner";
 import { Loader2, Save, Upload, Settings2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useOffersConfig, DEFAULT_OFFERS_CONFIG, type OffersConfig } from "@/hooks/useOffersConfig";
+import { deleteStorageImage } from "@/lib/storage";
 
 async function uploadBanner(file: File): Promise<string> {
   const ext = file.name.split(".").pop() || "jpg";
@@ -47,13 +48,22 @@ export function OffersSettingsPanel() {
     if (!file) return;
     setUploading(true);
     try {
+      const previous = draft.bannerImage;
       const url = await uploadBanner(file);
       set("bannerImage", url);
+      if (previous && previous !== url) await deleteStorageImage(previous);
     } catch {
       toast.error("تعذّر رفع الصورة");
     } finally {
       setUploading(false);
     }
+  };
+
+  const removeBanner = () => {
+    const previous = draft.bannerImage;
+    set("bannerImage", "");
+    set("showBanner", false);
+    void deleteStorageImage(previous);
   };
 
   const field = "h-9 w-full rounded-lg border border-input bg-background px-2 text-sm";
@@ -73,7 +83,7 @@ export function OffersSettingsPanel() {
             <img src={draft.bannerImage} alt="بانر العروض" className="h-20 w-full rounded-lg object-cover" />
           ) : (
             <div className="flex h-20 w-full items-center justify-center rounded-lg border border-dashed border-border text-xs text-muted-foreground">
-              الصورة الافتراضية
+              لا توجد صورة
             </div>
           )}
           <div className="flex gap-2">
@@ -82,8 +92,8 @@ export function OffersSettingsPanel() {
               <input type="file" accept="image/*" className="hidden" onChange={(e) => onUpload(e.target.files?.[0] ?? null)} />
             </label>
             {draft.bannerImage && (
-              <button type="button" onClick={() => set("bannerImage", "")} className="rounded-lg border border-input px-3 py-1.5 text-xs font-bold hover:bg-accent">
-                إزالة
+              <button type="button" onClick={removeBanner} className="rounded-lg border border-input px-3 py-1.5 text-xs font-bold hover:bg-accent">
+                حذف وإخفاء
               </button>
             )}
           </div>
@@ -269,7 +279,10 @@ export function OffersSettingsPanel() {
                 <img src={src} alt="" className="h-20 w-full object-cover" />
                 <button
                   type="button"
-                  onClick={() => set("slideImages", draft.slideImages.filter((_, j) => j !== i))}
+                  onClick={() => {
+                    set("slideImages", draft.slideImages.filter((_, j) => j !== i));
+                    void deleteStorageImage(src);
+                  }}
                   className="absolute right-1 top-1 rounded-full bg-black/60 px-1.5 py-0.5 text-[10px] font-bold text-white"
                 >
                   حذف

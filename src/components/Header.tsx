@@ -26,24 +26,26 @@ export function Header() {
     (lang === "ar" ? "حسابي" : "Account");
 
   const logoSize = Math.round(Math.min(identity.logoBoxWidth, identity.logoBoxHeight) * 0.8);
-  const logoUrl = identity.logoUrl ? `${identity.logoUrl}${identity.logoUrl.includes("?") ? "&" : "?"}v=alsaada-2026-06` : "";
+  const logoUrl = identity.showLogo && identity.logoUrl ? `${identity.logoUrl}${identity.logoUrl.includes("?") ? "&" : "?"}v=alsaada-2026-06` : "";
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-navy text-navy-foreground">
       <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3 sm:gap-6 sm:px-6 sm:py-4">
         <Link to="/" className="flex shrink-0 items-center gap-2 sm:gap-2.5">
-          <span
-            className="flex items-center justify-center rounded-xl bg-white p-1 shadow-md"
-            style={{ width: identity.logoBoxWidth, height: identity.logoBoxHeight }}
-          >
-            {logoUrl ? (
-              <img src={logoUrl} alt="حراج السعادة" width={64} height={64} loading="eager" fetchPriority="high" decoding="async" className="h-full w-full object-contain" />
-            ) : (
-              <BrandLogo size={logoSize} />
-            )}
-          </span>
+          {identity.showLogo && (
+            <span
+              className="flex items-center justify-center rounded-xl bg-white p-1 shadow-md"
+              style={{ width: identity.logoBoxWidth, height: identity.logoBoxHeight }}
+            >
+              {logoUrl ? (
+                <img src={logoUrl} alt="حراج السعادة" width={64} height={64} loading="eager" fetchPriority="high" decoding="async" className="h-full w-full object-contain" />
+              ) : (
+                <BrandLogo size={logoSize} />
+              )}
+            </span>
+          )}
 
-          <span className="hidden min-w-0 flex-col leading-tight sm:flex">
+          {identity.showName && <span className="hidden min-w-0 flex-col leading-tight sm:flex">
             <span
               className="truncate font-extrabold tracking-tight text-white"
               style={{ fontSize: identity.logoFontSize }}
@@ -58,7 +60,7 @@ export function Header() {
             >
               {lang === "ar" ? identity.taglineAr : identity.taglineEn}
             </span>
-          </span>
+          </span>}
         </Link>
 
         <div className="flex-1" />

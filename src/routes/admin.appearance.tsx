@@ -48,6 +48,8 @@ function IdentitySection() {
   const set = <K extends keyof SiteIdentity>(key: K, value: SiteIdentity[K]) =>
     setDraft((d) => ({ ...d, [key]: value }));
 
+  useEffect(() => setDraft(identity), [identity]);
+
   const onUpload = async (field: "logoUrl" | "faviconUrl", file: File | undefined) => {
     if (!file) return;
     setUploading(field === "logoUrl" ? "logo" : "favicon");
@@ -55,6 +57,7 @@ function IdentitySection() {
       const previous = draft[field];
       const url = await uploadImage(file);
       set(field, url);
+      if (field === "logoUrl") set("showLogo", true);
       // احذف الصورة القديمة من التخزين حتى لا تتعارض القديمة مع الجديدة
       if (previous && previous !== url) await deleteStorageImage(previous);
       toast.success("تم رفع الصورة الجديدة وحذف القديمة");
@@ -103,9 +106,12 @@ function IdentitySection() {
               رفع شعار
               <input type="file" accept="image/*" className="hidden" onChange={(e) => onUpload("logoUrl", e.target.files?.[0])} />
             </label>
+            <button type="button" onClick={() => set("showLogo", !draft.showLogo)} className="text-xs font-bold text-primary hover:underline">
+              {draft.showLogo ? "إخفاء" : "إظهار"}
+            </button>
             {draft.logoUrl && (
-              <button type="button" onClick={() => { const prev = draft.logoUrl; set("logoUrl", ""); void deleteStorageImage(prev); }} className="text-xs text-destructive hover:underline">
-                إزالة
+              <button type="button" onClick={() => { const prev = draft.logoUrl; set("logoUrl", ""); set("showLogo", false); void deleteStorageImage(prev); }} className="text-xs text-destructive hover:underline">
+                حذف وإخفاء
               </button>
             )}
           </div>
@@ -127,6 +133,11 @@ function IdentitySection() {
               رفع رمز
               <input type="file" accept="image/*" className="hidden" onChange={(e) => onUpload("faviconUrl", e.target.files?.[0])} />
             </label>
+            {draft.faviconUrl && (
+              <button type="button" onClick={() => { const prev = draft.faviconUrl; set("faviconUrl", ""); void deleteStorageImage(prev); }} className="text-xs text-destructive hover:underline">
+                حذف الرمز
+              </button>
+            )}
           </div>
         </div>
 
