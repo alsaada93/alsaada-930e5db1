@@ -47,7 +47,6 @@ function OffersPage() {
 
   const banner = config.bannerImage?.trim();
   const title = lang === "en" ? config.titleEn : config.titleAr;
-  const icon = config.icon || "🔥";
 
   const gridClass = {
     1: "grid-cols-1",
