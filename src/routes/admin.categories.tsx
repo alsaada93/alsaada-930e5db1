@@ -10,6 +10,7 @@ import {
   Save,
   Loader2,
   ImagePlus,
+  Image as ImageIcon,
   X,
   Smile,
   Eye,
@@ -20,6 +21,7 @@ import { AdminHeader } from "@/components/admin/AdminHeader";
 import { categories as initial, type Category, type SubCategory } from "@/data/marketplace";
 import { saveCategories } from "@/hooks/useCategories";
 import { supabase } from "@/integrations/supabase/client";
+import { deleteStorageImage } from "@/lib/storage";
 
 async function uploadCategoryIcon(file: File): Promise<string> {
   const ext = file.name.split(".").pop() || "png";
@@ -54,7 +56,9 @@ function AdminCategoriesPage() {
   const [saving, setSaving] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [iconUploading, setIconUploading] = useState<string | null>(null);
+  const [imageUploading, setImageUploading] = useState<string | null>(null);
   const iconInputs = useRef<Record<string, HTMLInputElement | null>>({});
+  const imageInputs = useRef<Record<string, HTMLInputElement | null>>({});
 
   useEffect(() => {
     supabase
@@ -130,6 +134,27 @@ function AdminCategoriesPage() {
     }
   };
   const clearIcon = (id: string) => setCatIcon(id, "📦");
+  const setCatImage = (id: string, image: string | undefined) =>
+    setCats((p) => p.map((x) => (x.id === id ? { ...x, image } : x)));
+  const uploadImage = async (id: string, file: File) => {
+    setImageUploading(id);
+    try {
+      const prev = cats.find((x) => x.id === id)?.image;
+      const url = await uploadCategoryIcon(file);
+      setCatImage(id, url);
+      await deleteStorageImage(prev);
+      toast.success("تم تحديث صورة القسم");
+    } catch {
+      toast.error("تعذّر رفع الصورة");
+    } finally {
+      setImageUploading(null);
+    }
+  };
+  const clearImage = async (id: string) => {
+    const prev = cats.find((x) => x.id === id)?.image;
+    setCatImage(id, undefined);
+    await deleteStorageImage(prev);
+  };
   const toggleHidden = (id: string) =>
     setCats((p) => p.map((x) => (x.id === id ? { ...x, hidden: !x.hidden } : x)));
 
@@ -277,10 +302,45 @@ function AdminCategoriesPage() {
                       <button
                         onClick={() => clearIcon(c.id)}
                         className="rounded-lg p-1.5 text-destructive hover:bg-destructive/10"
-                        aria-label="حذف الصورة"
-                        title="حذف الصورة"
+                        aria-label="حذف الرمز"
+                        title="حذف الرمز"
                       >
                         <X className="h-4 w-4" />
+                      </button>
+                    )}
+                    <input
+                      ref={(el) => {
+                        imageInputs.current[c.id] = el;
+                      }}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const f = e.target.files?.[0];
+                        if (f) uploadImage(c.id, f);
+                        e.target.value = "";
+                      }}
+                    />
+                    <button
+                      onClick={() => imageInputs.current[c.id]?.click()}
+                      className="rounded-lg p-1.5 text-primary hover:bg-accent"
+                      aria-label="صورة القسم"
+                      title={imageUploading === c.id ? "جارٍ الرفع…" : "رفع صورة بانر للقسم"}
+                    >
+                      {imageUploading === c.id ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <ImageIcon className="h-4 w-4" />
+                      )}
+                    </button>
+                    {c.image && (
+                      <button
+                        onClick={() => clearImage(c.id)}
+                        className="rounded-lg p-1.5 text-destructive hover:bg-destructive/10"
+                        aria-label="حذف صورة القسم"
+                        title="حذف صورة القسم"
+                      >
+                        <Trash2 className="h-4 w-4" />
                       </button>
                     )}
                     <button

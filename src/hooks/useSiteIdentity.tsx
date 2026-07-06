@@ -76,11 +76,35 @@ interface IdentityContextValue {
 
 const IdentityContext = createContext<IdentityContextValue | null>(null);
 
+const CACHE_KEY = "identityCache";
+
+function readCache(): SiteIdentity {
+  if (typeof window === "undefined") return DEFAULT_IDENTITY;
+  try {
+    const raw = window.localStorage.getItem(CACHE_KEY);
+    if (raw) return cleanIdentity(JSON.parse(raw) as Partial<SiteIdentity>);
+  } catch {
+    /* ignore */
+  }
+  return DEFAULT_IDENTITY;
+}
+
+function writeCache(v: SiteIdentity) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(CACHE_KEY, JSON.stringify(v));
+  } catch {
+    /* ignore */
+  }
+}
+
 export function SiteIdentityProvider({ children }: { children: ReactNode }) {
-  const [identity, setIdentity] = useState<SiteIdentity>(DEFAULT_IDENTITY);
+  // Paint the last-known identity immediately to avoid a logo/favicon flash.
+  const [identity, setIdentity] = useState<SiteIdentity>(readCache);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    applyFavicon(identity.faviconUrl);
     let active = true;
     supabase
       .from("site_settings")
@@ -92,17 +116,20 @@ export function SiteIdentityProvider({ children }: { children: ReactNode }) {
         const v = (data?.value as Partial<SiteIdentity> | null | undefined) ?? undefined;
         const merged = cleanIdentity(v);
         setIdentity(merged);
+        writeCache(merged);
         applyFavicon(merged.faviconUrl);
         setLoading(false);
       });
     return () => {
       active = false;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const save = async (next: SiteIdentity) => {
     const clean = cleanIdentity(next);
     setIdentity(clean);
+    writeCache(clean);
     applyFavicon(clean.faviconUrl);
     const { error } = await supabase
       .from("site_settings")

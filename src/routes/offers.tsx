@@ -9,6 +9,7 @@ import { useOffers } from "@/hooks/useOffers";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useListingTranslations } from "@/hooks/useListingTranslations";
 import { useOffersConfig } from "@/hooks/useOffersConfig";
+import { OffersSlideshow } from "@/components/OffersSlideshow";
 import offersBanner from "@/assets/offers-banner.jpg";
 
 export const Route = createFileRoute("/offers")({
@@ -120,7 +121,16 @@ function OffersPage() {
         </div>
       )}
 
+      {config.slideEnabled && config.slidePosition === "top" && (
+        <OffersSlideshow images={config.slideImages} intervalMs={config.slideIntervalMs} />
+      )}
+
       <main className="mx-auto max-w-6xl px-4 py-10">
+        {config.slideEnabled && config.slidePosition === "bottom" && (
+          <div className="mb-6">
+            <OffersSlideshow images={config.slideImages} intervalMs={config.slideIntervalMs} />
+          </div>
+        )}
         {offers.length > 0 ? (
           config.displayMode === "carousel" ? (
             <div dir={config.swipeDirection}>
