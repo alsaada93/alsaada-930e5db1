@@ -132,6 +132,27 @@ function AdminCategoriesPage() {
     }
   };
   const clearIcon = (id: string) => setCatIcon(id, "📦");
+  const setCatImage = (id: string, image: string | undefined) =>
+    setCats((p) => p.map((x) => (x.id === id ? { ...x, image } : x)));
+  const uploadImage = async (id: string, file: File) => {
+    setImageUploading(id);
+    try {
+      const prev = cats.find((x) => x.id === id)?.image;
+      const url = await uploadCategoryIcon(file);
+      setCatImage(id, url);
+      await deleteStorageImage(prev);
+      toast.success("تم تحديث صورة القسم");
+    } catch {
+      toast.error("تعذّر رفع الصورة");
+    } finally {
+      setImageUploading(null);
+    }
+  };
+  const clearImage = async (id: string) => {
+    const prev = cats.find((x) => x.id === id)?.image;
+    setCatImage(id, undefined);
+    await deleteStorageImage(prev);
+  };
   const toggleHidden = (id: string) =>
     setCats((p) => p.map((x) => (x.id === id ? { ...x, hidden: !x.hidden } : x)));
 
