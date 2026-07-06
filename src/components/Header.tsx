@@ -1,6 +1,5 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Globe, Heart, Bell, User, Camera, LogOut, LayoutDashboard, UserCircle, Menu, Calculator } from "lucide-react";
-import { BrandLogo } from "@/components/BrandLogo";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useAuth } from "@/hooks/useAuth";
 import { useSiteIdentity } from "@/hooks/useSiteIdentity";
@@ -18,32 +17,29 @@ export function Header() {
   const navigate = useNavigate();
   const { t, lang, toggle } = useLanguage();
   const { user, isAdmin, signOut } = useAuth();
-  const { identity } = useSiteIdentity();
+  const { identity, loading: identityLoading } = useSiteIdentity();
 
   const displayName =
     (user?.user_metadata?.full_name as string | undefined) ||
     user?.email?.split("@")[0] ||
     (lang === "ar" ? "حسابي" : "Account");
 
-  const logoSize = Math.round(Math.min(identity.logoBoxWidth, identity.logoBoxHeight) * 0.8);
-  const logoUrl = identity.logoUrl ? `${identity.logoUrl}${identity.logoUrl.includes("?") ? "&" : "?"}v=alsaada-2026-06` : "";
+  const logoUrl = identity.showLogo && identity.logoUrl ? `${identity.logoUrl}${identity.logoUrl.includes("?") ? "&" : "?"}v=alsaada-2026-06` : "";
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-navy text-navy-foreground">
       <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3 sm:gap-6 sm:px-6 sm:py-4">
         <Link to="/" className="flex shrink-0 items-center gap-2 sm:gap-2.5">
-          <span
-            className="flex items-center justify-center rounded-xl bg-white p-1 shadow-md"
-            style={{ width: identity.logoBoxWidth, height: identity.logoBoxHeight }}
-          >
-            {logoUrl ? (
+          {!identityLoading && identity.showLogo && logoUrl && (
+            <span
+              className="flex items-center justify-center rounded-xl bg-white p-1 shadow-md"
+              style={{ width: identity.logoBoxWidth, height: identity.logoBoxHeight }}
+            >
               <img src={logoUrl} alt="حراج السعادة" width={64} height={64} loading="eager" fetchPriority="high" decoding="async" className="h-full w-full object-contain" />
-            ) : (
-              <BrandLogo size={logoSize} />
-            )}
-          </span>
+            </span>
+          )}
 
-          <span className="hidden min-w-0 flex-col leading-tight sm:flex">
+          {identity.showName && <span className="hidden min-w-0 flex-col leading-tight sm:flex">
             <span
               className="truncate font-extrabold tracking-tight text-white"
               style={{ fontSize: identity.logoFontSize }}
@@ -58,7 +54,7 @@ export function Header() {
             >
               {lang === "ar" ? identity.taglineAr : identity.taglineEn}
             </span>
-          </span>
+          </span>}
         </Link>
 
         <div className="flex-1" />

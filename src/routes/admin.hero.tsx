@@ -114,12 +114,14 @@ function HeroAdminPage() {
         {/* Live preview */}
         <div className="overflow-hidden rounded-2xl border border-border shadow-card">
           <div className="relative h-56 w-full bg-navy">
-            <img
-              src={previewImg}
-              alt="preview"
-              className="absolute inset-0 h-full w-full object-cover"
-              style={{ opacity: draft.imageOpacity / 100 }}
-            />
+            {previewImg && (
+              <img
+                src={previewImg}
+                alt="preview"
+                className="absolute inset-0 h-full w-full object-cover"
+                style={{ opacity: draft.imageOpacity / 100 }}
+              />
+            )}
             <div
               className="absolute inset-0"
               style={{ backgroundColor: draft.overlayColor, opacity: draft.overlayOpacity / 100 }}
@@ -170,7 +172,7 @@ function HeroAdminPage() {
                 onClick={onRemoveImage}
                 className="text-xs text-destructive hover:underline"
               >
-                إزالة الصورة (استخدام الافتراضية)
+                حذف وإخفاء الصورة
               </button>
             )}
           </div>

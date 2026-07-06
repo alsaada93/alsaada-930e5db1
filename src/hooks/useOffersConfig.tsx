@@ -85,7 +85,8 @@ export function useOffersConfig() {
       .maybeSingle()
       .then(({ data }) => {
         if (!active) return;
-        setConfig(mergeOffersConfig(data?.value as Partial<OffersConfig> | null));
+        const next = mergeOffersConfig(data?.value as Partial<OffersConfig> | null);
+        setConfig(next);
         setLoading(false);
       });
     return () => {

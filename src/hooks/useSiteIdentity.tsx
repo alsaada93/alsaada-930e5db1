@@ -9,6 +9,7 @@ export interface SiteIdentity {
   taglineAr: string;
   taglineEn: string;
   showLogo: boolean;
+  showFavicon: boolean;
   showName: boolean;
   /** Header logo box size in px */
   logoBoxWidth: number;
@@ -30,6 +31,7 @@ export const DEFAULT_IDENTITY: SiteIdentity = {
   taglineAr: "شراء وبيع معدات المطاعم والأثاث والإلكترونيات في البحرين",
   taglineEn: "Buy & sell restaurant equipment, furniture & electronics in Bahrain",
   showLogo: true,
+  showFavicon: true,
   showName: true,
   logoBoxWidth: 35,
   logoBoxHeight: 35,
@@ -46,10 +48,10 @@ const SETTINGS_KEY = "identity";
 function cleanIdentity(v: Partial<SiteIdentity> | null | undefined): SiteIdentity {
   const merged = { ...DEFAULT_IDENTITY, ...(v ?? {}) };
   const oldBrand = /araba|عربه|عربة|cart|lovable/i;
-  if (!merged.logoUrl || oldBrand.test(merged.logoUrl) || oldBrand.test(merged.nameAr) || oldBrand.test(merged.nameEn)) {
+  if (oldBrand.test(merged.logoUrl || "") || oldBrand.test(merged.nameAr) || oldBrand.test(merged.nameEn)) {
     merged.logoUrl = DEFAULT_IDENTITY.logoUrl;
   }
-  if (!merged.faviconUrl || oldBrand.test(merged.faviconUrl)) {
+  if (oldBrand.test(merged.faviconUrl || "")) {
     merged.faviconUrl = DEFAULT_IDENTITY.faviconUrl;
   }
   merged.nameAr = "حراج السعادة";
@@ -58,8 +60,12 @@ function cleanIdentity(v: Partial<SiteIdentity> | null | undefined): SiteIdentit
 }
 
 function applyFavicon(url: string) {
-  if (typeof document === "undefined" || !url) return;
+  if (typeof document === "undefined") return;
   let link = document.querySelector<HTMLLinkElement>('link[rel="icon"]');
+  if (!url) {
+    link?.remove();
+    return;
+  }
   if (!link) {
     link = document.createElement("link");
     link.rel = "icon";
@@ -76,35 +82,11 @@ interface IdentityContextValue {
 
 const IdentityContext = createContext<IdentityContextValue | null>(null);
 
-const CACHE_KEY = "identityCache";
-
-function readCache(): SiteIdentity {
-  if (typeof window === "undefined") return DEFAULT_IDENTITY;
-  try {
-    const raw = window.localStorage.getItem(CACHE_KEY);
-    if (raw) return cleanIdentity(JSON.parse(raw) as Partial<SiteIdentity>);
-  } catch {
-    /* ignore */
-  }
-  return DEFAULT_IDENTITY;
-}
-
-function writeCache(v: SiteIdentity) {
-  if (typeof window === "undefined") return;
-  try {
-    window.localStorage.setItem(CACHE_KEY, JSON.stringify(v));
-  } catch {
-    /* ignore */
-  }
-}
-
 export function SiteIdentityProvider({ children }: { children: ReactNode }) {
-  // Paint the last-known identity immediately to avoid a logo/favicon flash.
-  const [identity, setIdentity] = useState<SiteIdentity>(readCache);
+  const [identity, setIdentity] = useState<SiteIdentity>(DEFAULT_IDENTITY);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    applyFavicon(identity.faviconUrl);
     let active = true;
     supabase
       .from("site_settings")
@@ -116,8 +98,7 @@ export function SiteIdentityProvider({ children }: { children: ReactNode }) {
         const v = (data?.value as Partial<SiteIdentity> | null | undefined) ?? undefined;
         const merged = cleanIdentity(v);
         setIdentity(merged);
-        writeCache(merged);
-        applyFavicon(merged.faviconUrl);
+        applyFavicon(merged.showFavicon ? merged.faviconUrl : "");
         setLoading(false);
       });
     return () => {
@@ -129,8 +110,7 @@ export function SiteIdentityProvider({ children }: { children: ReactNode }) {
   const save = async (next: SiteIdentity) => {
     const clean = cleanIdentity(next);
     setIdentity(clean);
-    writeCache(clean);
-    applyFavicon(clean.faviconUrl);
+    applyFavicon(clean.showFavicon ? clean.faviconUrl : "");
     const { error } = await supabase
       .from("site_settings")
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

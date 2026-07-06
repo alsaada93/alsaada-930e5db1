@@ -21,17 +21,19 @@ export function Hero() {
   return (
     <section className="relative overflow-hidden bg-navy text-navy-foreground">
       {/* Static hero image */}
-      <img
-        src={heroImage}
-        alt="Haraj Al Saada marketplace"
-        width={1536}
-        height={1024}
-        loading="eager"
-        fetchPriority="high"
-        decoding="async"
-        className="absolute inset-0 h-full w-full object-cover"
-        style={{ opacity: config.imageOpacity / 100 }}
-      />
+      {heroImage && (
+        <img
+          src={heroImage}
+          alt="Haraj Al Saada marketplace"
+          width={1536}
+          height={1024}
+          loading="eager"
+          fetchPriority="high"
+          decoding="async"
+          className="absolute inset-0 h-full w-full object-cover"
+          style={{ opacity: config.imageOpacity / 100 }}
+        />
+      )}
       {/* Color overlay / contrast tint */}
       <div
         className="absolute inset-0"
