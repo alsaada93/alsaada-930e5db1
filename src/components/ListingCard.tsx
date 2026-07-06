@@ -58,7 +58,7 @@ export function ListingCard({
   return (
     <article className="group overflow-hidden rounded-2xl border border-border bg-card shadow-card transition-all hover:-translate-y-1">
       <Link to="/listing/$id" params={{ id: item.id }} className="block">
-        <div className="relative aspect-square overflow-hidden bg-muted">
+        <div className="relative aspect-[4/3] overflow-hidden bg-muted">
           <img
             src={optimizedImage(item.image, 400)}
             srcSet={optimizedSrcSet(item.image, [200, 400, 600])}
