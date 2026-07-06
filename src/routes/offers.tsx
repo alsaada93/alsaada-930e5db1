@@ -111,7 +111,7 @@ function OffersPage() {
       {(!config.showBanner || config.countPosition === "top") && config.countShow && (
         <div className="mx-auto max-w-6xl px-4 pt-6 text-center">
           <span className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1 text-sm font-semibold text-primary">
-            {!config.showBanner && `${icon} ${title} — `}
+            {!config.showBanner && `${title} — `}
             {loading
               ? lang === "en" ? "Loading offers…" : "جارٍ تحميل العروض…"
               : lang === "en"
