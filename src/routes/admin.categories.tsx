@@ -301,10 +301,45 @@ function AdminCategoriesPage() {
                       <button
                         onClick={() => clearIcon(c.id)}
                         className="rounded-lg p-1.5 text-destructive hover:bg-destructive/10"
-                        aria-label="حذف الصورة"
-                        title="حذف الصورة"
+                        aria-label="حذف الرمز"
+                        title="حذف الرمز"
                       >
                         <X className="h-4 w-4" />
+                      </button>
+                    )}
+                    <input
+                      ref={(el) => {
+                        imageInputs.current[c.id] = el;
+                      }}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const f = e.target.files?.[0];
+                        if (f) uploadImage(c.id, f);
+                        e.target.value = "";
+                      }}
+                    />
+                    <button
+                      onClick={() => imageInputs.current[c.id]?.click()}
+                      className="rounded-lg p-1.5 text-primary hover:bg-accent"
+                      aria-label="صورة القسم"
+                      title={imageUploading === c.id ? "جارٍ الرفع…" : "رفع صورة بانر للقسم"}
+                    >
+                      {imageUploading === c.id ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <ImageIcon className="h-4 w-4" />
+                      )}
+                    </button>
+                    {c.image && (
+                      <button
+                        onClick={() => clearImage(c.id)}
+                        className="rounded-lg p-1.5 text-destructive hover:bg-destructive/10"
+                        aria-label="حذف صورة القسم"
+                        title="حذف صورة القسم"
+                      >
+                        <Trash2 className="h-4 w-4" />
                       </button>
                     )}
                     <button
