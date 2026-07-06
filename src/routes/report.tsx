@@ -11,7 +11,7 @@ export const Route = createFileRoute("/report")({
 
 function ReportPage() {
   const { lang } = useLanguage();
-  const wa = `https://wa.me/97336818153?text=${encodeURIComponent(
+  const wa = `https://wa.me/97333982383?text=${encodeURIComponent(
     lang === "ar" ? "أرغب بالإبلاغ عن إعلان: " : "I want to report a listing: ",
   )}`;
   return (
