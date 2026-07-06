@@ -34,6 +34,7 @@ export interface OffersConfig {
   /** جملة عدد العروض: الإظهار والموضع */
   countShow: boolean;
   countPosition: "top" | "bottom";
+}
 
 export const DEFAULT_OFFERS_CONFIG: OffersConfig = {
   bannerImage: "",
@@ -47,6 +48,13 @@ export const DEFAULT_OFFERS_CONFIG: OffersConfig = {
   cardWidthPct: 62,
   swipeDirection: "rtl",
   showOnHome: true,
+  showBanner: true,
+  badgeShow: true,
+  badgeTextAr: "خصومات حصرية",
+  badgeTextEn: "Exclusive deals",
+  badgePosition: "top",
+  countShow: true,
+  countPosition: "bottom",
 };
 
 export const OFFERS_CONFIG_KEY = "offersConfig";
