@@ -16,9 +16,8 @@ export function HomeOffersRow({ cardWidthPct }: { cardWidthPct?: number }) {
 
   if (!config.showOnHome) return null;
 
-  const icon = config.icon || "🔥";
   const baseTitle = lang === "en" ? config.titleEn : config.titleAr;
-  const title = `${icon} ${baseTitle}`;
+  const title = baseTitle;
   const shown = config.rows > 0 ? offers.slice(0, config.rows * 4) : offers;
 
   return (

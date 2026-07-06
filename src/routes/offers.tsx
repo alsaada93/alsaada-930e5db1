@@ -47,7 +47,6 @@ function OffersPage() {
 
   const banner = config.bannerImage?.trim();
   const title = lang === "en" ? config.titleEn : config.titleAr;
-  const icon = config.icon || "🔥";
 
   const gridClass = {
     1: "grid-cols-1",
@@ -87,7 +86,7 @@ function OffersPage() {
               </span>
             )}
             <h1 className="bg-gradient-to-r from-amber-300 via-orange-300 to-red-300 bg-clip-text text-3xl font-black text-transparent drop-shadow-[0_2px_6px_rgba(0,0,0,0.6)] sm:text-5xl md:text-6xl">
-              {icon} {title}
+              {title}
             </h1>
             {config.badgeShow && config.badgePosition === "bottom" && (
               <span className="mt-2 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-amber-500 to-red-500 px-4 py-1 text-xs font-bold text-white shadow-lg sm:text-sm">
@@ -112,7 +111,7 @@ function OffersPage() {
       {(!config.showBanner || config.countPosition === "top") && config.countShow && (
         <div className="mx-auto max-w-6xl px-4 pt-6 text-center">
           <span className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1 text-sm font-semibold text-primary">
-            {!config.showBanner && `${icon} ${title} — `}
+            {!config.showBanner && `${title} — `}
             {loading
               ? lang === "en" ? "Loading offers…" : "جارٍ تحميل العروض…"
               : lang === "en"
