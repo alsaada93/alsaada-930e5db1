@@ -85,7 +85,6 @@ export function SiteIdentityProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    applyFavicon(identity.faviconUrl);
     let active = true;
     supabase
       .from("site_settings")
