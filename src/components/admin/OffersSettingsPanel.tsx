@@ -157,12 +157,61 @@ export function OffersSettingsPanel() {
           <input type="range" min={40} max={100} step={2} value={draft.cardWidthPct} onChange={(e) => set("cardWidthPct", Number(e.target.value))} />
         </div>
 
+        {/* إظهار البانر العلوي */}
+        <div className="flex items-center gap-2 pt-5">
+          <input id="offers-show-banner" type="checkbox" checked={draft.showBanner} onChange={(e) => set("showBanner", e.target.checked)} className="h-4 w-4" />
+          <label htmlFor="offers-show-banner" className="text-sm font-semibold">إظهار صورة البانر العلوية</label>
+        </div>
+
+        {/* شارة الخصومات: إظهار */}
+        <div className="flex items-center gap-2 pt-5">
+          <input id="offers-badge-show" type="checkbox" checked={draft.badgeShow} onChange={(e) => set("badgeShow", e.target.checked)} className="h-4 w-4" />
+          <label htmlFor="offers-badge-show" className="text-sm font-semibold">إظهار شارة "خصومات حصرية"</label>
+        </div>
+
+        {/* نص الشارة عربي */}
+        <div className="flex flex-col gap-1.5">
+          <label className={lbl}>نص الشارة (عربي)</label>
+          <input className={field} value={draft.badgeTextAr} onChange={(e) => set("badgeTextAr", e.target.value)} />
+        </div>
+
+        {/* نص الشارة إنجليزي */}
+        <div className="flex flex-col gap-1.5">
+          <label className={lbl}>نص الشارة (إنجليزي)</label>
+          <input className={field} value={draft.badgeTextEn} onChange={(e) => set("badgeTextEn", e.target.value)} />
+        </div>
+
+        {/* موضع الشارة */}
+        <div className="flex flex-col gap-1.5">
+          <label className={lbl}>موضع الشارة</label>
+          <select className={field} value={draft.badgePosition} onChange={(e) => set("badgePosition", e.target.value as OffersConfig["badgePosition"])}>
+            <option value="top">أعلى العنوان</option>
+            <option value="bottom">أسفل العنوان</option>
+          </select>
+        </div>
+
+        {/* جملة عدد العروض: إظهار */}
+        <div className="flex items-center gap-2 pt-5">
+          <input id="offers-count-show" type="checkbox" checked={draft.countShow} onChange={(e) => set("countShow", e.target.checked)} className="h-4 w-4" />
+          <label htmlFor="offers-count-show" className="text-sm font-semibold">إظهار جملة عدد العروض</label>
+        </div>
+
+        {/* موضع جملة العدد */}
+        <div className="flex flex-col gap-1.5">
+          <label className={lbl}>موضع جملة العدد</label>
+          <select className={field} value={draft.countPosition} onChange={(e) => set("countPosition", e.target.value as OffersConfig["countPosition"])}>
+            <option value="bottom">داخل البانر (أسفل)</option>
+            <option value="top">أعلى الصفحة</option>
+          </select>
+        </div>
+
         {/* الظهور في الرئيسية */}
         <div className="flex items-center gap-2 pt-5">
           <input id="offers-show-home" type="checkbox" checked={draft.showOnHome} onChange={(e) => set("showOnHome", e.target.checked)} className="h-4 w-4" />
           <label htmlFor="offers-show-home" className="text-sm font-semibold">إظهار قسم العروض في الصفحة الرئيسية</label>
         </div>
       </div>
+
 
       <div className="mt-4 flex justify-end">
         <button
