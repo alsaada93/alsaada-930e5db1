@@ -219,6 +219,50 @@ function guessExt(contentType: string | null, url: string): string {
 }
 
 /** Downloads each remote image and stores it in Supabase Storage. Returns public URLs. */
+const MAX_IMAGE_BYTES = 15_000_000;
+const FETCH_TIMEOUT_MS = 10_000;
+
+/** Reject private, loopback, link-local and cloud-metadata targets to prevent SSRF. */
+function isBlockedHost(hostname: string): boolean {
+  const h = hostname.toLowerCase().replace(/^\[|\]$/g, "");
+  if (h === "localhost" || h.endsWith(".localhost") || h.endsWith(".internal") || h.endsWith(".local")) return true;
+  // IPv6 loopback / unspecified / unique-local / link-local
+  if (h === "::1" || h === "::") return true;
+  if (h.startsWith("fc") || h.startsWith("fd") || h.startsWith("fe80")) return true;
+  // IPv4-mapped IPv6 -> extract trailing v4
+  const mapped = h.match(/(?:^|:)((?:\d{1,3}\.){3}\d{1,3})$/);
+  const v4 = mapped ? mapped[1] : (/^(\d{1,3}\.){3}\d{1,3}$/.test(h) ? h : null);
+  if (v4) {
+    const p = v4.split(".").map(Number);
+    if (p.some((n) => Number.isNaN(n) || n < 0 || n > 255)) return true;
+    const [a, b] = p;
+    if (a === 10) return true;
+    if (a === 127) return true;
+    if (a === 0) return true;
+    if (a === 169 && b === 254) return true; // link-local incl. 169.254.169.254 metadata
+    if (a === 172 && b >= 16 && b <= 31) return true;
+    if (a === 192 && b === 168) return true;
+    if (a === 100 && b >= 64 && b <= 127) return true; // CGNAT
+    if (a >= 224) return true; // multicast / reserved
+  }
+  return false;
+}
+
+function assertSafeImageUrl(raw: string): void {
+  let u: URL;
+  try {
+    u = new URL(raw);
+  } catch {
+    throw new Error("رابط صورة غير صالح");
+  }
+  if (u.protocol !== "https:" && u.protocol !== "http:") {
+    throw new Error(`بروتوكول غير مسموح: ${u.protocol}`);
+  }
+  if (isBlockedHost(u.hostname)) {
+    throw new Error("رابط صورة يشير إلى عنوان داخلي غير مسموح");
+  }
+}
+
 async function storeImages(postId: string, urls: string[]): Promise<string[]> {
   const stored: string[] = [];
   const safeId = postId.replace(/[^a-zA-Z0-9_-]/g, "_");
@@ -227,15 +271,30 @@ async function storeImages(postId: string, urls: string[]): Promise<string[]> {
   for (let i = 0; i < list.length; i++) {
     const url = list[i];
     try {
-      const res = await fetch(url);
+      assertSafeImageUrl(url);
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+      let res: Response;
+      try {
+        res = await fetch(url, { signal: controller.signal, redirect: "error" });
+      } finally {
+        clearTimeout(timer);
+      }
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const contentType = res.headers.get("content-type");
       const normalizedType = (contentType || "").split(";")[0].trim().toLowerCase();
       if (normalizedType && !ALLOWED_IMAGE_TYPES.includes(normalizedType)) {
         throw new Error(`نوع صورة غير مسموح: ${normalizedType}`);
       }
+      const declaredLen = Number(res.headers.get("content-length") || "0");
+      if (declaredLen && declaredLen > MAX_IMAGE_BYTES) {
+        throw new Error("حجم الصورة كبير جداً");
+      }
       const ext = guessExt(contentType, url);
       const buf = new Uint8Array(await res.arrayBuffer());
+      if (buf.byteLength > MAX_IMAGE_BYTES) {
+        throw new Error("حجم الصورة كبير جداً");
+      }
       const path = `${PREFIX}/${safeId}/${i}.${ext}`;
       const { error } = await supabaseAdmin.storage.from(BUCKET).upload(path, buf, {
         contentType: normalizedType && ALLOWED_IMAGE_TYPES.includes(normalizedType) ? normalizedType : "image/jpeg",
