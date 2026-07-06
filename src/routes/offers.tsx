@@ -9,6 +9,7 @@ import { useOffers } from "@/hooks/useOffers";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useListingTranslations } from "@/hooks/useListingTranslations";
 import { useOffersConfig } from "@/hooks/useOffersConfig";
+import { OffersSlideshow } from "@/components/OffersSlideshow";
 import offersBanner from "@/assets/offers-banner.jpg";
 
 export const Route = createFileRoute("/offers")({
