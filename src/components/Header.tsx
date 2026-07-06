@@ -17,7 +17,7 @@ export function Header() {
   const navigate = useNavigate();
   const { t, lang, toggle } = useLanguage();
   const { user, isAdmin, signOut } = useAuth();
-  const { identity } = useSiteIdentity();
+  const { identity, loading: identityLoading } = useSiteIdentity();
 
   const displayName =
     (user?.user_metadata?.full_name as string | undefined) ||
@@ -30,7 +30,7 @@ export function Header() {
     <header className="sticky top-0 z-50 border-b border-border bg-navy text-navy-foreground">
       <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3 sm:gap-6 sm:px-6 sm:py-4">
         <Link to="/" className="flex shrink-0 items-center gap-2 sm:gap-2.5">
-          {identity.showLogo && logoUrl && (
+          {!identityLoading && identity.showLogo && logoUrl && (
             <span
               className="flex items-center justify-center rounded-xl bg-white p-1 shadow-md"
               style={{ width: identity.logoBoxWidth, height: identity.logoBoxHeight }}

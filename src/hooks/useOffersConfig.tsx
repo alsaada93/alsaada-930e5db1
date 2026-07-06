@@ -67,34 +67,13 @@ export const DEFAULT_OFFERS_CONFIG: OffersConfig = {
 };
 
 export const OFFERS_CONFIG_KEY = "offersConfig";
-const CACHE_KEY = "offersConfigCache";
 
 export function mergeOffersConfig(v: Partial<OffersConfig> | null | undefined): OffersConfig {
   return { ...DEFAULT_OFFERS_CONFIG, ...(v ?? {}) };
 }
 
-function readCache(): OffersConfig {
-  if (typeof window === "undefined") return DEFAULT_OFFERS_CONFIG;
-  try {
-    const raw = window.localStorage.getItem(CACHE_KEY);
-    if (raw) return mergeOffersConfig(JSON.parse(raw) as Partial<OffersConfig>);
-  } catch {
-    /* ignore */
-  }
-  return DEFAULT_OFFERS_CONFIG;
-}
-
-function writeCache(v: OffersConfig) {
-  if (typeof window === "undefined") return;
-  try {
-    window.localStorage.setItem(CACHE_KEY, JSON.stringify(v));
-  } catch {
-    /* ignore */
-  }
-}
-
 export function useOffersConfig() {
-  const [config, setConfig] = useState<OffersConfig>(readCache);
+  const [config, setConfig] = useState<OffersConfig>(DEFAULT_OFFERS_CONFIG);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -108,7 +87,6 @@ export function useOffersConfig() {
         if (!active) return;
         const next = mergeOffersConfig(data?.value as Partial<OffersConfig> | null);
         setConfig(next);
-        writeCache(next);
         setLoading(false);
       });
     return () => {
@@ -118,7 +96,6 @@ export function useOffersConfig() {
 
   const save = useCallback(async (next: OffersConfig) => {
     setConfig(next);
-    writeCache(next);
     const { error } = await supabase
       .from("site_settings")
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
