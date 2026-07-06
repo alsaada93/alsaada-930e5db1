@@ -212,6 +212,78 @@ export function OffersSettingsPanel() {
         </div>
       </div>
 
+      {/* شريط الصور المتحرك */}
+      <div className="mt-5 rounded-xl border border-border bg-background/50 p-4">
+        <div className="mb-3 flex flex-wrap items-center gap-4">
+          <label className="flex items-center gap-2 text-sm font-bold">
+            <input type="checkbox" checked={draft.slideEnabled} onChange={(e) => set("slideEnabled", e.target.checked)} className="h-4 w-4" />
+            تفعيل شريط الصور المتحرك
+          </label>
+          <div className="flex items-center gap-2">
+            <span className={lbl}>الموضع</span>
+            <select className={field + " w-auto"} value={draft.slidePosition} onChange={(e) => set("slidePosition", e.target.value as OffersConfig["slidePosition"])}>
+              <option value="top">أعلى الإعلانات</option>
+              <option value="bottom">أسفل البانر مباشرة</option>
+            </select>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className={lbl}>مدة التحريك (ث)</span>
+            <input
+              type="number"
+              min={1.5}
+              step={0.5}
+              className={field + " w-20"}
+              value={draft.slideIntervalMs / 1000}
+              onChange={(e) => set("slideIntervalMs", Math.max(1500, Number(e.target.value) * 1000))}
+            />
+          </div>
+          <label className="inline-flex cursor-pointer items-center gap-1 rounded-lg border border-input bg-background px-3 py-1.5 text-xs font-bold hover:bg-accent">
+            {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />} إضافة صور
+            <input
+              type="file"
+              accept="image/*"
+              multiple
+              className="hidden"
+              onChange={async (e) => {
+                const files = Array.from(e.target.files ?? []);
+                e.target.value = "";
+                if (files.length === 0) return;
+                setUploading(true);
+                try {
+                  const urls: string[] = [];
+                  for (const f of files) urls.push(await uploadBanner(f));
+                  set("slideImages", [...draft.slideImages, ...urls]);
+                } catch {
+                  toast.error("تعذّر رفع بعض الصور");
+                } finally {
+                  setUploading(false);
+                }
+              }}
+            />
+          </label>
+        </div>
+        {draft.slideImages.length > 0 ? (
+          <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
+            {draft.slideImages.map((src, i) => (
+              <div key={src + i} className="group relative overflow-hidden rounded-lg border border-border">
+                <img src={src} alt="" className="h-20 w-full object-cover" />
+                <button
+                  type="button"
+                  onClick={() => set("slideImages", draft.slideImages.filter((_, j) => j !== i))}
+                  className="absolute right-1 top-1 rounded-full bg-black/60 px-1.5 py-0.5 text-[10px] font-bold text-white"
+                >
+                  حذف
+                </button>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-xs text-muted-foreground">لا توجد صور — أضف صوراً لعرضها كشريط متحرك.</p>
+        )}
+      </div>
+
+
+
 
       <div className="mt-4 flex justify-end">
         <button
