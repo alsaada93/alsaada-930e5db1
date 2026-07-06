@@ -9,6 +9,7 @@ export interface SiteIdentity {
   taglineAr: string;
   taglineEn: string;
   showLogo: boolean;
+  showFavicon: boolean;
   showName: boolean;
   /** Header logo box size in px */
   logoBoxWidth: number;
@@ -30,6 +31,7 @@ export const DEFAULT_IDENTITY: SiteIdentity = {
   taglineAr: "شراء وبيع معدات المطاعم والأثاث والإلكترونيات في البحرين",
   taglineEn: "Buy & sell restaurant equipment, furniture & electronics in Bahrain",
   showLogo: true,
+  showFavicon: true,
   showName: true,
   logoBoxWidth: 35,
   logoBoxHeight: 35,
@@ -96,7 +98,7 @@ export function SiteIdentityProvider({ children }: { children: ReactNode }) {
         const v = (data?.value as Partial<SiteIdentity> | null | undefined) ?? undefined;
         const merged = cleanIdentity(v);
         setIdentity(merged);
-        applyFavicon(merged.faviconUrl);
+        applyFavicon(merged.showFavicon ? merged.faviconUrl : "");
         setLoading(false);
       });
     return () => {
@@ -108,7 +110,7 @@ export function SiteIdentityProvider({ children }: { children: ReactNode }) {
   const save = async (next: SiteIdentity) => {
     const clean = cleanIdentity(next);
     setIdentity(clean);
-    applyFavicon(clean.faviconUrl);
+    applyFavicon(clean.showFavicon ? clean.faviconUrl : "");
     const { error } = await supabase
       .from("site_settings")
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

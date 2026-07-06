@@ -58,6 +58,7 @@ function IdentitySection() {
       const url = await uploadImage(file);
       set(field, url);
       if (field === "logoUrl") set("showLogo", true);
+      if (field === "faviconUrl") set("showFavicon", true);
       // احذف الصورة القديمة من التخزين حتى لا تتعارض القديمة مع الجديدة
       if (previous && previous !== url) await deleteStorageImage(previous);
       toast.success("تم رفع الصورة الجديدة وحذف القديمة");
@@ -133,9 +134,12 @@ function IdentitySection() {
               رفع رمز
               <input type="file" accept="image/*" className="hidden" onChange={(e) => onUpload("faviconUrl", e.target.files?.[0])} />
             </label>
+            <button type="button" onClick={() => set("showFavicon", !draft.showFavicon)} className="text-xs font-bold text-primary hover:underline">
+              {draft.showFavicon ? "إخفاء" : "إظهار"}
+            </button>
             {draft.faviconUrl && (
-              <button type="button" onClick={() => { const prev = draft.faviconUrl; set("faviconUrl", ""); void deleteStorageImage(prev); }} className="text-xs text-destructive hover:underline">
-                حذف الرمز
+              <button type="button" onClick={() => { const prev = draft.faviconUrl; set("faviconUrl", ""); set("showFavicon", false); void deleteStorageImage(prev); }} className="text-xs text-destructive hover:underline">
+                حذف وإخفاء
               </button>
             )}
           </div>
@@ -211,6 +215,10 @@ function IdentitySection() {
         <label className="inline-flex items-center gap-2 text-sm font-semibold">
           <input type="checkbox" checked={draft.showLogo} onChange={(e) => set("showLogo", e.target.checked)} />
           إظهار الشعار
+        </label>
+        <label className="inline-flex items-center gap-2 text-sm font-semibold">
+          <input type="checkbox" checked={draft.showFavicon} onChange={(e) => set("showFavicon", e.target.checked)} />
+          إظهار رمز الموقع
         </label>
         <label className="inline-flex items-center gap-2 text-sm font-semibold">
           <input type="checkbox" checked={draft.showName} onChange={(e) => set("showName", e.target.checked)} />
