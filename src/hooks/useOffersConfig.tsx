@@ -24,7 +24,16 @@ export interface OffersConfig {
   swipeDirection: "rtl" | "ltr";
   /** إظهار قسم العروض في الصفحة الرئيسية */
   showOnHome: boolean;
-}
+  /** إظهار صورة البانر العلوية في صفحة العروض */
+  showBanner: boolean;
+  /** شارة "خصومات حصرية": الإظهار والنص والموضع */
+  badgeShow: boolean;
+  badgeTextAr: string;
+  badgeTextEn: string;
+  badgePosition: "top" | "bottom";
+  /** جملة عدد العروض: الإظهار والموضع */
+  countShow: boolean;
+  countPosition: "top" | "bottom";
 
 export const DEFAULT_OFFERS_CONFIG: OffersConfig = {
   bannerImage: "",
