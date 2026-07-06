@@ -26,11 +26,11 @@ function ContactPage() {
     >
       <InfoSection>
         <div className="space-y-3">
-          <a href="tel:+97336818153" className="flex items-center gap-3 text-foreground" dir="ltr">
-            <Phone className="h-5 w-5 text-primary" /> +973 36818153
+          <a href="tel:+97333982383" className="flex items-center gap-3 text-foreground" dir="ltr">
+            <Phone className="h-5 w-5 text-primary" /> +973 33982383
           </a>
           <a
-            href="https://wa.me/97336818153"
+            href="https://wa.me/97333982383"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-3 text-foreground"

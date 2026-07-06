@@ -134,7 +134,7 @@ function PackagesPage() {
                   </Link>
                 ) : (
                   <a
-                    href={`https://wa.me/97336818153?text=${encodeURIComponent(
+                    href={`https://wa.me/97333982383?text=${encodeURIComponent(
                       ar
                         ? `مرحباً، أرغب في الاشتراك في باقة ${p.name.ar} على حراج السعادة.`
                         : `Hello, I'd like to subscribe to the ${p.name.en} plan on Haraj Al Saada.`,

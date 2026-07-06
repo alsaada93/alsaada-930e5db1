@@ -67,34 +67,58 @@ function OffersPage() {
       <Header />
 
       {/* بانر العروض الخاصة */}
-      <section className="relative isolate overflow-hidden">
-        <img
-          src={banner}
-          alt={title}
-          width={1920}
-          height={640}
-          className="h-48 w-full object-cover sm:h-64 md:h-80"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20" />
-        <div className="absolute inset-0 flex flex-col items-center justify-center px-4 text-center">
-          <span className="mb-2 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-amber-500 to-red-500 px-4 py-1 text-xs font-bold text-white shadow-lg sm:text-sm">
-            <Flame className="h-4 w-4" />
-            {lang === "en" ? "Exclusive deals" : "خصومات حصرية"}
-          </span>
-          <h1 className="bg-gradient-to-r from-amber-300 via-orange-300 to-red-300 bg-clip-text text-3xl font-black text-transparent drop-shadow-[0_2px_6px_rgba(0,0,0,0.6)] sm:text-5xl md:text-6xl">
-            {icon} {title}
-          </h1>
-          <p className="mt-3 rounded-full bg-white/15 px-4 py-1 text-sm font-semibold text-white backdrop-blur-sm">
+      {config.showBanner && (
+        <section className="relative isolate overflow-hidden">
+          <img
+            src={banner}
+            alt={title}
+            width={1920}
+            height={640}
+            className="h-48 w-full object-cover sm:h-64 md:h-80"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20" />
+          <div className="absolute inset-0 flex flex-col items-center justify-center px-4 text-center">
+            {config.badgeShow && config.badgePosition === "top" && (
+              <span className="mb-2 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-amber-500 to-red-500 px-4 py-1 text-xs font-bold text-white shadow-lg sm:text-sm">
+                <Flame className="h-4 w-4" />
+                {lang === "en" ? config.badgeTextEn : config.badgeTextAr}
+              </span>
+            )}
+            <h1 className="bg-gradient-to-r from-amber-300 via-orange-300 to-red-300 bg-clip-text text-3xl font-black text-transparent drop-shadow-[0_2px_6px_rgba(0,0,0,0.6)] sm:text-5xl md:text-6xl">
+              {icon} {title}
+            </h1>
+            {config.badgeShow && config.badgePosition === "bottom" && (
+              <span className="mt-2 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-amber-500 to-red-500 px-4 py-1 text-xs font-bold text-white shadow-lg sm:text-sm">
+                <Flame className="h-4 w-4" />
+                {lang === "en" ? config.badgeTextEn : config.badgeTextAr}
+              </span>
+            )}
+            {config.countShow && config.countPosition === "bottom" && (
+              <p className="mt-3 rounded-full bg-white/15 px-4 py-1 text-sm font-semibold text-white backdrop-blur-sm">
+                {loading
+                  ? lang === "en"
+                    ? "Loading offers…"
+                    : "جارٍ تحميل العروض…"
+                  : lang === "en"
+                    ? `${offers.length.toLocaleString("en")} offers available`
+                    : `${offers.length.toLocaleString("ar")} عرض متاح`}
+              </p>
+            )}
+          </div>
+        </section>
+      )}
+      {(!config.showBanner || config.countPosition === "top") && config.countShow && (
+        <div className="mx-auto max-w-6xl px-4 pt-6 text-center">
+          <span className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1 text-sm font-semibold text-primary">
+            {!config.showBanner && `${icon} ${title} — `}
             {loading
-              ? lang === "en"
-                ? "Loading offers…"
-                : "جارٍ تحميل العروض…"
+              ? lang === "en" ? "Loading offers…" : "جارٍ تحميل العروض…"
               : lang === "en"
                 ? `${offers.length.toLocaleString("en")} offers available`
                 : `${offers.length.toLocaleString("ar")} عرض متاح`}
-          </p>
+          </span>
         </div>
-      </section>
+      )}
 
       <main className="mx-auto max-w-6xl px-4 py-10">
         {offers.length > 0 ? (

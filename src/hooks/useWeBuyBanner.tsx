@@ -26,7 +26,7 @@ export const DEFAULT_WEBUY_BANNER: WeBuyBanner = {
   ctaEn: "Call us",
   ctaPhotosAr: "أرسل صور معداتك الآن للتثمين",
   ctaPhotosEn: "Send your equipment photos now for valuation",
-  phone: "36818153",
+  phone: "33982383",
   whatsappMsg: "مرحباً، أريد تثمين معداتي. إليكم الصور:",
 };
 

@@ -35,7 +35,7 @@ export const DEFAULT_IDENTITY: SiteIdentity = {
   logoBoxHeight: 35,
   logoFontSize: 16,
   instagramUrl: "https://www.instagram.com/alsaada.bh1",
-  contactPhone: "36818153",
+  contactPhone: "33982383",
   locationAr: "مملكة البحرين",
   locationEn: "Kingdom of Bahrain",
 };

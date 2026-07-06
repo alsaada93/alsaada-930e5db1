@@ -37,7 +37,7 @@ const dict: Dict = {
   "hero.imageFailed": { ar: "تعذّر التعرف على الصورة، حاول بصورة أوضح", en: "Couldn't recognize the image, try a clearer photo" },
   "buy.title": { ar: "نشتري مباشرة", en: "We Buy Directly" },
   "buy.desc": { ar: "نشتري معدات المطاعم والأثاث والإلكترونيات المستعملة — تثمين مجاني وسعر مناسب.", en: "We buy used restaurant equipment, furniture and electronics — free valuation and a fair price." },
-  "buy.cta": { ar: "اتصل: 36818153", en: "Call: 36818153" },
+  "buy.cta": { ar: "اتصل: 33982383", en: "Call: 33982383" },
   "buy.ctaPhotos": { ar: "أرسل صور معداتك الآن للتثمين", en: "Send your equipment photos now for valuation" },
   "buy.waMsg": { ar: "مرحباً، أريد تثمين معداتي. إليكم الصور:", en: "Hello, I'd like a valuation for my equipment. Here are the photos:" },
   "header.tagline2": { ar: "شراء وبيع معدات المطاعم والأثاث والإلكترونيات في البحرين", en: "Buy & sell restaurant equipment, furniture & electronics in Bahrain" },

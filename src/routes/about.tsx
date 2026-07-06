@@ -46,8 +46,8 @@ function AboutPage() {
       <InfoSection heading={{ ar: "تواصل معنا", en: "Contact us" }}>
         <p>
           {lang === "ar" ? "هاتف / واتساب: " : "Phone / WhatsApp: "}
-          <a href="tel:+97336818153" dir="ltr" className="font-semibold text-primary">
-            +973 36818153
+          <a href="tel:+97333982383" dir="ltr" className="font-semibold text-primary">
+            +973 33982383
           </a>
         </p>
         <p>
