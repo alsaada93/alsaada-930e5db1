@@ -129,6 +129,7 @@ export function SiteIdentityProvider({ children }: { children: ReactNode }) {
   const save = async (next: SiteIdentity) => {
     const clean = cleanIdentity(next);
     setIdentity(clean);
+    writeCache(clean);
     applyFavicon(clean.faviconUrl);
     const { error } = await supabase
       .from("site_settings")
