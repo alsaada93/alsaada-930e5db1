@@ -34,6 +34,11 @@ export interface OffersConfig {
   /** جملة عدد العروض: الإظهار والموضع */
   countShow: boolean;
   countPosition: "top" | "bottom";
+  /** شريط صور متحرك داخل صفحة العروض */
+  slideEnabled: boolean;
+  slideImages: string[];
+  slideIntervalMs: number;
+  slidePosition: "top" | "bottom";
 }
 
 export const DEFAULT_OFFERS_CONFIG: OffersConfig = {
