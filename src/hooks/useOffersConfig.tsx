@@ -60,6 +60,10 @@ export const DEFAULT_OFFERS_CONFIG: OffersConfig = {
   badgePosition: "top",
   countShow: true,
   countPosition: "bottom",
+  slideEnabled: false,
+  slideImages: [],
+  slideIntervalMs: 4000,
+  slidePosition: "top",
 };
 
 export const OFFERS_CONFIG_KEY = "offersConfig";
