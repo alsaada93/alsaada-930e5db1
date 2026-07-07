@@ -137,6 +137,7 @@ function CategoryCard({ c }: { c: ReturnType<typeof useCategories>["categories"]
 export function CategoryGrid() {
   const { t, lang } = useLanguage();
   const { categories } = useCategories();
+  const { config: offersConfig } = useOffersConfig();
 
   return (
     <section className="mx-auto max-w-7xl px-4 py-12">
