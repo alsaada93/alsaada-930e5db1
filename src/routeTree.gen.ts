@@ -48,6 +48,7 @@ import { Route as AdminHomeLayoutRouteImport } from './routes/admin.home-layout'
 import { Route as AdminHeroRouteImport } from './routes/admin.hero'
 import { Route as AdminFacebookRouteImport } from './routes/admin.facebook'
 import { Route as AdminCategoriesRouteImport } from './routes/admin.categories'
+import { Route as AdminCardRouteImport } from './routes/admin.card'
 import { Route as AdminCalculatorRouteImport } from './routes/admin.calculator'
 import { Route as AdminBrandsRouteImport } from './routes/admin.brands'
 import { Route as AdminBlogRouteImport } from './routes/admin.blog'
@@ -254,6 +255,11 @@ const AdminCategoriesRoute = AdminCategoriesRouteImport.update({
   path: '/categories',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminCardRoute = AdminCardRouteImport.update({
+  id: '/card',
+  path: '/card',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminCalculatorRoute = AdminCalculatorRouteImport.update({
   id: '/calculator',
   path: '/calculator',
@@ -334,6 +340,7 @@ export interface FileRoutesByFullPath {
   '/admin/blog': typeof AdminBlogRoute
   '/admin/brands': typeof AdminBrandsRoute
   '/admin/calculator': typeof AdminCalculatorRoute
+  '/admin/card': typeof AdminCardRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/facebook': typeof AdminFacebookRoute
   '/admin/hero': typeof AdminHeroRoute
@@ -384,6 +391,7 @@ export interface FileRoutesByTo {
   '/admin/blog': typeof AdminBlogRoute
   '/admin/brands': typeof AdminBrandsRoute
   '/admin/calculator': typeof AdminCalculatorRoute
+  '/admin/card': typeof AdminCardRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/facebook': typeof AdminFacebookRoute
   '/admin/hero': typeof AdminHeroRoute
@@ -436,6 +444,7 @@ export interface FileRoutesById {
   '/admin/blog': typeof AdminBlogRoute
   '/admin/brands': typeof AdminBrandsRoute
   '/admin/calculator': typeof AdminCalculatorRoute
+  '/admin/card': typeof AdminCardRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/facebook': typeof AdminFacebookRoute
   '/admin/hero': typeof AdminHeroRoute
@@ -489,6 +498,7 @@ export interface FileRouteTypes {
     | '/admin/blog'
     | '/admin/brands'
     | '/admin/calculator'
+    | '/admin/card'
     | '/admin/categories'
     | '/admin/facebook'
     | '/admin/hero'
@@ -539,6 +549,7 @@ export interface FileRouteTypes {
     | '/admin/blog'
     | '/admin/brands'
     | '/admin/calculator'
+    | '/admin/card'
     | '/admin/categories'
     | '/admin/facebook'
     | '/admin/hero'
@@ -590,6 +601,7 @@ export interface FileRouteTypes {
     | '/admin/blog'
     | '/admin/brands'
     | '/admin/calculator'
+    | '/admin/card'
     | '/admin/categories'
     | '/admin/facebook'
     | '/admin/hero'
@@ -921,6 +933,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCategoriesRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/card': {
+      id: '/admin/card'
+      path: '/card'
+      fullPath: '/admin/card'
+      preLoaderRoute: typeof AdminCardRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/calculator': {
       id: '/admin/calculator'
       path: '/calculator'
@@ -1002,6 +1021,7 @@ interface AdminRouteChildren {
   AdminBlogRoute: typeof AdminBlogRoute
   AdminBrandsRoute: typeof AdminBrandsRoute
   AdminCalculatorRoute: typeof AdminCalculatorRoute
+  AdminCardRoute: typeof AdminCardRoute
   AdminCategoriesRoute: typeof AdminCategoriesRoute
   AdminFacebookRoute: typeof AdminFacebookRoute
   AdminHeroRoute: typeof AdminHeroRoute
@@ -1024,6 +1044,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminBlogRoute: AdminBlogRoute,
   AdminBrandsRoute: AdminBrandsRoute,
   AdminCalculatorRoute: AdminCalculatorRoute,
+  AdminCardRoute: AdminCardRoute,
   AdminCategoriesRoute: AdminCategoriesRoute,
   AdminFacebookRoute: AdminFacebookRoute,
   AdminHeroRoute: AdminHeroRoute,
