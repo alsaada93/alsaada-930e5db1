@@ -21,6 +21,8 @@ import { HomeBannersProvider } from "@/hooks/useHomeBanners";
 import { HomeLayoutProvider } from "@/hooks/useHomeLayout";
 import { CardConfigProvider } from "@/hooks/useCardConfig";
 import { Toaster } from "@/components/ui/sonner";
+import { MobileBottomNav } from "@/components/MobileBottomNav";
+import { isNativePlatform } from "@/lib/capacitor";
 
 function NotFoundComponent() {
   return (
