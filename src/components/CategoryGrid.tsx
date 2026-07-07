@@ -152,9 +152,15 @@ export function CategoryGrid() {
           to="/offers"
           className="group relative flex flex-col items-start gap-3 overflow-hidden rounded-2xl border border-primary/40 bg-card p-4 text-start shadow-card transition-all hover:-translate-y-1 hover:border-primary/40"
         >
-          <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500 to-red-500 text-white shadow-lg transition-transform group-hover:scale-110">
-            <Flame className="h-8 w-8" strokeWidth={1.75} />
-          </span>
+          {offersConfig.iconImage ? (
+            <span className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl shadow-lg transition-transform group-hover:scale-110">
+              <img src={offersConfig.iconImage} alt="العروض الخاصة" className="h-full w-full object-cover" />
+            </span>
+          ) : (
+            <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500 to-red-500 text-white shadow-lg transition-transform group-hover:scale-110">
+              <Flame className="h-8 w-8" strokeWidth={1.75} />
+            </span>
+          )}
           <h3 className="font-bold text-card-foreground">
             {lang === "ar" ? "🔥 العروض الخاصة" : "🔥 Special Offers"}
           </h3>
@@ -164,6 +170,7 @@ export function CategoryGrid() {
               : "Exclusive deals and discounts published by the admin"}
           </p>
         </Link>
+
 
         {categories
           .filter((c) => !c.hidden)
