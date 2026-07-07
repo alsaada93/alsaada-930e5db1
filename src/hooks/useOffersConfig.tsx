@@ -7,6 +7,8 @@ export interface OffersConfig {
   bannerImage: string;
   /** رمز/إيموجي القسم الظاهر في العنوان وبطاقة التصنيف */
   icon: string;
+  /** رابط صورة الأيقونة لبطاقة صفحة العروض (اختياري — يحل محل الإيموجي) */
+  iconImage: string;
   /** عنوان القسم بالعربية والإنجليزية */
   titleAr: string;
   titleEn: string;
