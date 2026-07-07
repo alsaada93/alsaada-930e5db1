@@ -67,6 +67,28 @@ export function OffersSettingsPanel() {
     void deleteStorageImage(previous);
   };
 
+  const onUploadIcon = async (file: File | null) => {
+    if (!file) return;
+    setUploadingIcon(true);
+    try {
+      const previous = draft.iconImage;
+      const url = await uploadBanner(file);
+      set("iconImage", url);
+      if (previous && previous !== url) await deleteStorageImage(previous);
+    } catch {
+      toast.error("تعذّر رفع الصورة");
+    } finally {
+      setUploadingIcon(false);
+    }
+  };
+
+  const removeIcon = () => {
+    const previous = draft.iconImage;
+    set("iconImage", "");
+    void deleteStorageImage(previous);
+  };
+
+
   const field = "h-9 w-full rounded-lg border border-input bg-background px-2 text-sm";
   const lbl = "text-xs font-semibold text-muted-foreground";
 
