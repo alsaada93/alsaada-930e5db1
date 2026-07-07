@@ -205,13 +205,13 @@ function RootComponent() {
     let cleanup = () => {};
 
     (async () => {
-      const [{ StatusBar }, { SplashScreen }, { App }] = await Promise.all([
+      const [{ StatusBar, StatusBarStyle }, { SplashScreen }, { App }] = await Promise.all([
         import("@capacitor/status-bar"),
         import("@capacitor/splash-screen"),
         import("@capacitor/app"),
       ]);
 
-      await StatusBar.setStyle({ style: "DARK" }).catch(() => {});
+      await StatusBar.setStyle({ style: StatusBarStyle.Dark }).catch(() => {});
       await StatusBar.setBackgroundColor({ color: "#1C3A40" }).catch(() => {});
       await SplashScreen.hide().catch(() => {});
 
