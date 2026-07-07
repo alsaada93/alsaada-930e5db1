@@ -724,9 +724,7 @@ function ListingPage() {
 
             {/* وصف الإعلان مباشرة تحت العنوان */}
             {displayDescription && (
-              <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
-                {displayDescription}
-              </p>
+              <CollapsibleText text={displayDescription} className="mt-2" clampLines={2} />
             )}
 
             {/* خانات بقرب الوصف: التوصيل، التفاوض، بلد الصنع، الماركة */}
