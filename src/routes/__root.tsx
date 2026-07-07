@@ -198,6 +198,38 @@ function RootComponent() {
     select: (s) => s.location.href,
   });
 
+  // Initialize native Capacitor plugins when running inside the mobile app.
+  useEffect(() => {
+    if (typeof window === "undefined" || !isNativePlatform()) return;
+
+    let cleanup = () => {};
+
+    (async () => {
+      const [{ StatusBar }, { SplashScreen }, { App }] = await Promise.all([
+        import("@capacitor/status-bar"),
+        import("@capacitor/splash-screen"),
+        import("@capacitor/app"),
+      ]);
+
+      await StatusBar.setStyle({ style: "DARK" }).catch(() => {});
+      await StatusBar.setBackgroundColor({ color: "#1C3A40" }).catch(() => {});
+      await SplashScreen.hide().catch(() => {});
+
+      // Handle Android hardware back button gracefully.
+      const listener = await App.addListener("backButton", ({ canGoBack }) => {
+        if (canGoBack) {
+          window.history.back();
+        } else {
+          App.exitApp().catch(() => {});
+        }
+      });
+
+      cleanup = () => listener.remove();
+    })();
+
+    return cleanup;
+  }, []);
+
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (sessionStorage.getItem("visit_recorded")) return;
