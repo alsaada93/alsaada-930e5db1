@@ -24,6 +24,7 @@ export function OffersSettingsPanel() {
   const [draft, setDraft] = useState<OffersConfig>(DEFAULT_OFFERS_CONFIG);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadingIcon, setUploadingIcon] = useState(false);
 
   useEffect(() => {
     if (!loading) setDraft(config);
