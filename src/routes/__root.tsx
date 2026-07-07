@@ -19,6 +19,7 @@ import { ThemeProvider } from "@/hooks/useTheme";
 import { SiteIdentityProvider } from "@/hooks/useSiteIdentity";
 import { HomeBannersProvider } from "@/hooks/useHomeBanners";
 import { HomeLayoutProvider } from "@/hooks/useHomeLayout";
+import { CardConfigProvider } from "@/hooks/useCardConfig";
 import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
