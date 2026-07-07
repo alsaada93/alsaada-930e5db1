@@ -25,6 +25,7 @@ import { useSeller, useSellerPhone } from "@/hooks/useSellers";
 import { useAuth } from "@/hooks/useAuth";
 import { AuctionBidBox } from "@/components/AuctionBidBox";
 import { SellerReviews } from "@/components/SellerReviews";
+import { CollapsibleText } from "@/components/CollapsibleText";
 import { categories } from "@/data/marketplace";
 import { useCategories } from "@/hooks/useCategories";
 import { supabase } from "@/integrations/supabase/client";
