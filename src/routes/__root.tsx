@@ -193,7 +193,7 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const locationKey = useRouterState({
-    select: (s) => s.location.pathname + s.location.searchStr,
+    select: (s) => s.location.href,
   });
 
   useEffect(() => {
