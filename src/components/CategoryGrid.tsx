@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { useCategories } from "@/hooks/useCategories";
 import { useLanguage } from "@/hooks/useLanguage";
+import { useOffersConfig } from "@/hooks/useOffersConfig";
 
 const icons: Record<string, LucideIcon> = {
   restaurant: UtensilsCrossed,
