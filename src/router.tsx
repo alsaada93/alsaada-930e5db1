@@ -8,7 +8,8 @@ export const getRouter = () => {
   const router = createRouter({
     routeTree,
     context: { queryClient },
-    scrollRestoration: true,
+    // نُدير استرجاع موضع التمرير يدوياً في __root لدعم القوائم التي تُحمَّل لاحقاً
+    scrollRestoration: false,
     defaultPreloadStaleTime: 0,
   });
 
