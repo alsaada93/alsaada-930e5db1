@@ -46,6 +46,7 @@ export interface OffersConfig {
 export const DEFAULT_OFFERS_CONFIG: OffersConfig = {
   bannerImage: "",
   icon: "🔥",
+  iconImage: "",
   titleAr: "العروض الخاصة",
   titleEn: "Special Offers",
   displayMode: "grid",
