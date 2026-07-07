@@ -24,6 +24,7 @@ export function OffersSettingsPanel() {
   const [draft, setDraft] = useState<OffersConfig>(DEFAULT_OFFERS_CONFIG);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadingIcon, setUploadingIcon] = useState(false);
 
   useEffect(() => {
     if (!loading) setDraft(config);
@@ -66,6 +67,28 @@ export function OffersSettingsPanel() {
     void deleteStorageImage(previous);
   };
 
+  const onUploadIcon = async (file: File | null) => {
+    if (!file) return;
+    setUploadingIcon(true);
+    try {
+      const previous = draft.iconImage;
+      const url = await uploadBanner(file);
+      set("iconImage", url);
+      if (previous && previous !== url) await deleteStorageImage(previous);
+    } catch {
+      toast.error("تعذّر رفع الصورة");
+    } finally {
+      setUploadingIcon(false);
+    }
+  };
+
+  const removeIcon = () => {
+    const previous = draft.iconImage;
+    set("iconImage", "");
+    void deleteStorageImage(previous);
+  };
+
+
   const field = "h-9 w-full rounded-lg border border-input bg-background px-2 text-sm";
   const lbl = "text-xs font-semibold text-muted-foreground";
 
@@ -104,6 +127,30 @@ export function OffersSettingsPanel() {
           <label className={lbl}>رمز القسم (إيموجي)</label>
           <input className={field} value={draft.icon} onChange={(e) => set("icon", e.target.value)} placeholder="🔥" />
         </div>
+
+        {/* صورة الأيقونة لبطاقة العروض */}
+        <div className="flex flex-col gap-1.5">
+          <label className={lbl}>صورة أيقونة بطاقة العروض</label>
+          {draft.iconImage ? (
+            <img src={draft.iconImage} alt="أيقونة العروض" className="h-16 w-16 rounded-2xl border border-border object-cover" />
+          ) : (
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-dashed border-border text-2xl">
+              {draft.icon || "🔥"}
+            </div>
+          )}
+          <div className="flex gap-2">
+            <label className="inline-flex cursor-pointer items-center gap-1 rounded-lg border border-input bg-background px-3 py-1.5 text-xs font-bold hover:bg-accent">
+              {uploadingIcon ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />} رفع صورة
+              <input type="file" accept="image/*" className="hidden" onChange={(e) => onUploadIcon(e.target.files?.[0] ?? null)} />
+            </label>
+            {draft.iconImage && (
+              <button type="button" onClick={removeIcon} className="rounded-lg border border-input px-3 py-1.5 text-xs font-bold hover:bg-accent">
+                حذف الصورة
+              </button>
+            )}
+          </div>
+        </div>
+
 
         {/* العنوان بالعربية */}
         <div className="flex flex-col gap-1.5">

@@ -25,6 +25,7 @@ import { useSeller, useSellerPhone } from "@/hooks/useSellers";
 import { useAuth } from "@/hooks/useAuth";
 import { AuctionBidBox } from "@/components/AuctionBidBox";
 import { SellerReviews } from "@/components/SellerReviews";
+import { CollapsibleText } from "@/components/CollapsibleText";
 import { categories } from "@/data/marketplace";
 import { useCategories } from "@/hooks/useCategories";
 import { supabase } from "@/integrations/supabase/client";
@@ -724,9 +725,7 @@ function ListingPage() {
 
             {/* وصف الإعلان مباشرة تحت العنوان */}
             {displayDescription && (
-              <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
-                {displayDescription}
-              </p>
+              <CollapsibleText text={displayDescription} className="mt-2" clampLines={2} />
             )}
 
             {/* خانات بقرب الوصف: التوصيل، التفاوض، بلد الصنع، الماركة */}
