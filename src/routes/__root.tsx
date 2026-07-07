@@ -192,6 +192,9 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const locationKey = useRouterState({
+    select: (s) => s.location.pathname + s.location.searchStr,
+  });
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -199,6 +202,43 @@ function RootComponent() {
     sessionStorage.setItem("visit_recorded", "1");
     recordVisit({ data: { path: window.location.pathname } }).catch(() => {});
   }, []);
+
+  // حفظ موضع التمرير لكل صفحة، واستعادته عند الرجوع (يعمل حتى مع القوائم
+  // التي تُحمَّل بشكل غير متزامن عبر إعادة المحاولة لفترة قصيرة).
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const storeKey = `scrollpos:${locationKey}`;
+    const onScroll = () => {
+      try {
+        sessionStorage.setItem(storeKey, String(window.scrollY));
+      } catch {
+        /* ignore */
+      }
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+
+    let raf = 0;
+    let tries = 0;
+    const saved = Number(sessionStorage.getItem(storeKey) || "0");
+    if (saved > 0) {
+      const restore = () => {
+        window.scrollTo(0, saved);
+        tries += 1;
+        if (Math.abs(window.scrollY - saved) > 2 && tries < 60) {
+          raf = requestAnimationFrame(restore);
+        }
+      };
+      raf = requestAnimationFrame(restore);
+    } else {
+      window.scrollTo(0, 0);
+    }
+
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, [locationKey]);
+
 
   // Load Google AdSense on the client only, after hydration, to avoid SSR
   // hydration mismatches caused by AdSense auto-ads injecting markup.
