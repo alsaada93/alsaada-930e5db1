@@ -56,19 +56,19 @@ export function ListingCard({
   const brandLogo = carBrandLogo(brand);
 
   return (
-    <article className="group overflow-hidden rounded-2xl border border-border bg-card shadow-card transition-all hover:-translate-y-1">
+    <article className="group overflow-hidden rounded-2xl border border-border bg-card shadow-card transition-shadow">
       <Link to="/listing/$id" params={{ id: item.id }} className="block">
-        <div className="relative flex aspect-[4/3] items-center justify-center overflow-hidden bg-white">
+        <div className="relative flex aspect-square items-center justify-center overflow-hidden bg-background">
           <img
-            src={optimizedImage(item.image, 400)}
-            srcSet={optimizedSrcSet(item.image, [200, 400, 600])}
+            src={optimizedImage(item.image, 600, 70, "contain")}
+            srcSet={optimizedSrcSet(item.image, [300, 600, 900], 70, "contain")}
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 280px"
             alt={title}
-            width={400}
-            height={300}
+            width={600}
+            height={600}
             loading="lazy"
             decoding="async"
-            className="h-full w-full object-contain"
+            className="block h-full w-full transform-none object-contain object-center transition-none"
           />
 
           <span className="pointer-events-none absolute bottom-1.5 right-1.5 select-none text-[10px] font-bold text-white/90 drop-shadow-[0_1px_2px_rgba(0,0,0,0.7)]">
