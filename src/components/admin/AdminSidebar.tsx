@@ -20,6 +20,7 @@ const items = [
   { title: "تخطيط الصفحة الرئيسية", url: "/admin/home-layout", icon: LayoutDashboard },
   { title: "صور العرض", url: "/admin/slides", icon: Images },
   { title: "مظهر الموقع", url: "/admin/appearance", icon: Palette },
+  { title: "شكل الإعلان", url: "/admin/card", icon: LayoutGrid },
   { title: "تحسين SEO", url: "/admin/seo", icon: Search },
   { title: "ضغط الصور", url: "/admin/images", icon: ImageDown },
 ];
