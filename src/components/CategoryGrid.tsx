@@ -154,10 +154,17 @@ export function CategoryGrid() {
           to="/offers"
           className="group relative flex flex-col items-start gap-3 overflow-hidden rounded-2xl border border-primary/40 bg-card p-4 text-start shadow-card transition-all hover:-translate-y-1 hover:border-primary/40"
         >
-          {offersConfig.iconImage ? (
-            <span className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl shadow-lg transition-transform group-hover:scale-110">
-              <img src={offersConfig.iconImage} alt="العروض الخاصة" className="h-full w-full object-cover" />
-            </span>
+          {offersConfig.iconImage || offersConfig.bannerImage ? (
+            <div className="relative -mx-4 -mt-4 mb-1 w-[calc(100%+2rem)] overflow-hidden">
+              <img
+                src={offersConfig.iconImage || offersConfig.bannerImage}
+                alt="العروض الخاصة"
+                className="h-28 w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                loading="lazy"
+                width={1024}
+                height={284}
+              />
+            </div>
           ) : (
             <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500 to-red-500 text-white shadow-lg transition-transform group-hover:scale-110">
               <Flame className="h-8 w-8" strokeWidth={1.75} />
