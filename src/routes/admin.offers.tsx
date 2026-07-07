@@ -227,8 +227,8 @@ function AdminOffersPage() {
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {offers.map((o) => (
               <div key={o.id} className="overflow-hidden rounded-xl border border-border bg-card">
-                <div className="relative aspect-[4/3] bg-muted">
-                  {o.image && <img src={o.image} alt={o.title} className="h-full w-full object-cover" loading="lazy" />}
+                <div className="relative aspect-square bg-background">
+                  {o.image && <img src={o.image} alt={o.title} className="h-full w-full object-contain" loading="lazy" />}
                   {o.featured && (
                     <span className="absolute right-2 top-2 rounded-full bg-gradient-to-r from-amber-500 to-red-500 px-2 py-0.5 text-[11px] font-bold text-white">مثبّت</span>
                   )}
@@ -363,8 +363,8 @@ function AdminOffersPage() {
 
               <div className="flex flex-wrap gap-2">
                 {form.images.map((url) => (
-                  <div key={url} className="relative h-16 w-16 overflow-hidden rounded-lg border border-border">
-                    <img src={url} alt="" className="h-full w-full object-cover" />
+                  <div key={url} className="relative h-16 w-16 overflow-hidden rounded-lg border border-border bg-background">
+                    <img src={url} alt="" className="h-full w-full object-contain" />
                     <button onClick={() => setForm({ ...form, images: form.images.filter((u) => u !== url) })}
                       className="absolute right-0 top-0 rounded-bl bg-black/60 p-0.5 text-white"><X className="h-3 w-3" /></button>
                   </div>

@@ -16,16 +16,19 @@ function isTransformable(url: string): boolean {
  * Build a resized image URL. For non-Supabase URLs (CDN assets, placeholders,
  * data URLs) the original is returned untouched so nothing breaks.
  */
+type ResizeMode = "cover" | "contain" | "fill";
+
 export function optimizedImage(
   url: string | undefined | null,
   width: number,
   quality = 65,
+  resize: ResizeMode = "cover",
 ): string {
   if (!url) return "/placeholder.svg";
   if (!isTransformable(url)) return url;
   const base = url.replace(OBJECT_MARKER, RENDER_MARKER);
   const sep = base.includes("?") ? "&" : "?";
-  return `${base}${sep}width=${width}&quality=${quality}&resize=cover`;
+  return `${base}${sep}width=${width}&quality=${quality}&resize=${resize}`;
 }
 
 /**
@@ -36,7 +39,8 @@ export function optimizedSrcSet(
   url: string | undefined | null,
   widths: number[],
   quality = 65,
+  resize: ResizeMode = "cover",
 ): string | undefined {
   if (!url || !isTransformable(url)) return undefined;
-  return widths.map((w) => `${optimizedImage(url, w, quality)} ${w}w`).join(", ");
+  return widths.map((w) => `${optimizedImage(url, w, quality, resize)} ${w}w`).join(", ");
 }
