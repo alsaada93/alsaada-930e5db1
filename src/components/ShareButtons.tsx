@@ -133,6 +133,17 @@ export function ShareButtons({
           </a>
         ),
       )}
+      {isNativePlatform() && (
+        <button
+          type="button"
+          onClick={nativeShare}
+          aria-label={ar ? "مشاركة" : "Share"}
+          title={ar ? "مشاركة" : "Share"}
+          className={`flex ${size} items-center justify-center rounded-full bg-primary text-primary-foreground transition-transform hover:scale-110`}
+        >
+          <Share2 className="h-4 w-4" />
+        </button>
+      )}
       <button
         type="button"
         onClick={copyLink}
