@@ -1,6 +1,7 @@
-import { MessageCircle, Facebook, Instagram, Send, Twitter, Link2 } from "lucide-react";
+import { MessageCircle, Facebook, Instagram, Send, Twitter, Link2, Share2 } from "lucide-react";
 import { toast } from "sonner";
 import { useLanguage } from "@/hooks/useLanguage";
+import { isNativePlatform } from "@/lib/capacitor";
 
 /**
  * أزرار المشاركة لأشهر منصات التواصل في البحرين:
