@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, ClipboardCheck, FolderTree, Tags, Gavel, Images, ImageDown, Palette, ExternalLink, ShoppingCart, MonitorPlay, Search, Users, KeyRound, Calculator, Newspaper, Facebook, ScanSearch, Flame } from "lucide-react";
+import { LayoutDashboard, ClipboardCheck, FolderTree, Tags, Gavel, Images, ImageDown, Palette, ExternalLink, ShoppingCart, MonitorPlay, Search, Users, KeyRound, Calculator, Newspaper, Facebook, ScanSearch, Flame, LayoutGrid } from "lucide-react";
 import { useAdminLayout } from "./AdminLayoutContext";
 
 const items = [
@@ -20,6 +20,7 @@ const items = [
   { title: "تخطيط الصفحة الرئيسية", url: "/admin/home-layout", icon: LayoutDashboard },
   { title: "صور العرض", url: "/admin/slides", icon: Images },
   { title: "مظهر الموقع", url: "/admin/appearance", icon: Palette },
+  { title: "شكل الإعلان", url: "/admin/card", icon: LayoutGrid },
   { title: "تحسين SEO", url: "/admin/seo", icon: Search },
   { title: "ضغط الصور", url: "/admin/images", icon: ImageDown },
 ];
