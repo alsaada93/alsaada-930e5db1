@@ -221,6 +221,11 @@ function guessExt(contentType: string | null, url: string): string {
 /** Downloads each remote image and stores it in Supabase Storage. Returns public URLs. */
 const MAX_IMAGE_BYTES = 15_000_000;
 const FETCH_TIMEOUT_MS = 10_000;
+const MAX_IMAGE_REDIRECTS = 5;
+const IMAGE_FETCH_HEADERS = {
+  Accept: "image/avif,image/webp,image/apng,image/*,*/*;q=0.8",
+  "User-Agent": "Mozilla/5.0 (compatible; AlsaadaImageImporter/1.0)",
+};
 
 /** Reject private, loopback, link-local and cloud-metadata targets to prevent SSRF. */
 function isBlockedHost(hostname: string): boolean {
@@ -263,6 +268,36 @@ function assertSafeImageUrl(raw: string): void {
   }
 }
 
+async function fetchRemoteImage(raw: string): Promise<{ res: Response; finalUrl: string }> {
+  let current = raw;
+
+  for (let redirects = 0; redirects <= MAX_IMAGE_REDIRECTS; redirects++) {
+    assertSafeImageUrl(current);
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+    let res: Response;
+    try {
+      res = await fetch(current, {
+        signal: controller.signal,
+        redirect: "manual",
+        headers: IMAGE_FETCH_HEADERS,
+      });
+    } finally {
+      clearTimeout(timer);
+    }
+
+    if (![301, 302, 303, 307, 308].includes(res.status)) {
+      return { res, finalUrl: current };
+    }
+
+    const location = res.headers.get("location");
+    if (!location) throw new Error(`تحويل صورة بدون رابط جديد: HTTP ${res.status}`);
+    current = new URL(location, current).toString();
+  }
+
+  throw new Error("عدد تحويلات رابط الصورة كبير جداً");
+}
+
 async function storeImages(postId: string, urls: string[]): Promise<string[]> {
   const stored: string[] = [];
   const safeId = postId.replace(/[^a-zA-Z0-9_-]/g, "_");
@@ -271,15 +306,7 @@ async function storeImages(postId: string, urls: string[]): Promise<string[]> {
   for (let i = 0; i < list.length; i++) {
     const url = list[i];
     try {
-      assertSafeImageUrl(url);
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
-      let res: Response;
-      try {
-        res = await fetch(url, { signal: controller.signal, redirect: "error" });
-      } finally {
-        clearTimeout(timer);
-      }
+      const { res, finalUrl } = await fetchRemoteImage(url);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const contentType = res.headers.get("content-type");
       const normalizedType = (contentType || "").split(";")[0].trim().toLowerCase();
@@ -290,7 +317,7 @@ async function storeImages(postId: string, urls: string[]): Promise<string[]> {
       if (declaredLen && declaredLen > MAX_IMAGE_BYTES) {
         throw new Error("حجم الصورة كبير جداً");
       }
-      const ext = guessExt(contentType, url);
+      const ext = guessExt(contentType, finalUrl);
       const buf = new Uint8Array(await res.arrayBuffer());
       if (buf.byteLength > MAX_IMAGE_BYTES) {
         throw new Error("حجم الصورة كبير جداً");
