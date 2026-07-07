@@ -21,6 +21,8 @@ import { HomeBannersProvider } from "@/hooks/useHomeBanners";
 import { HomeLayoutProvider } from "@/hooks/useHomeLayout";
 import { CardConfigProvider } from "@/hooks/useCardConfig";
 import { Toaster } from "@/components/ui/sonner";
+import { MobileBottomNav } from "@/components/MobileBottomNav";
+import { isNativePlatform } from "@/lib/capacitor";
 
 function NotFoundComponent() {
   return (
@@ -196,6 +198,38 @@ function RootComponent() {
     select: (s) => s.location.href,
   });
 
+  // Initialize native Capacitor plugins when running inside the mobile app.
+  useEffect(() => {
+    if (typeof window === "undefined" || !isNativePlatform()) return;
+
+    let cleanup = () => {};
+
+    (async () => {
+      const [{ StatusBar, StatusBarStyle }, { SplashScreen }, { App }] = await Promise.all([
+        import("@capacitor/status-bar"),
+        import("@capacitor/splash-screen"),
+        import("@capacitor/app"),
+      ]);
+
+      await StatusBar.setStyle({ style: StatusBarStyle.Dark }).catch(() => {});
+      await StatusBar.setBackgroundColor({ color: "#1C3A40" }).catch(() => {});
+      await SplashScreen.hide().catch(() => {});
+
+      // Handle Android hardware back button gracefully.
+      const listener = await App.addListener("backButton", ({ canGoBack }) => {
+        if (canGoBack) {
+          window.history.back();
+        } else {
+          App.exitApp().catch(() => {});
+        }
+      });
+
+      cleanup = () => listener.remove();
+    })();
+
+    return cleanup;
+  }, []);
+
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (sessionStorage.getItem("visit_recorded")) return;
@@ -266,6 +300,7 @@ function RootComponent() {
                     {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
                     <Outlet />
                     <Toaster />
+                    <MobileBottomNav />
                   </AuthProvider>
                 </CardConfigProvider>
               </HomeLayoutProvider>

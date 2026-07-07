@@ -1,6 +1,7 @@
-import { MessageCircle, Facebook, Instagram, Send, Twitter, Link2 } from "lucide-react";
+import { MessageCircle, Facebook, Instagram, Send, Twitter, Link2, Share2 } from "lucide-react";
 import { toast } from "sonner";
 import { useLanguage } from "@/hooks/useLanguage";
+import { isNativePlatform } from "@/lib/capacitor";
 
 /**
  * أزرار المشاركة لأشهر منصات التواصل في البحرين:
@@ -33,6 +34,21 @@ export function ShareButtons({
     await copyLink();
     toast.info(ar ? "تم نسخ الرابط — الصقه في إنستقرام" : "Link copied — paste it on Instagram");
     window.open("https://www.instagram.com/", "_blank", "noopener,noreferrer");
+  };
+
+  const nativeShare = async () => {
+    try {
+      const { Share } = await import("@capacitor/share");
+      await Share.share({
+        title,
+        text,
+        url,
+        dialogTitle: ar ? "مشاركة الإعلان" : "Share listing",
+      });
+    } catch {
+      // User cancelled or share sheet failed — fall back to copy.
+      await copyLink();
+    }
   };
 
   type Platform = {
@@ -116,6 +132,17 @@ export function ShareButtons({
             <p.icon className="h-4 w-4" />
           </a>
         ),
+      )}
+      {isNativePlatform() && (
+        <button
+          type="button"
+          onClick={nativeShare}
+          aria-label={ar ? "مشاركة" : "Share"}
+          title={ar ? "مشاركة" : "Share"}
+          className={`flex ${size} items-center justify-center rounded-full bg-primary text-primary-foreground transition-transform hover:scale-110`}
+        >
+          <Share2 className="h-4 w-4" />
+        </button>
       )}
       <button
         type="button"
