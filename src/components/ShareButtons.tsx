@@ -36,6 +36,21 @@ export function ShareButtons({
     window.open("https://www.instagram.com/", "_blank", "noopener,noreferrer");
   };
 
+  const nativeShare = async () => {
+    try {
+      const { Share } = await import("@capacitor/share");
+      await Share.share({
+        title,
+        text,
+        url,
+        dialogTitle: ar ? "مشاركة الإعلان" : "Share listing",
+      });
+    } catch {
+      // User cancelled or share sheet failed — fall back to copy.
+      await copyLink();
+    }
+  };
+
   type Platform = {
     key: string;
     label: string;
