@@ -1,4 +1,5 @@
-import { Phone, BadgeCheck, Camera } from "lucide-react";
+import { Phone, BadgeCheck, Camera, Calculator } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useWeBuyBanner } from "@/hooks/useWeBuyBanner";
 
