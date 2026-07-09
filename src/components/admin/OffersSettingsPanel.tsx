@@ -125,8 +125,21 @@ export function OffersSettingsPanel() {
         {/* الرمز */}
         <div className="flex flex-col gap-1.5">
           <label className={lbl}>رمز القسم (إيموجي)</label>
-          <input className={field} value={draft.icon} onChange={(e) => set("icon", e.target.value)} placeholder="🔥" />
+          <div className="flex gap-2">
+            <input className={field} value={draft.icon} onChange={(e) => set("icon", e.target.value)} placeholder="🔥" />
+            {draft.icon && (
+              <button
+                type="button"
+                onClick={() => set("icon", "")}
+                className="shrink-0 rounded-lg border border-input px-3 py-1.5 text-xs font-bold hover:bg-accent"
+              >
+                حذف الرمز
+              </button>
+            )}
+          </div>
+          <p className="text-xs text-muted-foreground">احذف الرمز لمنع ظهور شعار 🔥 والوميض على الصور.</p>
         </div>
+
 
         {/* صورة الأيقونة لبطاقة العروض */}
         <div className="flex flex-col gap-1.5">
