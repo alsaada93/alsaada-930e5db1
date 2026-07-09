@@ -43,6 +43,13 @@ export function WeBuyBanner() {
             <Phone className="h-4 w-4" />
             {cta} <span dir="ltr">{banner.phone}</span>
           </a>
+          <Link
+            to="/restaurant"
+            className="inline-flex items-center gap-2 rounded-xl bg-white/15 px-5 py-2.5 text-sm font-bold text-primary-foreground ring-1 ring-white/40 transition-transform hover:scale-[1.03]"
+          >
+            <Calculator className="h-4 w-4" />
+            {lang === "ar" ? "🏪 حاسبة المطاعم" : "🏪 Restaurant Cost Calculator"}
+          </Link>
         </div>
       </div>
     </section>
