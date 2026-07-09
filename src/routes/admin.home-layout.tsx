@@ -373,3 +373,72 @@ function NumberField({
     </div>
   );
 }
+
+function ImageField({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
+  const [uploading, setUploading] = useState(false);
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
+  const upload = async (file: File) => {
+    setUploading(true);
+    try {
+      const ext = file.name.split(".").pop() || "jpg";
+      const path = `home/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+      const { error } = await supabase.storage.from("listings").upload(path, file, { cacheControl: "3600" });
+      if (error) throw error;
+      onChange(supabase.storage.from("listings").getPublicUrl(path).data.publicUrl);
+      toast.success("تم رفع الصورة");
+    } catch {
+      toast.error("تعذّر رفع الصورة");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  return (
+    <div>
+      <label className="mb-1 block text-sm font-medium">{label}</label>
+      <div className="flex items-center gap-3">
+        {value ? (
+          <img src={value} alt={label} className="h-16 w-24 rounded-lg border border-border object-cover" />
+        ) : (
+          <div className="flex h-16 w-24 items-center justify-center rounded-lg border border-dashed border-border text-xs text-muted-foreground">
+            لا توجد صورة
+          </div>
+        )}
+        <div className="flex flex-col gap-1.5">
+          <button
+            type="button"
+            onClick={() => inputRef.current?.click()}
+            disabled={uploading}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-1.5 text-xs font-bold disabled:opacity-60"
+          >
+            {uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
+            رفع صورة
+          </button>
+          {value && (
+            <button
+              type="button"
+              onClick={() => onChange("")}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-destructive/40 px-3 py-1.5 text-xs font-bold text-destructive"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+              إزالة الصورة
+            </button>
+          )}
+        </div>
+      </div>
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={(e) => {
+          const f = e.target.files?.[0];
+          if (f) upload(f);
+          e.target.value = "";
+        }}
+      />
+    </div>
+  );
+}
+
