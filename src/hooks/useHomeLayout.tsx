@@ -103,6 +103,9 @@ export function mergeHomeLayout(v: Partial<HomeLayout> | null | undefined): Home
   if (!Array.isArray(merged.rows) || merged.rows.length === 0) {
     merged.rows = DEFAULT_HOME_ROWS;
   }
+  merged.businessesCard = { ...DEFAULT_HOME_LAYOUT.businessesCard, ...(v?.businessesCard ?? {}) };
+  merged.auctionsCard = { ...DEFAULT_HOME_LAYOUT.auctionsCard, ...(v?.auctionsCard ?? {}) };
+
   return merged;
 }
 
