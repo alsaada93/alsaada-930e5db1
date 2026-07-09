@@ -40,7 +40,6 @@ const gradients: Record<string, string> = {
 
 function CategoryCard({ c }: { c: ReturnType<typeof useCategories>["categories"][number] }) {
   const { t, lang } = useLanguage();
-  const [open, setOpen] = useState(false);
   const Icon = icons[c.id] ?? Smartphone;
   const grad = gradients[c.id] ?? "from-primary to-accent";
   const hasImageIcon =
@@ -95,39 +94,8 @@ function CategoryCard({ c }: { c: ReturnType<typeof useCategories>["categories"]
           </span>
         )}
       </Link>
-
-      {/* زر فتح التصنيفات الفرعية بقائمة منسدلة */}
-      {c.groups.length > 0 && (
-        <div className="mt-auto w-full">
-          <button
-            type="button"
-            onClick={() => setOpen((o) => !o)}
-            aria-expanded={open}
-            className="flex w-full items-center justify-between rounded-lg border border-border bg-background px-3 py-1.5 text-xs font-bold text-foreground transition-colors hover:bg-accent"
-          >
-            <span>{lang === "ar" ? "التصنيفات الفرعية" : "Subcategories"}</span>
-            <ChevronDown className={`h-4 w-4 transition-transform ${open ? "rotate-180" : ""}`} />
-          </button>
-          {open && (
-            <div className="mt-2 max-h-40 overflow-auto rounded-lg border border-border bg-background p-2">
-              <div className="flex flex-wrap gap-1.5">
-                {c.groups.map((g) => (
-                  <Link
-                    key={g.name}
-                    to="/category/$id"
-                    params={{ id: c.id }}
-                    search={{ sub: g.name }}
-                    className="rounded-full bg-secondary px-2 py-0.5 text-[11px] font-semibold text-secondary-foreground transition-colors hover:bg-primary hover:text-primary-foreground"
-                  >
-                    {g.name}
-                  </Link>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
     </div>
+
   );
 }
 
