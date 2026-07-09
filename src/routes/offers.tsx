@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Flame } from "lucide-react";
+
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
@@ -81,7 +81,7 @@ function OffersPage() {
           <div className="absolute inset-0 flex flex-col items-center justify-center px-4 text-center">
             {config.badgeShow && config.badgePosition === "top" && (
               <span className="mb-2 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-amber-500 to-red-500 px-4 py-1 text-xs font-bold text-white shadow-lg sm:text-sm">
-                <Flame className="h-4 w-4" />
+                {config.icon && <span>{config.icon}</span>}
                 {lang === "en" ? config.badgeTextEn : config.badgeTextAr}
               </span>
             )}
@@ -90,7 +90,7 @@ function OffersPage() {
             </h1>
             {config.badgeShow && config.badgePosition === "bottom" && (
               <span className="mt-2 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-amber-500 to-red-500 px-4 py-1 text-xs font-bold text-white shadow-lg sm:text-sm">
-                <Flame className="h-4 w-4" />
+                {config.icon && <span>{config.icon}</span>}
                 {lang === "en" ? config.badgeTextEn : config.badgeTextAr}
               </span>
             )}

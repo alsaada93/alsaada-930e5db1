@@ -4,13 +4,13 @@ import { useNavigate } from "@tanstack/react-router";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useHeroConfig, resolveHeroImage } from "@/hooks/useHeroConfig";
 
-export function Hero() {
+export function Hero({ bannerImage }: { bannerImage?: string } = {}) {
   const { t, lang } = useLanguage();
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
 
   const { config } = useHeroConfig();
-  const heroImage = resolveHeroImage(config);
+  const heroImage = bannerImage || resolveHeroImage(config);
 
   const goSearch = () => navigate({ to: "/search", search: { q: query.trim() || undefined } });
 

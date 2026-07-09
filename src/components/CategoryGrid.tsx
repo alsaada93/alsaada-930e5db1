@@ -11,7 +11,7 @@ import {
   Sofa,
   Store,
   Gavel,
-  Flame,
+  
   Calculator,
   ChevronDown,
   type LucideIcon,
@@ -182,11 +182,11 @@ export function CategoryGrid() {
                 height={284}
               />
             </div>
-          ) : (
-            <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500 to-red-500 text-white shadow-lg transition-transform group-hover:scale-110">
-              <Flame className="h-8 w-8" strokeWidth={1.75} />
+          ) : offersConfig.icon ? (
+            <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500 to-red-500 text-3xl text-white shadow-lg transition-transform group-hover:scale-110">
+              {offersConfig.icon}
             </span>
-          )}
+          ) : null}
           <h3 className="font-bold text-card-foreground">
             {offersConfig.icon ? `${offersConfig.icon} ` : ""}
             {lang === "ar" ? offersConfig.titleAr : offersConfig.titleEn}

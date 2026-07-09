@@ -60,18 +60,11 @@ function Index() {
         <HomeBanners position="left" />
         <main className="min-w-0 flex-1">
           <HomeBanners position="top" />
-          {layout.showMainBanner && layout.mainBannerImage && (
-            <section className="mx-auto max-w-6xl px-4 pt-4">
-              <img
-                src={layout.mainBannerImage}
-                alt="حراج السعادة"
-                className="h-40 w-full rounded-2xl object-cover shadow-card sm:h-56 md:h-72"
-                width={1600}
-                height={560}
-              />
-            </section>
+          {layout.showMainBanner && layout.mainBannerImage ? (
+            <Hero bannerImage={layout.mainBannerImage} />
+          ) : (
+            <Hero />
           )}
-          <Hero />
 
           {layout.showPromo && <PromoCarousel />}
           {layout.showCategories && <CategoryGrid />}
