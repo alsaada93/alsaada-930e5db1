@@ -34,7 +34,22 @@ export interface HomeLayout {
   showBusiness: boolean;
   /** صفوف إعلانات الصفحة الرئيسية (قابلة للإضافة والإخفاء والترتيب) */
   rows: HomeRow[];
+  /** عدد أعمدة شبكة التصنيفات على الجوال (2 أو 3) */
+  categoryColsMobile: number;
+  /** عدد أعمدة شبكة التصنيفات على الشاشات الكبيرة */
+  categoryColsDesktop: number;
+  /** عدد الصفوف الظاهرة من التصنيفات (0 = عرض الكل) */
+  categoryRows: number;
+  /** صورة البنر الرئيسي أعلى الصفحة */
+  mainBannerImage: string;
+  /** إظهار البنر الرئيسي */
+  showMainBanner: boolean;
+  /** بطاقة (أنشطة للبيع) في شبكة التصنيفات */
+  businessesCard: { show: boolean; image: string };
+  /** بطاقة (المزادات) في شبكة التصنيفات */
+  auctionsCard: { show: boolean; image: string };
 }
+
 
 export const DEFAULT_HOME_ROWS: HomeRow[] = [
   {
