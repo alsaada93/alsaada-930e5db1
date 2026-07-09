@@ -234,32 +234,8 @@ function HomeLayoutAdminPage() {
           </div>
         </section>
 
-        {/* بطاقات أنشطة للبيع والمزادات */}
-        <section className="rounded-2xl border border-border bg-card p-5">
-          <h2 className="mb-4 text-lg font-bold">بطاقات (أنشطة للبيع) و(المزادات)</h2>
-          <div className="space-y-5">
-            <div className="rounded-xl border border-border bg-background p-4">
-              <div className="mb-3 flex items-center justify-between gap-2">
-                <span className="text-sm font-bold text-primary">أنشطة للبيع</span>
-                <label className="flex cursor-pointer items-center gap-2 text-sm font-medium">
-                  إظهار
-                  <input type="checkbox" checked={draft.businessesCard.show} onChange={(e) => set("businessesCard", { ...draft.businessesCard, show: e.target.checked })} className="h-5 w-5 accent-primary" />
-                </label>
-              </div>
-              <ImageField label="صورة البطاقة" value={draft.businessesCard.image} onChange={(v) => set("businessesCard", { ...draft.businessesCard, image: v })} />
-            </div>
-            <div className="rounded-xl border border-border bg-background p-4">
-              <div className="mb-3 flex items-center justify-between gap-2">
-                <span className="text-sm font-bold text-primary">المزادات</span>
-                <label className="flex cursor-pointer items-center gap-2 text-sm font-medium">
-                  إظهار
-                  <input type="checkbox" checked={draft.auctionsCard.show} onChange={(e) => set("auctionsCard", { ...draft.auctionsCard, show: e.target.checked })} className="h-5 w-5 accent-primary" />
-                </label>
-              </div>
-              <ImageField label="صورة البطاقة" value={draft.auctionsCard.image} onChange={(v) => set("auctionsCard", { ...draft.auctionsCard, image: v })} />
-            </div>
-          </div>
-        </section>
+
+
 
 
 
