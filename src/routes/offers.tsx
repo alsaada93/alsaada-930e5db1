@@ -131,7 +131,19 @@ function OffersPage() {
             <OffersSlideshow images={config.slideImages} intervalMs={config.slideIntervalMs} />
           </div>
         )}
+
+        {/* سياسة الشحن */}
+        <div className="mb-6 flex items-center gap-3 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm font-semibold text-emerald-700 dark:text-emerald-300">
+          <span className="text-lg">🚚</span>
+          <span>
+            {lang === "en"
+              ? "Free shipping within Bahrain on offer purchases over 50 BHD."
+              : "شحن مجاني داخل البحرين لمشتريات قسم العروض التي تزيد عن 50 ديناراً."}
+          </span>
+        </div>
+
         {offers.length > 0 ? (
+
           config.displayMode === "carousel" ? (
             <div dir={config.swipeDirection}>
               <HomeListingsRow

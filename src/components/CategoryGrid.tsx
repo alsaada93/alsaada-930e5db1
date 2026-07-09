@@ -19,6 +19,7 @@ import {
 import { useCategories } from "@/hooks/useCategories";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useOffersConfig } from "@/hooks/useOffersConfig";
+import { useHomeLayout } from "@/hooks/useHomeLayout";
 
 const icons: Record<string, LucideIcon> = {
   restaurant: UtensilsCrossed,
@@ -139,6 +140,22 @@ export function CategoryGrid() {
   const { t, lang } = useLanguage();
   const { categories } = useCategories();
   const { config: offersConfig } = useOffersConfig();
+  const { layout } = useHomeLayout();
+
+  const mobileCols: Record<number, string> = { 1: "grid-cols-1", 2: "grid-cols-2", 3: "grid-cols-3" };
+  const desktopCols: Record<number, string> = {
+    3: "lg:grid-cols-3",
+    4: "lg:grid-cols-4",
+    5: "lg:grid-cols-5",
+    6: "lg:grid-cols-6",
+  };
+  const gridCls = `grid gap-3 ${mobileCols[layout.categoryColsMobile] ?? "grid-cols-3"} sm:grid-cols-3 ${desktopCols[layout.categoryColsDesktop] ?? "lg:grid-cols-4"}`;
+
+  const visibleCats = categories.filter((c) => !c.hidden);
+  const shownCats =
+    layout.categoryRows > 0
+      ? visibleCats.slice(0, layout.categoryRows * layout.categoryColsDesktop)
+      : visibleCats;
 
   return (
     <section className="mx-auto max-w-7xl px-4 py-12">
@@ -148,7 +165,7 @@ export function CategoryGrid() {
           <p className="text-sm text-muted-foreground">{t("cat.subtitle")}</p>
         </div>
       </div>
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+      <div className={gridCls}>
         {/* تصنيف: العروض الخاصة (إدارة فقط) */}
         <Link
           to="/offers"
@@ -171,7 +188,8 @@ export function CategoryGrid() {
             </span>
           )}
           <h3 className="font-bold text-card-foreground">
-            {lang === "ar" ? "🔥 العروض الخاصة" : "🔥 Special Offers"}
+            {offersConfig.icon ? `${offersConfig.icon} ` : ""}
+            {lang === "ar" ? offersConfig.titleAr : offersConfig.titleEn}
           </h3>
           <p className="line-clamp-2 text-xs text-muted-foreground">
             {lang === "ar"
@@ -181,47 +199,75 @@ export function CategoryGrid() {
         </Link>
 
 
-        {categories
-          .filter((c) => !c.hidden)
-          .map((c) => (
-            <CategoryCard key={c.id} c={c} />
-          ))}
+        {shownCats.map((c) => (
+          <CategoryCard key={c.id} c={c} />
+        ))}
 
         {/* تصنيف: أنشطة ومطاعم للبيع */}
-        <a
-          href="#businesses"
-          className="group relative flex flex-col items-start gap-3 overflow-hidden rounded-2xl border border-border bg-card p-4 text-start shadow-card transition-all hover:-translate-y-1 hover:border-primary/40"
-        >
-          <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500 to-red-500 text-white shadow-lg transition-transform group-hover:scale-110">
-            <Store className="h-8 w-8" strokeWidth={1.75} />
-          </span>
-          <h3 className="font-bold text-card-foreground">
-            {lang === "ar" ? "أنشطة للبيع" : "Businesses for sale"}
-          </h3>
-          <p className="line-clamp-2 text-xs text-muted-foreground">
-            {lang === "ar"
-              ? "مطاعم وأنشطة تجارية كاملة جاهزة للتشغيل"
-              : "Restaurants and full businesses ready to operate"}
-          </p>
-        </a>
+        {layout.businessesCard.show && (
+          <a
+            href="#businesses"
+            className="group relative flex flex-col items-start gap-3 overflow-hidden rounded-2xl border border-border bg-card p-4 text-start shadow-card transition-all hover:-translate-y-1 hover:border-primary/40"
+          >
+            {layout.businessesCard.image ? (
+              <div className="relative -mx-4 -mt-4 mb-1 w-[calc(100%+2rem)] overflow-hidden">
+                <img
+                  src={layout.businessesCard.image}
+                  alt={lang === "ar" ? "أنشطة للبيع" : "Businesses for sale"}
+                  className="h-28 w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  loading="lazy"
+                  width={1024}
+                  height={284}
+                />
+              </div>
+            ) : (
+              <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500 to-red-500 text-white shadow-lg transition-transform group-hover:scale-110">
+                <Store className="h-8 w-8" strokeWidth={1.75} />
+              </span>
+            )}
+            <h3 className="font-bold text-card-foreground">
+              {lang === "ar" ? "أنشطة للبيع" : "Businesses for sale"}
+            </h3>
+            <p className="line-clamp-2 text-xs text-muted-foreground">
+              {lang === "ar"
+                ? "مطاعم وأنشطة تجارية كاملة جاهزة للتشغيل"
+                : "Restaurants and full businesses ready to operate"}
+            </p>
+          </a>
+        )}
 
         {/* تصنيف: المزادات */}
-        <a
-          href="#auctions"
-          className="group relative flex flex-col items-start gap-3 overflow-hidden rounded-2xl border border-border bg-card p-4 text-start shadow-card transition-all hover:-translate-y-1 hover:border-primary/40"
-        >
-          <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-500 text-white shadow-lg transition-transform group-hover:scale-110">
-            <Gavel className="h-8 w-8" strokeWidth={1.75} />
-          </span>
-          <h3 className="font-bold text-card-foreground">
-            {lang === "ar" ? "المزادات" : "Auctions"}
-          </h3>
-          <p className="line-clamp-2 text-xs text-muted-foreground">
-            {lang === "ar"
-              ? "زايد على أفضل الصفقات واربح بأقل الأسعار"
-              : "Bid on the best deals and win at lower prices"}
-          </p>
-        </a>
+        {layout.auctionsCard.show && (
+          <a
+            href="#auctions"
+            className="group relative flex flex-col items-start gap-3 overflow-hidden rounded-2xl border border-border bg-card p-4 text-start shadow-card transition-all hover:-translate-y-1 hover:border-primary/40"
+          >
+            {layout.auctionsCard.image ? (
+              <div className="relative -mx-4 -mt-4 mb-1 w-[calc(100%+2rem)] overflow-hidden">
+                <img
+                  src={layout.auctionsCard.image}
+                  alt={lang === "ar" ? "المزادات" : "Auctions"}
+                  className="h-28 w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  loading="lazy"
+                  width={1024}
+                  height={284}
+                />
+              </div>
+            ) : (
+              <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-500 text-white shadow-lg transition-transform group-hover:scale-110">
+                <Gavel className="h-8 w-8" strokeWidth={1.75} />
+              </span>
+            )}
+            <h3 className="font-bold text-card-foreground">
+              {lang === "ar" ? "المزادات" : "Auctions"}
+            </h3>
+            <p className="line-clamp-2 text-xs text-muted-foreground">
+              {lang === "ar"
+                ? "زايد على أفضل الصفقات واربح بأقل الأسعار"
+                : "Bid on the best deals and win at lower prices"}
+            </p>
+          </a>
+        )}
 
         {/* حاسبة المطاعم — بطاقة مميزة تمتد على عرض أكبر */}
         <Link
@@ -244,3 +290,4 @@ export function CategoryGrid() {
     </section>
   );
 }
+

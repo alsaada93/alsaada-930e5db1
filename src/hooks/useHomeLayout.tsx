@@ -34,7 +34,22 @@ export interface HomeLayout {
   showBusiness: boolean;
   /** صفوف إعلانات الصفحة الرئيسية (قابلة للإضافة والإخفاء والترتيب) */
   rows: HomeRow[];
+  /** عدد أعمدة شبكة التصنيفات على الجوال (2 أو 3) */
+  categoryColsMobile: number;
+  /** عدد أعمدة شبكة التصنيفات على الشاشات الكبيرة */
+  categoryColsDesktop: number;
+  /** عدد الصفوف الظاهرة من التصنيفات (0 = عرض الكل) */
+  categoryRows: number;
+  /** صورة البنر الرئيسي أعلى الصفحة */
+  mainBannerImage: string;
+  /** إظهار البنر الرئيسي */
+  showMainBanner: boolean;
+  /** بطاقة (أنشطة للبيع) في شبكة التصنيفات */
+  businessesCard: { show: boolean; image: string };
+  /** بطاقة (المزادات) في شبكة التصنيفات */
+  auctionsCard: { show: boolean; image: string };
 }
+
 
 export const DEFAULT_HOME_ROWS: HomeRow[] = [
   {
@@ -71,7 +86,15 @@ export const DEFAULT_HOME_LAYOUT: HomeLayout = {
   showTestimonials: true,
   showBusiness: true,
   rows: DEFAULT_HOME_ROWS,
+  categoryColsMobile: 3,
+  categoryColsDesktop: 4,
+  categoryRows: 0,
+  mainBannerImage: "/__l5e/assets-v1/dd15f401-46f8-4420-ae48-fb6ea67f58df/home-main-banner.jpg",
+  showMainBanner: true,
+  businessesCard: { show: true, image: "/__l5e/assets-v1/fb407cd7-162a-4db4-91e7-0be93da8d308/cat-businesses.jpg" },
+  auctionsCard: { show: true, image: "/__l5e/assets-v1/68f11720-000e-465b-a7c0-faf85264eb18/cat-auctions.jpg" },
 };
+
 
 export const HOME_LAYOUT_KEY = "homeLayout";
 
@@ -80,6 +103,9 @@ export function mergeHomeLayout(v: Partial<HomeLayout> | null | undefined): Home
   if (!Array.isArray(merged.rows) || merged.rows.length === 0) {
     merged.rows = DEFAULT_HOME_ROWS;
   }
+  merged.businessesCard = { ...DEFAULT_HOME_LAYOUT.businessesCard, ...(v?.businessesCard ?? {}) };
+  merged.auctionsCard = { ...DEFAULT_HOME_LAYOUT.auctionsCard, ...(v?.auctionsCard ?? {}) };
+
   return merged;
 }
 
