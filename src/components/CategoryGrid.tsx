@@ -19,6 +19,7 @@ import {
 import { useCategories } from "@/hooks/useCategories";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useOffersConfig } from "@/hooks/useOffersConfig";
+import { useHomeLayout } from "@/hooks/useHomeLayout";
 
 const icons: Record<string, LucideIcon> = {
   restaurant: UtensilsCrossed,
