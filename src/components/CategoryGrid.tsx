@@ -11,7 +11,7 @@ import {
   Sofa,
   Store,
   Gavel,
-  Flame,
+  
   Calculator,
   ChevronDown,
   type LucideIcon,
