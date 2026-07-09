@@ -86,7 +86,15 @@ export const DEFAULT_HOME_LAYOUT: HomeLayout = {
   showTestimonials: true,
   showBusiness: true,
   rows: DEFAULT_HOME_ROWS,
+  categoryColsMobile: 3,
+  categoryColsDesktop: 4,
+  categoryRows: 0,
+  mainBannerImage: "/__l5e/assets-v1/dd15f401-46f8-4420-ae48-fb6ea67f58df/home-main-banner.jpg",
+  showMainBanner: true,
+  businessesCard: { show: true, image: "/__l5e/assets-v1/fb407cd7-162a-4db4-91e7-0be93da8d308/cat-businesses.jpg" },
+  auctionsCard: { show: true, image: "/__l5e/assets-v1/68f11720-000e-465b-a7c0-faf85264eb18/cat-auctions.jpg" },
 };
+
 
 export const HOME_LAYOUT_KEY = "homeLayout";
 
