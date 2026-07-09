@@ -8,7 +8,7 @@ import {
   Package,
   Smartphone,
   Sofa,
-  Calculator,
+  
   type LucideIcon,
 } from "lucide-react";
 import { useCategories } from "@/hooks/useCategories";
