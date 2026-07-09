@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import {
   UtensilsCrossed,
@@ -9,11 +8,7 @@ import {
   Package,
   Smartphone,
   Sofa,
-  Store,
-  Gavel,
-  
   Calculator,
-  ChevronDown,
   type LucideIcon,
 } from "lucide-react";
 import { useCategories } from "@/hooks/useCategories";
