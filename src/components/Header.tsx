@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Globe, Heart, Bell, User, Camera, LogOut, LayoutDashboard, UserCircle, Menu, Calculator } from "lucide-react";
 import { useLanguage } from "@/hooks/useLanguage";
@@ -19,6 +20,34 @@ export function Header() {
   const { user, isAdmin, signOut } = useAuth();
   const { identity, loading: identityLoading } = useSiteIdentity();
 
+  // إظهار/إخفاء الهيدر عند التمرير: يختفي عند النزول ويظهر عند الصعود أو التوقف
+  const [hidden, setHidden] = useState(false);
+  const lastY = useRef(0);
+  const stopTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    lastY.current = window.scrollY;
+    const onScroll = () => {
+      const y = window.scrollY;
+      const delta = y - lastY.current;
+      if (y < 80) {
+        setHidden(false);
+      } else if (delta > 6) {
+        setHidden(true);
+      } else if (delta < -6) {
+        setHidden(false);
+      }
+      lastY.current = y;
+      if (stopTimer.current) clearTimeout(stopTimer.current);
+      stopTimer.current = setTimeout(() => setHidden(false), 150);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (stopTimer.current) clearTimeout(stopTimer.current);
+    };
+  }, []);
+
   const displayName =
     (user?.user_metadata?.full_name as string | undefined) ||
     user?.email?.split("@")[0] ||
@@ -27,7 +56,11 @@ export function Header() {
   const logoUrl = identity.showLogo && identity.logoUrl ? `${identity.logoUrl}${identity.logoUrl.includes("?") ? "&" : "?"}v=alsaada-2026-06` : "";
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border bg-navy text-navy-foreground">
+    <header
+      className={`sticky top-0 z-50 border-b border-border bg-navy text-navy-foreground transition-transform duration-300 will-change-transform ${
+        hidden ? "-translate-y-full" : "translate-y-0"
+      }`}
+    >
       <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3 sm:gap-6 sm:px-6 sm:py-4">
         <Link to="/" className="flex shrink-0 items-center gap-2 sm:gap-2.5">
           {!identityLoading && identity.showLogo && logoUrl && (
