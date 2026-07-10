@@ -23,6 +23,7 @@ import { CardConfigProvider } from "@/hooks/useCardConfig";
 import { Toaster } from "@/components/ui/sonner";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { isNativePlatform } from "@/lib/capacitor";
+import { supabase } from "@/integrations/supabase/client";
 
 function NotFoundComponent() {
   return (
@@ -224,7 +225,31 @@ function RootComponent() {
         }
       });
 
-      cleanup = () => listener.remove();
+      // استقبال deep link العائد من Google OAuth: harajalsaada://login-callback?code=...
+      const urlListener = await App.addListener("appUrlOpen", async ({ url }) => {
+        console.log("[HARAJ_AUTH_DEBUG] appUrlOpen received:", url);
+        if (!url || !url.startsWith("harajalsaada://login-callback")) return;
+        try {
+          const code = new URL(url).searchParams.get("code");
+          console.log("[HARAJ_AUTH_DEBUG] extracted code:", code);
+          if (!code) return;
+          const { error } = await supabase.auth.exchangeCodeForSession(code);
+          console.log(
+            "[HARAJ_AUTH_DEBUG] exchangeCodeForSession:",
+            error ? `error: ${error.message}` : "success",
+          );
+          if (!error) {
+            window.location.href = "/";
+          }
+        } catch (e) {
+          console.error("[HARAJ_AUTH_DEBUG] deep link parse/exchange failed", e);
+        }
+      });
+
+      cleanup = () => {
+        listener.remove();
+        urlListener.remove();
+      };
     })();
 
     return cleanup;
