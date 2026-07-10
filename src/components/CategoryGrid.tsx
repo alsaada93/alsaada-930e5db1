@@ -134,7 +134,7 @@ export function CategoryGrid() {
           to="/offers"
           className="group relative flex flex-col items-start gap-3 overflow-hidden rounded-2xl border border-primary/40 bg-card p-4 text-start shadow-card transition-all hover:-translate-y-1 hover:border-primary/40"
         >
-          {offersConfig.iconImage || offersConfig.bannerImage ? (
+          {offersLoading ? null : offersConfig.iconImage || offersConfig.bannerImage ? (
             <div className="relative -mx-4 -mt-4 mb-1 w-[calc(100%+2rem)] overflow-hidden">
               <img
                 src={offersConfig.iconImage || offersConfig.bannerImage}
@@ -151,7 +151,7 @@ export function CategoryGrid() {
             </span>
           ) : null}
           <h3 className="font-bold text-card-foreground">
-            {offersConfig.icon ? `${offersConfig.icon} ` : ""}
+            {!offersLoading && offersConfig.icon ? `${offersConfig.icon} ` : ""}
             {lang === "ar" ? offersConfig.titleAr : offersConfig.titleEn}
           </h3>
           <p className="line-clamp-2 text-xs text-muted-foreground">
