@@ -102,7 +102,7 @@ function CategoryCard({ c }: { c: ReturnType<typeof useCategories>["categories"]
 export function CategoryGrid() {
   const { t, lang } = useLanguage();
   const { categories } = useCategories();
-  const { config: offersConfig } = useOffersConfig();
+  const { config: offersConfig, loading: offersLoading } = useOffersConfig();
   const { layout } = useHomeLayout();
 
   const mobileCols: Record<number, string> = { 1: "grid-cols-1", 2: "grid-cols-2", 3: "grid-cols-3" };
