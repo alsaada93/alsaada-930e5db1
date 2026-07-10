@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Globe, Heart, Bell, User, Camera, LogOut, LayoutDashboard, UserCircle, Menu, Calculator } from "lucide-react";
 import { useLanguage } from "@/hooks/useLanguage";
