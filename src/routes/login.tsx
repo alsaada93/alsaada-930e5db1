@@ -164,6 +164,25 @@ function LoginPage() {
   };
 
   const handleGoogle = async () => {
+    // داخل تطبيق Capacitor نعيد التوجيه إلى deep link التطبيق بدلاً من الموقع.
+    if (isNativePlatform()) {
+      console.log("[HARAJ_AUTH_DEBUG] native platform: using redirect", NATIVE_OAUTH_REDIRECT);
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo: NATIVE_OAUTH_REDIRECT, skipBrowserRedirect: true },
+      });
+      if (error || !data?.url) {
+        console.error("[HARAJ_AUTH_DEBUG] signInWithOAuth error", error);
+        toast.error("تعذّر تسجيل الدخول عبر جوجل");
+        return;
+      }
+      console.log("[HARAJ_AUTH_DEBUG] opening OAuth url:", data.url);
+      // فتح المتصفح الخارجي للنظام لإكمال تسجيل الدخول ثم العودة عبر deep link.
+      window.open(data.url, "_system");
+      return;
+    }
+
+    console.log("[HARAJ_AUTH_DEBUG] web platform: using redirect", `${window.location.origin}/account`);
     const result = await lovable.auth.signInWithOAuth("google", {
       redirect_uri: `${window.location.origin}/account`,
     });
@@ -173,6 +192,18 @@ function LoginPage() {
   };
 
   const handleApple = async () => {
+    if (isNativePlatform()) {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: "apple",
+        options: { redirectTo: NATIVE_OAUTH_REDIRECT, skipBrowserRedirect: true },
+      });
+      if (error || !data?.url) {
+        toast.error("تعذّر تسجيل الدخول عبر آبل");
+        return;
+      }
+      window.open(data.url, "_system");
+      return;
+    }
     const result = await lovable.auth.signInWithOAuth("apple", {
       redirect_uri: `${window.location.origin}/account`,
     });
