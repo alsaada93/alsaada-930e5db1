@@ -20,6 +20,10 @@ import {
 import { toast } from "sonner";
 import { ShieldCheck, Apple, MessageCircle, Mail } from "lucide-react";
 import googleLogo from "@/assets/google-logo.png";
+import { isNativePlatform } from "@/lib/capacitor";
+
+// Deep link used by the native Android/iOS app to return from Google OAuth.
+const NATIVE_OAUTH_REDIRECT = "harajalsaada://login-callback";
 
 const COUNTRY_CODES = [
   { code: "973", label: "البحرين +973" },
