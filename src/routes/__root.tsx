@@ -23,6 +23,7 @@ import { CardConfigProvider } from "@/hooks/useCardConfig";
 import { Toaster } from "@/components/ui/sonner";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { isNativePlatform } from "@/lib/capacitor";
+import { supabase } from "@/integrations/supabase/client";
 
 function NotFoundComponent() {
   return (
