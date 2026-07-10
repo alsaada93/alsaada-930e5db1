@@ -20,6 +20,34 @@ export function Header() {
   const { user, isAdmin, signOut } = useAuth();
   const { identity, loading: identityLoading } = useSiteIdentity();
 
+  // إظهار/إخفاء الهيدر عند التمرير: يختفي عند النزول ويظهر عند الصعود أو التوقف
+  const [hidden, setHidden] = useState(false);
+  const lastY = useRef(0);
+  const stopTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    lastY.current = window.scrollY;
+    const onScroll = () => {
+      const y = window.scrollY;
+      const delta = y - lastY.current;
+      if (y < 80) {
+        setHidden(false);
+      } else if (delta > 6) {
+        setHidden(true);
+      } else if (delta < -6) {
+        setHidden(false);
+      }
+      lastY.current = y;
+      if (stopTimer.current) clearTimeout(stopTimer.current);
+      stopTimer.current = setTimeout(() => setHidden(false), 150);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (stopTimer.current) clearTimeout(stopTimer.current);
+    };
+  }, []);
+
   const displayName =
     (user?.user_metadata?.full_name as string | undefined) ||
     user?.email?.split("@")[0] ||
