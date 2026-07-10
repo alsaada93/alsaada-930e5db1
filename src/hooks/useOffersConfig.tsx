@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 export interface OffersConfig {
   /** رابط صورة البانر الرئيسي لصفحة العروض */
   bannerImage: string;
-  /** رمز/إيموجي القسم الظاهر في العنوان وبطاقة التصنيف */
+  /** قيمة قديمة للتوافق فقط — لا تُعرض في الواجهة. */
   icon: string;
   /** رابط صورة الأيقونة لبطاقة صفحة العروض (اختياري — يحل محل الإيموجي) */
   iconImage: string;
@@ -45,7 +45,7 @@ export interface OffersConfig {
 
 export const DEFAULT_OFFERS_CONFIG: OffersConfig = {
   bannerImage: "",
-  icon: "🔥",
+  icon: "",
   iconImage: "",
   titleAr: "العروض الخاصة",
   titleEn: "Special Offers",
@@ -72,7 +72,7 @@ export const DEFAULT_OFFERS_CONFIG: OffersConfig = {
 export const OFFERS_CONFIG_KEY = "offersConfig";
 
 export function mergeOffersConfig(v: Partial<OffersConfig> | null | undefined): OffersConfig {
-  return { ...DEFAULT_OFFERS_CONFIG, ...(v ?? {}) };
+  return { ...DEFAULT_OFFERS_CONFIG, ...(v ?? {}), icon: "" };
 }
 
 export function useOffersConfig() {

@@ -145,13 +145,8 @@ export function CategoryGrid() {
                 height={284}
               />
             </div>
-          ) : offersConfig.icon ? (
-            <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500 to-red-500 text-3xl text-white shadow-lg transition-transform group-hover:scale-110">
-              {offersConfig.icon}
-            </span>
           ) : null}
           <h3 className="font-bold text-card-foreground">
-            {!offersLoading && offersConfig.icon ? `${offersConfig.icon} ` : ""}
             {lang === "ar" ? offersConfig.titleAr : offersConfig.titleEn}
           </h3>
           <p className="line-clamp-2 text-xs text-muted-foreground">

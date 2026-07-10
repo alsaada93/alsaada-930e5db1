@@ -16,7 +16,7 @@ async function uploadBanner(file: File): Promise<string> {
 }
 
 /**
- * لوحة التحكم بشكل صفحة العروض: الصورة، الرمز، العنوان، طريقة العرض،
+  * لوحة التحكم بشكل صفحة العروض: الصورة، العنوان، طريقة العرض،
  * عدد الأعمدة والصفوف، حجم البطاقات، اتجاه السحب، والظهور في الرئيسية.
  */
 export function OffersSettingsPanel() {
@@ -27,7 +27,7 @@ export function OffersSettingsPanel() {
   const [uploadingIcon, setUploadingIcon] = useState(false);
 
   useEffect(() => {
-    if (!loading) setDraft(config);
+    if (!loading) setDraft({ ...config, icon: "" });
   }, [loading, config]);
 
   const set = <K extends keyof OffersConfig>(k: K, v: OffersConfig[K]) =>
@@ -36,7 +36,7 @@ export function OffersSettingsPanel() {
   const onSave = async () => {
     setSaving(true);
     try {
-      await save(draft);
+      await save({ ...draft, icon: "" });
       toast.success("تم حفظ إعدادات صفحة العروض");
     } catch {
       toast.error("تعذّر الحفظ — تأكد من صلاحياتك");
@@ -122,33 +122,14 @@ export function OffersSettingsPanel() {
           </div>
         </div>
 
-        {/* الرمز */}
-        <div className="flex flex-col gap-1.5">
-          <label className={lbl}>رمز القسم (إيموجي)</label>
-          <div className="flex gap-2">
-            <input className={field} value={draft.icon} onChange={(e) => set("icon", e.target.value)} placeholder="🔥" />
-            {draft.icon && (
-              <button
-                type="button"
-                onClick={() => set("icon", "")}
-                className="shrink-0 rounded-lg border border-input px-3 py-1.5 text-xs font-bold hover:bg-accent"
-              >
-                حذف الرمز
-              </button>
-            )}
-          </div>
-          <p className="text-xs text-muted-foreground">احذف الرمز لمنع ظهور شعار 🔥 والوميض على الصور.</p>
-        </div>
-
-
         {/* صورة الأيقونة لبطاقة العروض */}
         <div className="flex flex-col gap-1.5">
           <label className={lbl}>صورة أيقونة بطاقة العروض</label>
           {draft.iconImage ? (
             <img src={draft.iconImage} alt="أيقونة العروض" className="h-16 w-16 rounded-2xl border border-border object-cover" />
           ) : (
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-dashed border-border text-2xl">
-              {draft.icon || "🔥"}
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-dashed border-border text-xs text-muted-foreground">
+              لا توجد صورة
             </div>
           )}
           <div className="flex gap-2">
