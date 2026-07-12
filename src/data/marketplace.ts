@@ -35,6 +35,8 @@ export interface Listing {
   sub?: string;
   itemName?: string;
   image: string;
+  /** جميع صور الإعلان (للتبديل التلقائي داخل البطاقة) */
+  images?: string[];
   featured: boolean;
   views: number;
   phone?: string;

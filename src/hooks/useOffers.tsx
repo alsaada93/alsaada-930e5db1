@@ -24,6 +24,7 @@ function mapRow(d: Row): Listing {
     category: categoryName((d.category_id as string | null) ?? null),
     categoryId: (d.category_id as string | null) ?? undefined,
     image: images[0] ?? "/placeholder.svg",
+    images,
     featured: Boolean(d.featured),
     views: Number(d.views ?? 0),
     phone: (d.contact_phone as string | null) ?? undefined,
