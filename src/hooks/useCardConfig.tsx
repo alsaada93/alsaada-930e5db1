@@ -22,6 +22,11 @@ export interface CardConfig {
   /** خلفية مربع الصورة */
   imageBg: "background" | "white" | "muted";
 
+  /** تبديل صور الإعلان تلقائياً داخل البطاقة عند وجود أكثر من صورة */
+  imageAutoRotate: boolean;
+  /** الفاصل الزمني للتبديل التلقائي بالمللي ثانية */
+  imageRotateMs: number;
+
   /** عناصر تظهر داخل البطاقة */
   showWatermark: boolean;
   showBrandLogo: boolean;
@@ -49,6 +54,9 @@ export const DEFAULT_CARD_CONFIG: CardConfig = {
   imageHeightPx: 200,
   cardRadius: 16,
   imageBg: "white",
+
+  imageAutoRotate: true,
+  imageRotateMs: 2000,
 
   showWatermark: true,
   showBrandLogo: true,

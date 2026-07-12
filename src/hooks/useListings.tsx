@@ -25,6 +25,7 @@ function mapRow(d: Row): Listing {
     sub: (d.group_name as string | null) ?? undefined,
     itemName: (d.item_name as string | null) ?? undefined,
     image: images[0] ?? "/placeholder.svg",
+    images,
     featured: Boolean(d.featured),
     views: Number(d.views ?? 0),
     phone: (d.contact_phone as string | null) ?? undefined,

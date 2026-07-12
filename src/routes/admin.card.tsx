@@ -151,6 +151,29 @@ function CardConfigPage() {
               </div>
               <Slider min={0} max={32} step={1} value={[draft.cardRadius]} onValueChange={(v) => set("cardRadius", v[0])} />
             </div>
+
+            <div className="space-y-3 rounded-xl border border-border bg-background p-4">
+              <Toggle
+                label="تبديل صور الإعلان تلقائياً (عند وجود أكثر من صورة)"
+                checked={draft.imageAutoRotate}
+                onChange={(v) => set("imageAutoRotate", v)}
+              />
+              {draft.imageAutoRotate && (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-sm font-semibold">
+                    <span>مدة عرض كل صورة</span>
+                    <span className="text-primary">{(draft.imageRotateMs / 1000).toFixed(1)} ثانية</span>
+                  </div>
+                  <Slider
+                    min={1000}
+                    max={10000}
+                    step={500}
+                    value={[draft.imageRotateMs]}
+                    onValueChange={(v) => set("imageRotateMs", v[0])}
+                  />
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
