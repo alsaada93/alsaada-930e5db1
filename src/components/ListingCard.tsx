@@ -79,6 +79,19 @@ export function ListingCard({
       : { aspectRatio: config.imageAspect.replace("/", " / ") };
   const objectFit = config.imageFit === "cover" ? "object-cover" : "object-contain";
 
+  // صور الإعلان مع التبديل التلقائي داخل البطاقة
+  const gallery = (item.images && item.images.length > 0 ? item.images : [item.image]).filter(Boolean);
+  const [imgIndex, setImgIndex] = useState(0);
+  useEffect(() => {
+    if (!config.imageAutoRotate || gallery.length < 2) return;
+    const ms = Math.max(500, config.imageRotateMs || 2000);
+    const timer = setInterval(() => {
+      setImgIndex((i) => (i + 1) % gallery.length);
+    }, ms);
+    return () => clearInterval(timer);
+  }, [config.imageAutoRotate, config.imageRotateMs, gallery.length]);
+  const currentImage = gallery[imgIndex] ?? item.image;
+
   // أزرار التواصل الظاهرة
   const showWa = config.showContact && config.showWhatsapp && !!phone && !!waLink;
   const showCall = config.showContact && config.showCall && !!phone;
