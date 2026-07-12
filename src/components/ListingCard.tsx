@@ -111,16 +111,30 @@ export function ListingCard({
           style={imageStyle}
         >
           <img
-            src={optimizedImage(item.image, 600, 70, config.imageFit)}
-            srcSet={optimizedSrcSet(item.image, [300, 600, 900], 70, config.imageFit)}
+            key={currentImage}
+            src={optimizedImage(currentImage, 600, 70, config.imageFit)}
+            srcSet={optimizedSrcSet(currentImage, [300, 600, 900], 70, config.imageFit)}
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 280px"
             alt={title}
             width={600}
             height={600}
             loading="lazy"
             decoding="async"
-            className={`block h-full w-full transform-none object-center transition-none ${objectFit}`}
+            className={`block h-full w-full animate-fade-in object-center ${objectFit}`}
           />
+
+          {gallery.length > 1 && (
+            <div className="pointer-events-none absolute bottom-1.5 left-1/2 flex -translate-x-1/2 gap-1">
+              {gallery.map((_, i) => (
+                <span
+                  key={i}
+                  className={`h-1.5 w-1.5 rounded-full transition-colors ${
+                    i === imgIndex ? "bg-white" : "bg-white/50"
+                  }`}
+                />
+              ))}
+            </div>
+          )}
 
           {config.showWatermark && (
             <span className="pointer-events-none absolute bottom-1.5 right-1.5 select-none text-[10px] font-bold text-white/90 drop-shadow-[0_1px_2px_rgba(0,0,0,0.7)]">
