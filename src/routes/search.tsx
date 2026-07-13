@@ -4,6 +4,7 @@ import { ArrowRight, Search as SearchIcon, SlidersHorizontal, X } from "lucide-r
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ListingCard } from "@/components/ListingCard";
+import { ListingGridSkeleton } from "@/components/ListingCardSkeleton";
 import { bahrainRegions, type Listing } from "@/data/marketplace";
 import { displayCity } from "@/data/bahrainCities";
 import { useListings } from "@/hooks/useListings";
