@@ -1,4 +1,5 @@
 import { ListingCard } from "./ListingCard";
+import { ListingGridSkeleton } from "./ListingCardSkeleton";
 import type { Listing } from "@/data/marketplace";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useListingTranslations } from "@/hooks/useListingTranslations";
@@ -9,12 +10,16 @@ export function ListingsSection({
   items,
   emptyText,
   hideContact,
+  hideMeta,
+  loading,
 }: {
   title: string;
   subtitle?: string;
   items: Listing[];
   emptyText?: string;
   hideContact?: boolean;
+  hideMeta?: boolean;
+  loading?: boolean;
 }) {
   const { lang } = useLanguage();
   const { map } = useListingTranslations(items.map((i) => ({ id: i.id, title: i.title, description: i.description })));
@@ -27,10 +32,18 @@ export function ListingsSection({
           {subtitle && <p className="text-sm text-muted-foreground">{subtitle}</p>}
         </div>
       </div>
-      {items.length > 0 ? (
+      {loading ? (
+        <ListingGridSkeleton className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3" />
+      ) : items.length > 0 ? (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {items.map((item) => (
-            <ListingCard key={item.id} item={item} displayTitle={map[item.id]?.title} hideContact={hideContact} />
+            <ListingCard
+              key={item.id}
+              item={item}
+              displayTitle={map[item.id]?.title}
+              hideContact={hideContact}
+              hideMeta={hideMeta}
+            />
           ))}
         </div>
       ) : (
