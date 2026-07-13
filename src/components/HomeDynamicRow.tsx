@@ -11,7 +11,7 @@ import type { HomeRow } from "@/hooks/useHomeLayout";
 export function HomeDynamicRow({ row }: { row: HomeRow }) {
   const { lang } = useLanguage();
   const isCategory = row.source === "category" && !!row.categoryId;
-  const { listings, loadMore, loadingMore, hasMore } = useListings({
+  const { listings, loading, loadMore, loadingMore, hasMore } = useListings({
     pageSize: row.count,
     onlyNormal: true,
     categoryId: isCategory ? row.categoryId : undefined,
