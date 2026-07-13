@@ -91,7 +91,9 @@ export function HomeListingsRow({
         )}
       </div>
 
-      {items.length > 0 ? (
+      {loading ? (
+        <ListingRowSkeleton cardWidthPct={cardWidthPct} />
+      ) : items.length > 0 ? (
         <div
           ref={trackRef}
           className="flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-smooth pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
@@ -102,7 +104,12 @@ export function HomeListingsRow({
               className="w-[var(--cw)] min-w-0 shrink-0 snap-start sm:w-[38%] lg:w-[23%]"
               style={{ ["--cw" as string]: `${cardWidthPct ?? 62}%` }}
             >
-              <ListingCard item={item} displayTitle={map[item.id]?.title} hideContact={hideContact} />
+              <ListingCard
+                item={item}
+                displayTitle={map[item.id]?.title}
+                hideContact={hideContact}
+                hideMeta={hideMeta}
+              />
             </div>
           ))}
         </div>
