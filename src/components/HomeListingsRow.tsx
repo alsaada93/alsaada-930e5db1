@@ -1,6 +1,7 @@
 import { useRef, type ReactNode } from "react";
 import { ChevronLeft, ChevronRight, ChevronDown, Loader2 } from "lucide-react";
 import { ListingCard } from "./ListingCard";
+import { ListingRowSkeleton } from "./ListingCardSkeleton";
 import type { Listing } from "@/data/marketplace";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useListingTranslations } from "@/hooks/useListingTranslations";
