@@ -209,7 +209,7 @@ export function ListingCard({
           </div>
         )}
 
-        {config.showRating && (
+        {!hideMeta && config.showRating && (
           <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
             {verified && (
               <span className="inline-flex items-center gap-0.5 font-semibold text-primary">
