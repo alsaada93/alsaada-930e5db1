@@ -4,6 +4,7 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { ListingCard } from "@/components/ListingCard";
+import { ListingGridSkeleton } from "@/components/ListingCardSkeleton";
 import { HomeListingsRow } from "@/components/HomeListingsRow";
 import { useOffers } from "@/hooks/useOffers";
 import { useLanguage } from "@/hooks/useLanguage";
