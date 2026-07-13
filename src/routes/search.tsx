@@ -210,7 +210,9 @@ function SearchPage() {
                   : "Search results"}{" "}
               ({results.length.toLocaleString(lang)})
             </h1>
-            {results.length > 0 ? (
+            {loading ? (
+              <ListingGridSkeleton count={12} />
+            ) : results.length > 0 ? (
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
                 {results.map((item) => (
                   <ListingCard key={item.id} item={item} />
