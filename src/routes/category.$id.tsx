@@ -394,7 +394,9 @@ function CategoryPage() {
           <h2 className="mb-4 text-lg font-extrabold">
             {lang === "ar" ? "الإعلانات" : "Listings"} ({filtered.length.toLocaleString(lang)})
           </h2>
-          {filtered.length > 0 ? (
+          {loading ? (
+            <ListingGridSkeleton count={12} />
+          ) : filtered.length > 0 ? (
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
               {filtered.map((item: Listing) => (
                 <ListingCard key={item.id} item={item} />
