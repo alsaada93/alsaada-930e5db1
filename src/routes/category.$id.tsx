@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ListingCard } from "@/components/ListingCard";
+import { ListingGridSkeleton } from "@/components/ListingCardSkeleton";
 import { categories, bahrainRegions, type Listing, type Category } from "@/data/marketplace";
 import { displayCity } from "@/data/bahrainCities";
 import { useListings } from "@/hooks/useListings";
@@ -117,7 +118,7 @@ function CategoryPage() {
   const search = Route.useSearch();
   const navigate = useNavigate();
   const { t, lang } = useLanguage();
-  const { listings, loadMore, loadingMore, hasMore } = useListings({
+  const { listings, loading, loadMore, loadingMore, hasMore } = useListings({
     categoryId: category.id,
     subcategory: search.sub,
     pageSize: 24,
@@ -394,7 +395,9 @@ function CategoryPage() {
           <h2 className="mb-4 text-lg font-extrabold">
             {lang === "ar" ? "الإعلانات" : "Listings"} ({filtered.length.toLocaleString(lang)})
           </h2>
-          {filtered.length > 0 ? (
+          {loading ? (
+            <ListingGridSkeleton count={12} />
+          ) : filtered.length > 0 ? (
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
               {filtered.map((item: Listing) => (
                 <ListingCard key={item.id} item={item} />

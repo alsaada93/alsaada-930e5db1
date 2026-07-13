@@ -81,7 +81,7 @@ function Index() {
           ))}
 
           {layout.showFeatured && featured.length > 0 && (
-            <ListingsSection title={t("sec.featured")} subtitle={t("sec.featuredSub")} items={featured} hideContact />
+            <ListingsSection title={t("sec.featured")} subtitle={t("sec.featuredSub")} items={featured} hideContact hideMeta />
           )}
 
           {layout.showTestimonials && <Testimonials />}

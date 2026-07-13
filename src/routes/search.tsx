@@ -4,6 +4,7 @@ import { ArrowRight, Search as SearchIcon, SlidersHorizontal, X } from "lucide-r
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ListingCard } from "@/components/ListingCard";
+import { ListingGridSkeleton } from "@/components/ListingCardSkeleton";
 import { bahrainRegions, type Listing } from "@/data/marketplace";
 import { displayCity } from "@/data/bahrainCities";
 import { useListings } from "@/hooks/useListings";
@@ -44,7 +45,7 @@ function SearchPage() {
   const { q } = search;
   const navigate = useNavigate();
   const { lang } = useLanguage();
-  const { listings } = useListings();
+  const { listings, loading } = useListings();
   const [query, setQuery] = useState(q ?? "");
 
   useEffect(() => {
@@ -209,7 +210,9 @@ function SearchPage() {
                   : "Search results"}{" "}
               ({results.length.toLocaleString(lang)})
             </h1>
-            {results.length > 0 ? (
+            {loading ? (
+              <ListingGridSkeleton count={12} />
+            ) : results.length > 0 ? (
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
                 {results.map((item) => (
                   <ListingCard key={item.id} item={item} />

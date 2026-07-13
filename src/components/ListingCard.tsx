@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { MapPin, Eye, Star, BadgeCheck, MessageCircle, Phone, Tag } from "lucide-react";
 import { categories, type Listing } from "@/data/marketplace";
@@ -39,11 +39,14 @@ export function ListingCard({
   item,
   displayTitle,
   hideContact = false,
+  hideMeta = false,
 }: {
   item: Listing;
   displayTitle?: string;
   /** إخفاء أزرار التواصل (واتساب/اتصال/دردشة) — مستخدم في الصفحة الرئيسية */
   hideContact?: boolean;
+  /** إخفاء التقييم والموقع وعدد المشاهدات — مستخدم في الصفحة الرئيسية والعروض */
+  hideMeta?: boolean;
 }) {
   const { byId } = useSellers();
   const { t, lang } = useLanguage();
@@ -79,18 +82,19 @@ export function ListingCard({
       : { aspectRatio: config.imageAspect.replace("/", " / ") };
   const objectFit = config.imageFit === "cover" ? "object-cover" : "object-contain";
 
-  // صور الإعلان مع التبديل التلقائي داخل البطاقة
+  // صور الإعلان مع التمرير التلقائي (انزلاق من اليمين لليسار) داخل البطاقة
   const gallery = (item.images && item.images.length > 0 ? item.images : [item.image]).filter(Boolean);
   const [imgIndex, setImgIndex] = useState(0);
+  // فاصل زمني عشوائي لكل بطاقة بين 1.5 و2.5 ثانية حتى لا تتحرك كل الإعلانات معاً
+  const rotateMs = useMemo(() => 1500 + Math.random() * 1000, []);
   useEffect(() => {
     if (!config.imageAutoRotate || gallery.length < 2) return;
-    const ms = Math.max(500, config.imageRotateMs || 2000);
     const timer = setInterval(() => {
       setImgIndex((i) => (i + 1) % gallery.length);
-    }, ms);
+    }, rotateMs);
     return () => clearInterval(timer);
-  }, [config.imageAutoRotate, config.imageRotateMs, gallery.length]);
-  const currentImage = gallery[imgIndex] ?? item.image;
+  }, [config.imageAutoRotate, rotateMs, gallery.length]);
+
 
   // أزرار التواصل الظاهرة
   const showWa = config.showContact && config.showWhatsapp && !!phone && !!waLink;
@@ -110,18 +114,26 @@ export function ListingCard({
           className={`relative flex items-center justify-center overflow-hidden ${IMG_BG[config.imageBg] ?? IMG_BG.background}`}
           style={imageStyle}
         >
-          <img
-            key={currentImage}
-            src={optimizedImage(currentImage, 600, 70, config.imageFit)}
-            srcSet={optimizedSrcSet(currentImage, [300, 600, 900], 70, config.imageFit)}
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 280px"
-            alt={title}
-            width={600}
-            height={600}
-            loading="lazy"
-            decoding="async"
-            className={`block h-full w-full animate-fade-in object-center ${objectFit}`}
-          />
+          <div
+            className="flex h-full w-full transition-transform duration-700 ease-in-out"
+            style={{ transform: `translateX(-${imgIndex * 100}%)` }}
+          >
+            {gallery.map((img, i) => (
+              <img
+                key={`${img}-${i}`}
+                src={optimizedImage(img, 600, 70, config.imageFit)}
+                srcSet={optimizedSrcSet(img, [300, 600, 900], 70, config.imageFit)}
+                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 280px"
+                alt={title}
+                width={600}
+                height={600}
+                loading="lazy"
+                decoding="async"
+                className={`block h-full w-full shrink-0 object-center ${objectFit}`}
+              />
+            ))}
+          </div>
+
 
           {gallery.length > 1 && (
             <div className="pointer-events-none absolute bottom-1.5 left-1/2 flex -translate-x-1/2 gap-1">
@@ -197,7 +209,7 @@ export function ListingCard({
           </div>
         )}
 
-        {config.showRating && (
+        {!hideMeta && config.showRating && (
           <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
             {verified && (
               <span className="inline-flex items-center gap-0.5 font-semibold text-primary">
@@ -218,7 +230,7 @@ export function ListingCard({
           </div>
         )}
 
-        {(config.showLocation || config.showViews) && (
+        {!hideMeta && (config.showLocation || config.showViews) && (
           <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
             {config.showLocation ? (
               <span className="flex items-center gap-1">

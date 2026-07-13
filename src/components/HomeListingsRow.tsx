@@ -1,6 +1,7 @@
 import { useRef, type ReactNode } from "react";
 import { ChevronLeft, ChevronRight, ChevronDown, Loader2 } from "lucide-react";
 import { ListingCard } from "./ListingCard";
+import { ListingRowSkeleton } from "./ListingCardSkeleton";
 import type { Listing } from "@/data/marketplace";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useListingTranslations } from "@/hooks/useListingTranslations";
@@ -21,7 +22,9 @@ export function HomeListingsRow({
   loadingMore,
   hasMore,
   hideContact,
+  hideMeta,
   cardWidthPct,
+  loading,
 }: {
   title: string;
   subtitle?: string;
@@ -35,8 +38,12 @@ export function HomeListingsRow({
   loadingMore?: boolean;
   hasMore?: boolean;
   hideContact?: boolean;
+  /** إخفاء التقييم والموقع وعدد المشاهدات */
+  hideMeta?: boolean;
   /** عرض البطاقة على الجوال كنسبة من الشاشة (يتحكم بها الأدمن) */
   cardWidthPct?: number;
+  /** عرض هيكل التحميل أثناء جلب البيانات */
+  loading?: boolean;
 }) {
   const { lang } = useLanguage();
   const rtl = lang === "ar";
@@ -84,7 +91,9 @@ export function HomeListingsRow({
         )}
       </div>
 
-      {items.length > 0 ? (
+      {loading ? (
+        <ListingRowSkeleton cardWidthPct={cardWidthPct} />
+      ) : items.length > 0 ? (
         <div
           ref={trackRef}
           className="flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-smooth pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
@@ -95,7 +104,12 @@ export function HomeListingsRow({
               className="w-[var(--cw)] min-w-0 shrink-0 snap-start sm:w-[38%] lg:w-[23%]"
               style={{ ["--cw" as string]: `${cardWidthPct ?? 62}%` }}
             >
-              <ListingCard item={item} displayTitle={map[item.id]?.title} hideContact={hideContact} />
+              <ListingCard
+                item={item}
+                displayTitle={map[item.id]?.title}
+                hideContact={hideContact}
+                hideMeta={hideMeta}
+              />
             </div>
           ))}
         </div>

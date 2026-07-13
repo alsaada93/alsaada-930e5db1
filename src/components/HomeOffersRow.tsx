@@ -11,7 +11,7 @@ import { useOffersConfig } from "@/hooks/useOffersConfig";
  */
 export function HomeOffersRow({ cardWidthPct }: { cardWidthPct?: number }) {
   const { lang } = useLanguage();
-  const { offers } = useOffers();
+  const { offers, loading } = useOffers();
   const { config } = useOffersConfig();
 
   if (!config.showOnHome) return null;
@@ -30,6 +30,9 @@ export function HomeOffersRow({ cardWidthPct }: { cardWidthPct?: number }) {
             : "The latest exclusive deals from the site admin"
         }
         items={shown}
+        loading={loading}
+        hideContact
+        hideMeta
         cardWidthPct={cardWidthPct ?? config.cardWidthPct}
         emptyText={lang === "ar" ? "لا توجد عروض حالياً — تابعنا قريباً." : "No offers yet — stay tuned."}
         moreButton={
