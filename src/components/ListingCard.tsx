@@ -114,18 +114,26 @@ export function ListingCard({
           className={`relative flex items-center justify-center overflow-hidden ${IMG_BG[config.imageBg] ?? IMG_BG.background}`}
           style={imageStyle}
         >
-          <img
-            key={currentImage}
-            src={optimizedImage(currentImage, 600, 70, config.imageFit)}
-            srcSet={optimizedSrcSet(currentImage, [300, 600, 900], 70, config.imageFit)}
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 280px"
-            alt={title}
-            width={600}
-            height={600}
-            loading="lazy"
-            decoding="async"
-            className={`block h-full w-full animate-fade-in object-center ${objectFit}`}
-          />
+          <div
+            className="flex h-full w-full transition-transform duration-700 ease-in-out"
+            style={{ transform: `translateX(-${imgIndex * 100}%)` }}
+          >
+            {gallery.map((img, i) => (
+              <img
+                key={`${img}-${i}`}
+                src={optimizedImage(img, 600, 70, config.imageFit)}
+                srcSet={optimizedSrcSet(img, [300, 600, 900], 70, config.imageFit)}
+                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 280px"
+                alt={title}
+                width={600}
+                height={600}
+                loading="lazy"
+                decoding="async"
+                className={`block h-full w-full shrink-0 object-center ${objectFit}`}
+              />
+            ))}
+          </div>
+
 
           {gallery.length > 1 && (
             <div className="pointer-events-none absolute bottom-1.5 left-1/2 flex -translate-x-1/2 gap-1">
