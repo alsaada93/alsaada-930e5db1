@@ -117,7 +117,7 @@ function CategoryPage() {
   const search = Route.useSearch();
   const navigate = useNavigate();
   const { t, lang } = useLanguage();
-  const { listings, loadMore, loadingMore, hasMore } = useListings({
+  const { listings, loading, loadMore, loadingMore, hasMore } = useListings({
     categoryId: category.id,
     subcategory: search.sub,
     pageSize: 24,
