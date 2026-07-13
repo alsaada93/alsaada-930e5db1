@@ -11,7 +11,7 @@ import { useOffersConfig } from "@/hooks/useOffersConfig";
  */
 export function HomeOffersRow({ cardWidthPct }: { cardWidthPct?: number }) {
   const { lang } = useLanguage();
-  const { offers } = useOffers();
+  const { offers, loading } = useOffers();
   const { config } = useOffersConfig();
 
   if (!config.showOnHome) return null;
