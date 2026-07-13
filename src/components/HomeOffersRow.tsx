@@ -30,6 +30,9 @@ export function HomeOffersRow({ cardWidthPct }: { cardWidthPct?: number }) {
             : "The latest exclusive deals from the site admin"
         }
         items={shown}
+        loading={loading}
+        hideContact
+        hideMeta
         cardWidthPct={cardWidthPct ?? config.cardWidthPct}
         emptyText={lang === "ar" ? "لا توجد عروض حالياً — تابعنا قريباً." : "No offers yet — stay tuned."}
         moreButton={
