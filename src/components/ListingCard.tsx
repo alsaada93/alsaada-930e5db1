@@ -82,18 +82,19 @@ export function ListingCard({
       : { aspectRatio: config.imageAspect.replace("/", " / ") };
   const objectFit = config.imageFit === "cover" ? "object-cover" : "object-contain";
 
-  // صور الإعلان مع التبديل التلقائي داخل البطاقة
+  // صور الإعلان مع التمرير التلقائي (انزلاق من اليمين لليسار) داخل البطاقة
   const gallery = (item.images && item.images.length > 0 ? item.images : [item.image]).filter(Boolean);
   const [imgIndex, setImgIndex] = useState(0);
+  // فاصل زمني عشوائي لكل بطاقة بين 1.5 و2.5 ثانية حتى لا تتحرك كل الإعلانات معاً
+  const rotateMs = useMemo(() => 1500 + Math.random() * 1000, []);
   useEffect(() => {
     if (!config.imageAutoRotate || gallery.length < 2) return;
-    const ms = Math.max(500, config.imageRotateMs || 2000);
     const timer = setInterval(() => {
       setImgIndex((i) => (i + 1) % gallery.length);
-    }, ms);
+    }, rotateMs);
     return () => clearInterval(timer);
-  }, [config.imageAutoRotate, config.imageRotateMs, gallery.length]);
-  const currentImage = gallery[imgIndex] ?? item.image;
+  }, [config.imageAutoRotate, rotateMs, gallery.length]);
+
 
   // أزرار التواصل الظاهرة
   const showWa = config.showContact && config.showWhatsapp && !!phone && !!waLink;
