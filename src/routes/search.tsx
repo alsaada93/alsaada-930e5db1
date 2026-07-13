@@ -45,7 +45,7 @@ function SearchPage() {
   const { q } = search;
   const navigate = useNavigate();
   const { lang } = useLanguage();
-  const { listings } = useListings();
+  const { listings, loading } = useListings();
   const [query, setQuery] = useState(q ?? "");
 
   useEffect(() => {
