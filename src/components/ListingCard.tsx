@@ -39,11 +39,14 @@ export function ListingCard({
   item,
   displayTitle,
   hideContact = false,
+  hideMeta = false,
 }: {
   item: Listing;
   displayTitle?: string;
   /** إخفاء أزرار التواصل (واتساب/اتصال/دردشة) — مستخدم في الصفحة الرئيسية */
   hideContact?: boolean;
+  /** إخفاء التقييم والموقع وعدد المشاهدات — مستخدم في الصفحة الرئيسية والعروض */
+  hideMeta?: boolean;
 }) {
   const { byId } = useSellers();
   const { t, lang } = useLanguage();
