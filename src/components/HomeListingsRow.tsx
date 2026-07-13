@@ -22,7 +22,9 @@ export function HomeListingsRow({
   loadingMore,
   hasMore,
   hideContact,
+  hideMeta,
   cardWidthPct,
+  loading,
 }: {
   title: string;
   subtitle?: string;
@@ -36,8 +38,12 @@ export function HomeListingsRow({
   loadingMore?: boolean;
   hasMore?: boolean;
   hideContact?: boolean;
+  /** إخفاء التقييم والموقع وعدد المشاهدات */
+  hideMeta?: boolean;
   /** عرض البطاقة على الجوال كنسبة من الشاشة (يتحكم بها الأدمن) */
   cardWidthPct?: number;
+  /** عرض هيكل التحميل أثناء جلب البيانات */
+  loading?: boolean;
 }) {
   const { lang } = useLanguage();
   const rtl = lang === "ar";
