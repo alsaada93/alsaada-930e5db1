@@ -141,13 +141,20 @@ function OffersPage() {
           </span>
         </div>
 
-        {offers.length > 0 ? (
+        {loading ? (
+          <ListingGridSkeleton
+            count={12}
+            className={`grid gap-3 ${gridClass[config.gridColsMobile] ?? "grid-cols-2"} sm:grid-cols-3 ${lgClass[config.gridColsDesktop] ?? "lg:grid-cols-4"}`}
+          />
+        ) : offers.length > 0 ? (
 
           config.displayMode === "carousel" ? (
             <div dir={config.swipeDirection}>
               <HomeListingsRow
                 title=""
                 items={shown}
+                hideContact
+                hideMeta
                 cardWidthPct={config.cardWidthPct}
               />
             </div>
@@ -156,15 +163,15 @@ function OffersPage() {
               className={`grid gap-3 ${gridClass[config.gridColsMobile] ?? "grid-cols-2"} sm:grid-cols-3 ${lgClass[config.gridColsDesktop] ?? "lg:grid-cols-4"}`}
             >
               {shown.map((item) => (
-                <ListingCard key={item.id} item={item} displayTitle={map[item.id]?.title} />
+                <ListingCard key={item.id} item={item} displayTitle={map[item.id]?.title} hideContact hideMeta />
               ))}
             </div>
           )
-        ) : !loading ? (
+        ) : (
           <div className="rounded-2xl border border-dashed border-border bg-card p-10 text-center text-sm text-muted-foreground">
             {lang === "en" ? "No offers yet." : "لا توجد عروض حالياً."}
           </div>
-        ) : null}
+        )}
       </main>
 
       <Footer />
