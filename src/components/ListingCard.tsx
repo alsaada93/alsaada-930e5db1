@@ -230,7 +230,7 @@ export function ListingCard({
           </div>
         )}
 
-        {(config.showLocation || config.showViews) && (
+        {!hideMeta && (config.showLocation || config.showViews) && (
           <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
             {config.showLocation ? (
               <span className="flex items-center gap-1">
