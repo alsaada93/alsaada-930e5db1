@@ -23,7 +23,9 @@ export function HomeDynamicRow({ row }: { row: HomeRow }) {
     <HomeListingsRow
       title={title}
       items={listings}
+      loading={loading}
       hideContact
+      hideMeta
       cardWidthPct={row.cardWidthPct}
       moreButton={
         isCategory ? (
