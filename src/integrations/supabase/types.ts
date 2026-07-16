@@ -1607,7 +1607,30 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      seller_reviews_public: {
+        Row: {
+          comment: string | null
+          created_at: string | null
+          id: string | null
+          rating: number | null
+          seller_id: string | null
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string | null
+          id?: string | null
+          rating?: number | null
+          seller_id?: string | null
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string | null
+          id?: string | null
+          rating?: number | null
+          seller_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       cleanup_expired_otps: { Args: never; Returns: undefined }
@@ -1621,6 +1644,24 @@ export type Database = {
         Returns: number
       }
       expire_old_listings: { Args: never; Returns: undefined }
+      get_auction_recent_bids: {
+        Args: { _limit?: number; _listing_id: string }
+        Returns: {
+          amount: number
+          created_at: string
+          id: string
+          is_self: boolean
+        }[]
+      }
+      get_auction_stats: {
+        Args: { _listing_ids: string[] }
+        Returns: {
+          bidders: number
+          bids: number
+          highest: number
+          listing_id: string
+        }[]
+      }
       get_seller_phone: { Args: { _seller_id: string }; Returns: string }
       has_role: {
         Args: {
