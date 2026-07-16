@@ -182,9 +182,11 @@ function LoginPage() {
       return;
     }
 
-    console.log("[HARAJ_AUTH_DEBUG] web platform: using redirect", `${window.location.origin}/account`);
+    // redirect_uri يجب أن يكون رابطاً عاماً على نفس النطاق (ليس صفحة محمية) —
+    // وإلا يفشل ربط web_message داخل الـ popup ويفقد المستخدم الجلسة.
+    console.log("[HARAJ_AUTH_DEBUG] web platform: using redirect", window.location.origin);
     const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: `${window.location.origin}/account`,
+      redirect_uri: window.location.origin,
     });
     if (result.error) {
       toast.error("تعذّر تسجيل الدخول عبر جوجل");
