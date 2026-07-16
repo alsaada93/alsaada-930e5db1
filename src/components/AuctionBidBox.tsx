@@ -1,15 +1,21 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { Gavel, Clock, Users, TrendingUp, Loader2, Radio } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
-interface Bid {
+interface RecentBid {
   id: string;
-  user_id: string;
   amount: number;
   created_at: string;
+  is_self: boolean;
+}
+
+interface Stats {
+  highest: number;
+  bids: number;
+  bidders: number;
 }
 
 interface Props {
@@ -32,7 +38,8 @@ function timeLeft(endsAt: string | null): string | null {
 
 export function AuctionBidBox({ listingId, startPrice, auctionEndsAt }: Props) {
   const { user } = useAuth();
-  const [bids, setBids] = useState<Bid[]>([]);
+  const [stats, setStats] = useState<Stats>({ highest: 0, bids: 0, bidders: 0 });
+  const [recent, setRecent] = useState<RecentBid[]>([]);
   const [amount, setAmount] = useState("");
   const [placing, setPlacing] = useState(false);
   const [online, setOnline] = useState(0);
@@ -40,41 +47,46 @@ export function AuctionBidBox({ listingId, startPrice, auctionEndsAt }: Props) {
 
   const ended = !!auctionEndsAt && new Date(auctionEndsAt).getTime() <= Date.now();
 
-  const highest = bids.length ? Math.max(...bids.map((b) => b.amount)) : 0;
-  const currentPrice = Math.max(highest, startPrice);
-  const bidCount = bids.length;
-  const bidderCount = useMemo(() => new Set(bids.map((b) => b.user_id)).size, [bids]);
+  const currentPrice = Math.max(stats.highest, startPrice);
   const minNext = currentPrice + 1;
 
-  // Load + realtime bids
-  useEffect(() => {
-    let active = true;
-    const load = async () => {
-      const { data } = await supabase
-        .from("auction_bids")
-        .select("id,user_id,amount,created_at")
-        .eq("listing_id", listingId)
-        .order("amount", { ascending: false });
-      if (active) setBids((data as Bid[]) ?? []);
-    };
-    load();
+  const refresh = useCallback(async () => {
+    const [statsRes, recentRes] = await Promise.all([
+      (supabase as any).rpc("get_auction_stats", { _listing_ids: [listingId] }),
+      (supabase as any).rpc("get_auction_recent_bids", { _listing_id: listingId, _limit: 5 }),
+    ]);
+    const row = (statsRes.data as { highest: number; bids: number; bidders: number }[] | null)?.[0];
+    setStats({
+      highest: Number(row?.highest) || 0,
+      bids: Number(row?.bids) || 0,
+      bidders: Number(row?.bidders) || 0,
+    });
+    setRecent(
+      ((recentRes.data as RecentBid[] | null) ?? []).map((b) => ({
+        ...b,
+        amount: Number(b.amount),
+      })),
+    );
+  }, [listingId]);
 
+  useEffect(() => {
+    refresh();
+    // React to new bids via realtime signal only (payload not readable without permissions)
     const channel = supabase
       .channel(`auction-${listingId}`)
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "auction_bids", filter: `listing_id=eq.${listingId}` },
-        (payload) => setBids((p) => [payload.new as Bid, ...p]),
+        () => refresh(),
       )
       .subscribe();
-
+    const poll = setInterval(refresh, 15000);
     return () => {
-      active = false;
       supabase.removeChannel(channel);
+      clearInterval(poll);
     };
-  }, [listingId]);
+  }, [listingId, refresh]);
 
-  // Presence: connected bidders
   useEffect(() => {
     const key = user?.id ?? `guest-${Math.random().toString(36).slice(2)}`;
     const channel = supabase.channel(`auction-presence-${listingId}`, {
@@ -94,7 +106,6 @@ export function AuctionBidBox({ listingId, startPrice, auctionEndsAt }: Props) {
     };
   }, [listingId, user?.id]);
 
-  // tick countdown
   useEffect(() => {
     const id = setInterval(() => force((n) => n + 1), 30000);
     return () => clearInterval(id);
@@ -118,9 +129,11 @@ export function AuctionBidBox({ listingId, startPrice, auctionEndsAt }: Props) {
     }
     setAmount("");
     toast.success("تمت المزايدة بنجاح!");
+    refresh();
   };
 
   const left = timeLeft(auctionEndsAt);
+  const displayRecent = useMemo(() => recent.slice(0, 5), [recent]);
 
   return (
     <div className="mt-5 rounded-2xl border border-primary/30 bg-accent/30 p-4">
@@ -137,8 +150,8 @@ export function AuctionBidBox({ listingId, startPrice, auctionEndsAt }: Props) {
       <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Stat label="سعر البداية" value={`${startPrice.toLocaleString("ar")} د.ب`} />
         <Stat label="السعر الحالي" value={`${currentPrice.toLocaleString("ar")} د.ب`} highlight />
-        <Stat label="عدد المزايدات" value={bidCount.toLocaleString("ar")} icon={<TrendingUp className="h-4 w-4" />} />
-        <Stat label="عدد المزايدين" value={bidderCount.toLocaleString("ar")} icon={<Users className="h-4 w-4" />} />
+        <Stat label="عدد المزايدات" value={stats.bids.toLocaleString("ar")} icon={<TrendingUp className="h-4 w-4" />} />
+        <Stat label="عدد المزايدين" value={stats.bidders.toLocaleString("ar")} icon={<Users className="h-4 w-4" />} />
       </div>
 
       <div className="mt-3 flex items-center gap-1.5 text-xs font-semibold text-emerald-600">
@@ -177,16 +190,14 @@ export function AuctionBidBox({ listingId, startPrice, auctionEndsAt }: Props) {
         </Link>
       )}
 
-      {bids.length > 0 && (
+      {displayRecent.length > 0 && (
         <div className="mt-4">
           <h3 className="mb-2 text-sm font-bold">آخر المزايدات</h3>
           <ul className="space-y-1.5">
-            {bids.slice(0, 5).map((b) => (
+            {displayRecent.map((b) => (
               <li key={b.id} className="flex items-center justify-between rounded-lg bg-background px-3 py-2 text-sm">
                 <span className="font-semibold text-primary">{b.amount.toLocaleString("ar")} د.ب</span>
-                <span className="text-xs text-muted-foreground">
-                  مزايد {b.user_id === user?.id ? "(أنت)" : `#${b.user_id.slice(0, 4)}`}
-                </span>
+                <span className="text-xs text-muted-foreground">{b.is_self ? "أنت" : "مزايد"}</span>
               </li>
             ))}
           </ul>

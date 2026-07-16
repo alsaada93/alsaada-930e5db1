@@ -30,24 +30,18 @@ export function AuctionsSection() {
     if (!ids) return;
     let active = true;
     (async () => {
-      const { data } = await supabase
-        .from("auction_bids")
-        .select("listing_id,user_id,amount")
-        .in("listing_id", ids.split(","));
+      const { data } = await (supabase as any).rpc("get_auction_stats", {
+        _listing_ids: ids.split(","),
+      });
       if (!active || !data) return;
       const map: Record<string, BidAgg> = {};
-      for (const b of data as { listing_id: string; user_id: string; amount: number }[]) {
-        const cur = map[b.listing_id] ?? { highest: 0, bids: 0, bidders: 0 };
-        cur.highest = Math.max(cur.highest, Number(b.amount));
-        cur.bids += 1;
-        map[b.listing_id] = cur;
+      for (const r of data as { listing_id: string; highest: number; bids: number; bidders: number }[]) {
+        map[r.listing_id] = {
+          highest: Number(r.highest) || 0,
+          bids: Number(r.bids) || 0,
+          bidders: Number(r.bidders) || 0,
+        };
       }
-      // distinct bidders
-      const byListing: Record<string, Set<string>> = {};
-      for (const b of data as { listing_id: string; user_id: string }[]) {
-        (byListing[b.listing_id] ??= new Set()).add(b.user_id);
-      }
-      for (const k of Object.keys(map)) map[k].bidders = byListing[k]?.size ?? 0;
       setAgg(map);
     })();
     return () => {
