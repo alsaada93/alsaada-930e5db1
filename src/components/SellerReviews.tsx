@@ -50,8 +50,8 @@ export function SellerReviews({ sellerId, sellerName }: { sellerId: string; sell
   const isOwnListing = !!user && user.id === sellerId && !isAdmin;
 
   const { data: reviews = [], isLoading } = useQuery({
-    queryKey: ["seller_reviews", sellerId],
-    queryFn: () => fetchReviews(sellerId),
+    queryKey: ["seller_reviews", sellerId, user?.id],
+    queryFn: () => fetchReviews(sellerId, user?.id),
   });
 
   // ملخص التقييمات: المتوسط، العدد، والنسبة المئوية
