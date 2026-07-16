@@ -9,18 +9,37 @@ interface Review {
   id: string;
   rating: number;
   comment: string | null;
-  reviewer_id: string;
+  reviewer_id: string | null;
   created_at: string;
 }
 
-async function fetchReviews(sellerId: string): Promise<Review[]> {
-  const { data, error } = await supabase
-    .from("seller_reviews")
-    .select("id, rating, comment, reviewer_id, created_at")
+async function fetchReviews(sellerId: string, userId: string | undefined): Promise<Review[]> {
+  // Public list: reviewer_id excluded via the safe view
+  const { data, error } = await (supabase as any)
+    .from("seller_reviews_public")
+    .select("id, rating, comment, created_at")
     .eq("seller_id", sellerId)
     .order("created_at", { ascending: false });
   if (error) throw error;
-  return (data ?? []) as Review[];
+  const list = ((data ?? []) as Omit<Review, "reviewer_id">[]).map((r) => ({
+    ...r,
+    reviewer_id: null as string | null,
+  }));
+  // If signed in, fetch the caller's own review to allow editing (RLS lets reviewer read their row)
+  if (userId) {
+    const { data: mine } = await supabase
+      .from("seller_reviews")
+      .select("id, rating, comment, reviewer_id, created_at")
+      .eq("seller_id", sellerId)
+      .eq("reviewer_id", userId)
+      .maybeSingle();
+    if (mine) {
+      const idx = list.findIndex((r) => r.id === (mine as Review).id);
+      if (idx >= 0) list[idx] = mine as Review;
+      else list.unshift(mine as Review);
+    }
+  }
+  return list;
 }
 
 export function SellerReviews({ sellerId, sellerName }: { sellerId: string; sellerName?: string }) {
