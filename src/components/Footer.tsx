@@ -78,10 +78,15 @@ export function Footer() {
               | {lang === "ar" ? identity.nameEn : identity.nameAr}
             </span>
           </div>
-          <div className="flex items-center gap-1.5 text-sm text-navy-foreground/80">
+          <a
+            href="https://www.google.com/maps/search/?api=1&query=Al+Saada+workshop+Tubli+Bahrain"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 text-sm text-navy-foreground/80 transition-colors hover:text-navy-foreground"
+          >
             <MapPin className="h-4 w-4 shrink-0" />
             {lang === "ar" ? "مملكة البحرين" : "Kingdom of Bahrain"}
-          </div>
+          </a>
           {identity.contactPhone && (
             <a href={`tel:${identity.contactPhone}`} className="flex items-center gap-1.5 text-sm text-navy-foreground/80 hover:text-navy-foreground">
               <Phone className="h-4 w-4 shrink-0" />
