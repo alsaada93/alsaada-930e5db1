@@ -115,9 +115,11 @@ export function ListingCard({
           style={imageStyle}
         >
           <div
+            dir="ltr"
             className="flex h-full w-full transition-transform duration-700 ease-in-out"
             style={{ transform: `translateX(-${imgIndex * 100}%)` }}
           >
+
             {gallery.map((img, i) => (
               <img
                 key={`${img}-${i}`}
