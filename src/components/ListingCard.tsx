@@ -86,7 +86,7 @@ export function ListingCard({
   const gallery = (item.images && item.images.length > 0 ? item.images : [item.image]).filter(Boolean);
   const [imgIndex, setImgIndex] = useState(0);
   // فاصل زمني عشوائي لكل بطاقة بين 1.5 و2.5 ثانية حتى لا تتحرك كل الإعلانات معاً
-  const rotateMs = useMemo(() => 1500 + Math.random() * 1000, []);
+  const rotateMs = useMemo(() => 2500 + Math.random() * 1000, []);
   useEffect(() => {
     if (!config.imageAutoRotate || gallery.length < 2) return;
     const timer = setInterval(() => {
