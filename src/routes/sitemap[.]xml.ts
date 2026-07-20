@@ -38,6 +38,12 @@ export const Route = createFileRoute("/sitemap.xml")({
             changefreq: "monthly" as const,
             priority: "0.5",
           })),
+          { path: "/l", changefreq: "weekly", priority: "0.7" },
+          ...landings.map((l) => ({
+            path: `/l/${l.slug}`,
+            changefreq: "weekly" as const,
+            priority: "0.8",
+          })),
         ];
 
         // أضف كل إعلان معتمد ديناميكياً ليراه جوجل فور نشره
