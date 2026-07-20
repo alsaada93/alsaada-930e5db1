@@ -35,6 +35,7 @@ import { Route as TipsSlugRouteImport } from './routes/tips.$slug'
 import { Route as RestaurantManufacturingRouteImport } from './routes/restaurant.manufacturing'
 import { Route as LoginAdminRouteImport } from './routes/login.admin'
 import { Route as ListingIdRouteImport } from './routes/listing.$id'
+import { Route as LSlugRouteImport } from './routes/l.$slug'
 import { Route as FacebookAdsIdRouteImport } from './routes/facebook-ads.$id'
 import { Route as CategoryIdRouteImport } from './routes/category.$id'
 import { Route as AdminSlidesRouteImport } from './routes/admin.slides'
@@ -188,6 +189,11 @@ const LoginAdminRoute = LoginAdminRouteImport.update({
 const ListingIdRoute = ListingIdRouteImport.update({
   id: '/listing/$id',
   path: '/listing/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LSlugRoute = LSlugRouteImport.update({
+  id: '/l/$slug',
+  path: '/l/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FacebookAdsIdRoute = FacebookAdsIdRouteImport.update({
@@ -354,6 +360,7 @@ export interface FileRoutesByFullPath {
   '/admin/slides': typeof AdminSlidesRoute
   '/category/$id': typeof CategoryIdRoute
   '/facebook-ads/$id': typeof FacebookAdsIdRoute
+  '/l/$slug': typeof LSlugRoute
   '/listing/$id': typeof ListingIdRoute
   '/login/admin': typeof LoginAdminRoute
   '/restaurant/manufacturing': typeof RestaurantManufacturingRoute
@@ -405,6 +412,7 @@ export interface FileRoutesByTo {
   '/admin/slides': typeof AdminSlidesRoute
   '/category/$id': typeof CategoryIdRoute
   '/facebook-ads/$id': typeof FacebookAdsIdRoute
+  '/l/$slug': typeof LSlugRoute
   '/listing/$id': typeof ListingIdRoute
   '/login/admin': typeof LoginAdminRoute
   '/restaurant/manufacturing': typeof RestaurantManufacturingRoute
@@ -458,6 +466,7 @@ export interface FileRoutesById {
   '/admin/slides': typeof AdminSlidesRoute
   '/category/$id': typeof CategoryIdRoute
   '/facebook-ads/$id': typeof FacebookAdsIdRoute
+  '/l/$slug': typeof LSlugRoute
   '/listing/$id': typeof ListingIdRoute
   '/login/admin': typeof LoginAdminRoute
   '/restaurant/manufacturing': typeof RestaurantManufacturingRoute
@@ -512,6 +521,7 @@ export interface FileRouteTypes {
     | '/admin/slides'
     | '/category/$id'
     | '/facebook-ads/$id'
+    | '/l/$slug'
     | '/listing/$id'
     | '/login/admin'
     | '/restaurant/manufacturing'
@@ -563,6 +573,7 @@ export interface FileRouteTypes {
     | '/admin/slides'
     | '/category/$id'
     | '/facebook-ads/$id'
+    | '/l/$slug'
     | '/listing/$id'
     | '/login/admin'
     | '/restaurant/manufacturing'
@@ -615,6 +626,7 @@ export interface FileRouteTypes {
     | '/admin/slides'
     | '/category/$id'
     | '/facebook-ads/$id'
+    | '/l/$slug'
     | '/listing/$id'
     | '/login/admin'
     | '/restaurant/manufacturing'
@@ -649,6 +661,7 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   CategoryIdRoute: typeof CategoryIdRoute
   FacebookAdsIdRoute: typeof FacebookAdsIdRoute
+  LSlugRoute: typeof LSlugRoute
   ListingIdRoute: typeof ListingIdRoute
   TipsSlugRoute: typeof TipsSlugRoute
   FacebookAdsIndexRoute: typeof FacebookAdsIndexRoute
@@ -840,6 +853,13 @@ declare module '@tanstack/react-router' {
       path: '/listing/$id'
       fullPath: '/listing/$id'
       preLoaderRoute: typeof ListingIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/l/$slug': {
+      id: '/l/$slug'
+      path: '/l/$slug'
+      fullPath: '/l/$slug'
+      preLoaderRoute: typeof LSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/facebook-ads/$id': {
@@ -1105,6 +1125,7 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   CategoryIdRoute: CategoryIdRoute,
   FacebookAdsIdRoute: FacebookAdsIdRoute,
+  LSlugRoute: LSlugRoute,
   ListingIdRoute: ListingIdRoute,
   TipsSlugRoute: TipsSlugRoute,
   FacebookAdsIndexRoute: FacebookAdsIndexRoute,

@@ -2,7 +2,7 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
-import { getLanding, landings } from "@/data/landings";
+import { getLanding, landings, type LandingPage } from "@/data/landings";
 import { categories } from "@/data/marketplace";
 import { articles } from "@/data/articles";
 
