@@ -13,7 +13,8 @@ type FooterTo =
   | "/report"
   | "/privacy"
   | "/terms"
-  | "/tips";
+  | "/tips"
+  | "/l";
 type FooterLink = { label: string; to: FooterTo };
 
 export function Footer() {
