@@ -29,6 +29,7 @@ import { Route as AccountRouteImport } from './routes/account'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TipsIndexRouteImport } from './routes/tips.index'
+import { Route as LIndexRouteImport } from './routes/l.index'
 import { Route as FacebookAdsIndexRouteImport } from './routes/facebook-ads.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as TipsSlugRouteImport } from './routes/tips.$slug'
@@ -159,6 +160,11 @@ const IndexRoute = IndexRouteImport.update({
 const TipsIndexRoute = TipsIndexRouteImport.update({
   id: '/tips/',
   path: '/tips/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LIndexRoute = LIndexRouteImport.update({
+  id: '/l/',
+  path: '/l/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FacebookAdsIndexRoute = FacebookAdsIndexRouteImport.update({
@@ -367,6 +373,7 @@ export interface FileRoutesByFullPath {
   '/tips/$slug': typeof TipsSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/facebook-ads/': typeof FacebookAdsIndexRoute
+  '/l/': typeof LIndexRoute
   '/tips/': typeof TipsIndexRoute
   '/api/public/facebook-sync': typeof ApiPublicFacebookSyncRoute
   '/api/public/facebook-sync-cron': typeof ApiPublicFacebookSyncCronRoute
@@ -419,6 +426,7 @@ export interface FileRoutesByTo {
   '/tips/$slug': typeof TipsSlugRoute
   '/admin': typeof AdminIndexRoute
   '/facebook-ads': typeof FacebookAdsIndexRoute
+  '/l': typeof LIndexRoute
   '/tips': typeof TipsIndexRoute
   '/api/public/facebook-sync': typeof ApiPublicFacebookSyncRoute
   '/api/public/facebook-sync-cron': typeof ApiPublicFacebookSyncCronRoute
@@ -473,6 +481,7 @@ export interface FileRoutesById {
   '/tips/$slug': typeof TipsSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/facebook-ads/': typeof FacebookAdsIndexRoute
+  '/l/': typeof LIndexRoute
   '/tips/': typeof TipsIndexRoute
   '/api/public/facebook-sync': typeof ApiPublicFacebookSyncRoute
   '/api/public/facebook-sync-cron': typeof ApiPublicFacebookSyncCronRoute
@@ -528,6 +537,7 @@ export interface FileRouteTypes {
     | '/tips/$slug'
     | '/admin/'
     | '/facebook-ads/'
+    | '/l/'
     | '/tips/'
     | '/api/public/facebook-sync'
     | '/api/public/facebook-sync-cron'
@@ -580,6 +590,7 @@ export interface FileRouteTypes {
     | '/tips/$slug'
     | '/admin'
     | '/facebook-ads'
+    | '/l'
     | '/tips'
     | '/api/public/facebook-sync'
     | '/api/public/facebook-sync-cron'
@@ -633,6 +644,7 @@ export interface FileRouteTypes {
     | '/tips/$slug'
     | '/admin/'
     | '/facebook-ads/'
+    | '/l/'
     | '/tips/'
     | '/api/public/facebook-sync'
     | '/api/public/facebook-sync-cron'
@@ -665,6 +677,7 @@ export interface RootRouteChildren {
   ListingIdRoute: typeof ListingIdRoute
   TipsSlugRoute: typeof TipsSlugRoute
   FacebookAdsIndexRoute: typeof FacebookAdsIndexRoute
+  LIndexRoute: typeof LIndexRoute
   TipsIndexRoute: typeof TipsIndexRoute
   ApiPublicFacebookSyncRoute: typeof ApiPublicFacebookSyncRoute
   ApiPublicFacebookSyncCronRoute: typeof ApiPublicFacebookSyncCronRoute
@@ -811,6 +824,13 @@ declare module '@tanstack/react-router' {
       path: '/tips'
       fullPath: '/tips/'
       preLoaderRoute: typeof TipsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/l/': {
+      id: '/l/'
+      path: '/l'
+      fullPath: '/l/'
+      preLoaderRoute: typeof LIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/facebook-ads/': {
@@ -1129,6 +1149,7 @@ const rootRouteChildren: RootRouteChildren = {
   ListingIdRoute: ListingIdRoute,
   TipsSlugRoute: TipsSlugRoute,
   FacebookAdsIndexRoute: FacebookAdsIndexRoute,
+  LIndexRoute: LIndexRoute,
   TipsIndexRoute: TipsIndexRoute,
   ApiPublicFacebookSyncRoute: ApiPublicFacebookSyncRoute,
   ApiPublicFacebookSyncCronRoute: ApiPublicFacebookSyncCronRoute,
