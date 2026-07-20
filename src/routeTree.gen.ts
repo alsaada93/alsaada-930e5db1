@@ -29,12 +29,14 @@ import { Route as AccountRouteImport } from './routes/account'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TipsIndexRouteImport } from './routes/tips.index'
+import { Route as LIndexRouteImport } from './routes/l.index'
 import { Route as FacebookAdsIndexRouteImport } from './routes/facebook-ads.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as TipsSlugRouteImport } from './routes/tips.$slug'
 import { Route as RestaurantManufacturingRouteImport } from './routes/restaurant.manufacturing'
 import { Route as LoginAdminRouteImport } from './routes/login.admin'
 import { Route as ListingIdRouteImport } from './routes/listing.$id'
+import { Route as LSlugRouteImport } from './routes/l.$slug'
 import { Route as FacebookAdsIdRouteImport } from './routes/facebook-ads.$id'
 import { Route as CategoryIdRouteImport } from './routes/category.$id'
 import { Route as AdminSlidesRouteImport } from './routes/admin.slides'
@@ -160,6 +162,11 @@ const TipsIndexRoute = TipsIndexRouteImport.update({
   path: '/tips/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LIndexRoute = LIndexRouteImport.update({
+  id: '/l/',
+  path: '/l/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FacebookAdsIndexRoute = FacebookAdsIndexRouteImport.update({
   id: '/facebook-ads/',
   path: '/facebook-ads/',
@@ -188,6 +195,11 @@ const LoginAdminRoute = LoginAdminRouteImport.update({
 const ListingIdRoute = ListingIdRouteImport.update({
   id: '/listing/$id',
   path: '/listing/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LSlugRoute = LSlugRouteImport.update({
+  id: '/l/$slug',
+  path: '/l/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FacebookAdsIdRoute = FacebookAdsIdRouteImport.update({
@@ -354,12 +366,14 @@ export interface FileRoutesByFullPath {
   '/admin/slides': typeof AdminSlidesRoute
   '/category/$id': typeof CategoryIdRoute
   '/facebook-ads/$id': typeof FacebookAdsIdRoute
+  '/l/$slug': typeof LSlugRoute
   '/listing/$id': typeof ListingIdRoute
   '/login/admin': typeof LoginAdminRoute
   '/restaurant/manufacturing': typeof RestaurantManufacturingRoute
   '/tips/$slug': typeof TipsSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/facebook-ads/': typeof FacebookAdsIndexRoute
+  '/l/': typeof LIndexRoute
   '/tips/': typeof TipsIndexRoute
   '/api/public/facebook-sync': typeof ApiPublicFacebookSyncRoute
   '/api/public/facebook-sync-cron': typeof ApiPublicFacebookSyncCronRoute
@@ -405,12 +419,14 @@ export interface FileRoutesByTo {
   '/admin/slides': typeof AdminSlidesRoute
   '/category/$id': typeof CategoryIdRoute
   '/facebook-ads/$id': typeof FacebookAdsIdRoute
+  '/l/$slug': typeof LSlugRoute
   '/listing/$id': typeof ListingIdRoute
   '/login/admin': typeof LoginAdminRoute
   '/restaurant/manufacturing': typeof RestaurantManufacturingRoute
   '/tips/$slug': typeof TipsSlugRoute
   '/admin': typeof AdminIndexRoute
   '/facebook-ads': typeof FacebookAdsIndexRoute
+  '/l': typeof LIndexRoute
   '/tips': typeof TipsIndexRoute
   '/api/public/facebook-sync': typeof ApiPublicFacebookSyncRoute
   '/api/public/facebook-sync-cron': typeof ApiPublicFacebookSyncCronRoute
@@ -458,12 +474,14 @@ export interface FileRoutesById {
   '/admin/slides': typeof AdminSlidesRoute
   '/category/$id': typeof CategoryIdRoute
   '/facebook-ads/$id': typeof FacebookAdsIdRoute
+  '/l/$slug': typeof LSlugRoute
   '/listing/$id': typeof ListingIdRoute
   '/login/admin': typeof LoginAdminRoute
   '/restaurant/manufacturing': typeof RestaurantManufacturingRoute
   '/tips/$slug': typeof TipsSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/facebook-ads/': typeof FacebookAdsIndexRoute
+  '/l/': typeof LIndexRoute
   '/tips/': typeof TipsIndexRoute
   '/api/public/facebook-sync': typeof ApiPublicFacebookSyncRoute
   '/api/public/facebook-sync-cron': typeof ApiPublicFacebookSyncCronRoute
@@ -512,12 +530,14 @@ export interface FileRouteTypes {
     | '/admin/slides'
     | '/category/$id'
     | '/facebook-ads/$id'
+    | '/l/$slug'
     | '/listing/$id'
     | '/login/admin'
     | '/restaurant/manufacturing'
     | '/tips/$slug'
     | '/admin/'
     | '/facebook-ads/'
+    | '/l/'
     | '/tips/'
     | '/api/public/facebook-sync'
     | '/api/public/facebook-sync-cron'
@@ -563,12 +583,14 @@ export interface FileRouteTypes {
     | '/admin/slides'
     | '/category/$id'
     | '/facebook-ads/$id'
+    | '/l/$slug'
     | '/listing/$id'
     | '/login/admin'
     | '/restaurant/manufacturing'
     | '/tips/$slug'
     | '/admin'
     | '/facebook-ads'
+    | '/l'
     | '/tips'
     | '/api/public/facebook-sync'
     | '/api/public/facebook-sync-cron'
@@ -615,12 +637,14 @@ export interface FileRouteTypes {
     | '/admin/slides'
     | '/category/$id'
     | '/facebook-ads/$id'
+    | '/l/$slug'
     | '/listing/$id'
     | '/login/admin'
     | '/restaurant/manufacturing'
     | '/tips/$slug'
     | '/admin/'
     | '/facebook-ads/'
+    | '/l/'
     | '/tips/'
     | '/api/public/facebook-sync'
     | '/api/public/facebook-sync-cron'
@@ -649,9 +673,11 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   CategoryIdRoute: typeof CategoryIdRoute
   FacebookAdsIdRoute: typeof FacebookAdsIdRoute
+  LSlugRoute: typeof LSlugRoute
   ListingIdRoute: typeof ListingIdRoute
   TipsSlugRoute: typeof TipsSlugRoute
   FacebookAdsIndexRoute: typeof FacebookAdsIndexRoute
+  LIndexRoute: typeof LIndexRoute
   TipsIndexRoute: typeof TipsIndexRoute
   ApiPublicFacebookSyncRoute: typeof ApiPublicFacebookSyncRoute
   ApiPublicFacebookSyncCronRoute: typeof ApiPublicFacebookSyncCronRoute
@@ -800,6 +826,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TipsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/l/': {
+      id: '/l/'
+      path: '/l'
+      fullPath: '/l/'
+      preLoaderRoute: typeof LIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/facebook-ads/': {
       id: '/facebook-ads/'
       path: '/facebook-ads'
@@ -840,6 +873,13 @@ declare module '@tanstack/react-router' {
       path: '/listing/$id'
       fullPath: '/listing/$id'
       preLoaderRoute: typeof ListingIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/l/$slug': {
+      id: '/l/$slug'
+      path: '/l/$slug'
+      fullPath: '/l/$slug'
+      preLoaderRoute: typeof LSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/facebook-ads/$id': {
@@ -1105,9 +1145,11 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   CategoryIdRoute: CategoryIdRoute,
   FacebookAdsIdRoute: FacebookAdsIdRoute,
+  LSlugRoute: LSlugRoute,
   ListingIdRoute: ListingIdRoute,
   TipsSlugRoute: TipsSlugRoute,
   FacebookAdsIndexRoute: FacebookAdsIndexRoute,
+  LIndexRoute: LIndexRoute,
   TipsIndexRoute: TipsIndexRoute,
   ApiPublicFacebookSyncRoute: ApiPublicFacebookSyncRoute,
   ApiPublicFacebookSyncCronRoute: ApiPublicFacebookSyncCronRoute,

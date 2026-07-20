@@ -13,7 +13,8 @@ type FooterTo =
   | "/report"
   | "/privacy"
   | "/terms"
-  | "/tips";
+  | "/tips"
+  | "/l";
 type FooterLink = { label: string; to: FooterTo };
 
 export function Footer() {
@@ -35,6 +36,7 @@ export function Footer() {
       title: lang === "ar" ? "المساعدة" : "Help",
       links: [
         { label: lang === "ar" ? "نصائح ومقالات" : "Tips & articles", to: "/tips" },
+        { label: lang === "ar" ? "أدلة البيع والشراء" : "Buy & sell guides", to: "/l" },
         { label: lang === "ar" ? "الأسئلة الشائعة" : "FAQ", to: "/faq" },
         { label: lang === "ar" ? "تواصل معنا" : "Contact us", to: "/contact" },
         { label: lang === "ar" ? "الإبلاغ عن إعلان" : "Report an ad", to: "/report" },
