@@ -76,7 +76,7 @@ export const Route = createFileRoute("/l/$slug")({
 });
 
 function LandingPageView() {
-  const { page } = Route.useLoaderData();
+  const { page } = Route.useLoaderData() as { page: LandingPage };
   const cat = page.categoryId ? categories.find((c) => c.id === page.categoryId) : undefined;
   const relatedArticles = (page.articleSlugs ?? [])
     .map((s) => articles.find((a) => a.slug === s))
