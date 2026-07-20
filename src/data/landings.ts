@@ -17,7 +17,7 @@ export interface LandingPage {
   categoryId?: string;  // ربط بتصنيف
   searchQueries: string[]; // روابط بحث فعّالة
   articleSlugs?: string[]; // مقالات ذات صلة
-  sections: LandingSection[];
+  sections?: LandingSection[];
   faq?: { q: string; a: string }[];
 }
 
