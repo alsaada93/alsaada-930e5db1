@@ -988,8 +988,12 @@ function ListingPage() {
           tags={[cat?.name, item.groupName, item.itemName, item.city, showsCondition(cat?.name, cat?.nameEn) ? item.condition : undefined]}
           className="mt-4"
         />
+
+        {/* إعلانات مشابهة */}
+        <SimilarListings categoryId={item.categoryId} currentId={item.id} />
       </main>
       <Footer />
+
       <SafetyModal
         open={safety != null}
         continueLabel={safety?.label ?? ""}
