@@ -36,6 +36,7 @@ import { ListingChatDialog } from "@/components/ListingChatDialog";
 import { AdminListingControls } from "@/components/AdminListingControls";
 import { ListingHashtags } from "@/components/ListingHashtags";
 import { ShareButtons } from "@/components/ShareButtons";
+import { SimilarListings } from "@/components/SimilarListings";
 import { useListingTranslations } from "@/hooks/useListingTranslations";
 import { Tag, Truck, Tag as TagIcon, Globe, Package } from "lucide-react";
 import { useViewBoost, boostViews } from "@/hooks/useViewBoost";
