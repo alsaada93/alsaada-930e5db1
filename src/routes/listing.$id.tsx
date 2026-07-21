@@ -36,6 +36,7 @@ import { ListingChatDialog } from "@/components/ListingChatDialog";
 import { AdminListingControls } from "@/components/AdminListingControls";
 import { ListingHashtags } from "@/components/ListingHashtags";
 import { ShareButtons } from "@/components/ShareButtons";
+import { SimilarListings } from "@/components/SimilarListings";
 import { useListingTranslations } from "@/hooks/useListingTranslations";
 import { Tag, Truck, Tag as TagIcon, Globe, Package } from "lucide-react";
 import { useViewBoost, boostViews } from "@/hooks/useViewBoost";
@@ -988,8 +989,12 @@ function ListingPage() {
           tags={[cat?.name, item.groupName, item.itemName, item.city, showsCondition(cat?.name, cat?.nameEn) ? item.condition : undefined]}
           className="mt-4"
         />
+
+        {/* إعلانات مشابهة */}
+        <SimilarListings categoryId={item.categoryId} currentId={item.id} />
       </main>
       <Footer />
+
       <SafetyModal
         open={safety != null}
         continueLabel={safety?.label ?? ""}

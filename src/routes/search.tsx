@@ -49,6 +49,10 @@ function SearchPage() {
   const [query, setQuery] = useState(q ?? "");
 
   useEffect(() => {
+    setQuery(q ?? "");
+  }, [q]);
+
+  useEffect(() => {
     const term = (q ?? "").trim();
     if (!term) return;
     try {
@@ -60,10 +64,25 @@ function SearchPage() {
     }
   }, [q]);
 
-
   const update = (patch: Partial<SearchParams>) => {
     navigate({ to: "/search", search: (prev: SearchParams) => ({ ...prev, ...patch }) });
   };
+
+  // بحث فوري أثناء الكتابة مع Debounce قصير لمنع التحديث على كل حرف
+  useEffect(() => {
+    const trimmed = query.trim();
+    if (trimmed === (q ?? "")) return;
+    const t = setTimeout(() => {
+      navigate({
+        to: "/search",
+        search: (prev: SearchParams) => ({ ...prev, q: trimmed || undefined }),
+        replace: true,
+      });
+    }, 250);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query]);
+
 
   const results = useMemo(() => {
     const term = (q ?? "").trim().toLowerCase();
