@@ -19,7 +19,7 @@
     "@capacitor/android": "^8.4.1",
     "@capacitor/app": "^8.1.0",
     "@capacitor/camera": "^8.2.0",
-    "@capacitor/cli": "^8.4.1",
+    "@capacitor/cli": "^8.4.2",
     "@capacitor/core": "^8.4.1",
     "@capacitor/ios": "^8.4.1",
     "@capacitor/preferences": "^8.0.1",
@@ -108,5 +108,8 @@
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.56.1",
     "vite": "^7.3.1"
+  },
+  "overrides": {
+    "tar": "^7.5.3"
   }
 }
