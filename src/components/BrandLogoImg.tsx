@@ -33,6 +33,8 @@ export function BrandLogoImg({ name, className }: { name: string; className?: st
   const [url, setUrl] = useState<string | null>(() => cache.get(name.toLowerCase()) ?? null);
   const [failed, setFailed] = useState(false);
 
+  const [triedSecondary, setTriedSecondary] = useState(false);
+
   useEffect(() => {
     let active = true;
     const key = name.toLowerCase();
@@ -75,7 +77,17 @@ export function BrandLogoImg({ name, className }: { name: string; className?: st
       alt={name}
       loading="lazy"
       decoding="async"
-      onError={() => setFailed(true)}
+      onError={() => {
+        if (!triedSecondary) {
+          const alt = secondaryLogoUrl(name);
+          if (alt) {
+            setTriedSecondary(true);
+            setUrl(alt);
+            return;
+          }
+        }
+        setFailed(true);
+      }}
       className={className}
     />
   );
