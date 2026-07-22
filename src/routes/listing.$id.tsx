@@ -47,6 +47,7 @@ import { showsCondition, categoryKind, realEstateLabel, conditionLabel } from "@
 import { isPriceOnRequest, priceOnRequestLabel } from "@/lib/price-display";
 import { listingRating, listingReviewCount } from "@/lib/rating";
 import { optimizedImage, optimizedSrcSet } from "@/lib/image-url";
+import { BrandLogoImg } from "@/components/BrandLogoImg";
 
 const EXPIRY_DAYS = 60;
 
