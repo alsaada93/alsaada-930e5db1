@@ -16,7 +16,13 @@ function slugify(name: string): string {
 function fallbackLogoUrl(name: string): string | null {
   const slug = slugify(name);
   if (!slug) return null;
-  // Google's favicon service — no API key, no rate limit for typical usage
+  // Clearbit's free logo service returns a proper brand mark when available
+  return `https://logo.clearbit.com/${slug}.com`;
+}
+
+function secondaryLogoUrl(name: string): string | null {
+  const slug = slugify(name);
+  if (!slug) return null;
   return `https://www.google.com/s2/favicons?domain=${slug}.com&sz=128`;
 }
 
