@@ -364,23 +364,21 @@ function Gallery({ images, video, title }: { images: string[]; video: string | n
 
   return (
     <div>
-      <div className="relative overflow-hidden rounded-2xl border border-border bg-muted">
+      <div className="relative flex items-center justify-center overflow-hidden rounded-2xl border border-border bg-muted" style={{ aspectRatio: "4 / 3", maxHeight: "70vh" }}>
         {active.type === "image" ? (
           <img
-            src={optimizedImage(active.url, 800, 70)}
-            srcSet={optimizedSrcSet(active.url, [400, 800, 1200], 70)}
+            src={optimizedImage(active.url, 800, 70, "contain")}
+            srcSet={optimizedSrcSet(active.url, [400, 800, 1200], 70, "contain")}
             sizes="(max-width: 1024px) 100vw, 640px"
             alt={title}
-            width={800}
-            height={600}
             onClick={() => setLightbox(true)}
             loading="eager"
             fetchPriority="high"
             decoding="async"
-            className="aspect-[4/3] w-full cursor-zoom-in object-cover"
+            className="h-full w-full cursor-zoom-in object-contain"
           />
         ) : (
-          <video src={active.url} controls className="aspect-[4/3] w-full bg-black object-contain" />
+          <video src={active.url} controls className="h-full w-full bg-black object-contain" />
         )}
         {active.type === "image" && (
           <span className="pointer-events-none absolute bottom-2 right-2 select-none text-xs font-bold text-white/90 drop-shadow-[0_1px_2px_rgba(0,0,0,0.7)]">
