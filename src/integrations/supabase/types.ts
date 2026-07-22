@@ -100,25 +100,37 @@ export type Database = {
       brands: {
         Row: {
           category_id: string
+          country: string | null
           created_at: string
+          description: string | null
+          equipment_type: string | null
           id: string
           item_name: string | null
+          logo_url: string | null
           name: string
           updated_at: string
         }
         Insert: {
           category_id: string
+          country?: string | null
           created_at?: string
+          description?: string | null
+          equipment_type?: string | null
           id?: string
           item_name?: string | null
+          logo_url?: string | null
           name: string
           updated_at?: string
         }
         Update: {
           category_id?: string
+          country?: string | null
           created_at?: string
+          description?: string | null
+          equipment_type?: string | null
           id?: string
           item_name?: string | null
+          logo_url?: string | null
           name?: string
           updated_at?: string
         }
