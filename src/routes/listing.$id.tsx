@@ -47,6 +47,7 @@ import { showsCondition, categoryKind, realEstateLabel, conditionLabel } from "@
 import { isPriceOnRequest, priceOnRequestLabel } from "@/lib/price-display";
 import { listingRating, listingReviewCount } from "@/lib/rating";
 import { optimizedImage, optimizedSrcSet } from "@/lib/image-url";
+import { BrandLogoImg } from "@/components/BrandLogoImg";
 
 const EXPIRY_DAYS = 60;
 
@@ -102,6 +103,10 @@ export const Route = createFileRoute("/listing/$id")({
         description: data.description as string | null,
         brand: (data.brand as string | null) ?? null,
         carMake: (data.car_make as string | null) ?? null,
+        modelYear: (data.model_year as number | null) ?? null,
+        mileage: (data.mileage as number | null) ?? null,
+        engineCapacity: (data.engine_capacity as string | null) ?? null,
+        color: (data.color as string | null) ?? null,
         isOffer: Boolean(data.is_offer),
         sold: Boolean(data.sold),
         countryOfOrigin: (data.country_of_origin as string | null) ?? null,
@@ -364,23 +369,21 @@ function Gallery({ images, video, title }: { images: string[]; video: string | n
 
   return (
     <div>
-      <div className="relative overflow-hidden rounded-2xl border border-border bg-muted">
+      <div className="relative flex items-center justify-center overflow-hidden rounded-2xl border border-border bg-muted" style={{ aspectRatio: "4 / 3", maxHeight: "70vh" }}>
         {active.type === "image" ? (
           <img
-            src={optimizedImage(active.url, 800, 70)}
-            srcSet={optimizedSrcSet(active.url, [400, 800, 1200], 70)}
+            src={optimizedImage(active.url, 800, 70, "contain")}
+            srcSet={optimizedSrcSet(active.url, [400, 800, 1200], 70, "contain")}
             sizes="(max-width: 1024px) 100vw, 640px"
             alt={title}
-            width={800}
-            height={600}
             onClick={() => setLightbox(true)}
             loading="eager"
             fetchPriority="high"
             decoding="async"
-            className="aspect-[4/3] w-full cursor-zoom-in object-cover"
+            className="h-full w-full cursor-zoom-in object-contain"
           />
         ) : (
-          <video src={active.url} controls className="aspect-[4/3] w-full bg-black object-contain" />
+          <video src={active.url} controls className="h-full w-full bg-black object-contain" />
         )}
         {active.type === "image" && (
           <span className="pointer-events-none absolute bottom-2 right-2 select-none text-xs font-bold text-white/90 drop-shadow-[0_1px_2px_rgba(0,0,0,0.7)]">
@@ -766,17 +769,79 @@ function ListingPage() {
               )}
             </div>
 
-            {/* وصف الماركة التلقائي: بلد المنشأ، النوع، مستوى السوق والتخصص */}
-            {bInfo && (
-              <div className="mt-4 rounded-2xl border border-primary/30 bg-accent/30 p-4">
-                <div className="flex items-center gap-2">
-                  <BadgeCheck className="h-4 w-4 text-primary" />
-                  <h2 className="font-extrabold text-primary">
-                    {bInfo.name} <span className="text-foreground">— {bInfo.country}</span>
-                  </h2>
+            {/* جدول مواصفات السيارة — يظهر لإعلانات المركبات فقط */}
+            {categoryKind(cat?.name, cat?.nameEn) === "vehicle" && (
+              (item.carMake || item.modelYear || item.mileage || item.engineCapacity || item.color) && (
+                <div className="mt-4 overflow-hidden rounded-2xl border border-border bg-card">
+                  <div className="flex items-center gap-2 border-b border-border bg-muted px-4 py-2 text-sm font-extrabold">
+                    <Package className="h-4 w-4 text-primary" />
+                    {lang === "en" ? "Vehicle specifications" : "مواصفات السيارة"}
+                  </div>
+                  <dl className="grid grid-cols-2 gap-x-4 gap-y-2 p-4 text-sm">
+                    {item.carMake && (
+                      <>
+                        <dt className="text-muted-foreground">{lang === "en" ? "Make" : "الشركة المصنعة"}</dt>
+                        <dd className="font-bold">{item.carMake}</dd>
+                      </>
+                    )}
+                    {item.modelYear && (
+                      <>
+                        <dt className="text-muted-foreground">{lang === "en" ? "Year" : "سنة الصنع"}</dt>
+                        <dd className="font-bold">{lang === "en" ? item.modelYear : item.modelYear.toLocaleString("ar")}</dd>
+                      </>
+                    )}
+                    {item.mileage != null && (
+                      <>
+                        <dt className="text-muted-foreground">{lang === "en" ? "Mileage (km)" : "الممشى (كم)"}</dt>
+                        <dd className="font-bold">{item.mileage.toLocaleString(lang === "en" ? "en" : "ar")}</dd>
+                      </>
+                    )}
+                    {item.engineCapacity && (
+                      <>
+                        <dt className="text-muted-foreground">{lang === "en" ? "Engine" : "سعة المحرك"}</dt>
+                        <dd className="font-bold">{item.engineCapacity}</dd>
+                      </>
+                    )}
+                    {item.color && (
+                      <>
+                        <dt className="text-muted-foreground">{lang === "en" ? "Color" : "اللون"}</dt>
+                        <dd className="font-bold">{item.color}</dd>
+                      </>
+                    )}
+                    {showsCondition(cat?.name, cat?.nameEn) === false && item.condition && (
+                      <>
+                        <dt className="text-muted-foreground">{lang === "en" ? "Condition" : "الحالة"}</dt>
+                        <dd className="font-bold">{conditionLabel(item.condition, lang)}</dd>
+                      </>
+                    )}
+                  </dl>
                 </div>
-                <p className="mt-1 text-xs font-semibold text-muted-foreground">{bInfo.type}</p>
-                <p className="mt-2 text-sm leading-relaxed text-foreground">{bInfo.description}</p>
+              )
+            )}
+
+            {/* وصف الماركة التلقائي: بلد المنشأ، النوع، مستوى السوق والتخصص + شعار */}
+            {(bInfo || item.brand) && (
+              <div className="mt-4 rounded-2xl border border-primary/30 bg-accent/30 p-4">
+                <div className="flex items-center gap-3">
+                  {item.brand && (
+                    <BrandLogoImg name={item.brand} className="h-10 w-10 shrink-0 rounded-lg border border-border bg-white object-contain p-1" />
+                  )}
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <BadgeCheck className="h-4 w-4 text-primary" />
+                      <h2 className="truncate font-extrabold text-primary">
+                        {bInfo?.name ?? item.brand}
+                        {bInfo?.country && <span className="text-foreground"> — {bInfo.country}</span>}
+                      </h2>
+                    </div>
+                    {bInfo?.type && (
+                      <p className="mt-0.5 text-xs font-semibold text-muted-foreground">{bInfo.type}</p>
+                    )}
+                  </div>
+                </div>
+                {bInfo?.description && (
+                  <p className="mt-2 text-sm leading-relaxed text-foreground">{bInfo.description}</p>
+                )}
               </div>
             )}
 
