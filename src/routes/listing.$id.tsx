@@ -80,7 +80,7 @@ export const Route = createFileRoute("/listing/$id")({
         .ilike("name", brandName)
         .limit(1)
         .maybeSingle();
-      if (b) brandDb = b as typeof brandDb;
+      if (b) brandDb = b as unknown as typeof brandDb;
     }
 
     return {
