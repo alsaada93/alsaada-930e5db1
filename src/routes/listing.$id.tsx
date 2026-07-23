@@ -70,8 +70,22 @@ export const Route = createFileRoute("/listing/$id")({
       }
     }
 
+    // معلومات الماركة من قاعدة البيانات (يشمل الوصف والبلد والشعار لأكثر من 700 ماركة)
+    let brandDb: { name: string; country: string | null; equipment_type: string | null; description: string | null; logo_url: string | null } | null = null;
+    const brandName = ((data.brand as string | null) ?? (data.car_make as string | null) ?? "").trim();
+    if (brandName) {
+      const { data: b } = await supabase
+        .from("brands")
+        .select("name, country, equipment_type, description, logo_url")
+        .ilike("name", brandName)
+        .limit(1)
+        .maybeSingle();
+      if (b) brandDb = b as unknown as typeof brandDb;
+    }
+
     return {
       rating,
+      brandDb,
       item: {
         id: data.id,
         title: data.title,
@@ -452,7 +466,7 @@ function Gallery({ images, video, title }: { images: string[]; video: string | n
 }
 
 function ListingPage() {
-  const { item, rating: ratingData } = Route.useLoaderData();
+  const { item, rating: ratingData, brandDb } = Route.useLoaderData();
   const navigate = useNavigate();
   const { user, isAdmin } = useAuth();
   const { boost } = useViewBoost();
@@ -589,8 +603,10 @@ function ListingPage() {
   const approxLocation = !exactPoint && !!mapPoint;
   const mapSrc = mapPoint ? `https://www.google.com/maps?q=${mapPoint.lat},${mapPoint.lng}&z=15&hl=ar&output=embed` : null;
 
-  // معلومات الماركة (الوصف وبلد المنشأ والتخصص) تُعرض تلقائياً
-  const bInfo = brandInfo(item.brand);
+  // معلومات الماركة: الكتالوج الداخلي أولاً ثم قاعدة البيانات (لأكثر من 700 ماركة)
+  const bCat = brandInfo(item.brand);
+  const bDb = brandDb;
+  const bInfo = bCat ?? (bDb ? { name: bDb.name, country: bDb.country ?? undefined, type: bDb.equipment_type ?? undefined, description: bDb.description ?? undefined } : null);
 
   return (
     <div className="flex min-h-screen flex-col">
