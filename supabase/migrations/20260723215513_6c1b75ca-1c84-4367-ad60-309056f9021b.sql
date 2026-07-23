@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "Public columns of reviews are readable" ON public.seller_reviews;
