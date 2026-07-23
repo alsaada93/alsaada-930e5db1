@@ -70,8 +70,22 @@ export const Route = createFileRoute("/listing/$id")({
       }
     }
 
+    // معلومات الماركة من قاعدة البيانات (يشمل الوصف والبلد والشعار لأكثر من 700 ماركة)
+    let brandDb: { name: string; country: string | null; equipment_type: string | null; description: string | null; logo_url: string | null } | null = null;
+    const brandName = ((data.brand as string | null) ?? (data.car_make as string | null) ?? "").trim();
+    if (brandName) {
+      const { data: b } = await supabase
+        .from("brands")
+        .select("name, country, equipment_type, description, logo_url")
+        .ilike("name", brandName)
+        .limit(1)
+        .maybeSingle();
+      if (b) brandDb = b as typeof brandDb;
+    }
+
     return {
       rating,
+      brandDb,
       item: {
         id: data.id,
         title: data.title,
