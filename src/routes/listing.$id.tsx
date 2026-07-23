@@ -605,7 +605,7 @@ function ListingPage() {
 
   // معلومات الماركة: الكتالوج الداخلي أولاً ثم قاعدة البيانات (لأكثر من 700 ماركة)
   const bCat = brandInfo(item.brand);
-  const bDb = loaderRoot.brandDb;
+  const bDb = brandDb;
   const bInfo = bCat ?? (bDb ? { name: bDb.name, country: bDb.country ?? undefined, type: bDb.equipment_type ?? undefined, description: bDb.description ?? undefined } : null);
 
   return (
