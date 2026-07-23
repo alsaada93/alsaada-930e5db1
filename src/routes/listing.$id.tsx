@@ -603,8 +603,10 @@ function ListingPage() {
   const approxLocation = !exactPoint && !!mapPoint;
   const mapSrc = mapPoint ? `https://www.google.com/maps?q=${mapPoint.lat},${mapPoint.lng}&z=15&hl=ar&output=embed` : null;
 
-  // معلومات الماركة (الوصف وبلد المنشأ والتخصص) تُعرض تلقائياً
-  const bInfo = brandInfo(item.brand);
+  // معلومات الماركة: الكتالوج الداخلي أولاً ثم قاعدة البيانات (لأكثر من 700 ماركة)
+  const bCat = brandInfo(item.brand);
+  const bDb = loaderRoot.brandDb;
+  const bInfo = bCat ?? (bDb ? { name: bDb.name, country: bDb.country ?? undefined, type: bDb.equipment_type ?? undefined, description: bDb.description ?? undefined } : null);
 
   return (
     <div className="flex min-h-screen flex-col">
