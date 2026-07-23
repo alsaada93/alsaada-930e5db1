@@ -466,7 +466,7 @@ function Gallery({ images, video, title }: { images: string[]; video: string | n
 }
 
 function ListingPage() {
-  const { item, rating: ratingData } = Route.useLoaderData();
+  const { item, rating: ratingData, brandDb } = Route.useLoaderData();
   const navigate = useNavigate();
   const { user, isAdmin } = useAuth();
   const { boost } = useViewBoost();
