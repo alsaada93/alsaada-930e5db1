@@ -10,6 +10,20 @@ export function Hero({ bannerImage }: { bannerImage?: string } = {}) {
   const { t, lang } = useLanguage();
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
+  const [focused, setFocused] = useState(false);
+  const { listings } = useListings();
+
+  const suggestions = useMemo(() => {
+    const term = query.trim().toLowerCase();
+    if (!term || term.length < 2) return [];
+    return listings
+      .filter((l) => {
+        const hay = `${l.title} ${l.itemName ?? ""} ${l.category ?? ""} ${l.city ?? ""}`.toLowerCase();
+        return hay.includes(term);
+      })
+      .slice(0, 8);
+  }, [query, listings]);
+
 
   const { config } = useHeroConfig();
   const heroImage = bannerImage || resolveHeroImage(config);
