@@ -72,27 +72,73 @@ export function Hero({ bannerImage }: { bannerImage?: string } = {}) {
           )}
 
           {config.showSearch && (
-            <div className="mt-7 rounded-2xl bg-white p-2 shadow-card">
-              <div className="flex items-center gap-2">
-                <Search className="ms-2 h-5 w-5 shrink-0 text-muted-foreground" />
-                <input
-                  type="search"
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && goSearch()}
-                  placeholder={t("hero.searchPlaceholder")}
-                  className="h-11 w-full border-0 bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
-                />
-                <button
-                  type="button"
-                  onClick={goSearch}
-                  className="rounded-xl bg-gradient-primary px-5 py-2.5 text-sm font-bold text-primary-foreground"
-                >
-                  {t("hero.search")}
-                </button>
+            <div className="relative mt-7">
+              <div className="rounded-2xl bg-white p-2 shadow-card">
+                <div className="flex items-center gap-2">
+                  <Search className="ms-2 h-5 w-5 shrink-0 text-muted-foreground" />
+                  <input
+                    type="search"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    onFocus={() => setFocused(true)}
+                    onBlur={() => setTimeout(() => setFocused(false), 150)}
+                    onKeyDown={(e) => e.key === "Enter" && goSearch()}
+                    placeholder={t("hero.searchPlaceholder")}
+                    className="h-11 w-full border-0 bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={goSearch}
+                    className="rounded-xl bg-gradient-primary px-5 py-2.5 text-sm font-bold text-primary-foreground"
+                  >
+                    {t("hero.search")}
+                  </button>
+                </div>
               </div>
+
+              {focused && suggestions.length > 0 && (
+                <div className="absolute inset-x-0 top-full z-30 mt-2 max-h-[70vh] overflow-y-auto rounded-2xl border border-border bg-white text-foreground shadow-xl">
+                  <ul className="divide-y divide-border">
+                    {suggestions.map((l) => (
+                      <li key={l.id}>
+                        <Link
+                          to="/listing/$id"
+                          params={{ id: l.id }}
+                          className="flex items-center gap-3 px-3 py-2 hover:bg-muted"
+                          onMouseDown={(e) => e.preventDefault()}
+                        >
+                          <img
+                            src={l.image}
+                            alt=""
+                            loading="lazy"
+                            className="h-12 w-12 shrink-0 rounded-lg object-cover"
+                          />
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-sm font-semibold">{l.title}</p>
+                            <p className="truncate text-xs text-muted-foreground">
+                              {l.category} {l.city ? `• ${l.city}` : ""}
+                            </p>
+                          </div>
+                          <span className="shrink-0 text-sm font-bold text-primary">
+                            {l.price ? `${l.price} د.ب` : ""}
+                          </span>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                  <button
+                    type="button"
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={goSearch}
+                    className="block w-full border-t border-border px-3 py-2 text-center text-sm font-bold text-primary hover:bg-muted"
+                  >
+                    {lang === "ar" ? "عرض جميع النتائج" : "View all results"}
+                  </button>
+                </div>
+              )}
             </div>
           )}
+
         </div>
       </div>
     </section>
