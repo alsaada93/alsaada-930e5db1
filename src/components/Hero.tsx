@@ -1,8 +1,10 @@
 import { Search, Sparkles } from "lucide-react";
-import { useState } from "react";
-import { useNavigate } from "@tanstack/react-router";
+import { useMemo, useState } from "react";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useHeroConfig, resolveHeroImage } from "@/hooks/useHeroConfig";
+import { useListings } from "@/hooks/useListings";
+
 
 export function Hero({ bannerImage }: { bannerImage?: string } = {}) {
   const { t, lang } = useLanguage();
