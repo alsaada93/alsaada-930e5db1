@@ -21,9 +21,7 @@ import { toast } from "sonner";
 import { ShieldCheck, Apple, MessageCircle, Mail } from "lucide-react";
 import googleLogo from "@/assets/google-logo.png";
 import { isNativePlatform } from "@/lib/capacitor";
-
-// Deep link used by the native Android/iOS app to return from Google OAuth.
-const NATIVE_OAUTH_REDIRECT = "harajalsaada://login-callback";
+import { getNativeOAuthBridgeUrl, getWebOAuthCallbackUrl } from "@/lib/auth-redirects";
 
 const COUNTRY_CODES = [
   { code: "973", label: "البحرين +973" },
@@ -164,12 +162,13 @@ function LoginPage() {
   };
 
   const handleGoogle = async () => {
-    // داخل تطبيق Capacitor نعيد التوجيه إلى deep link التطبيق بدلاً من الموقع.
+    // داخل تطبيق Capacitor نستخدم رابط HTTPS عام كجسر ثم يعود إلى التطبيق عبر deep link.
     if (isNativePlatform()) {
-      console.log("[HARAJ_AUTH_DEBUG] native platform: using redirect", NATIVE_OAUTH_REDIRECT);
+      const redirectTo = getNativeOAuthBridgeUrl();
+      console.log("[HARAJ_AUTH_DEBUG] native platform: using redirect", redirectTo);
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "google",
-        options: { redirectTo: NATIVE_OAUTH_REDIRECT, skipBrowserRedirect: true },
+        options: { redirectTo, skipBrowserRedirect: true },
       });
       if (error || !data?.url) {
         console.error("[HARAJ_AUTH_DEBUG] signInWithOAuth error", error);
@@ -184,9 +183,10 @@ function LoginPage() {
 
     // redirect_uri يجب أن يكون رابطاً عاماً على نفس النطاق (ليس صفحة محمية) —
     // وإلا يفشل ربط web_message داخل الـ popup ويفقد المستخدم الجلسة.
-    console.log("[HARAJ_AUTH_DEBUG] web platform: using redirect", window.location.origin);
+    const redirectTo = getWebOAuthCallbackUrl();
+    console.log("[HARAJ_AUTH_DEBUG] web platform: using redirect", redirectTo);
     const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
+      redirect_uri: redirectTo,
     });
     if (result.error) {
       toast.error("تعذّر تسجيل الدخول عبر جوجل");
@@ -195,9 +195,10 @@ function LoginPage() {
 
   const handleApple = async () => {
     if (isNativePlatform()) {
+      const redirectTo = getNativeOAuthBridgeUrl();
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "apple",
-        options: { redirectTo: NATIVE_OAUTH_REDIRECT, skipBrowserRedirect: true },
+        options: { redirectTo, skipBrowserRedirect: true },
       });
       if (error || !data?.url) {
         toast.error("تعذّر تسجيل الدخول عبر آبل");
@@ -206,8 +207,9 @@ function LoginPage() {
       window.open(data.url, "_system");
       return;
     }
+    const redirectTo = getWebOAuthCallbackUrl();
     const result = await lovable.auth.signInWithOAuth("apple", {
-      redirect_uri: window.location.origin,
+      redirect_uri: redirectTo,
     });
     if (result.error) {
       toast.error("تعذّر تسجيل الدخول عبر آبل");
