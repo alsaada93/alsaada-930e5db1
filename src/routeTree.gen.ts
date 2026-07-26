@@ -39,6 +39,7 @@ import { Route as ListingIdRouteImport } from './routes/listing.$id'
 import { Route as LSlugRouteImport } from './routes/l.$slug'
 import { Route as FacebookAdsIdRouteImport } from './routes/facebook-ads.$id'
 import { Route as CategoryIdRouteImport } from './routes/category.$id'
+import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
 import { Route as AdminSlidesRouteImport } from './routes/admin.slides'
 import { Route as AdminSeoRouteImport } from './routes/admin.seo'
 import { Route as AdminRestaurantRouteImport } from './routes/admin.restaurant'
@@ -212,6 +213,11 @@ const CategoryIdRoute = CategoryIdRouteImport.update({
   path: '/category/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthCallbackRoute = AuthCallbackRouteImport.update({
+  id: '/auth/callback',
+  path: '/auth/callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminSlidesRoute = AdminSlidesRouteImport.update({
   id: '/slides',
   path: '/slides',
@@ -364,6 +370,7 @@ export interface FileRoutesByFullPath {
   '/admin/restaurant': typeof AdminRestaurantRoute
   '/admin/seo': typeof AdminSeoRoute
   '/admin/slides': typeof AdminSlidesRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/category/$id': typeof CategoryIdRoute
   '/facebook-ads/$id': typeof FacebookAdsIdRoute
   '/l/$slug': typeof LSlugRoute
@@ -417,6 +424,7 @@ export interface FileRoutesByTo {
   '/admin/restaurant': typeof AdminRestaurantRoute
   '/admin/seo': typeof AdminSeoRoute
   '/admin/slides': typeof AdminSlidesRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/category/$id': typeof CategoryIdRoute
   '/facebook-ads/$id': typeof FacebookAdsIdRoute
   '/l/$slug': typeof LSlugRoute
@@ -472,6 +480,7 @@ export interface FileRoutesById {
   '/admin/restaurant': typeof AdminRestaurantRoute
   '/admin/seo': typeof AdminSeoRoute
   '/admin/slides': typeof AdminSlidesRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/category/$id': typeof CategoryIdRoute
   '/facebook-ads/$id': typeof FacebookAdsIdRoute
   '/l/$slug': typeof LSlugRoute
@@ -528,6 +537,7 @@ export interface FileRouteTypes {
     | '/admin/restaurant'
     | '/admin/seo'
     | '/admin/slides'
+    | '/auth/callback'
     | '/category/$id'
     | '/facebook-ads/$id'
     | '/l/$slug'
@@ -581,6 +591,7 @@ export interface FileRouteTypes {
     | '/admin/restaurant'
     | '/admin/seo'
     | '/admin/slides'
+    | '/auth/callback'
     | '/category/$id'
     | '/facebook-ads/$id'
     | '/l/$slug'
@@ -635,6 +646,7 @@ export interface FileRouteTypes {
     | '/admin/restaurant'
     | '/admin/seo'
     | '/admin/slides'
+    | '/auth/callback'
     | '/category/$id'
     | '/facebook-ads/$id'
     | '/l/$slug'
@@ -671,6 +683,7 @@ export interface RootRouteChildren {
   SellRoute: typeof SellRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsRoute: typeof TermsRoute
+  AuthCallbackRoute: typeof AuthCallbackRoute
   CategoryIdRoute: typeof CategoryIdRoute
   FacebookAdsIdRoute: typeof FacebookAdsIdRoute
   LSlugRoute: typeof LSlugRoute
@@ -894,6 +907,13 @@ declare module '@tanstack/react-router' {
       path: '/category/$id'
       fullPath: '/category/$id'
       preLoaderRoute: typeof CategoryIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/callback': {
+      id: '/auth/callback'
+      path: '/auth/callback'
+      fullPath: '/auth/callback'
+      preLoaderRoute: typeof AuthCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/slides': {
@@ -1143,6 +1163,7 @@ const rootRouteChildren: RootRouteChildren = {
   SellRoute: SellRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsRoute: TermsRoute,
+  AuthCallbackRoute: AuthCallbackRoute,
   CategoryIdRoute: CategoryIdRoute,
   FacebookAdsIdRoute: FacebookAdsIdRoute,
   LSlugRoute: LSlugRoute,
@@ -1158,13 +1179,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
