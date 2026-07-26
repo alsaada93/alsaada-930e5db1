@@ -162,27 +162,26 @@ function LoginPage() {
   };
 
   const handleGoogle = async () => {
-    // داخل تطبيق Capacitor نستخدم رابط HTTPS عام كجسر ثم يعود إلى التطبيق عبر deep link.
+    // Google must use the Lovable Cloud OAuth broker on web and in the native shell.
+    // Google Console should register /~oauth/callback for each domain; this return URL
+    // is only where the broker sends the user after it finishes.
     if (isNativePlatform()) {
       const redirectTo = getNativeOAuthBridgeUrl();
       console.log("[HARAJ_AUTH_DEBUG] native platform: using redirect", redirectTo);
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: { redirectTo, skipBrowserRedirect: true },
+      const result = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: redirectTo,
       });
-      if (error || !data?.url) {
-        console.error("[HARAJ_AUTH_DEBUG] signInWithOAuth error", error);
+      if (result.error) {
+        console.error("[HARAJ_AUTH_DEBUG] Google OAuth error", result.error);
         toast.error("تعذّر تسجيل الدخول عبر جوجل");
         return;
       }
-      console.log("[HARAJ_AUTH_DEBUG] opening OAuth url:", data.url);
-      // فتح المتصفح الخارجي للنظام لإكمال تسجيل الدخول ثم العودة عبر deep link.
-      window.open(data.url, "_system");
+      if (!result.redirected) navigate({ to: "/account" });
       return;
     }
 
-    // redirect_uri يجب أن يكون رابطاً عاماً على نفس النطاق (ليس صفحة محمية) —
-    // وإلا يفشل ربط web_message داخل الـ popup ويفقد المستخدم الجلسة.
+    // redirect_uri is an app return URL. The Google OAuth redirect registered in
+    // Google Console is the broker callback: https://<domain>/~oauth/callback.
     const redirectTo = getWebOAuthCallbackUrl();
     console.log("[HARAJ_AUTH_DEBUG] web platform: using redirect", redirectTo);
     const result = await lovable.auth.signInWithOAuth("google", {
