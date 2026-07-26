@@ -105,6 +105,8 @@ npx cap open ios
 
 - التطبيق يحمل الموقع من `https://www.alsaada.sale`. أي تعديل على الموقع يظهر في التطبيق فوراً بدون تحديث المتجر.
 - إذا أردت تغيير Bundle ID أو اسم التطبيق، عدّل `capacitor.config.ts` ثم شغّل `npx cap sync`.
+- لاختبار تسجيل الدخول عبر Google على الويب وAndroid وبعد إعادة تثبيت التطبيق، اتبع القائمة الكاملة في `GOOGLE_SIGNIN_TEST_CHECKLIST.md`.
+- عند ظهور خطأ Google يحتوي على `redirect_uri=https://www.alsaada.sale/~oauth/callback` يجب تسجيل هذا الرابط نفسه حرفياً في Google Cloud Console ضمن Web OAuth Client، وليس `/auth/callback`.
 - للاختبار السريع على جهاز Android:
   ```bash
   npx cap run android
