@@ -21,7 +21,7 @@ import { toast } from "sonner";
 import { ShieldCheck, Apple, MessageCircle, Mail } from "lucide-react";
 import googleLogo from "@/assets/google-logo.png";
 import { isNativePlatform } from "@/lib/capacitor";
-import { getNativeOAuthBridgeUrl, getWebOAuthCallbackUrl } from "@/lib/auth-redirects";
+import { GOOGLE_OAUTH_OPTIONS, getNativeOAuthBridgeUrl, getWebOAuthCallbackUrl } from "@/lib/auth-redirects";
 
 const COUNTRY_CODES = [
   { code: "973", label: "البحرين +973" },
@@ -166,12 +166,14 @@ function LoginPage() {
   const handleGoogle = async () => {
     // Google must use the Lovable Cloud OAuth broker on web and in the native shell.
     // Google Console should register /~oauth/callback for each domain; this return URL
-    // is only where the broker sends the user after it finishes.
+    // is only where the broker sends the user after it finishes. Both surfaces use
+    // the same Web OAuth client + authorization-code PKCE flow for Google policy compliance.
     if (isNativePlatform()) {
       const redirectTo = getNativeOAuthBridgeUrl();
       console.log("[HARAJ_AUTH_DEBUG] native platform: using redirect", redirectTo);
       const result = await lovable.auth.signInWithOAuth("google", {
         redirect_uri: redirectTo,
+        extraParams: GOOGLE_OAUTH_OPTIONS,
       });
       if (result.error) {
         console.error("[HARAJ_AUTH_DEBUG] Google OAuth error", result.error);
@@ -188,6 +190,7 @@ function LoginPage() {
     console.log("[HARAJ_AUTH_DEBUG] web platform: using redirect", redirectTo);
     const result = await lovable.auth.signInWithOAuth("google", {
       redirect_uri: redirectTo,
+      extraParams: GOOGLE_OAUTH_OPTIONS,
     });
     if (result.error) {
       toast.error("تعذّر تسجيل الدخول عبر جوجل");
