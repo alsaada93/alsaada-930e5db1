@@ -4,6 +4,16 @@ Use this checklist whenever Google sign-in is changed, the Android app is rebuil
 
 ## 1) Exact OAuth URLs to register
 
+Current app flow:
+
+- Client type used by both website and Android shell: **Web OAuth client**
+- OAuth flow: **Authorization Code + PKCE (S256)**
+- Google redirect URI: the broker callback `/~oauth/callback`
+- App return page after the broker finishes: `/auth/callback`
+- Native app return after the HTTPS bridge: `harajalsaada://login-callback`
+
+Do not create a separate Android redirect URI for the browser sign-in flow. The Android OAuth client is only for package/SHA registration; the actual sign-in request must still use the Web OAuth client and PKCE so Google receives the exact same redirect URI on web and Android.
+
 ### Google Cloud Console — Web OAuth client
 
 Add these **Authorized JavaScript origins**:
@@ -23,11 +33,20 @@ Optional, only if testing Google sign-in on the Lovable published domain:
 
 Important: Google reports the real OAuth redirect as `/~oauth/callback`. Do **not** use `/auth/callback` as the Google redirect URI. `/auth/callback` is only the app return page after the OAuth broker has finished.
 
+The request shown by Google should contain:
+
+- `redirect_uri=https://www.alsaada.sale/~oauth/callback` or `https://alsaada.sale/~oauth/callback`
+- `response_type=code`
+- `code_challenge_method=S256`
+- the Web OAuth Client ID
+
 ### Google Cloud Console — Android OAuth client
 
 - Package name: `sale.alsaada.app`
 - SHA-1: `33:A6:D3:69:20:B0:8E:49:7E:F9:5D:D0:21:C1:ED:46:9E:E4:0D:95`
 - SHA-256: `5D:C8:86:1D:7B:A4:5D:23:F7:BB:C3:8E:4E:C3:99:4B:C8:E8:8D:45:28:C0:79:E0:AA:D1:A8:C6:EB:FB:61:1C`
+
+Keep this Android client in the same Google Cloud project as the Web OAuth client. Do not use the Android client ID as the browser OAuth `client_id`; Google browser redirects must use the Web OAuth client.
 
 ### Backend auth redirect allow-list
 

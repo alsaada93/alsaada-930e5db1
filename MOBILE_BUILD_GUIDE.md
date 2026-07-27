@@ -107,6 +107,7 @@ npx cap open ios
 - إذا أردت تغيير Bundle ID أو اسم التطبيق، عدّل `capacitor.config.ts` ثم شغّل `npx cap sync`.
 - لاختبار تسجيل الدخول عبر Google على الويب وAndroid وبعد إعادة تثبيت التطبيق، اتبع القائمة الكاملة في `GOOGLE_SIGNIN_TEST_CHECKLIST.md`.
 - عند ظهور خطأ Google يحتوي على `redirect_uri=https://www.alsaada.sale/~oauth/callback` يجب تسجيل هذا الرابط نفسه حرفياً في Google Cloud Console ضمن Web OAuth Client، وليس `/auth/callback`.
+- تم توحيد تدفق Google للويب وأندرويد على Web OAuth Client مع Authorization Code + PKCE (S256). لا تستخدم Android Client ID كـ `client_id` في تدفق المتصفح؛ دوره فقط ربط الحزمة وبصمات SHA داخل نفس مشروع Google.
 - للاختبار السريع على جهاز Android:
   ```bash
   npx cap run android
