@@ -237,8 +237,20 @@ function RootComponent() {
             console.error("[HARAJ_AUTH_DEBUG] OAuth returned error", errorDescription);
             return;
           }
+          const accessToken = parsed.searchParams.get("access_token");
+          const refreshToken = parsed.searchParams.get("refresh_token");
           const code = parsed.searchParams.get("code");
-          console.log("[HARAJ_AUTH_DEBUG] extracted code:", code);
+
+          if (accessToken && refreshToken) {
+            const { error } = await supabase.auth.setSession({
+              access_token: accessToken,
+              refresh_token: refreshToken,
+            });
+            console.log("[HARAJ_AUTH_DEBUG] setSession:", error ? `error: ${error.message}` : "success");
+            if (!error) window.location.href = "/";
+            return;
+          }
+
           if (!code) return;
           const { error } = await supabase.auth.exchangeCodeForSession(code);
           console.log(
