@@ -164,38 +164,32 @@ function LoginPage() {
   };
 
   const handleGoogle = async () => {
-    // Google must use the Lovable Cloud OAuth broker on web and in the native shell.
-    // Google Console should register /~oauth/callback for each domain; this return URL
-    // is only where the broker sends the user after it finishes. Both surfaces use
-    // the same Web OAuth client + authorization-code PKCE flow for Google policy compliance.
-    if (isNativePlatform()) {
-      const redirectTo = getNativeOAuthBridgeUrl();
-      console.log("[HARAJ_AUTH_DEBUG] native platform: using redirect", redirectTo);
-      const result = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: redirectTo,
-        extraParams: GOOGLE_OAUTH_OPTIONS,
-      });
-      if (result.error) {
-        console.error("[HARAJ_AUTH_DEBUG] Google OAuth error", result.error);
-        toast.error("تعذّر تسجيل الدخول عبر جوجل");
-        return;
-      }
-      if (!result.redirected) navigate({ to: "/account" });
-      return;
-    }
-
-    // redirect_uri is an app return URL. The Google OAuth redirect registered in
-    // Google Console is the broker callback: https://<domain>/~oauth/callback.
+    // Google always goes through the Lovable Cloud OAuth broker. Google Console keeps
+    // the single registered redirect: https://<domain>/~oauth/callback — we never change it.
+    //
+    // The Android shell is a Capacitor WebView that loads https://www.alsaada.sale
+    // directly, so the broker's redirect lands back INSIDE the app WebView on the
+    // same origin. That means the normal same-origin callback works natively too,
+    // and no custom scheme is required for the happy path. The deep-link bridge in
+    // /auth/callback?native=1 remains as a fallback when the flow is completed in an
+    // external browser (Chrome Custom Tab) instead of the WebView.
+    const native = isNativePlatform();
     const redirectTo = getWebOAuthCallbackUrl();
-    console.log("[HARAJ_AUTH_DEBUG] web platform: using redirect", redirectTo);
+    console.log("[HARAJ_AUTH_DEBUG] google sign-in", { native, redirect_uri: redirectTo });
+
     const result = await lovable.auth.signInWithOAuth("google", {
       redirect_uri: redirectTo,
       extraParams: GOOGLE_OAUTH_OPTIONS,
     });
+
     if (result.error) {
+      console.error("[HARAJ_AUTH_DEBUG] Google OAuth error", result.error);
       toast.error("تعذّر تسجيل الدخول عبر جوجل");
+      return;
     }
+    if (!result.redirected) navigate({ to: "/account" });
   };
+
 
   const handleApple = async () => {
     if (isNativePlatform()) {
