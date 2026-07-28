@@ -37,32 +37,54 @@ function AuthCallbackPage() {
       const currentUrl = window.location.href;
       const params = new URLSearchParams(window.location.search);
       const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
-      const error = params.get("error_description") ?? params.get("error") ?? hashParams.get("error_description") ?? hashParams.get("error");
+      const pick = (name: string) => params.get(name) ?? hashParams.get(name);
+      const error = pick("error_description") ?? pick("error");
 
       if (error) {
+        console.error("[HARAJ_AUTH_DEBUG] callback error", error);
         setStatus("تعذّر إكمال تسجيل الدخول. حاول مرة أخرى.");
         setFailed(true);
         return;
       }
 
-      if (isNativeBridge) {
+      // Deep-link bridge: only needed when this page was opened in an EXTERNAL
+      // browser (Chrome Custom Tab). Inside the Capacitor WebView we are already
+      // in the app, so we finish the session here instead of bouncing out.
+      const insideNativeApp = isNativePlatform();
+      if (isNativeBridge && !insideNativeApp) {
         window.location.href = buildNativeCallbackUrl(currentUrl);
         setStatus("جاري إعادتك إلى التطبيق...");
         return;
       }
 
-      const code = params.get("code");
-      if (code) {
+      const accessToken = pick("access_token");
+      const refreshToken = pick("refresh_token");
+      const code = pick("code");
+
+      if (accessToken && refreshToken) {
+        const { error: sessionError } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken,
+        });
+        if (sessionError) {
+          console.error("[HARAJ_AUTH_DEBUG] setSession failed", sessionError.message);
+        }
+      } else if (code) {
         const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
         if (exchangeError) {
-          setStatus("تعذّر تأكيد جلسة الدخول. حاول مرة أخرى.");
-          setFailed(true);
-          return;
+          console.error("[HARAJ_AUTH_DEBUG] exchangeCodeForSession failed", exchangeError.message);
         }
       }
 
-      const { data } = await supabase.auth.getSession();
-      if (!data.session) {
+      // The Lovable broker may have already stored the session before redirecting,
+      // so re-check before declaring failure. Retry briefly for slow storage writes.
+      let session = (await supabase.auth.getSession()).data.session;
+      for (let i = 0; !session && i < 5; i++) {
+        await new Promise((r) => setTimeout(r, 300));
+        session = (await supabase.auth.getSession()).data.session;
+      }
+
+      if (!session) {
         setStatus("لم يتم العثور على جلسة دخول صالحة. حاول تسجيل الدخول مرة أخرى.");
         setFailed(true);
         return;
@@ -71,11 +93,13 @@ function AuthCallbackPage() {
       navigate({ to: "/account", replace: true });
     };
 
-    complete().catch(() => {
+    complete().catch((e) => {
+      console.error("[HARAJ_AUTH_DEBUG] callback crashed", e);
       setStatus("حدث خطأ غير متوقع أثناء تسجيل الدخول.");
       setFailed(true);
     });
   }, [isNativeBridge, navigate]);
+
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
