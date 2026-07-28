@@ -36,7 +36,13 @@ export function buildNativeCallbackUrl(sourceUrl: string) {
     if (value) target.searchParams.set(name, value);
   };
 
+  // The Lovable broker may return either an authorization code (PKCE) or the
+  // session tokens directly in the hash. Forward whichever is present.
   copyParam("code");
+  copyParam("access_token");
+  copyParam("refresh_token");
+  copyParam("expires_in");
+  copyParam("token_type");
   copyParam("error");
   copyParam("error_code");
   copyParam("error_description");
