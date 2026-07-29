@@ -109,17 +109,18 @@ export function useListings(opts: UseListingsOpts = {}) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pageSize, onlyNormal, categoryId, subcategory]);
 
-  const loadMore = async () => {
+  /** يحمّل دفعة إضافية. يمكن تمرير عدد مخصص (مثلاً 6 لكل صف جديد). */
+  const loadMore = async (step?: number) => {
     if (!pageSize || loadingMore || !hasMore) return;
     setLoadingMore(true);
-    const nextPage = pageRef.current + 1;
-    const from = nextPage * pageSize;
-    const to = from + pageSize - 1;
+    const size = step && step > 0 ? step : pageSize;
+    const from = listings.length;
+    const to = from + size - 1;
     const { data } = await buildQuery(from, to);
     const rows = (data ?? []).map(mapRow);
-    pageRef.current = nextPage;
+    pageRef.current += 1;
     setListings((prev) => [...prev, ...rows]);
-    setHasMore(rows.length === pageSize);
+    setHasMore(rows.length === size);
     setLoadingMore(false);
   };
 
