@@ -25,6 +25,8 @@ export function HomeListingsRow({
   hideMeta,
   cardWidthPct,
   loading,
+  firstRowCount,
+  chunkSize,
 }: {
   title: string;
   subtitle?: string;
@@ -44,23 +46,28 @@ export function HomeListingsRow({
   cardWidthPct?: number;
   /** عرض هيكل التحميل أثناء جلب البيانات */
   loading?: boolean;
+  /** عدد إعلانات الصف الأول (الباقي يُقسم على صفوف جديدة) */
+  firstRowCount?: number;
+  /** عدد الإعلانات في كل صف جديد يظهر بعد الضغط على "المزيد" */
+  chunkSize?: number;
 }) {
   const { lang } = useLanguage();
   const rtl = lang === "ar";
   const { map } = useListingTranslations(
     items.map((i) => ({ id: i.id, title: i.title, description: i.description })),
   );
-  const trackRef = useRef<HTMLDivElement>(null);
 
-  const scrollByOne = (dir: 1 | -1) => {
-    const el = trackRef.current;
-    if (!el) return;
-    const firstCol = el.firstElementChild as HTMLElement | null;
-    const colWidth = firstCol ? firstCol.getBoundingClientRect().width : el.clientWidth / 2;
-    const gap = 12;
-    const amount = (colWidth + gap) * 2 * dir * (rtl ? -1 : 1);
-    el.scrollBy({ left: amount, behavior: "smooth" });
-  };
+  // تقسيم الإعلانات إلى صفوف: الصف الأول ثم صف جديد لكل دفعة إضافية
+  const chunks: Listing[][] = [];
+  if (chunkSize && chunkSize > 0) {
+    const first = firstRowCount && firstRowCount > 0 ? firstRowCount : chunkSize;
+    chunks.push(items.slice(0, first));
+    for (let i = first; i < items.length; i += chunkSize) {
+      chunks.push(items.slice(i, i + chunkSize));
+    }
+  } else {
+    chunks.push(items);
+  }
 
   return (
     <section className="mx-auto max-w-7xl px-4 py-8">
@@ -69,49 +76,25 @@ export function HomeListingsRow({
           <h2 className="text-2xl font-extrabold">{title}</h2>
           {subtitle && <p className="text-sm text-muted-foreground">{subtitle}</p>}
         </div>
-        {items.length > 1 && (
-          <div className="hidden items-center gap-2 sm:flex">
-            <button
-              type="button"
-              onClick={() => scrollByOne(-1)}
-              aria-label={rtl ? "السابق" : "Previous"}
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card text-foreground transition-colors hover:bg-accent"
-            >
-              {rtl ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
-            </button>
-            <button
-              type="button"
-              onClick={() => scrollByOne(1)}
-              aria-label={rtl ? "التالي" : "Next"}
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card text-foreground transition-colors hover:bg-accent"
-            >
-              {rtl ? <ChevronLeft className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
-            </button>
-          </div>
-        )}
       </div>
 
       {loading ? (
         <ListingRowSkeleton cardWidthPct={cardWidthPct} />
       ) : items.length > 0 ? (
-        <div
-          ref={trackRef}
-          className="flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-smooth pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-        >
-          {items.map((item) => (
-            <div
-              key={item.id}
-              className="w-[var(--cw)] min-w-0 shrink-0 snap-start sm:w-[38%] lg:w-[23%]"
-              style={{ ["--cw" as string]: `${cardWidthPct ?? 62}%` }}
-            >
-              <ListingCard
-                item={item}
-                displayTitle={map[item.id]?.title}
+        <div className="space-y-4">
+          {chunks
+            .filter((c) => c.length > 0)
+            .map((chunk, idx) => (
+              <RowTrack
+                key={idx}
+                items={chunk}
+                rtl={rtl}
+                map={map}
                 hideContact={hideContact}
                 hideMeta={hideMeta}
+                cardWidthPct={cardWidthPct}
               />
-            </div>
-          ))}
+            ))}
         </div>
       ) : (
         <div className="rounded-2xl border border-dashed border-border bg-card p-10 text-center text-sm text-muted-foreground">
@@ -139,5 +122,78 @@ export function HomeListingsRow({
         </div>
       )}
     </section>
+  );
+}
+
+/** صف أفقي واحد مع أزرار التنقل */
+function RowTrack({
+  items,
+  rtl,
+  map,
+  hideContact,
+  hideMeta,
+  cardWidthPct,
+}: {
+  items: Listing[];
+  rtl: boolean;
+  map: Record<string, { title?: string } | undefined>;
+  hideContact?: boolean;
+  hideMeta?: boolean;
+  cardWidthPct?: number;
+}) {
+  const trackRef = useRef<HTMLDivElement>(null);
+
+  const scrollByOne = (dir: 1 | -1) => {
+    const el = trackRef.current;
+    if (!el) return;
+    const firstCol = el.firstElementChild as HTMLElement | null;
+    const colWidth = firstCol ? firstCol.getBoundingClientRect().width : el.clientWidth / 2;
+    const gap = 12;
+    const amount = (colWidth + gap) * 2 * dir * (rtl ? -1 : 1);
+    el.scrollBy({ left: amount, behavior: "smooth" });
+  };
+
+  return (
+    <div className="relative">
+      {items.length > 1 && (
+        <div className="mb-2 hidden items-center justify-end gap-2 sm:flex">
+          <button
+            type="button"
+            onClick={() => scrollByOne(-1)}
+            aria-label={rtl ? "السابق" : "Previous"}
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card text-foreground transition-colors hover:bg-accent"
+          >
+            {rtl ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
+          </button>
+          <button
+            type="button"
+            onClick={() => scrollByOne(1)}
+            aria-label={rtl ? "التالي" : "Next"}
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card text-foreground transition-colors hover:bg-accent"
+          >
+            {rtl ? <ChevronLeft className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
+          </button>
+        </div>
+      )}
+      <div
+        ref={trackRef}
+        className="flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-smooth pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      >
+        {items.map((item) => (
+          <div
+            key={item.id}
+            className="w-[var(--cw)] min-w-0 shrink-0 snap-start sm:w-[38%] lg:w-[23%]"
+            style={{ ["--cw" as string]: `${cardWidthPct ?? 62}%` }}
+          >
+            <ListingCard
+              item={item}
+              displayTitle={map[item.id]?.title}
+              hideContact={hideContact}
+              hideMeta={hideMeta}
+            />
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
