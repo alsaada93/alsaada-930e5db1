@@ -27,6 +27,8 @@ export function HomeDynamicRow({ row }: { row: HomeRow }) {
       hideContact
       hideMeta
       cardWidthPct={row.cardWidthPct}
+      firstRowCount={row.count}
+      chunkSize={6}
       moreButton={
         isCategory ? (
           <Link
@@ -38,7 +40,7 @@ export function HomeDynamicRow({ row }: { row: HomeRow }) {
           </Link>
         ) : undefined
       }
-      onLoadMore={isCategory ? undefined : () => loadMore()}
+      onLoadMore={isCategory ? undefined : () => loadMore(6)}
       loadingMore={loadingMore}
       hasMore={isCategory ? undefined : hasMore}
     />
