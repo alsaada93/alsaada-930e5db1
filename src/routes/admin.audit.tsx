@@ -152,8 +152,18 @@ function AuditPage() {
   useCategories();
   const list = useServerFn(adminListListings);
   const { data: items = [], isLoading } = useQuery({
-    queryKey: ["admin-listings"],
-    queryFn: () => list(),
+    queryKey: ["admin-listings-all"],
+    queryFn: async () => {
+      const all: AdminListingRow[] = [];
+      let offset = 0;
+      for (;;) {
+        const page = await list({ data: { limit: 100, offset } });
+        all.push(...page.items);
+        if (!page.hasMore || page.nextOffset == null) break;
+        offset = page.nextOffset;
+      }
+      return all;
+    },
   });
 
   const [query, setQuery] = useState("");
