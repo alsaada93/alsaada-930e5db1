@@ -158,54 +158,100 @@ export const adminGetDashboardStats = createServerFn({ method: "GET" })
     };
   });
 
-/** Returns all listings (any status) for the admin management table. */
+export interface AdminListingsPage {
+  items: AdminListingRow[];
+  total: number;
+  hasMore: boolean;
+  nextOffset: number | null;
+}
+
+function mapAdminRow(d: any): AdminListingRow {
+  return {
+    id: String(d.id),
+    title: String(d.title ?? ""),
+    description: d.description ?? null,
+    price: Number(d.price ?? 0),
+    old_price: d.old_price != null ? Number(d.old_price) : null,
+    category_id: d.category_id ?? null,
+    group_name: d.group_name ?? null,
+    item_name: d.item_name ?? null,
+    brand: d.brand ?? null,
+    condition: d.condition ?? null,
+    city: d.city ?? null,
+    contact_name: d.contact_name ?? null,
+    contact_phone: d.contact_phone ?? null,
+    image: (d.images as string[] | null)?.[0] ?? null,
+    images: (d.images as string[] | null) ?? [],
+    negotiable_flag: Boolean(d.negotiable_flag),
+    delivery_available: Boolean(d.delivery_available),
+    status: String(d.status ?? "pending"),
+    listing_type: String(d.listing_type ?? "normal"),
+    featured: Boolean(d.featured),
+    created_at: String(d.created_at ?? ""),
+  };
+}
+
+/** Returns a paginated, filterable slice of listings for the admin table. */
 export const adminListListings = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }): Promise<AdminListingRow[]> => {
+  .inputValidator((input: unknown) =>
+    z
+      .object({
+        status: z.enum(["pending", "approved", "rejected", "suspended", "all"]).optional(),
+        query: z.string().max(200).optional(),
+        limit: z.number().int().min(1).max(100).default(20),
+        offset: z.number().int().min(0).default(0),
+      })
+      .parse(input),
+  )
+  .handler(async ({ context, data }): Promise<AdminListingsPage> => {
     const { supabase, userId } = context;
     await assertAdmin(supabase, userId);
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const PAGE = 1000;
-    const data: any[] = [];
-    for (let page = 0; ; page++) {
-      const from = page * PAGE;
-      const to = from + PAGE - 1;
-      const { data: batch, error } = await supabaseAdmin
-        .from("listings")
-        .select(
-          "id,title,description,price,old_price,category_id,group_name,item_name,brand,condition,city,contact_name,contact_phone,images,negotiable_flag,delivery_available,status,listing_type,featured,created_at",
-        )
-        .order("created_at", { ascending: false })
-        .range(from, to);
-      if (error) throw error;
-      data.push(...(batch ?? []));
-      if ((batch ?? []).length < PAGE) break;
+    let q = supabaseAdmin
+      .from("listings")
+      .select(
+        "id,title,description,price,old_price,category_id,group_name,item_name,brand,condition,city,contact_name,contact_phone,images,negotiable_flag,delivery_available,status,listing_type,featured,created_at",
+        { count: "exact" },
+      )
+      .order("created_at", { ascending: false });
+    if (data.status && data.status !== "all") q = q.eq("status", data.status);
+    if (data.query && data.query.trim()) {
+      const term = data.query.trim().replace(/[%_,]/g, " ");
+      q = q.or(`title.ilike.%${term}%,contact_name.ilike.%${term}%`);
     }
+    const { data: batch, error, count } = await q.range(data.offset, data.offset + data.limit - 1);
+    if (error) throw error;
 
-    return (data ?? []).map((d: any) => ({
-      id: String(d.id),
-      title: String(d.title ?? ""),
-      description: d.description ?? null,
-      price: Number(d.price ?? 0),
-      old_price: d.old_price != null ? Number(d.old_price) : null,
-      category_id: d.category_id ?? null,
-      group_name: d.group_name ?? null,
-      item_name: d.item_name ?? null,
-      brand: d.brand ?? null,
-      condition: d.condition ?? null,
-      city: d.city ?? null,
-      contact_name: d.contact_name ?? null,
-      contact_phone: d.contact_phone ?? null,
-      image: (d.images as string[] | null)?.[0] ?? null,
-      images: (d.images as string[] | null) ?? [],
-      negotiable_flag: Boolean(d.negotiable_flag),
-      delivery_available: Boolean(d.delivery_available),
-      status: String(d.status ?? "pending"),
-      listing_type: String(d.listing_type ?? "normal"),
-      featured: Boolean(d.featured),
-      created_at: String(d.created_at ?? ""),
-    }));
+    const items = (batch ?? []).map(mapAdminRow);
+    const total = count ?? 0;
+    const fetched = data.offset + items.length;
+    const hasMore = fetched < total;
+    return { items, total, hasMore, nextOffset: hasMore ? fetched : null };
+  });
+
+/** Per-status counts for the admin listings tabs. */
+export const adminListingsCounts = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase, userId } = context;
+    await assertAdmin(supabase, userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const statuses = ["pending", "approved", "rejected", "suspended"] as const;
+    const [allRes, pendRes, apprRes, rejRes, suspRes] = await Promise.all([
+      supabaseAdmin.from("listings").select("id", { count: "exact", head: true }),
+      ...statuses.map((s) =>
+        supabaseAdmin.from("listings").select("id", { count: "exact", head: true }).eq("status", s),
+      ),
+    ]);
+    return {
+      all: allRes.count ?? 0,
+      pending: pendRes.count ?? 0,
+      approved: apprRes.count ?? 0,
+      rejected: rejRes.count ?? 0,
+      suspended: suspRes.count ?? 0,
+    };
   });
 
 /** Sets a listing status: approved | rejected | suspended | pending. */

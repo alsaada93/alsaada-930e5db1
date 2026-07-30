@@ -1,11 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { Check, X, Search, MapPin, Trash2, Pause, Star, Loader2, Pencil, FolderSync } from "lucide-react";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import {
   adminListListings,
+  adminListingsCounts,
   adminSetListingStatus,
   adminUpdateListing,
   adminDeleteListing,
@@ -41,6 +42,7 @@ const statusBadge: Record<string, { label: string; cls: string }> = {
 function AdminListingsPage() {
   const qc = useQueryClient();
   const list = useServerFn(adminListListings);
+  const countsFn = useServerFn(adminListingsCounts);
   const setStatusFn = useServerFn(adminSetListingStatus);
   const updateFn = useServerFn(adminUpdateListing);
   const deleteFn = useServerFn(adminDeleteListing);
@@ -48,17 +50,41 @@ function AdminListingsPage() {
   const reprocessFn = useServerFn(adminReprocessListings);
   const { categories } = useCategories();
 
-  const { data: items = [], isLoading } = useQuery({
-    queryKey: ["admin-listings"],
-    queryFn: () => list(),
-  });
-
   const [tab, setTab] = useState<Status | "all">("pending");
   const [query, setQuery] = useState("");
+  const debounced = useDebouncedValue(query, 350);
   const [busy, setBusy] = useState<string | null>(null);
   const [editing, setEditing] = useState<AdminListingRow | null>(null);
   const [reclassifying, setReclassifying] = useState(false);
   const [reprocessing, setReprocessing] = useState(false);
+
+  const {
+    data: pagesData,
+    isLoading,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+  } = useInfiniteQuery({
+    queryKey: ["admin-listings", tab, debounced],
+    queryFn: ({ pageParam }) =>
+      list({
+        data: {
+          status: tab,
+          query: debounced || undefined,
+          limit: 20,
+          offset: pageParam ?? 0,
+        },
+      }),
+    initialPageParam: 0 as number,
+    getNextPageParam: (last) => last.nextOffset ?? undefined,
+  });
+
+  const { data: countsData } = useQuery({
+    queryKey: ["admin-listings-counts"],
+    queryFn: () => countsFn(),
+  });
+
+  const items = pagesData?.pages.flatMap((p) => p.items) ?? [];
 
   const doReprocess = async () => {
     if (!confirm("معالجة عميقة لجميع الإعلانات: إصلاح العناوين والأسعار والتصنيف ومواصفات السيارات تلقائياً؟")) return;
@@ -90,20 +116,8 @@ function AdminListingsPage() {
     }
   };
 
-  const filtered = useMemo(
-    () =>
-      items.filter(
-        (i) =>
-          (tab === "all" || i.status === tab) &&
-          (query === "" ||
-            i.title.includes(query) ||
-            (i.contact_name ?? "").includes(query)),
-      ),
-    [items, tab, query],
-  );
-
   const counts = (k: Status | "all") =>
-    k === "all" ? items.length : items.filter((i) => i.status === k).length;
+    countsData ? (k === "all" ? countsData.all : countsData[k]) : 0;
 
   const doStatus = async (id: string, status: Status) => {
     let reason: string | undefined;
@@ -206,11 +220,11 @@ function AdminListingsPage() {
             <p className="flex items-center justify-center gap-2 py-16 text-sm text-muted-foreground">
               <Loader2 className="h-4 w-4 animate-spin" /> جاري التحميل...
             </p>
-          ) : filtered.length === 0 ? (
+          ) : items.length === 0 ? (
             <p className="py-16 text-center text-sm text-muted-foreground">لا توجد إعلانات في هذا القسم</p>
           ) : (
             <ul className="divide-y divide-border">
-              {filtered.map((i) => (
+              {items.map((i: AdminListingRow) => (
                 <li key={i.id} className="flex flex-wrap items-center gap-4 p-4">
                   <img
                     src={i.image ?? "/placeholder.svg"}
@@ -288,6 +302,19 @@ function AdminListingsPage() {
             </ul>
           )}
         </div>
+
+        {hasNextPage && (
+          <div className="flex justify-center pt-3">
+            <button
+              onClick={() => fetchNextPage()}
+              disabled={isFetchingNextPage}
+              className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-2.5 text-sm font-bold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
+            >
+              {isFetchingNextPage ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+              {isFetchingNextPage ? "جاري التحميل..." : "عرض 20 إعلان آخر"}
+            </button>
+          </div>
+        )}
       </div>
 
       {editing && (
@@ -546,4 +573,13 @@ function EditDialog({
       </div>
     </div>
   );
+}
+
+function useDebouncedValue<T>(value: T, delay: number): T {
+  const [debounced, setDebounced] = useState(value);
+  useEffect(() => {
+    const t = setTimeout(() => setDebounced(value), delay);
+    return () => clearTimeout(t);
+  }, [value, delay]);
+  return debounced;
 }
