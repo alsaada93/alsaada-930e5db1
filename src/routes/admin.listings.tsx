@@ -220,11 +220,11 @@ function AdminListingsPage() {
             <p className="flex items-center justify-center gap-2 py-16 text-sm text-muted-foreground">
               <Loader2 className="h-4 w-4 animate-spin" /> جاري التحميل...
             </p>
-          ) : filtered.length === 0 ? (
+          ) : items.length === 0 ? (
             <p className="py-16 text-center text-sm text-muted-foreground">لا توجد إعلانات في هذا القسم</p>
           ) : (
             <ul className="divide-y divide-border">
-              {filtered.map((i) => (
+              {items.map((i: AdminListingRow) => (
                 <li key={i.id} className="flex flex-wrap items-center gap-4 p-4">
                   <img
                     src={i.image ?? "/placeholder.svg"}
