@@ -1,11 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { Check, X, Search, MapPin, Trash2, Pause, Star, Loader2, Pencil, FolderSync } from "lucide-react";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import {
   adminListListings,
+  adminListingsCounts,
   adminSetListingStatus,
   adminUpdateListing,
   adminDeleteListing,
@@ -41,6 +42,7 @@ const statusBadge: Record<string, { label: string; cls: string }> = {
 function AdminListingsPage() {
   const qc = useQueryClient();
   const list = useServerFn(adminListListings);
+  const countsFn = useServerFn(adminListingsCounts);
   const setStatusFn = useServerFn(adminSetListingStatus);
   const updateFn = useServerFn(adminUpdateListing);
   const deleteFn = useServerFn(adminDeleteListing);
@@ -48,17 +50,41 @@ function AdminListingsPage() {
   const reprocessFn = useServerFn(adminReprocessListings);
   const { categories } = useCategories();
 
-  const { data: items = [], isLoading } = useQuery({
-    queryKey: ["admin-listings"],
-    queryFn: () => list(),
-  });
-
   const [tab, setTab] = useState<Status | "all">("pending");
   const [query, setQuery] = useState("");
+  const debounced = useDebouncedValue(query, 350);
   const [busy, setBusy] = useState<string | null>(null);
   const [editing, setEditing] = useState<AdminListingRow | null>(null);
   const [reclassifying, setReclassifying] = useState(false);
   const [reprocessing, setReprocessing] = useState(false);
+
+  const {
+    data: pagesData,
+    isLoading,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+  } = useInfiniteQuery({
+    queryKey: ["admin-listings", tab, debounced],
+    queryFn: ({ pageParam }) =>
+      list({
+        data: {
+          status: tab,
+          query: debounced || undefined,
+          limit: 20,
+          offset: pageParam ?? 0,
+        },
+      }),
+    initialPageParam: 0 as number,
+    getNextPageParam: (last) => last.nextOffset ?? undefined,
+  });
+
+  const { data: countsData } = useQuery({
+    queryKey: ["admin-listings-counts"],
+    queryFn: () => countsFn(),
+  });
+
+  const items = pagesData?.pages.flatMap((p) => p.items) ?? [];
 
   const doReprocess = async () => {
     if (!confirm("معالجة عميقة لجميع الإعلانات: إصلاح العناوين والأسعار والتصنيف ومواصفات السيارات تلقائياً؟")) return;
@@ -90,20 +116,8 @@ function AdminListingsPage() {
     }
   };
 
-  const filtered = useMemo(
-    () =>
-      items.filter(
-        (i) =>
-          (tab === "all" || i.status === tab) &&
-          (query === "" ||
-            i.title.includes(query) ||
-            (i.contact_name ?? "").includes(query)),
-      ),
-    [items, tab, query],
-  );
-
   const counts = (k: Status | "all") =>
-    k === "all" ? items.length : items.filter((i) => i.status === k).length;
+    countsData ? (k === "all" ? countsData.all : countsData[k]) : 0;
 
   const doStatus = async (id: string, status: Status) => {
     let reason: string | undefined;
