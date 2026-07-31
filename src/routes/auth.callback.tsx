@@ -102,10 +102,29 @@ function AuthCallbackPage() {
   }, [isNativeBridge, navigate]);
 
 
-  const showAppReturn =
-    typeof window !== "undefined" &&
-    !isNativePlatform() &&
-    /Android/i.test(navigator.userAgent);
+  const [showAppReturn, setShowAppReturn] = useState(false);
+
+  // إن كنا في متصفح خارجي على أندرويد، افتح التطبيق تلقائياً بعد لحظة قصيرة
+  // بدل انتظار ضغط المستخدم على الزر، مع إبقاء الزر كخيار احتياطي.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (isNativePlatform()) return;
+    if (!/Android/i.test(navigator.userAgent)) return;
+
+    setShowAppReturn(true);
+    if (failed) return;
+
+    setStatus("جاري إعادتك إلى التطبيق...");
+    const t = window.setTimeout(() => {
+      try {
+        window.location.href = buildNativeCallbackUrl(window.location.href);
+      } catch {
+        /* ignore */
+      }
+    }, 800);
+    return () => window.clearTimeout(t);
+  }, [failed]);
+
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
