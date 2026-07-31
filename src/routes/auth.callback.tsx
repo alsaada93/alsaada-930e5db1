@@ -5,7 +5,7 @@ import { buildNativeCallbackUrl } from "@/lib/auth-redirects";
 import { isNativePlatform } from "@/lib/capacitor";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2, ShieldCheck } from "lucide-react";
+import { AlertTriangle, Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/auth/callback")({
   head: () => ({
