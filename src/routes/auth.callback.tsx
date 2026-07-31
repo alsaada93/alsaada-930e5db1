@@ -5,7 +5,7 @@ import { buildNativeCallbackUrl } from "@/lib/auth-redirects";
 import { isNativePlatform } from "@/lib/capacitor";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2, ShieldCheck } from "lucide-react";
+import { AlertTriangle, Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/auth/callback")({
   head: () => ({
@@ -22,10 +22,35 @@ export const Route = createFileRoute("/auth/callback")({
   component: AuthCallbackPage,
 });
 
+/** يترجم أخطاء Supabase/Google إلى رسالة عربية مفهومة للمستخدم. */
+function describeAuthError(raw: string | null | undefined) {
+  const msg = (raw ?? "").toLowerCase();
+  if (!msg) return "تعذّر إكمال تسجيل الدخول. حاول مرة أخرى.";
+  if (
+    msg.includes("expired") ||
+    msg.includes("invalid request") ||
+    msg.includes("code verifier") ||
+    msg.includes("invalid grant") ||
+    msg.includes("bad_code_verifier") ||
+    msg.includes("already used") ||
+    msg.includes("pkce")
+  ) {
+    return "انتهت صلاحية رابط تسجيل الدخول أو تم استخدامه من قبل. رجاءً ابدأ تسجيل الدخول من جديد.";
+  }
+  if (msg.includes("access_denied") || msg.includes("denied") || msg.includes("cancel")) {
+    return "تم إلغاء تسجيل الدخول من صفحة جوجل. يمكنك المحاولة مرة أخرى.";
+  }
+  if (msg.includes("network") || msg.includes("fetch")) {
+    return "تعذّر الاتصال بالخادم أثناء تسجيل الدخول. تحقق من الإنترنت وحاول مجدداً.";
+  }
+  return "تعذّر إكمال تسجيل الدخول. حاول مرة أخرى.";
+}
+
 function AuthCallbackPage() {
   const navigate = useNavigate();
   const [status, setStatus] = useState("جاري إكمال تسجيل الدخول...");
   const [failed, setFailed] = useState(false);
+  const [details, setDetails] = useState<string | null>(null);
   const isNativeBridge = useMemo(() => {
     if (typeof window === "undefined") return false;
     return new URLSearchParams(window.location.search).get("native") === "1";
@@ -33,6 +58,12 @@ function AuthCallbackPage() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
+
+    const fail = (message: string, detail?: string | null) => {
+      setStatus(message);
+      setDetails(detail ?? null);
+      setFailed(true);
+    };
 
     const complete = async () => {
       const currentUrl = window.location.href;
@@ -43,8 +74,7 @@ function AuthCallbackPage() {
 
       if (error) {
         console.error("[HARAJ_AUTH_DEBUG] callback error", error);
-        setStatus("تعذّر إكمال تسجيل الدخول. حاول مرة أخرى.");
-        setFailed(true);
+        fail(describeAuthError(error), error);
         return;
       }
 
@@ -62,6 +92,17 @@ function AuthCallbackPage() {
       const refreshToken = pick("refresh_token");
       const code = pick("code");
 
+      if (!accessToken && !refreshToken && !code) {
+        // لا يوجد رمز ولا توكن — قد يكون المستخدم فتح الصفحة مباشرة.
+        const existing = (await supabase.auth.getSession()).data.session;
+        if (existing) {
+          navigate({ to: "/account", replace: true });
+          return;
+        }
+        fail("رابط تسجيل الدخول غير مكتمل أو منتهي الصلاحية. ابدأ تسجيل الدخول من جديد.");
+        return;
+      }
+
       if (accessToken && refreshToken) {
         const { error: sessionError } = await supabase.auth.setSession({
           access_token: accessToken,
@@ -69,11 +110,22 @@ function AuthCallbackPage() {
         });
         if (sessionError) {
           console.error("[HARAJ_AUTH_DEBUG] setSession failed", sessionError.message);
+          const stored = (await supabase.auth.getSession()).data.session;
+          if (!stored) {
+            fail(describeAuthError(sessionError.message), sessionError.message);
+            return;
+          }
         }
       } else if (code) {
         const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
         if (exchangeError) {
           console.error("[HARAJ_AUTH_DEBUG] exchangeCodeForSession failed", exchangeError.message);
+          // قد يكون الوسيط خزّن الجلسة مسبقاً؛ لا نُعلن الفشل إلا بعد التأكد.
+          const stored = (await supabase.auth.getSession()).data.session;
+          if (!stored) {
+            fail(describeAuthError(exchangeError.message), exchangeError.message);
+            return;
+          }
         }
       }
 
@@ -86,8 +138,7 @@ function AuthCallbackPage() {
       }
 
       if (!session) {
-        setStatus("لم يتم العثور على جلسة دخول صالحة. حاول تسجيل الدخول مرة أخرى.");
-        setFailed(true);
+        fail("لم يتم العثور على جلسة دخول صالحة. حاول تسجيل الدخول مرة أخرى.");
         return;
       }
 
@@ -96,10 +147,10 @@ function AuthCallbackPage() {
 
     complete().catch((e) => {
       console.error("[HARAJ_AUTH_DEBUG] callback crashed", e);
-      setStatus("حدث خطأ غير متوقع أثناء تسجيل الدخول.");
-      setFailed(true);
+      fail(describeAuthError(e instanceof Error ? e.message : String(e)));
     });
   }, [isNativeBridge, navigate]);
+
 
 
   const [showAppReturn, setShowAppReturn] = useState(false);
@@ -129,13 +180,21 @@ function AuthCallbackPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <Card className="w-full max-w-md p-8 text-center">
-        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-primary text-primary-foreground">
-          {failed ? <ShieldCheck className="h-6 w-6" /> : <Loader2 className="h-6 w-6 animate-spin" />}
+        <div
+          className={`mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl ${
+            failed ? "bg-destructive/10 text-destructive" : "bg-gradient-primary text-primary-foreground"
+          }`}
+        >
+          {failed ? <AlertTriangle className="h-6 w-6" /> : <Loader2 className="h-6 w-6 animate-spin" />}
         </div>
-        <h1 className="text-2xl font-extrabold text-foreground">إكمال تسجيل الدخول</h1>
+        <h1 className="text-2xl font-extrabold text-foreground">
+          {failed ? "تعذّر تسجيل الدخول" : "إكمال تسجيل الدخول"}
+        </h1>
         <p className="mt-2 text-sm text-muted-foreground">{status}</p>
-        {showAppReturn && (
-
+        {failed && details && (
+          <p className="mt-2 break-words text-xs text-muted-foreground/70">تفاصيل تقنية: {details}</p>
+        )}
+        {showAppReturn && !failed && (
           <div className="mt-4">
             <Button
               variant="outline"
@@ -148,10 +207,14 @@ function AuthCallbackPage() {
           </div>
         )}
         {failed && (
-          <div className="mt-6 flex justify-center gap-2">
+          <div className="mt-6 flex flex-wrap justify-center gap-2">
             <Button asChild>
-              <Link to="/login">العودة لتسجيل الدخول</Link>
+              <Link to="/login">إعادة تسجيل الدخول</Link>
             </Button>
+            <Button variant="outline" asChild>
+              <Link to="/">الصفحة الرئيسية</Link>
+            </Button>
+
           </div>
         )}
       </Card>
