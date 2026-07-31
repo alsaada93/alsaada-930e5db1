@@ -22,10 +22,35 @@ export const Route = createFileRoute("/auth/callback")({
   component: AuthCallbackPage,
 });
 
+/** يترجم أخطاء Supabase/Google إلى رسالة عربية مفهومة للمستخدم. */
+function describeAuthError(raw: string | null | undefined) {
+  const msg = (raw ?? "").toLowerCase();
+  if (!msg) return "تعذّر إكمال تسجيل الدخول. حاول مرة أخرى.";
+  if (
+    msg.includes("expired") ||
+    msg.includes("invalid request") ||
+    msg.includes("code verifier") ||
+    msg.includes("invalid grant") ||
+    msg.includes("bad_code_verifier") ||
+    msg.includes("already used") ||
+    msg.includes("pkce")
+  ) {
+    return "انتهت صلاحية رابط تسجيل الدخول أو تم استخدامه من قبل. رجاءً ابدأ تسجيل الدخول من جديد.";
+  }
+  if (msg.includes("access_denied") || msg.includes("denied") || msg.includes("cancel")) {
+    return "تم إلغاء تسجيل الدخول من صفحة جوجل. يمكنك المحاولة مرة أخرى.";
+  }
+  if (msg.includes("network") || msg.includes("fetch")) {
+    return "تعذّر الاتصال بالخادم أثناء تسجيل الدخول. تحقق من الإنترنت وحاول مجدداً.";
+  }
+  return "تعذّر إكمال تسجيل الدخول. حاول مرة أخرى.";
+}
+
 function AuthCallbackPage() {
   const navigate = useNavigate();
   const [status, setStatus] = useState("جاري إكمال تسجيل الدخول...");
   const [failed, setFailed] = useState(false);
+  const [details, setDetails] = useState<string | null>(null);
   const isNativeBridge = useMemo(() => {
     if (typeof window === "undefined") return false;
     return new URLSearchParams(window.location.search).get("native") === "1";
@@ -33,6 +58,12 @@ function AuthCallbackPage() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
+
+    const fail = (message: string, detail?: string | null) => {
+      setStatus(message);
+      setDetails(detail ?? null);
+      setFailed(true);
+    };
 
     const complete = async () => {
       const currentUrl = window.location.href;
@@ -43,8 +74,7 @@ function AuthCallbackPage() {
 
       if (error) {
         console.error("[HARAJ_AUTH_DEBUG] callback error", error);
-        setStatus("تعذّر إكمال تسجيل الدخول. حاول مرة أخرى.");
-        setFailed(true);
+        fail(describeAuthError(error), error);
         return;
       }
 
@@ -62,6 +92,17 @@ function AuthCallbackPage() {
       const refreshToken = pick("refresh_token");
       const code = pick("code");
 
+      if (!accessToken && !refreshToken && !code) {
+        // لا يوجد رمز ولا توكن — قد يكون المستخدم فتح الصفحة مباشرة.
+        const existing = (await supabase.auth.getSession()).data.session;
+        if (existing) {
+          navigate({ to: "/account", replace: true });
+          return;
+        }
+        fail("رابط تسجيل الدخول غير مكتمل أو منتهي الصلاحية. ابدأ تسجيل الدخول من جديد.");
+        return;
+      }
+
       if (accessToken && refreshToken) {
         const { error: sessionError } = await supabase.auth.setSession({
           access_token: accessToken,
@@ -69,11 +110,22 @@ function AuthCallbackPage() {
         });
         if (sessionError) {
           console.error("[HARAJ_AUTH_DEBUG] setSession failed", sessionError.message);
+          const stored = (await supabase.auth.getSession()).data.session;
+          if (!stored) {
+            fail(describeAuthError(sessionError.message), sessionError.message);
+            return;
+          }
         }
       } else if (code) {
         const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
         if (exchangeError) {
           console.error("[HARAJ_AUTH_DEBUG] exchangeCodeForSession failed", exchangeError.message);
+          // قد يكون الوسيط خزّن الجلسة مسبقاً؛ لا نُعلن الفشل إلا بعد التأكد.
+          const stored = (await supabase.auth.getSession()).data.session;
+          if (!stored) {
+            fail(describeAuthError(exchangeError.message), exchangeError.message);
+            return;
+          }
         }
       }
 
@@ -86,8 +138,7 @@ function AuthCallbackPage() {
       }
 
       if (!session) {
-        setStatus("لم يتم العثور على جلسة دخول صالحة. حاول تسجيل الدخول مرة أخرى.");
-        setFailed(true);
+        fail("لم يتم العثور على جلسة دخول صالحة. حاول تسجيل الدخول مرة أخرى.");
         return;
       }
 
@@ -96,10 +147,10 @@ function AuthCallbackPage() {
 
     complete().catch((e) => {
       console.error("[HARAJ_AUTH_DEBUG] callback crashed", e);
-      setStatus("حدث خطأ غير متوقع أثناء تسجيل الدخول.");
-      setFailed(true);
+      fail(describeAuthError(e instanceof Error ? e.message : String(e)));
     });
   }, [isNativeBridge, navigate]);
+
 
 
   const [showAppReturn, setShowAppReturn] = useState(false);
