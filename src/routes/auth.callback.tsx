@@ -180,13 +180,21 @@ function AuthCallbackPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <Card className="w-full max-w-md p-8 text-center">
-        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-primary text-primary-foreground">
-          {failed ? <ShieldCheck className="h-6 w-6" /> : <Loader2 className="h-6 w-6 animate-spin" />}
+        <div
+          className={`mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl ${
+            failed ? "bg-destructive/10 text-destructive" : "bg-gradient-primary text-primary-foreground"
+          }`}
+        >
+          {failed ? <AlertTriangle className="h-6 w-6" /> : <Loader2 className="h-6 w-6 animate-spin" />}
         </div>
-        <h1 className="text-2xl font-extrabold text-foreground">إكمال تسجيل الدخول</h1>
+        <h1 className="text-2xl font-extrabold text-foreground">
+          {failed ? "تعذّر تسجيل الدخول" : "إكمال تسجيل الدخول"}
+        </h1>
         <p className="mt-2 text-sm text-muted-foreground">{status}</p>
-        {showAppReturn && (
-
+        {failed && details && (
+          <p className="mt-2 break-words text-xs text-muted-foreground/70">تفاصيل تقنية: {details}</p>
+        )}
+        {showAppReturn && !failed && (
           <div className="mt-4">
             <Button
               variant="outline"
@@ -199,10 +207,14 @@ function AuthCallbackPage() {
           </div>
         )}
         {failed && (
-          <div className="mt-6 flex justify-center gap-2">
+          <div className="mt-6 flex flex-wrap justify-center gap-2">
             <Button asChild>
-              <Link to="/login">العودة لتسجيل الدخول</Link>
+              <Link to="/login">إعادة تسجيل الدخول</Link>
             </Button>
+            <Button variant="outline" asChild>
+              <Link to="/">الصفحة الرئيسية</Link>
+            </Button>
+
           </div>
         )}
       </Card>
