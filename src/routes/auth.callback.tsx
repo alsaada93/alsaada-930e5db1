@@ -102,6 +102,11 @@ function AuthCallbackPage() {
   }, [isNativeBridge, navigate]);
 
 
+  const showAppReturn =
+    typeof window !== "undefined" &&
+    !isNativePlatform() &&
+    /Android/i.test(navigator.userAgent);
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <Card className="w-full max-w-md p-8 text-center">
@@ -110,6 +115,19 @@ function AuthCallbackPage() {
         </div>
         <h1 className="text-2xl font-extrabold text-foreground">إكمال تسجيل الدخول</h1>
         <p className="mt-2 text-sm text-muted-foreground">{status}</p>
+        {showAppReturn && (
+
+          <div className="mt-4">
+            <Button
+              variant="outline"
+              onClick={() => {
+                window.location.href = buildNativeCallbackUrl(window.location.href);
+              }}
+            >
+              العودة إلى التطبيق
+            </Button>
+          </div>
+        )}
         {failed && (
           <div className="mt-6 flex justify-center gap-2">
             <Button asChild>

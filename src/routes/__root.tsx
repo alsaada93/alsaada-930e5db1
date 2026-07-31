@@ -274,12 +274,29 @@ function RootComponent() {
     return cleanup;
   }, []);
 
+  // بعض تدفقات Google تعيد المستخدم إلى الصفحة الرئيسية مع ?code=... بدلاً من
+  // صفحة الـ callback. نلتقط ذلك عالمياً ونكمل الجلسة داخل التطبيق/الموقع.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const { pathname, search, hash } = window.location;
+    if (pathname.startsWith("/auth/callback")) return;
+    const params = new URLSearchParams(search);
+    const hashParams = new URLSearchParams(hash.replace(/^#/, ""));
+    const hasCode = params.has("code") || hashParams.has("code");
+    const hasTokens = params.has("access_token") || hashParams.has("access_token");
+    if (!hasCode && !hasTokens) return;
+    const merged = new URLSearchParams(params);
+    hashParams.forEach((v, k) => merged.set(k, v));
+    window.location.replace(`/auth/callback?${merged.toString()}`);
+  }, []);
+
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (sessionStorage.getItem("visit_recorded")) return;
     sessionStorage.setItem("visit_recorded", "1");
     recordVisit({ data: { path: window.location.pathname } }).catch(() => {});
   }, []);
+
 
   // حفظ موضع التمرير لكل صفحة، واستعادته عند الرجوع (يعمل حتى مع القوائم
   // التي تُحمَّل بشكل غير متزامن عبر إعادة المحاولة لفترة قصيرة).
