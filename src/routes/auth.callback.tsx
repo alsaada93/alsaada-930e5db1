@@ -102,7 +102,10 @@ function AuthCallbackPage() {
   }, [isNativeBridge, navigate]);
 
 
-  const insideApp = typeof window !== "undefined" && isNativePlatform();
+  const showAppReturn =
+    typeof window !== "undefined" &&
+    !isNativePlatform() &&
+    /Android/i.test(navigator.userAgent);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -112,7 +115,8 @@ function AuthCallbackPage() {
         </div>
         <h1 className="text-2xl font-extrabold text-foreground">إكمال تسجيل الدخول</h1>
         <p className="mt-2 text-sm text-muted-foreground">{status}</p>
-        {!insideApp && (
+        {showAppReturn && (
+
           <div className="mt-4">
             <Button
               variant="outline"
