@@ -167,15 +167,14 @@ function LoginPage() {
     // Google always goes through the Lovable Cloud OAuth broker. Google Console keeps
     // the single registered redirect: https://<domain>/~oauth/callback — we never change it.
     //
-    // The Android shell is a Capacitor WebView that loads https://www.alsaada.sale
-    // directly, so the broker's redirect lands back INSIDE the app WebView on the
-    // same origin. That means the normal same-origin callback works natively too,
-    // and no custom scheme is required for the happy path. The deep-link bridge in
-    // /auth/callback?native=1 remains as a fallback when the flow is completed in an
-    // external browser (Chrome Custom Tab) instead of the WebView.
     const native = isNativePlatform();
-    const redirectTo = getWebOAuthCallbackUrl();
-    console.log("[HARAJ_AUTH_DEBUG] google sign-in", { native, redirect_uri: redirectTo });
+    const redirectTo = native ? getNativeOAuthBridgeUrl() : getWebOAuthCallbackUrl();
+    console.log("[HARAJ_AUTH_DEBUG] OAuth start", {
+      provider: "google",
+      native,
+      redirect_uri: redirectTo,
+      redirect_to: redirectTo,
+    });
 
     const result = await lovable.auth.signInWithOAuth("google", {
       redirect_uri: redirectTo,
@@ -187,7 +186,17 @@ function LoginPage() {
       toast.error("تعذّر تسجيل الدخول عبر جوجل");
       return;
     }
-    if (!result.redirected) navigate({ to: "/account" });
+    console.log("[HARAJ_AUTH_DEBUG] OAuth broker result", {
+      redirected: result.redirected,
+      native,
+    });
+    if (!result.redirected) {
+      if (native) {
+        window.location.replace(redirectTo);
+      } else {
+        navigate({ to: "/account" });
+      }
+    }
   };
 
 

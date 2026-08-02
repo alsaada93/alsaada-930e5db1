@@ -71,20 +71,22 @@ function AuthCallbackPage() {
       const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
       const pick = (name: string) => params.get(name) ?? hashParams.get(name);
       const error = pick("error_description") ?? pick("error");
+      const insideNativeApp = isNativePlatform();
+      const androidUserAgent = /Android/i.test(navigator.userAgent);
+      const shouldReturnToAndroid = isNativeBridge || insideNativeApp;
+
+      console.log("[HARAJ_AUTH_DEBUG] callback reached", {
+        pathname: window.location.pathname,
+        native_parameter: isNativeBridge,
+        inside_native_app: insideNativeApp,
+        android_user_agent: androidUserAgent,
+        has_code: Boolean(pick("code")),
+        has_tokens: Boolean(pick("access_token") && pick("refresh_token")),
+      });
 
       if (error) {
         console.error("[HARAJ_AUTH_DEBUG] callback error", error);
         fail(describeAuthError(error), error);
-        return;
-      }
-
-      // Deep-link bridge: only needed when this page was opened in an EXTERNAL
-      // browser (Chrome Custom Tab). Inside the Capacitor WebView we are already
-      // in the app, so we finish the session here instead of bouncing out.
-      const insideNativeApp = isNativePlatform();
-      if (isNativeBridge && !insideNativeApp) {
-        window.location.href = buildNativeCallbackUrl(currentUrl);
-        setStatus("جاري إعادتك إلى التطبيق...");
         return;
       }
 
@@ -104,6 +106,7 @@ function AuthCallbackPage() {
       }
 
       if (accessToken && refreshToken) {
+        console.log("[HARAJ_AUTH_DEBUG] creating session from callback tokens");
         const { error: sessionError } = await supabase.auth.setSession({
           access_token: accessToken,
           refresh_token: refreshToken,
@@ -117,6 +120,7 @@ function AuthCallbackPage() {
           }
         }
       } else if (code) {
+        console.log("[HARAJ_AUTH_DEBUG] exchanging PKCE authorization code");
         const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
         if (exchangeError) {
           console.error("[HARAJ_AUTH_DEBUG] exchangeCodeForSession failed", exchangeError.message);
@@ -142,6 +146,34 @@ function AuthCallbackPage() {
         return;
       }
 
+      console.log("[HARAJ_AUTH_DEBUG] session created", {
+        should_return_to_android: shouldReturnToAndroid,
+      });
+
+      if (shouldReturnToAndroid) {
+        const expiresIn = session.expires_at
+          ? Math.max(0, session.expires_at - Math.floor(Date.now() / 1000))
+          : undefined;
+        const deepLink = buildNativeCallbackUrl(currentUrl, {
+          accessToken: session.access_token,
+          refreshToken: session.refresh_token,
+          expiresIn,
+          tokenType: session.token_type,
+        });
+        console.log("[HARAJ_AUTH_DEBUG] calling buildNativeCallbackUrl", {
+          scheme: "harajalsaada",
+          has_code: Boolean(code),
+          has_session: true,
+        });
+        setStatus("جاري إعادتك إلى التطبيق...");
+        setShowAppReturn(false);
+        window.setTimeout(() => setShowAppReturn(true), 2000);
+        console.log("[HARAJ_AUTH_DEBUG] attempting Android deep link");
+        window.location.replace(deepLink);
+        return;
+      }
+
+      console.log("[HARAJ_AUTH_DEBUG] web authentication complete; opening account");
       navigate({ to: "/account", replace: true });
     };
 
@@ -154,28 +186,6 @@ function AuthCallbackPage() {
 
 
   const [showAppReturn, setShowAppReturn] = useState(false);
-
-  // إن كنا في متصفح خارجي على أندرويد، افتح التطبيق تلقائياً بعد لحظة قصيرة
-  // بدل انتظار ضغط المستخدم على الزر، مع إبقاء الزر كخيار احتياطي.
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (isNativePlatform()) return;
-    if (!/Android/i.test(navigator.userAgent)) return;
-
-    setShowAppReturn(true);
-    if (failed) return;
-
-    setStatus("جاري إعادتك إلى التطبيق...");
-    const t = window.setTimeout(() => {
-      try {
-        window.location.href = buildNativeCallbackUrl(window.location.href);
-      } catch {
-        /* ignore */
-      }
-    }, 800);
-    return () => window.clearTimeout(t);
-  }, [failed]);
-
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -199,7 +209,8 @@ function AuthCallbackPage() {
             <Button
               variant="outline"
               onClick={() => {
-                window.location.href = buildNativeCallbackUrl(window.location.href);
+                console.log("[HARAJ_AUTH_DEBUG] retrying Android deep link from fallback button");
+                window.location.replace(buildNativeCallbackUrl(window.location.href));
               }}
             >
               العودة إلى التطبيق

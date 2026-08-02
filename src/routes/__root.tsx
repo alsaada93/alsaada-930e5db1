@@ -242,12 +242,16 @@ function RootComponent() {
           const code = parsed.searchParams.get("code");
 
           if (accessToken && refreshToken) {
+            console.log("[HARAJ_AUTH_DEBUG] native callback contains session tokens");
             const { error } = await supabase.auth.setSession({
               access_token: accessToken,
               refresh_token: refreshToken,
             });
             console.log("[HARAJ_AUTH_DEBUG] setSession:", error ? `error: ${error.message}` : "success");
-            if (!error) window.location.href = "/";
+            if (!error) {
+              console.log("[HARAJ_AUTH_DEBUG] native session restored; opening account");
+              window.location.replace("/account");
+            }
             return;
           }
 
@@ -258,7 +262,8 @@ function RootComponent() {
             error ? `error: ${error.message}` : "success",
           );
           if (!error) {
-            window.location.href = "/";
+            console.log("[HARAJ_AUTH_DEBUG] native PKCE exchange complete; opening account");
+            window.location.replace("/account");
           }
         } catch (e) {
           console.error("[HARAJ_AUTH_DEBUG] deep link parse/exchange failed", e);
@@ -287,6 +292,13 @@ function RootComponent() {
     if (!hasCode && !hasTokens) return;
     const merged = new URLSearchParams(params);
     hashParams.forEach((v, k) => merged.set(k, v));
+    if (isNativePlatform()) merged.set("native", "1");
+    console.log("[HARAJ_AUTH_DEBUG] normalizing OAuth return", {
+      from: pathname,
+      native: merged.get("native") === "1",
+      has_code: merged.has("code"),
+      has_tokens: merged.has("access_token") && merged.has("refresh_token"),
+    });
     window.location.replace(`/auth/callback?${merged.toString()}`);
   }, []);
 
