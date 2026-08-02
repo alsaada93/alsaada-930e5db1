@@ -51,6 +51,8 @@ function AuthCallbackPage() {
   const [status, setStatus] = useState("جاري إكمال تسجيل الدخول...");
   const [failed, setFailed] = useState(false);
   const [details, setDetails] = useState<string | null>(null);
+  const [showAppReturn, setShowAppReturn] = useState(false);
+  const [nativeReturnUrl, setNativeReturnUrl] = useState<string | null>(null);
   const isNativeBridge = useMemo(() => {
     if (typeof window === "undefined") return false;
     return new URLSearchParams(window.location.search).get("native") === "1";
@@ -93,16 +95,17 @@ function AuthCallbackPage() {
       const accessToken = pick("access_token");
       const refreshToken = pick("refresh_token");
       const code = pick("code");
+      let callbackSession = null;
 
       if (!accessToken && !refreshToken && !code) {
-        // لا يوجد رمز ولا توكن — قد يكون المستخدم فتح الصفحة مباشرة.
-        const existing = (await supabase.auth.getSession()).data.session;
-        if (existing) {
-          navigate({ to: "/account", replace: true });
+        // The managed broker can store the session before redirecting and then
+        // return without exposing a code or tokens in the URL.
+        callbackSession = (await supabase.auth.getSession()).data.session;
+        if (!callbackSession) {
+          fail("رابط تسجيل الدخول غير مكتمل أو منتهي الصلاحية. ابدأ تسجيل الدخول من جديد.");
           return;
         }
-        fail("رابط تسجيل الدخول غير مكتمل أو منتهي الصلاحية. ابدأ تسجيل الدخول من جديد.");
-        return;
+        console.log("[HARAJ_AUTH_DEBUG] callback reused broker-created session");
       }
 
       if (accessToken && refreshToken) {
@@ -135,7 +138,7 @@ function AuthCallbackPage() {
 
       // The Lovable broker may have already stored the session before redirecting,
       // so re-check before declaring failure. Retry briefly for slow storage writes.
-      let session = (await supabase.auth.getSession()).data.session;
+      let session = callbackSession ?? (await supabase.auth.getSession()).data.session;
       for (let i = 0; !session && i < 5; i++) {
         await new Promise((r) => setTimeout(r, 300));
         session = (await supabase.auth.getSession()).data.session;
@@ -166,8 +169,12 @@ function AuthCallbackPage() {
           has_session: true,
         });
         setStatus("جاري إعادتك إلى التطبيق...");
+        setNativeReturnUrl(deepLink);
         setShowAppReturn(false);
-        window.setTimeout(() => setShowAppReturn(true), 2000);
+        window.setTimeout(() => {
+          console.warn("[HARAJ_AUTH_DEBUG] deep link did not leave the callback page; showing fallback");
+          setShowAppReturn(true);
+        }, 2000);
         console.log("[HARAJ_AUTH_DEBUG] attempting Android deep link");
         window.location.replace(deepLink);
         return;
@@ -184,8 +191,6 @@ function AuthCallbackPage() {
   }, [isNativeBridge, navigate]);
 
 
-
-  const [showAppReturn, setShowAppReturn] = useState(false);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -210,7 +215,7 @@ function AuthCallbackPage() {
               variant="outline"
               onClick={() => {
                 console.log("[HARAJ_AUTH_DEBUG] retrying Android deep link from fallback button");
-                window.location.replace(buildNativeCallbackUrl(window.location.href));
+                if (nativeReturnUrl) window.location.replace(nativeReturnUrl);
               }}
             >
               العودة إلى التطبيق
