@@ -6,6 +6,7 @@ import { isNativePlatform } from "@/lib/capacitor";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, Loader2 } from "lucide-react";
+import type { Session } from "@supabase/supabase-js";
 
 export const Route = createFileRoute("/auth/callback")({
   head: () => ({
@@ -88,6 +89,18 @@ function AuthCallbackPage() {
 
       if (error) {
         console.error("[HARAJ_AUTH_DEBUG] callback error", error);
+        if (shouldReturnToAndroid) {
+          const errorDeepLink = buildNativeCallbackUrl(currentUrl);
+          setStatus("جاري إعادتك إلى التطبيق...");
+          setNativeReturnUrl(errorDeepLink);
+          window.setTimeout(() => {
+            console.warn("[HARAJ_AUTH_DEBUG] error deep link did not open the app; showing fallback");
+            setShowAppReturn(true);
+          }, 2000);
+          console.log("[HARAJ_AUTH_DEBUG] forwarding OAuth error to Android app");
+          window.location.replace(errorDeepLink);
+          return;
+        }
         fail(describeAuthError(error), error);
         return;
       }
@@ -95,7 +108,7 @@ function AuthCallbackPage() {
       const accessToken = pick("access_token");
       const refreshToken = pick("refresh_token");
       const code = pick("code");
-      let callbackSession = null;
+      let callbackSession: Session | null = null;
 
       if (!accessToken && !refreshToken && !code) {
         // The managed broker can store the session before redirecting and then
