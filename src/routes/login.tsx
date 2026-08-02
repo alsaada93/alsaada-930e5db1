@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { useServerFn } from "@tanstack/react-start";
@@ -66,6 +66,7 @@ function LoginPage() {
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const oauthInProgress = useRef(false);
 
   // Phone (WhatsApp) OTP state
   const requestOtpFn = useServerFn(requestPhoneOtp);
@@ -120,7 +121,7 @@ function LoginPage() {
 
 
   useEffect(() => {
-    if (!loading && user) {
+    if (!loading && user && !oauthInProgress.current) {
       navigate({ to: "/account" });
     }
   }, [user, loading, navigate]);
@@ -175,6 +176,7 @@ function LoginPage() {
       redirect_uri: redirectTo,
       redirect_to: redirectTo,
     });
+    oauthInProgress.current = true;
 
     const result = await lovable.auth.signInWithOAuth("google", {
       redirect_uri: redirectTo,
@@ -182,6 +184,7 @@ function LoginPage() {
     });
 
     if (result.error) {
+      oauthInProgress.current = false;
       console.error("[HARAJ_AUTH_DEBUG] Google OAuth error", result.error);
       toast.error("تعذّر تسجيل الدخول عبر جوجل");
       return;
