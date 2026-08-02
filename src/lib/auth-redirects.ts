@@ -14,6 +14,13 @@ export const GOOGLE_OAUTH_OPTIONS = {
   prompt: "select_account",
 } as const;
 
+export interface NativeCallbackSession {
+  accessToken?: string;
+  refreshToken?: string;
+  expiresIn?: number;
+  tokenType?: string;
+}
+
 export function getWebOAuthCallbackUrl() {
   return new URL(AUTH_CALLBACK_PATH, window.location.origin).toString();
 }
@@ -28,7 +35,7 @@ export function isNativeCallbackUrl(url: string) {
   return url.startsWith(NATIVE_OAUTH_CALLBACK);
 }
 
-export function buildNativeCallbackUrl(sourceUrl: string) {
+export function buildNativeCallbackUrl(sourceUrl: string, session?: NativeCallbackSession) {
   const source = new URL(sourceUrl);
   const target = new URL(NATIVE_OAUTH_CALLBACK);
   const copyParam = (name: string) => {
@@ -46,6 +53,14 @@ export function buildNativeCallbackUrl(sourceUrl: string) {
   copyParam("error");
   copyParam("error_code");
   copyParam("error_description");
+
+  // After the web callback has completed the PKCE exchange, forward the
+  // resulting session to the native shell. Explicit values replace any stale
+  // callback values while preserving the original code for diagnostics.
+  if (session?.accessToken) target.searchParams.set("access_token", session.accessToken);
+  if (session?.refreshToken) target.searchParams.set("refresh_token", session.refreshToken);
+  if (session?.expiresIn !== undefined) target.searchParams.set("expires_in", String(session.expiresIn));
+  if (session?.tokenType) target.searchParams.set("token_type", session.tokenType);
 
   return target.toString();
 }
