@@ -51,7 +51,7 @@ type UseListingsOpts = {
   pageSize?: number;
   /** اقتصار النتائج على الإعلانات العادية فقط */
   onlyNormal?: boolean;
-  categoryId?: string;
+  categoryId?: string | null;
   /** فلترة تصنيف فرعي: يطابق اسم المجموعة أو اسم المنتج. */
   subcategory?: string;
 };
