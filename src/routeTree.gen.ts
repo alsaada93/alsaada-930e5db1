@@ -9,143 +9,63 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as TermsRouteImport } from './routes/terms'
-import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
-import { Route as SellRouteImport } from './routes/sell'
-import { Route as SearchRouteImport } from './routes/search'
-import { Route as RestaurantRouteImport } from './routes/restaurant'
-import { Route as ResetPasswordRouteImport } from './routes/reset-password'
-import { Route as ReportRouteImport } from './routes/report'
-import { Route as PrivacyRouteImport } from './routes/privacy'
-import { Route as PackagesRouteImport } from './routes/packages'
-import { Route as OffersRouteImport } from './routes/offers'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as FaqRouteImport } from './routes/faq'
-import { Route as ContactRouteImport } from './routes/contact'
-import { Route as BuyRouteImport } from './routes/buy'
-import { Route as AdminRouteImport } from './routes/admin'
-import { Route as AddListingRouteImport } from './routes/add-listing'
-import { Route as AccountRouteImport } from './routes/account'
-import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as TipsIndexRouteImport } from './routes/tips.index'
-import { Route as LIndexRouteImport } from './routes/l.index'
-import { Route as FacebookAdsIndexRouteImport } from './routes/facebook-ads.index'
+import { Route as AboutRouteImport } from './routes/about'
+import { Route as AccountRouteImport } from './routes/account'
+import { Route as AddListingRouteImport } from './routes/add-listing'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as BuyRouteImport } from './routes/buy'
+import { Route as ContactRouteImport } from './routes/contact'
+import { Route as FaqRouteImport } from './routes/faq'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as OffersRouteImport } from './routes/offers'
+import { Route as PackagesRouteImport } from './routes/packages'
+import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as ReportRouteImport } from './routes/report'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as RestaurantRouteImport } from './routes/restaurant'
+import { Route as SearchRouteImport } from './routes/search'
+import { Route as SellRouteImport } from './routes/sell'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
-import { Route as TipsSlugRouteImport } from './routes/tips.$slug'
-import { Route as RestaurantManufacturingRouteImport } from './routes/restaurant.manufacturing'
-import { Route as LoginAdminRouteImport } from './routes/login.admin'
-import { Route as ListingIdRouteImport } from './routes/listing.$id'
-import { Route as LSlugRouteImport } from './routes/l.$slug'
-import { Route as FacebookAdsIdRouteImport } from './routes/facebook-ads.$id'
-import { Route as CategoryIdRouteImport } from './routes/category.$id'
-import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
-import { Route as AdminSlidesRouteImport } from './routes/admin.slides'
-import { Route as AdminSeoRouteImport } from './routes/admin.seo'
-import { Route as AdminRestaurantRouteImport } from './routes/admin.restaurant'
-import { Route as AdminOffersRouteImport } from './routes/admin.offers'
-import { Route as AdminMembersRouteImport } from './routes/admin.members'
-import { Route as AdminListingsRouteImport } from './routes/admin.listings'
-import { Route as AdminImagesRouteImport } from './routes/admin.images'
-import { Route as AdminHomeLayoutRouteImport } from './routes/admin.home-layout'
-import { Route as AdminHeroRouteImport } from './routes/admin.hero'
-import { Route as AdminFacebookRouteImport } from './routes/admin.facebook'
-import { Route as AdminCategoriesRouteImport } from './routes/admin.categories'
-import { Route as AdminCardRouteImport } from './routes/admin.card'
-import { Route as AdminCalculatorRouteImport } from './routes/admin.calculator'
-import { Route as AdminBrandsRouteImport } from './routes/admin.brands'
-import { Route as AdminBlogRouteImport } from './routes/admin.blog'
-import { Route as AdminAuditRouteImport } from './routes/admin.audit'
-import { Route as AdminAuctionsRouteImport } from './routes/admin.auctions'
-import { Route as AdminAppearanceRouteImport } from './routes/admin.appearance'
 import { Route as AdminAccessRouteImport } from './routes/admin.access'
-import { Route as ApiPublicFacebookSyncCronRouteImport } from './routes/api/public/facebook-sync-cron'
+import { Route as AdminAppearanceRouteImport } from './routes/admin.appearance'
+import { Route as AdminAuctionsRouteImport } from './routes/admin.auctions'
+import { Route as AdminAuditRouteImport } from './routes/admin.audit'
+import { Route as AdminBlogRouteImport } from './routes/admin.blog'
+import { Route as AdminBrandsRouteImport } from './routes/admin.brands'
+import { Route as AdminCalculatorRouteImport } from './routes/admin.calculator'
+import { Route as AdminCardRouteImport } from './routes/admin.card'
+import { Route as AdminCategoriesRouteImport } from './routes/admin.categories'
+import { Route as AdminFacebookRouteImport } from './routes/admin.facebook'
+import { Route as AdminHeroRouteImport } from './routes/admin.hero'
+import { Route as AdminHomeLayoutRouteImport } from './routes/admin.home-layout'
+import { Route as AdminImagesRouteImport } from './routes/admin.images'
+import { Route as AdminListingsRouteImport } from './routes/admin.listings'
+import { Route as AdminMembersRouteImport } from './routes/admin.members'
+import { Route as AdminOffersRouteImport } from './routes/admin.offers'
+import { Route as AdminRestaurantRouteImport } from './routes/admin.restaurant'
+import { Route as AdminSeoRouteImport } from './routes/admin.seo'
+import { Route as AdminSlidesRouteImport } from './routes/admin.slides'
+import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
+import { Route as CategoryIdRouteImport } from './routes/category.$id'
+import { Route as FacebookAdsIndexRouteImport } from './routes/facebook-ads.index'
+import { Route as FacebookAdsIdRouteImport } from './routes/facebook-ads.$id'
+import { Route as LIndexRouteImport } from './routes/l.index'
+import { Route as LSlugRouteImport } from './routes/l.$slug'
+import { Route as ListingIdRouteImport } from './routes/listing.$id'
+import { Route as LoginAdminRouteImport } from './routes/login.admin'
+import { Route as RestaurantManufacturingRouteImport } from './routes/restaurant.manufacturing'
+import { Route as TipsIndexRouteImport } from './routes/tips.index'
+import { Route as TipsSlugRouteImport } from './routes/tips.$slug'
 import { Route as ApiPublicFacebookSyncRouteImport } from './routes/api/public/facebook-sync'
+import { Route as ApiPublicFacebookSyncCronRouteImport } from './routes/api/public/facebook-sync-cron'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 
-const TermsRoute = TermsRouteImport.update({
-  id: '/terms',
-  path: '/terms',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
-  id: '/sitemap.xml',
-  path: '/sitemap.xml',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SellRoute = SellRouteImport.update({
-  id: '/sell',
-  path: '/sell',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SearchRoute = SearchRouteImport.update({
-  id: '/search',
-  path: '/search',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RestaurantRoute = RestaurantRouteImport.update({
-  id: '/restaurant',
-  path: '/restaurant',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ResetPasswordRoute = ResetPasswordRouteImport.update({
-  id: '/reset-password',
-  path: '/reset-password',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ReportRoute = ReportRouteImport.update({
-  id: '/report',
-  path: '/report',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PrivacyRoute = PrivacyRouteImport.update({
-  id: '/privacy',
-  path: '/privacy',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PackagesRoute = PackagesRouteImport.update({
-  id: '/packages',
-  path: '/packages',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const OffersRoute = OffersRouteImport.update({
-  id: '/offers',
-  path: '/offers',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FaqRoute = FaqRouteImport.update({
-  id: '/faq',
-  path: '/faq',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ContactRoute = ContactRouteImport.update({
-  id: '/contact',
-  path: '/contact',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BuyRoute = BuyRouteImport.update({
-  id: '/buy',
-  path: '/buy',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminRoute = AdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AddListingRoute = AddListingRouteImport.update({
-  id: '/add-listing',
-  path: '/add-listing',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AccountRoute = AccountRouteImport.update({
-  id: '/account',
-  path: '/account',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AboutRoute = AboutRouteImport.update({
@@ -153,24 +73,89 @@ const AboutRoute = AboutRouteImport.update({
   path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const AccountRoute = AccountRouteImport.update({
+  id: '/account',
+  path: '/account',
   getParentRoute: () => rootRouteImport,
 } as any)
-const TipsIndexRoute = TipsIndexRouteImport.update({
-  id: '/tips/',
-  path: '/tips/',
+const AddListingRoute = AddListingRouteImport.update({
+  id: '/add-listing',
+  path: '/add-listing',
   getParentRoute: () => rootRouteImport,
 } as any)
-const LIndexRoute = LIndexRouteImport.update({
-  id: '/l/',
-  path: '/l/',
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
-const FacebookAdsIndexRoute = FacebookAdsIndexRouteImport.update({
-  id: '/facebook-ads/',
-  path: '/facebook-ads/',
+const BuyRoute = BuyRouteImport.update({
+  id: '/buy',
+  path: '/buy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FaqRoute = FaqRouteImport.update({
+  id: '/faq',
+  path: '/faq',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OffersRoute = OffersRouteImport.update({
+  id: '/offers',
+  path: '/offers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PackagesRoute = PackagesRouteImport.update({
+  id: '/packages',
+  path: '/packages',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReportRoute = ReportRouteImport.update({
+  id: '/report',
+  path: '/report',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RestaurantRoute = RestaurantRouteImport.update({
+  id: '/restaurant',
+  path: '/restaurant',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SearchRoute = SearchRouteImport.update({
+  id: '/search',
+  path: '/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SellRoute = SellRouteImport.update({
+  id: '/sell',
+  path: '/sell',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
@@ -178,129 +163,9 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminRoute,
 } as any)
-const TipsSlugRoute = TipsSlugRouteImport.update({
-  id: '/tips/$slug',
-  path: '/tips/$slug',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RestaurantManufacturingRoute = RestaurantManufacturingRouteImport.update({
-  id: '/manufacturing',
-  path: '/manufacturing',
-  getParentRoute: () => RestaurantRoute,
-} as any)
-const LoginAdminRoute = LoginAdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
-  getParentRoute: () => LoginRoute,
-} as any)
-const ListingIdRoute = ListingIdRouteImport.update({
-  id: '/listing/$id',
-  path: '/listing/$id',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LSlugRoute = LSlugRouteImport.update({
-  id: '/l/$slug',
-  path: '/l/$slug',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FacebookAdsIdRoute = FacebookAdsIdRouteImport.update({
-  id: '/facebook-ads/$id',
-  path: '/facebook-ads/$id',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CategoryIdRoute = CategoryIdRouteImport.update({
-  id: '/category/$id',
-  path: '/category/$id',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthCallbackRoute = AuthCallbackRouteImport.update({
-  id: '/auth/callback',
-  path: '/auth/callback',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminSlidesRoute = AdminSlidesRouteImport.update({
-  id: '/slides',
-  path: '/slides',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminSeoRoute = AdminSeoRouteImport.update({
-  id: '/seo',
-  path: '/seo',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminRestaurantRoute = AdminRestaurantRouteImport.update({
-  id: '/restaurant',
-  path: '/restaurant',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminOffersRoute = AdminOffersRouteImport.update({
-  id: '/offers',
-  path: '/offers',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminMembersRoute = AdminMembersRouteImport.update({
-  id: '/members',
-  path: '/members',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminListingsRoute = AdminListingsRouteImport.update({
-  id: '/listings',
-  path: '/listings',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminImagesRoute = AdminImagesRouteImport.update({
-  id: '/images',
-  path: '/images',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminHomeLayoutRoute = AdminHomeLayoutRouteImport.update({
-  id: '/home-layout',
-  path: '/home-layout',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminHeroRoute = AdminHeroRouteImport.update({
-  id: '/hero',
-  path: '/hero',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminFacebookRoute = AdminFacebookRouteImport.update({
-  id: '/facebook',
-  path: '/facebook',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminCategoriesRoute = AdminCategoriesRouteImport.update({
-  id: '/categories',
-  path: '/categories',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminCardRoute = AdminCardRouteImport.update({
-  id: '/card',
-  path: '/card',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminCalculatorRoute = AdminCalculatorRouteImport.update({
-  id: '/calculator',
-  path: '/calculator',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminBrandsRoute = AdminBrandsRouteImport.update({
-  id: '/brands',
-  path: '/brands',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminBlogRoute = AdminBlogRouteImport.update({
-  id: '/blog',
-  path: '/blog',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminAuditRoute = AdminAuditRouteImport.update({
-  id: '/audit',
-  path: '/audit',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminAuctionsRoute = AdminAuctionsRouteImport.update({
-  id: '/auctions',
-  path: '/auctions',
+const AdminAccessRoute = AdminAccessRouteImport.update({
+  id: '/access',
+  path: '/access',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminAppearanceRoute = AdminAppearanceRouteImport.update({
@@ -308,10 +173,150 @@ const AdminAppearanceRoute = AdminAppearanceRouteImport.update({
   path: '/appearance',
   getParentRoute: () => AdminRoute,
 } as any)
-const AdminAccessRoute = AdminAccessRouteImport.update({
-  id: '/access',
-  path: '/access',
+const AdminAuctionsRoute = AdminAuctionsRouteImport.update({
+  id: '/auctions',
+  path: '/auctions',
   getParentRoute: () => AdminRoute,
+} as any)
+const AdminAuditRoute = AdminAuditRouteImport.update({
+  id: '/audit',
+  path: '/audit',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminBlogRoute = AdminBlogRouteImport.update({
+  id: '/blog',
+  path: '/blog',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminBrandsRoute = AdminBrandsRouteImport.update({
+  id: '/brands',
+  path: '/brands',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminCalculatorRoute = AdminCalculatorRouteImport.update({
+  id: '/calculator',
+  path: '/calculator',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminCardRoute = AdminCardRouteImport.update({
+  id: '/card',
+  path: '/card',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminCategoriesRoute = AdminCategoriesRouteImport.update({
+  id: '/categories',
+  path: '/categories',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminFacebookRoute = AdminFacebookRouteImport.update({
+  id: '/facebook',
+  path: '/facebook',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminHeroRoute = AdminHeroRouteImport.update({
+  id: '/hero',
+  path: '/hero',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminHomeLayoutRoute = AdminHomeLayoutRouteImport.update({
+  id: '/home-layout',
+  path: '/home-layout',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminImagesRoute = AdminImagesRouteImport.update({
+  id: '/images',
+  path: '/images',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminListingsRoute = AdminListingsRouteImport.update({
+  id: '/listings',
+  path: '/listings',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminMembersRoute = AdminMembersRouteImport.update({
+  id: '/members',
+  path: '/members',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminOffersRoute = AdminOffersRouteImport.update({
+  id: '/offers',
+  path: '/offers',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminRestaurantRoute = AdminRestaurantRouteImport.update({
+  id: '/restaurant',
+  path: '/restaurant',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminSeoRoute = AdminSeoRouteImport.update({
+  id: '/seo',
+  path: '/seo',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminSlidesRoute = AdminSlidesRouteImport.update({
+  id: '/slides',
+  path: '/slides',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AuthCallbackRoute = AuthCallbackRouteImport.update({
+  id: '/auth/callback',
+  path: '/auth/callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CategoryIdRoute = CategoryIdRouteImport.update({
+  id: '/category/$id',
+  path: '/category/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FacebookAdsIndexRoute = FacebookAdsIndexRouteImport.update({
+  id: '/facebook-ads/',
+  path: '/facebook-ads/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FacebookAdsIdRoute = FacebookAdsIdRouteImport.update({
+  id: '/facebook-ads/$id',
+  path: '/facebook-ads/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LIndexRoute = LIndexRouteImport.update({
+  id: '/l/',
+  path: '/l/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LSlugRoute = LSlugRouteImport.update({
+  id: '/l/$slug',
+  path: '/l/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ListingIdRoute = ListingIdRouteImport.update({
+  id: '/listing/$id',
+  path: '/listing/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginAdminRoute = LoginAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => LoginRoute,
+} as any)
+const RestaurantManufacturingRoute = RestaurantManufacturingRouteImport.update({
+  id: '/manufacturing',
+  path: '/manufacturing',
+  getParentRoute: () => RestaurantRoute,
+} as any)
+const TipsIndexRoute = TipsIndexRouteImport.update({
+  id: '/tips/',
+  path: '/tips/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TipsSlugRoute = TipsSlugRouteImport.update({
+  id: '/tips/$slug',
+  path: '/tips/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicFacebookSyncRoute = ApiPublicFacebookSyncRouteImport.update({
+  id: '/api/public/facebook-sync',
+  path: '/api/public/facebook-sync',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicFacebookSyncCronRoute =
   ApiPublicFacebookSyncCronRouteImport.update({
@@ -319,11 +324,6 @@ const ApiPublicFacebookSyncCronRoute =
     path: '/api/public/facebook-sync-cron',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ApiPublicFacebookSyncRoute = ApiPublicFacebookSyncRouteImport.update({
-  id: '/api/public/facebook-sync',
-  path: '/api/public/facebook-sync',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const LovableEmailQueueProcessRoute =
   LovableEmailQueueProcessRouteImport.update({
     id: '/lovable/email/queue/process',
@@ -699,123 +699,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/terms': {
-      id: '/terms'
-      path: '/terms'
-      fullPath: '/terms'
-      preLoaderRoute: typeof TermsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sitemap.xml': {
-      id: '/sitemap.xml'
-      path: '/sitemap.xml'
-      fullPath: '/sitemap.xml'
-      preLoaderRoute: typeof SitemapDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sell': {
-      id: '/sell'
-      path: '/sell'
-      fullPath: '/sell'
-      preLoaderRoute: typeof SellRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/search': {
-      id: '/search'
-      path: '/search'
-      fullPath: '/search'
-      preLoaderRoute: typeof SearchRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/restaurant': {
-      id: '/restaurant'
-      path: '/restaurant'
-      fullPath: '/restaurant'
-      preLoaderRoute: typeof RestaurantRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/reset-password': {
-      id: '/reset-password'
-      path: '/reset-password'
-      fullPath: '/reset-password'
-      preLoaderRoute: typeof ResetPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/report': {
-      id: '/report'
-      path: '/report'
-      fullPath: '/report'
-      preLoaderRoute: typeof ReportRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/privacy': {
-      id: '/privacy'
-      path: '/privacy'
-      fullPath: '/privacy'
-      preLoaderRoute: typeof PrivacyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/packages': {
-      id: '/packages'
-      path: '/packages'
-      fullPath: '/packages'
-      preLoaderRoute: typeof PackagesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/offers': {
-      id: '/offers'
-      path: '/offers'
-      fullPath: '/offers'
-      preLoaderRoute: typeof OffersRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/faq': {
-      id: '/faq'
-      path: '/faq'
-      fullPath: '/faq'
-      preLoaderRoute: typeof FaqRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/contact': {
-      id: '/contact'
-      path: '/contact'
-      fullPath: '/contact'
-      preLoaderRoute: typeof ContactRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/buy': {
-      id: '/buy'
-      path: '/buy'
-      fullPath: '/buy'
-      preLoaderRoute: typeof BuyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin': {
-      id: '/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AdminRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/add-listing': {
-      id: '/add-listing'
-      path: '/add-listing'
-      fullPath: '/add-listing'
-      preLoaderRoute: typeof AddListingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/account': {
-      id: '/account'
-      path: '/account'
-      fullPath: '/account'
-      preLoaderRoute: typeof AccountRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/about': {
@@ -825,32 +713,123 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/account': {
+      id: '/account'
+      path: '/account'
+      fullPath: '/account'
+      preLoaderRoute: typeof AccountRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/tips/': {
-      id: '/tips/'
-      path: '/tips'
-      fullPath: '/tips/'
-      preLoaderRoute: typeof TipsIndexRouteImport
+    '/add-listing': {
+      id: '/add-listing'
+      path: '/add-listing'
+      fullPath: '/add-listing'
+      preLoaderRoute: typeof AddListingRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/l/': {
-      id: '/l/'
-      path: '/l'
-      fullPath: '/l/'
-      preLoaderRoute: typeof LIndexRouteImport
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/facebook-ads/': {
-      id: '/facebook-ads/'
-      path: '/facebook-ads'
-      fullPath: '/facebook-ads/'
-      preLoaderRoute: typeof FacebookAdsIndexRouteImport
+    '/buy': {
+      id: '/buy'
+      path: '/buy'
+      fullPath: '/buy'
+      preLoaderRoute: typeof BuyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/faq': {
+      id: '/faq'
+      path: '/faq'
+      fullPath: '/faq'
+      preLoaderRoute: typeof FaqRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/offers': {
+      id: '/offers'
+      path: '/offers'
+      fullPath: '/offers'
+      preLoaderRoute: typeof OffersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/packages': {
+      id: '/packages'
+      path: '/packages'
+      fullPath: '/packages'
+      preLoaderRoute: typeof PackagesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/report': {
+      id: '/report'
+      path: '/report'
+      fullPath: '/report'
+      preLoaderRoute: typeof ReportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/restaurant': {
+      id: '/restaurant'
+      path: '/restaurant'
+      fullPath: '/restaurant'
+      preLoaderRoute: typeof RestaurantRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/search': {
+      id: '/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof SearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sell': {
+      id: '/sell'
+      path: '/sell'
+      fullPath: '/sell'
+      preLoaderRoute: typeof SellRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/': {
@@ -860,179 +839,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/tips/$slug': {
-      id: '/tips/$slug'
-      path: '/tips/$slug'
-      fullPath: '/tips/$slug'
-      preLoaderRoute: typeof TipsSlugRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/restaurant/manufacturing': {
-      id: '/restaurant/manufacturing'
-      path: '/manufacturing'
-      fullPath: '/restaurant/manufacturing'
-      preLoaderRoute: typeof RestaurantManufacturingRouteImport
-      parentRoute: typeof RestaurantRoute
-    }
-    '/login/admin': {
-      id: '/login/admin'
-      path: '/admin'
-      fullPath: '/login/admin'
-      preLoaderRoute: typeof LoginAdminRouteImport
-      parentRoute: typeof LoginRoute
-    }
-    '/listing/$id': {
-      id: '/listing/$id'
-      path: '/listing/$id'
-      fullPath: '/listing/$id'
-      preLoaderRoute: typeof ListingIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/l/$slug': {
-      id: '/l/$slug'
-      path: '/l/$slug'
-      fullPath: '/l/$slug'
-      preLoaderRoute: typeof LSlugRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/facebook-ads/$id': {
-      id: '/facebook-ads/$id'
-      path: '/facebook-ads/$id'
-      fullPath: '/facebook-ads/$id'
-      preLoaderRoute: typeof FacebookAdsIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/category/$id': {
-      id: '/category/$id'
-      path: '/category/$id'
-      fullPath: '/category/$id'
-      preLoaderRoute: typeof CategoryIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth/callback': {
-      id: '/auth/callback'
-      path: '/auth/callback'
-      fullPath: '/auth/callback'
-      preLoaderRoute: typeof AuthCallbackRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/slides': {
-      id: '/admin/slides'
-      path: '/slides'
-      fullPath: '/admin/slides'
-      preLoaderRoute: typeof AdminSlidesRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/seo': {
-      id: '/admin/seo'
-      path: '/seo'
-      fullPath: '/admin/seo'
-      preLoaderRoute: typeof AdminSeoRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/restaurant': {
-      id: '/admin/restaurant'
-      path: '/restaurant'
-      fullPath: '/admin/restaurant'
-      preLoaderRoute: typeof AdminRestaurantRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/offers': {
-      id: '/admin/offers'
-      path: '/offers'
-      fullPath: '/admin/offers'
-      preLoaderRoute: typeof AdminOffersRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/members': {
-      id: '/admin/members'
-      path: '/members'
-      fullPath: '/admin/members'
-      preLoaderRoute: typeof AdminMembersRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/listings': {
-      id: '/admin/listings'
-      path: '/listings'
-      fullPath: '/admin/listings'
-      preLoaderRoute: typeof AdminListingsRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/images': {
-      id: '/admin/images'
-      path: '/images'
-      fullPath: '/admin/images'
-      preLoaderRoute: typeof AdminImagesRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/home-layout': {
-      id: '/admin/home-layout'
-      path: '/home-layout'
-      fullPath: '/admin/home-layout'
-      preLoaderRoute: typeof AdminHomeLayoutRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/hero': {
-      id: '/admin/hero'
-      path: '/hero'
-      fullPath: '/admin/hero'
-      preLoaderRoute: typeof AdminHeroRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/facebook': {
-      id: '/admin/facebook'
-      path: '/facebook'
-      fullPath: '/admin/facebook'
-      preLoaderRoute: typeof AdminFacebookRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/categories': {
-      id: '/admin/categories'
-      path: '/categories'
-      fullPath: '/admin/categories'
-      preLoaderRoute: typeof AdminCategoriesRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/card': {
-      id: '/admin/card'
-      path: '/card'
-      fullPath: '/admin/card'
-      preLoaderRoute: typeof AdminCardRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/calculator': {
-      id: '/admin/calculator'
-      path: '/calculator'
-      fullPath: '/admin/calculator'
-      preLoaderRoute: typeof AdminCalculatorRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/brands': {
-      id: '/admin/brands'
-      path: '/brands'
-      fullPath: '/admin/brands'
-      preLoaderRoute: typeof AdminBrandsRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/blog': {
-      id: '/admin/blog'
-      path: '/blog'
-      fullPath: '/admin/blog'
-      preLoaderRoute: typeof AdminBlogRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/audit': {
-      id: '/admin/audit'
-      path: '/audit'
-      fullPath: '/admin/audit'
-      preLoaderRoute: typeof AdminAuditRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/auctions': {
-      id: '/admin/auctions'
-      path: '/auctions'
-      fullPath: '/admin/auctions'
-      preLoaderRoute: typeof AdminAuctionsRouteImport
+    '/admin/access': {
+      id: '/admin/access'
+      path: '/access'
+      fullPath: '/admin/access'
+      preLoaderRoute: typeof AdminAccessRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/appearance': {
@@ -1042,18 +853,200 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAppearanceRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/admin/access': {
-      id: '/admin/access'
-      path: '/access'
-      fullPath: '/admin/access'
-      preLoaderRoute: typeof AdminAccessRouteImport
+    '/admin/auctions': {
+      id: '/admin/auctions'
+      path: '/auctions'
+      fullPath: '/admin/auctions'
+      preLoaderRoute: typeof AdminAuctionsRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/api/public/facebook-sync-cron': {
-      id: '/api/public/facebook-sync-cron'
-      path: '/api/public/facebook-sync-cron'
-      fullPath: '/api/public/facebook-sync-cron'
-      preLoaderRoute: typeof ApiPublicFacebookSyncCronRouteImport
+    '/admin/audit': {
+      id: '/admin/audit'
+      path: '/audit'
+      fullPath: '/admin/audit'
+      preLoaderRoute: typeof AdminAuditRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/blog': {
+      id: '/admin/blog'
+      path: '/blog'
+      fullPath: '/admin/blog'
+      preLoaderRoute: typeof AdminBlogRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/brands': {
+      id: '/admin/brands'
+      path: '/brands'
+      fullPath: '/admin/brands'
+      preLoaderRoute: typeof AdminBrandsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/calculator': {
+      id: '/admin/calculator'
+      path: '/calculator'
+      fullPath: '/admin/calculator'
+      preLoaderRoute: typeof AdminCalculatorRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/card': {
+      id: '/admin/card'
+      path: '/card'
+      fullPath: '/admin/card'
+      preLoaderRoute: typeof AdminCardRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/categories': {
+      id: '/admin/categories'
+      path: '/categories'
+      fullPath: '/admin/categories'
+      preLoaderRoute: typeof AdminCategoriesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/facebook': {
+      id: '/admin/facebook'
+      path: '/facebook'
+      fullPath: '/admin/facebook'
+      preLoaderRoute: typeof AdminFacebookRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/hero': {
+      id: '/admin/hero'
+      path: '/hero'
+      fullPath: '/admin/hero'
+      preLoaderRoute: typeof AdminHeroRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/home-layout': {
+      id: '/admin/home-layout'
+      path: '/home-layout'
+      fullPath: '/admin/home-layout'
+      preLoaderRoute: typeof AdminHomeLayoutRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/images': {
+      id: '/admin/images'
+      path: '/images'
+      fullPath: '/admin/images'
+      preLoaderRoute: typeof AdminImagesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/listings': {
+      id: '/admin/listings'
+      path: '/listings'
+      fullPath: '/admin/listings'
+      preLoaderRoute: typeof AdminListingsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/members': {
+      id: '/admin/members'
+      path: '/members'
+      fullPath: '/admin/members'
+      preLoaderRoute: typeof AdminMembersRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/offers': {
+      id: '/admin/offers'
+      path: '/offers'
+      fullPath: '/admin/offers'
+      preLoaderRoute: typeof AdminOffersRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/restaurant': {
+      id: '/admin/restaurant'
+      path: '/restaurant'
+      fullPath: '/admin/restaurant'
+      preLoaderRoute: typeof AdminRestaurantRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/seo': {
+      id: '/admin/seo'
+      path: '/seo'
+      fullPath: '/admin/seo'
+      preLoaderRoute: typeof AdminSeoRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/slides': {
+      id: '/admin/slides'
+      path: '/slides'
+      fullPath: '/admin/slides'
+      preLoaderRoute: typeof AdminSlidesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/auth/callback': {
+      id: '/auth/callback'
+      path: '/auth/callback'
+      fullPath: '/auth/callback'
+      preLoaderRoute: typeof AuthCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/category/$id': {
+      id: '/category/$id'
+      path: '/category/$id'
+      fullPath: '/category/$id'
+      preLoaderRoute: typeof CategoryIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/facebook-ads/': {
+      id: '/facebook-ads/'
+      path: '/facebook-ads'
+      fullPath: '/facebook-ads/'
+      preLoaderRoute: typeof FacebookAdsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/facebook-ads/$id': {
+      id: '/facebook-ads/$id'
+      path: '/facebook-ads/$id'
+      fullPath: '/facebook-ads/$id'
+      preLoaderRoute: typeof FacebookAdsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/l/': {
+      id: '/l/'
+      path: '/l'
+      fullPath: '/l/'
+      preLoaderRoute: typeof LIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/l/$slug': {
+      id: '/l/$slug'
+      path: '/l/$slug'
+      fullPath: '/l/$slug'
+      preLoaderRoute: typeof LSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/listing/$id': {
+      id: '/listing/$id'
+      path: '/listing/$id'
+      fullPath: '/listing/$id'
+      preLoaderRoute: typeof ListingIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login/admin': {
+      id: '/login/admin'
+      path: '/admin'
+      fullPath: '/login/admin'
+      preLoaderRoute: typeof LoginAdminRouteImport
+      parentRoute: typeof LoginRoute
+    }
+    '/restaurant/manufacturing': {
+      id: '/restaurant/manufacturing'
+      path: '/manufacturing'
+      fullPath: '/restaurant/manufacturing'
+      preLoaderRoute: typeof RestaurantManufacturingRouteImport
+      parentRoute: typeof RestaurantRoute
+    }
+    '/tips/': {
+      id: '/tips/'
+      path: '/tips'
+      fullPath: '/tips/'
+      preLoaderRoute: typeof TipsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tips/$slug': {
+      id: '/tips/$slug'
+      path: '/tips/$slug'
+      fullPath: '/tips/$slug'
+      preLoaderRoute: typeof TipsSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/facebook-sync': {
@@ -1061,6 +1054,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/facebook-sync'
       fullPath: '/api/public/facebook-sync'
       preLoaderRoute: typeof ApiPublicFacebookSyncRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/facebook-sync-cron': {
+      id: '/api/public/facebook-sync-cron'
+      path: '/api/public/facebook-sync-cron'
+      fullPath: '/api/public/facebook-sync-cron'
+      preLoaderRoute: typeof ApiPublicFacebookSyncCronRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/lovable/email/queue/process': {

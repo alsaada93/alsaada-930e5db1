@@ -9,7 +9,7 @@ export function SimilarListings({
   currentId,
   limit = 8,
 }: {
-  categoryId?: string;
+  categoryId?: string | null;
   currentId: string;
   limit?: number;
 }) {

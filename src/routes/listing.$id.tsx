@@ -85,7 +85,13 @@ export const Route = createFileRoute("/listing/$id")({
 
     return {
       rating,
-      brandDb,
+      brandDb: brandDb as {
+        name: string;
+        country: string | null;
+        equipment_type: string | null;
+        description: string | null;
+        logo_url: string | null;
+      } | null,
       item: {
         id: data.id,
         title: data.title,
@@ -1108,7 +1114,12 @@ function SchemaCheckBar({
   item,
   hasRating,
 }: {
-  item: { price?: number; images?: string[]; description?: string; brand?: string };
+  item: {
+    price?: number | null;
+    images?: string[] | null;
+    description?: string | null;
+    brand?: string | null;
+  };
   hasRating: boolean;
 }) {
   const checks: { label: string; ok: boolean }[] = [
